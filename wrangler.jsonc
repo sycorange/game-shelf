@@ -1,0 +1,20 @@
+{
+  // 1) Change "name" to the exact name of your existing Worker (shown in Workers & Pages).
+  //    Using the same name keeps your current web address, so everyone keeps their saves.
+  "name": "yellow-salad-fd76",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-06-01",
+  "assets": {
+    "directory": "./public/",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      // 2) Paste your D1 database's name and ID here (D1 page in the dashboard, or the output of `npx wrangler d1 create`).
+      "database_name": "lantern-lake",
+      "database_id": "2feedd41-c831-4cea-b3dc-a9a2b8f66c37"
+    }
+  ]
+}

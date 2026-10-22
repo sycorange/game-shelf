@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game Shelf</title>
+<meta name="description" content="A small shelf of browser games to play with friends. Start with Lantern Lake, an idle fishing game.">
+<meta property="og:title" content="Game Shelf">
+<meta property="og:description" content="Browser games to play with friends. Now playing: Lantern Lake.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f2026'/%3E%3Crect x='6' y='9' width='5' height='15' rx='1' fill='%23ff7a3d'/%3E%3Crect x='13' y='7' width='5' height='17' rx='1' fill='%237cc7dc'/%3E%3Crect x='20' y='10' width='5' height='14' rx='1' fill='%23bcd06b' transform='rotate(8 22 17)'/%3E%3Crect x='4' y='24' width='24' height='2.5' rx='1' fill='%23edf2ea'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&family=Figtree:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#0f2026; --panel:#16303a; --panel-2:#1c3a45; --line:#2b4d58;
+  --fg:#edf2ea; --muted:#9db4ae; --buoy:#ff7a3d; --buoy-ink:#2a1206; --reed:#bcd06b; --gold:#ffd05a;
+  --font-display:"Sniglet","Trebuchet MS",system-ui,sans-serif;
+  --font-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font-family:var(--font-body);font-size:15px;line-height:1.45;min-height:100vh;
+  padding:max(28px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(40px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  background:radial-gradient(120% 60% at 50% -10%,#1d4250 0%,rgba(15,32,38,0) 70%),var(--bg)}
+.sky{position:fixed;inset:0;pointer-events:none;z-index:0}
+.sky i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;opacity:.5;animation:tw 4s ease-in-out infinite}
+@keyframes tw{50%{opacity:.12}}
+main{position:relative;z-index:1;max-width:620px;margin:0 auto}
+header{margin:8px 0 22px}
+h1{font-family:var(--font-display);font-weight:800;font-size:clamp(2rem,7vw,2.8rem);line-height:1.05;margin:0;letter-spacing:.01em}
+h1 span{color:var(--buoy)}
+header p{margin:8px 0 0;color:var(--muted)}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.game{display:grid;grid-template-columns:112px minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px 16px 12px 12px;border-radius:16px;
+  background:var(--panel);border:1px solid var(--line);color:inherit;text-decoration:none;transition:transform .15s,border-color .15s,background .15s}
+a.game:hover,a.game:focus-visible{border-color:var(--buoy);background:var(--panel-2);transform:translateY(-2px);outline:none}
+a.game:active{transform:translateY(0)}
+.thumb{width:112px;height:76px;border-radius:11px;overflow:hidden;display:block;background:#11262d}
+.thumb svg{width:100%;height:100%;display:block}
+.info{min-width:0;display:grid;gap:2px}
+.info b{font-family:var(--font-display);font-weight:800;font-size:1.3rem;line-height:1.15}
+.info small{color:var(--muted);font-size:.86rem}
+.info .save{color:var(--reed);font-weight:600;font-size:.8rem;font-variant-numeric:tabular-nums}
+.play{background:var(--buoy);color:var(--buoy-ink);font-family:var(--font-display);font-weight:800;border-radius:999px;padding:9px 18px;white-space:nowrap}
+.game.soon{background:transparent;border-style:dashed;cursor:default}
+.game.soon .thumb{background:repeating-linear-gradient(135deg,#132a31 0 8px,#16303a 8px 16px);display:grid;place-items:center;color:#4a6a72}
+.game.soon .info b{color:var(--muted)}
+.stage{display:inline-block;vertical-align:4px;margin-left:6px;font-family:var(--font-body);font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px 2px 8px;border-radius:6px;line-height:1.3}
+.stage.beta{background:#7cc7dc;color:#0d2a33}
+.stage.alpha{background:#c9a0f2;color:#24133a}
+.hwtag{display:inline-block;margin-left:6px;vertical-align:4px;font-size:.66rem;font-weight:800;padding:2px 8px;border-radius:6px;background:linear-gradient(90deg,#ff8a2a,#9a3ac8);color:#fff;letter-spacing:.04em}
+.tag{border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 12px;font-size:.78rem;font-weight:700;white-space:nowrap}
+footer{margin-top:26px;color:#5f7d78;font-size:.8rem;text-align:center}
+@media (max-width:480px){
+  .game{grid-template-columns:84px minmax(0,1fr);gap:12px}
+  .thumb{width:84px;height:62px}
+  .play,.tag{grid-column:1/-1;text-align:center}
+}
+@media (prefers-reduced-motion:reduce){.sky i{animation:none}.game{transition:none}a.game:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="sky" id="sky" aria-hidden="true"></div>
+<main>
+  <header>
+    <h1>Game <span>Shelf</span></h1>
+    <p>Pick a game to play.</p>
+  </header>
+
+  <ul class="list">
+    <li>
+      <a class="game" href="lantern-lake/">
+        <span class="thumb" aria-hidden="true">
+          <svg viewBox="0 0 112 76">
+            <defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3f6b"/><stop offset="1" stop-color="#e88a5a"/></linearGradient>
+            <linearGradient id="w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d6a7a"/><stop offset="1" stop-color="#1a3540"/></linearGradient></defs>
+            <rect width="112" height="46" fill="url(#s)"/>
+            <circle cx="84" cy="16" r="6" fill="#ffe9b0"/>
+            <path d="M0 40c14-8 26-10 40-5s28-8 44-6 22 4 28 6v11H0z" fill="#2c4a44"/>
+            <rect y="44" width="112" height="32" fill="url(#w)"/>
+            <rect x="8" y="30" width="18" height="12" fill="#7a4e30"/><path d="M6 31l11-7 11 7z" fill="#5a3420"/><rect x="15" y="34" width="4" height="4" fill="#ffd05a"/>
+            <rect x="24" y="43" width="20" height="2" fill="#8a6a48"/>
+            <path d="M58 54h22l-3 5H61z" fill="#d04a32"/><rect x="66" y="47" width="3" height="7" fill="#ff7a3d"/><circle cx="67.5" cy="45.5" r="2" fill="#f2c9a0"/>
+            <path d="M69 48L90 38" stroke="#3a2a1a" stroke-width="1.2"/><path d="M90 38q4 10 6 22" stroke="#cfe0e6" stroke-width=".5" fill="none"/>
+            <circle cx="96" cy="60" r="1.6" fill="#ff5a3a"/>
+            <path d="M40 66h10M74 70h12M10 62h8" stroke="#5f8f9c" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="info">
+          <b>Lantern Lake <span class="stage beta" title="Beta: playable, still being polished">Beta</span></b><span class="hwtag" id="hwTag" hidden>🎃 Halloween event</span><script>(function(){var n=Date.now();if(n>=new Date(2026,9,20).getTime()&&n<new Date(2026,10,2).getTime())document.getElementById('hwTag').hidden=false})()</script>
+          <small>An idle fishing game. Cast, cook, craft and hunt the Lake Beast.</small>
+          <span class="save" id="llSave" hidden></span>
+        </span>
+        <span class="play" id="llPlay">Play</span>
+      </a>
+    </li>
+    <li>
+      <a class="game" href="deep-dive/">
+        <span class="thumb" aria-hidden="true">
+          <svg viewBox="0 0 112 76">
+            <defs><radialGradient id="f" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a6e6a"/><stop offset="1" stop-color="#0d2a2c"/></radialGradient></defs>
+            <rect width="112" height="76" fill="url(#f)"/>
+            <g transform="rotate(-10 38 40)"><rect x="22" y="14" width="30" height="44" rx="4" fill="#f2e8d2" stroke="#2f7fb0" stroke-width="2"/><rect x="22" y="14" width="30" height="9" rx="3" fill="#2f7fb0"/><path d="M30 38q4-5 8 0t8 0" stroke="#2f7fb0" stroke-width="2" fill="none"/></g>
+            <g transform="rotate(8 70 40)"><rect x="56" y="12" width="30" height="44" rx="4" fill="#f2e8d2" stroke="#d9533b" stroke-width="2"/><rect x="56" y="12" width="30" height="9" rx="3" fill="#d9533b"/><path d="M74 28v9a4 4 0 0 1-8 0v-1" fill="none" stroke="#d9533b" stroke-width="2.2" stroke-linecap="round"/></g>
+            <circle cx="96" cy="62" r="3" fill="none" stroke="#86dbe9"/><circle cx="102" cy="52" r="2" fill="none" stroke="#86dbe9"/><circle cx="12" cy="64" r="2.4" fill="none" stroke="#86dbe9"/>
+          </svg>
+        </span>
+        <span class="info">
+          <b>Deep Dive <span class="stage alpha" title="Alpha: early and still changing">Alpha</span></b>
+          <small>A roguelike card game. Build a deck, dive four zones deep and land the Lake Beast.</small>
+          <span class="save" id="ddSave" hidden></span>
+        </span>
+        <span class="play" id="ddPlay">Play</span>
+      </a>
+    </li>
+    <li>
+      <div class="game soon" aria-disabled="true">
+        <span class="thumb" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" style="width:26px;height:26px"><path d="M12 3a5 5 0 0 0-5 5h2.4A2.6 2.6 0 1 1 13 10.3c-1.4.9-2.2 1.9-2.2 3.7v.5h2.4V14c0-1 .5-1.6 1.5-2.3A5 5 0 0 0 12 3zm-1.3 14.5v2.6h2.6v-2.6z" fill="currentColor"/></svg></span>
+        <span class="info"><b>Coming soon</b><small>Another game is on the way.</small></span>
+        <span class="tag">Coming soon</span>
+      </div>
+    </li>
+  </ul>
+
+  <footer>Progress saves in your browser, separately for each game.</footer>
+</main>
+<script>
+(function(){
+  var sky=document.getElementById('sky');
+  for(var i=0;i<46;i++){var s=document.createElement('i');s.style.left=(Math.random()*100)+'%';s.style.top=(Math.random()*55)+'%';s.style.animationDelay=(Math.random()*4)+'s';if(Math.random()<.2){s.style.width=s.style.height='3px'}sky.appendChild(s)}
+  try{
+    var raw=localStorage.getItem('lantern-lake-v1');
+    if(raw){var S=JSON.parse(raw);if(S&&typeof S.coins==='number'){
+      var el=document.getElementById('llSave');el.hidden=false;
+      el.textContent='Your save: day '+(S.day||1)+' · $'+Math.floor(S.coins).toLocaleString('en-US');
+      document.getElementById('llPlay').textContent='Continue';
+    }}
+  }catch(e){}
+  try{
+    var run=JSON.parse(localStorage.getItem('deep-dive-run-v1')||'null'),dm=JSON.parse(localStorage.getItem('deep-dive-v1')||'null');
+    var el2=document.getElementById('ddSave');
+    if(run&&run.zone!=null){var zn=['The Shallows','The Reedbeds','The Sunken Town','The Abyss'][run.zone]||'';el2.hidden=false;el2.textContent='Dive in progress: '+zn+' · line '+run.line+'/'+run.maxLine;document.getElementById('ddPlay').textContent='Continue'}
+    else if(dm&&dm.runs){el2.hidden=false;el2.textContent=dm.beastWins?('Lake Beast landed '+dm.beastWins+'× · '+dm.pearls+' pearls'):(dm.runs+' dive'+(dm.runs>1?'s':'')+' · '+dm.pearls+' pearls')}
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
