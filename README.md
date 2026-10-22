@@ -7,3 +7,4 @@ Browser games for friends, hosted on Cloudflare Workers.
 - `wrangler.jsonc` is the Cloudflare config.
 
 Cloudflare Workers Builds deploys automatically on every push to `main`.
+Deployed Via Cloudflare
