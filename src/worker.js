@@ -45,6 +45,8 @@ async function init(db){
     db.prepare(`CREATE TABLE IF NOT EXISTS cloud(pid TEXT PRIMARY KEY,data TEXT,ts INTEGER,dev TEXT,kind TEXT,day INTEGER,coins REAL,up INTEGER)`),
   ]);
   try{await db.prepare('ALTER TABLE players ADD COLUMN pub INTEGER DEFAULT 1').run()}catch(e){/* already there */}
+  try{await db.prepare('ALTER TABLE players ADD COLUMN pin TEXT').run()}catch(e){/* already there */}
+  try{await db.prepare('CREATE TABLE IF NOT EXISTS pinfail(k TEXT PRIMARY KEY,n INTEGER,ts INTEGER)').run()}catch(e){}
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS grec(fish TEXT PRIMARY KEY,pid TEXT,w REAL,ts INTEGER)`),
@@ -59,6 +61,29 @@ async function init(db){
 const rid=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return [...a].map(b=>b.toString(16).padStart(2,'0')).join('')};
 const rnd=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n};
 const xcode=()=>Array.from({length:6},()=>XABC[rnd(XABC.length)]).join('');
+// ==LOGIN PIN== a 6-digit PIN lets a player sign in on a new device with their angler name.
+// Stored as a salted PBKDF2 hash. Wrong guesses are limited per name and network (5 per 15 minutes)
+// and per name per day (30), so a stranger can't lock someone out and can't guess a PIN in any useful time.
+const PIN_RE=/^[0-9]{6}$/,PIN_TRIES=5,PIN_WIN=15*60000,PIN_DAY=30;
+const hex=a=>[...new Uint8Array(a)].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function pinHash(pin,salt){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:new TextEncoder().encode(salt),iterations:4000},k,256))}
+async function pinMake(pin){const salt=rid(8);return salt+':'+await pinHash(pin,salt)}
+async function pinCheck(pin,stored){if(!stored||!stored.includes(':'))return false;const [salt,h]=stored.split(':');const g=await pinHash(pin,salt);let d=0;for(let i=0;i<Math.max(g.length,h.length);i++)d|=(g.charCodeAt(i)||0)^(h.charCodeAt(i)||0);return d===0}
+async function pinRoute(req,db,b,now){
+  const name=clean(b.name,16).toLowerCase(),pin=String(b.pin||'');if(!name||!PIN_RE.test(pin))return json({error:'bad-login'},400);
+  const ip=(req.headers.get('CF-Connecting-IP')||'x').slice(0,64),kN=`n:${name}|${ip}`,kD=`d:${name}|${Math.floor(now/864e5)}`;
+  const [fn,fd]=await Promise.all([db.prepare('SELECT n,ts FROM pinfail WHERE k=?').bind(kN).first(),db.prepare('SELECT n FROM pinfail WHERE k=?').bind(kD).first()]);
+  const nN=fn&&now-fn.ts<PIN_WIN?fn.n:0;
+  if(nN>=PIN_TRIES)return json({error:'locked:'+Math.ceil((fn.ts+PIN_WIN-now)/60000)},429);
+  if(fd&&fd.n>=PIN_DAY)return json({error:'locked-day'},429);
+  const p=await db.prepare('SELECT id,key,name,pin FROM players WHERE lname=?').bind(name).first();
+  if(p&&!p.pin)return json({error:'no-pin'},404);
+  if(p&&await pinCheck(pin,p.pin)){await db.prepare('DELETE FROM pinfail WHERE k=?').bind(kN).run();return json({id:p.id,key:p.key,name:p.name})}
+  await db.batch([db.prepare('INSERT INTO pinfail(k,n,ts) VALUES(?,1,?) ON CONFLICT(k) DO UPDATE SET n=CASE WHEN ?-pinfail.ts<? THEN pinfail.n+1 ELSE 1 END,ts=CASE WHEN ?-pinfail.ts<? THEN pinfail.ts ELSE excluded.ts END').bind(kN,now,now,PIN_WIN,now,PIN_WIN),
+    db.prepare('INSERT INTO pinfail(k,n,ts) VALUES(?,1,?) ON CONFLICT(k) DO UPDATE SET n=pinfail.n+1').bind(kD,now)]);
+  if(Math.random()<.05)await db.prepare('DELETE FROM pinfail WHERE ts<?').bind(now-2*864e5).run();
+  return json({error:'bad-pin:'+Math.max(0,PIN_TRIES-nN-1)},401)}
 const clean=(s,max)=>String(s||'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,max);
 async function auth(db,b){
   if(!b||typeof b.id!=='string'||typeof b.key!=='string')throw new Error('auth');
@@ -210,6 +235,8 @@ async function extraRoutes(p,db,me,b,now){
     const r=await Promise.all([q('SELECT COUNT(*) AS c FROM players'),q('SELECT COUNT(*) AS c FROM players WHERE seen>?',d),q('SELECT COUNT(*) AS c FROM players WHERE seen>?',now-7*864e5),q('SELECT COUNT(*) AS c FROM catches WHERE ts>?',d),q('SELECT COUNT(*) AS c FROM texts WHERE ts>?',d),q('SELECT COUNT(*) AS c FROM cloud WHERE up>?',d),q('SELECT COUNT(*) AS c FROM bugs'),q('SELECT COUNT(*) AS c FROM guest WHERE ts>?',d),q("SELECT COUNT(*) AS c FROM chal WHERE st IN ('pend','live')"),q('SELECT COUNT(*) AS c FROM mail WHERE ts>?',d)]);
     const [players,a24,a7,c24,t24,cl24,bugs,g24,chal,m24]=r.map(x=>x?x.c|0:0);return json({players,a24,a7,c24,t24,cl24,bugs,g24,chal,m24})}
   if(p==='owner/bugs'){const r=await db.prepare('SELECT id,name,msg,errs,ua,ver,scr,ts FROM bugs ORDER BY id DESC LIMIT 60').all();return json({bugs:r.results})}
+  if(p==='owner/pinreset'){const n=clean(b.name,16).toLowerCase();const r=await db.prepare('UPDATE players SET pin=NULL WHERE lname=?').bind(n).run();
+    await db.prepare("DELETE FROM pinfail WHERE k LIKE ?").bind('%:'+n+'|%').run();return json({ok:true,found:!!(r.meta&&r.meta.changes)})}
   if(p==='owner/bugdel'){await db.prepare('DELETE FROM bugs WHERE id=?').bind(b.bid|0).run();return json({ok:true})}
   if(p==='owner/backup'){const [pl,cl]=await Promise.all([db.prepare('SELECT id,name,created,seen,COALESCE(pub,1) AS pub,stats FROM players ORDER BY created').all(),db.prepare('SELECT c.pid,p.name,c.ts,c.day,c.coins,c.data FROM cloud c LEFT JOIN players p ON p.id=c.pid').all()]);
     return json({made:now,players:pl.results,cloud:cl.results})}
@@ -315,7 +342,13 @@ async function route(req,env,url){
     return json({data:r.data});
   }
   if(p==='bug')return bugRoute(db,b,now);
+  if(p==='login')return pinRoute(req,db,b,now);
   const me=await auth(db,b);
+  // Being signed in on a device proves it's you, so setting a new PIN never needs the old one.
+  if(p==='pin/set'){const pin=String(b.pin||'');if(!PIN_RE.test(pin))return json({error:'bad-pin-format'},400);
+    if(/^(\d)\1{5}$/.test(pin)||'0123456789'.includes(pin)||'9876543210'.includes(pin))return json({error:'pin-too-easy'},400);
+    await db.prepare('UPDATE players SET pin=? WHERE id=?').bind(await pinMake(pin),me.id).run();return json({ok:true})}
+  if(p==='pin/clear'){await db.prepare('UPDATE players SET pin=NULL WHERE id=?').bind(me.id).run();return json({ok:true})}
   {const xr=await extraRoutes(p,db,me,b,now);if(xr)return xr}
   // Cloud save: the latest copy of this player's game, so their devices stay in sync.
   if(p==='cloud/put'){
@@ -398,7 +431,7 @@ async function route(req,env,url){
       cached(db,`comm:${k}:${wk}`,3*MIN,async()=>await db.prepare(`SELECT COALESCE(SUM(wkn),0) AS total,COUNT(*) AS players FROM players WHERE wk=? AND wkn>0 AND id IN ${scc.sql}`).bind(wk,...scc.args).first()),
       cached(db,`wt:${k}:${wk}`,3*MIN,()=>weeklyTop(db,wk,scc)),cached(db,`wt:${k}:${lw}`,60*MIN,()=>weeklyTop(db,lw,scc)),myLakes(db,me)]);
     const players=Math.max(1,comm.players|0);
-    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,mail:mail.results,records,
+    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,hasPin:!!me.pin,mail:mail.results,records,
       community:{week:wk,lake:sc.code,total:comm.total|0,players,goal:2000+1500*players},
       weekly:{week:wk,top},lastWeekly:{week:lw,lake:sc.code,top:ltop},next:((+wk+1)*7-3)*864e5});
   }

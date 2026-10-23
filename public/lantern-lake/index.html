@@ -370,7 +370,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .tsave{margin:0;color:#ffe8c8;font-size:.85rem;opacity:.85;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .tback{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:max(14px,env(safe-area-inset-top,0px));color:#ffe8c8;text-decoration:none;font-size:.88rem;opacity:.85;z-index:2}
 .tback:hover{opacity:1}
-#updModal,#saveModal{z-index:75}
+#updModal,#saveModal,#loginModal,#lpinModal,#cloudModal{z-index:75}
 .cardbox{max-width:560px;width:100%}.cardbox img{width:100%;border-radius:10px;display:block}.cardbox a.ghost{text-decoration:none;color:var(--fg);display:inline-flex;align-items:center}
 .fr{display:grid;gap:10px;color:#1a1d24}
 .fr-card{background:#fff;border-radius:14px;padding:12px;display:grid;gap:7px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -1091,6 +1091,32 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .helpcall .hc-ic{font-size:1.6rem;grid-row:span 2}.helpcall b{font-size:.9rem}.helpcall small{display:block;font-size:.76rem;opacity:.85}
 .helpcall .hc-btns{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}.helpcall .hc-btns button{padding:5px 12px}
 @media (max-width:600px){.helpcall{top:48px}}
+
+/* ==LOGIN PIN== */
+.box.lg{max-width:400px;display:grid;gap:10px}.lg-l{display:grid;gap:4px;font-size:.82rem;font-weight:700;color:var(--muted)}
+.lg-in{font:600 1.05rem inherit;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--fg);width:100%;box-sizing:border-box}
+.lg-pin{font:700 1.4rem ui-monospace,Menlo,monospace;letter-spacing:.4em}
+.lg-msg:empty{display:none}.lg-msg.err{color:#ff8a7a}.lg-msg.ok{color:var(--reed)}
+.lg-help summary{cursor:pointer;font-size:.82rem;color:var(--muted)}.lg-help p{font-size:.82rem;color:var(--muted);margin:6px 0 0}
+#lgForm{display:grid;gap:10px}
+
+/* ==UI TIDY== */
+/* 1. Achievement pop-ups sit in a corner instead of over the lake view, and catch messages wait while one shows */
+.ach-wrap{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);justify-content:flex-start}
+body.dock-left .ach-wrap{justify-content:flex-end}
+.ach-wrap .ach{max-width:340px}
+@media (max-width:700px){.ach-wrap{top:calc(env(safe-area-inset-top,0px) + 6px);bottom:auto;justify-content:center}.ach-wrap .ach{grid-template-columns:34px minmax(0,1fr);padding:6px 12px 6px 6px;gap:8px;border-width:1.5px}.ach-wrap .ach .ic{width:34px;height:34px}.ach-wrap .ach .ic svg{width:24px;height:24px}.ach-wrap .ach .lbl{font-size:.68rem}.ach-wrap .ach .nm{font-size:.86rem}.ach-wrap .ach .sub{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
+/* 4. Weather chip opens the Weather app; the extra weather row under the lake is gone */
+#wxinfo{display:none!important}
+.ovl.ovl-wx{pointer-events:auto;cursor:pointer}
+.ovl.ovl-wx:hover{background:rgba(10,22,28,.78)}
+/* hunger and stamina side by side on phones too */
+@media (max-width:560px){.vitals{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.vital{grid-template-columns:minmax(0,1fr);padding:7px 10px}.vital .vh{flex-wrap:wrap;gap:2px 6px}.vital .vh b{font-size:.8rem}
+  .vital button{grid-column:1;grid-row:auto;justify-self:stretch;padding:4px 6px;font-size:.78rem}}
+.buffs:has(.none){visibility:hidden}
+/* 5. Settings buttons readable on the light phone screen */
+.set .ghost{background:#e9ebf1;color:#1a1d24;border:1px solid #d3d7df}.set .ghost:disabled{opacity:.5}
 </style>
 
 </head>
@@ -1103,7 +1129,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <h1 class="tlogo" aria-label="Lantern Lake"><span class="tl1" aria-hidden="true"><span style="--i:0">L</span><span style="--i:1">a</span><span style="--i:2">n</span><span style="--i:3">t</span><span style="--i:4">e</span><span style="--i:5">r</span><span style="--i:6">n</span></span><span class="tl2" aria-hidden="true"><span style="--i:0">L</span><span style="--i:1">a</span><span style="--i:2">k</span><span style="--i:3">e</span></span></h1>
     <p class="ttag">An idle fishing game</p>
     <button class="jig tgo" id="tGo">Go fishing</button>
-    <div class="tbtnrow"><button class="ghost" id="tUpd">Updates <span class="tnew" id="tNew" hidden>New</span></button><button class="ghost" id="saveBtn">Move your game</button></div>
+    <div class="tbtnrow"><button class="ghost" id="tUpd">Updates <span class="tnew" id="tNew" hidden>New</span></button><button class="ghost" id="saveBtn">Your game</button></div>
     <p class="tsave" id="tSave"></p>
   </div>
 </div>
@@ -1119,7 +1145,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
   <div class="scene" id="scene" title="Tap to jig the line">
     <canvas id="cv" aria-label="Lake scene with your shack, dock, boat and bobber"></canvas>
-    <div class="ovl ovl-wx" id="ovlWx"><span id="wxIcon"></span><b id="wxName">Clear</b></div>
+    <div class="ovl ovl-wx" id="ovlWx" role="button" tabindex="0" aria-label="Open Lake 7 Weather" title="Tap for the forecast"><span id="wxIcon"></span><b id="wxName">Clear</b></div>
     <div class="ovl ovl-loc"><span id="locLbl">Fishing</span> <b id="waterName">Dock Pond</b></div>
     <div class="ovl ovl-live" id="liveChip" hidden></div>
     <div class="ovl ovl-realm" id="realmHud" hidden></div>
@@ -1480,6 +1506,28 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div id="ownBody"></div>
   </div>
 </div>
+<div class="away" id="loginModal" hidden>
+  <div class="box lg">
+    <span class="eyebrow">Your account</span><h2 id="lgH">Log in</h2>
+    <div id="lgForm"><p class="xf-sub">Play on this device with your angler name and the 6-digit PIN you set. You only need to do this once per device.</p>
+      <label class="lg-l">Angler name<input id="lgName" class="lg-in" autocomplete="username" maxlength="16" spellcheck="false" autocapitalize="off"></label>
+      <label class="lg-l">PIN<input id="lgPin" class="lg-in lg-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="current-password"></label>
+      <div class="xf-row"><button class="jig" id="lgGo">Log in</button><button class="ghost" id="lgCancel">Cancel</button></div></div>
+    <div id="lgPick" hidden><div class="cl-card" id="lgCard"></div><div class="xf-row"><button class="jig" id="lgLoad">Load my game</button><button class="ghost" id="lgBack">Cancel</button></div></div>
+    <p class="xf-sub lg-msg" id="lgMsg" role="status"></p>
+    <details class="lg-help"><summary>No PIN, or forgot it?</summary><p>Open the game on a device you already play on and go to Phone → Settings → Login PIN. You can set a new PIN there without the old one. You can also move your game with a transfer code from that device.</p></details>
+  </div>
+</div>
+<div class="away" id="lpinModal" hidden>
+  <div class="box lg">
+    <span class="eyebrow">Your account</span><h2 id="pnH">Set a login PIN</h2>
+    <p class="xf-sub" id="pnP"></p>
+    <label class="lg-l">New 6-digit PIN<input id="pnA" class="lg-in lg-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password"></label>
+    <label class="lg-l">Type it again<input id="pnB" class="lg-in lg-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password"></label>
+    <div class="xf-row"><button class="jig" id="pnGo">Save PIN</button><button class="ghost" id="pnLater">Later</button></div>
+    <p class="xf-sub lg-msg" id="pnMsg" role="status"></p>
+  </div>
+</div>
 <div class="away" id="cloudModal" hidden>
   <div class="box">
     <span class="eyebrow" id="clEye">Cloud save</span><h2 id="clH">Pick up where you left off?</h2>
@@ -1491,10 +1539,15 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 </div>
 <div class="away" id="saveModal" hidden>
   <div class="box xfer">
-    <div class="xf-h"><div><span class="eyebrow">Play on another device</span><h2>Move your game</h2></div><button class="x" id="saveClose" aria-label="Close">×</button></div>
+    <div class="xf-h"><div><span class="eyebrow">Play on another device</span><h2>Your game</h2></div><button class="x" id="saveClose" aria-label="Close">×</button></div>
     <div class="xf-sec">
-      <h3>Send this game</h3>
-      <p>Get a 6-letter code, then enter it on your phone or computer.</p>
+      <h3>Log in</h3>
+      <p>Already play on another device? Log in with your angler name and PIN to get your game here.</p>
+      <button class="jig" id="tLogin">Log in with name + PIN</button>
+    </div>
+    <div class="xf-sec">
+      <h3>Send this game with a code</h3>
+      <p>No PIN? Get a 6-letter code here, then enter it on your phone or computer.</p>
       <button class="jig" id="xfMake">Get a transfer code</button>
       <div class="xf-code" id="xfCode" hidden></div>
       <p class="xf-sub" id="xfSub" hidden></p>
@@ -2173,7 +2226,7 @@ function burst(x,y,cols,n){if(RM)return;for(let i=0;i<n;i++){const a=Math.random
 const achQ=[];let achBusy=false;
 function celebrate(a){sfx('chime',a.r);achQ.push(a);if(!achBusy)nextAch()}
 function nextAch(){
-  const a=achQ.shift();if(!a){achBusy=false;return}achBusy=true;
+  const a=achQ.shift();if(!a){achBusy=false;document.body.classList.remove('ach-on');return}achBusy=true;document.body.classList.add('ach-on');
   const el=document.createElement('div');el.className='ach';el.style.setProperty('--rc',RCOL[a.r]);
   el.innerHTML=`<div class="ic">${a.icon}</div><div style="min-width:0"><div class="lbl">${a.lbl}</div><div class="nm">${a.name}</div><div class="sub">${a.sub}</div></div>`;
   $('achWrap').append(el);
@@ -2790,12 +2843,13 @@ const APPS=[
   {id:'friends',n:'Friends',bg:'linear-gradient(145deg,#ff8ab0,#d04a7a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="#fff"/><circle cx="22" cy="13" r="4" fill="#ffd6e4"/><path d="M3 27c0-6 4-9 9-9s9 3 9 9z" fill="#fff"/><path d="M19 27c0-4 1-6 3-7.5 4 0 7 2.5 7 7.5z" fill="#ffd6e4"/></svg>`},
   {id:'texts',n:'Messages',bg:'linear-gradient(145deg,#6ee07a,#1fa83a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6C9.4 6 4 10.3 4 15.6c0 3 1.7 5.6 4.4 7.4L7 27.5l5.2-2.6c1.2.3 2.5.5 3.8.5 6.6 0 12-4.3 12-9.8S22.6 6 16 6z" fill="#fff"/></svg>`},
   {id:'sports',n:'FinDuel',bg:'linear-gradient(145deg,#1e6aff,#0a2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="10" fill="#ff8a2a"/><path d="M6 17h20M16 7v20M9 10c4 4 4 10 0 14M23 10c-4 4-4 10 0 14" stroke="#3a1a00" stroke-width="1.6" fill="none"/><path d="M20 3c3 2 4 5 3 8-2-2-4-3-6-3 1-2 2-4 3-5z" fill="#7cf0ff"/></svg>`},
-  {id:'weather',n:'Lake 7 Weather',bg:'linear-gradient(145deg,#3a8aff,#0c2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="#ffd05a"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7" stroke="#ffd05a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 25.5a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6 3.8 3.8 0 0 1 .4 7.4z" fill="#fff"/><rect x="19" y="20" width="11" height="9" rx="2" fill="#d8312a"/><path d="M22 22.4h5l-2.6 4.8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
-  {id:'crate',n:'Crate Expectations',bg:'linear-gradient(145deg,#ff5ad8,#3a1a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11l12-6 12 6v12l-12 6-12-6z" fill="#b07a3a"/><path d="M4 11l12 6 12-6M16 17v12" stroke="#5a3814" stroke-width="1.6" fill="none"/><path d="M14 18l4-2v5l-4 2z" fill="#ffc23a"/><path d="M24 3l1 2.4 2.4 1-2.4 1L24 10l-1-2.6-2.4-1 2.4-1z" fill="#fff"/></svg>`},
+  {id:'weather',n:'Lake 7 Weather',s:'Weather',bg:'linear-gradient(145deg,#3a8aff,#0c2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="#ffd05a"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7" stroke="#ffd05a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 25.5a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6 3.8 3.8 0 0 1 .4 7.4z" fill="#fff"/><rect x="19" y="20" width="11" height="9" rx="2" fill="#d8312a"/><path d="M22 22.4h5l-2.6 4.8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
+  {id:'crate',n:'Crate Expectations',s:'Crates',bg:'linear-gradient(145deg,#ff5ad8,#3a1a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11l12-6 12 6v12l-12 6-12-6z" fill="#b07a3a"/><path d="M4 11l12 6 12-6M16 17v12" stroke="#5a3814" stroke-width="1.6" fill="none"/><path d="M14 18l4-2v5l-4 2z" fill="#ffc23a"/><path d="M24 3l1 2.4 2.4 1-2.4 1L24 10l-1-2.6-2.4-1 2.4-1z" fill="#fff"/></svg>`},
   {id:'hw',n:'Spooky',bg:'linear-gradient(145deg,#ff8a2a,#5a1a6a)',ic:()=>pumpkinSvg,when:()=>hwOn()},
   {id:'settings',n:'Settings',bg:'linear-gradient(145deg,#a8aeb8,#5e6470)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4l2.2 3.1 3.7-.9.9 3.7 3.1 2.2-1.7 3.4 1.7 3.4-3.1 2.2-.9 3.7-3.7-.9L16 28l-2.2-3.1-3.7.9-.9-3.7-3.1-2.2 1.7-3.4-1.7-3.4 3.1-2.2.9-3.7 3.7.9z" fill="#fff"/><circle cx="16" cy="16" r="4.5" fill="#6e7480"/></svg>`},
   {id:'help',n:'Help',bg:'linear-gradient(145deg,#5aa8ff,#2a5ad0)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12" fill="#fff"/><path d="M12.4 12.6a3.6 3.6 0 1 1 5.2 3.2c-1 .5-1.6 1.2-1.6 2.3v1" stroke="#2a5ad0" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="16" cy="23.2" r="1.7" fill="#2a5ad0"/></svg>`},
 ];
+const APP_ORDER=['texts','friends','bounty','shop','case','news','weather','crate','sports','slots','hw','settings','help'];
 const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
@@ -2970,7 +3024,7 @@ let WXA_H=-1;setInterval(()=>{try{if(phOpen()&&phView==='weather'){const h=S.day
 function renderHome(){
   const fc=S.fc&&S.fc[S.day];
   $('phWidget').innerHTML=`${isRealm(S.water)?wxSvg(S.wx.id):wxIc(S.wx.id,S.min)}<div><b>${isRealm(S.water)?'':(wxTempAt(S.day,S.min)??'')+'°'}</b><div>${WX[S.wx.id].n}</div><span>${W(S.water).n} · Day ${S.day}</span></div>`;
-  $('appGrid').innerHTML=APPS.filter(appVis).map(a=>`<button class="appbtn" data-app="${a.id}"><span class="appic" style="background:${a.bg}">${a.ic()}</span>${a.n}${badgeFor(a.id)}</button>`).join('');
+  $('appGrid').innerHTML=APP_ORDER.map(id=>APPS.find(a=>a.id===id)).filter(a=>a&&appVis(a)).map(a=>`<button class="appbtn" data-app="${a.id}" aria-label="${a.n}"><span class="appic" style="background:${a.bg}">${a.ic()}</span>${a.s||a.n}${badgeFor(a.id)}</button>`).join('');
   $('appGrid').querySelectorAll('[data-app]').forEach(b=>b.onclick=()=>phShow(b.dataset.app));const wg=$('phWidget');wg.setAttribute('role','button');wg.tabIndex=0;wg.setAttribute('aria-label','Open Lake 7 Weather');wg.onclick=()=>phShow('weather');wg.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();phShow('weather')}};
 }
 function renderLock(){
@@ -3201,7 +3255,7 @@ const phDark=()=>{const d=SETS().dark;return d==='on'||(d==='auto'&&!!DARKQ&&DAR
 function applyPhTheme(){const el=$('phScreen');if(el)el.classList.toggle('dark',phDark());const dk=$('phoneDock');if(dk)dk.classList.toggle('dark',phDark())}
 try{DARKQ&&DARKQ.addEventListener('change',applyPhTheme)}catch(e){}
 const cutOn=()=>{const c=SETS().cut;return c==='always'||(c==='auto'&&!RM)};
-function applyDock(){const d=$('phoneDock');if(!d)return;const p=SETS().dock;d.classList.toggle('pos-left',p==='left');d.classList.toggle('pos-center',p==='center')}
+function applyDock(){const d=$('phoneDock');if(!d)return;const p=SETS().dock;document.body.classList.toggle('dock-left',p==='left');d.classList.toggle('pos-left',p==='left');d.classList.toggle('pos-center',p==='center')}
 function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   const seg=(k,opts)=>`<span class="seg" role="group">${opts.map(([v,n])=>`<button data-sk="${k}" data-sv="${v}" aria-pressed="${st[k]===v}">${n}</button>`).join('')}</span>`;
   const sw=(k,on,lbl)=>`<input type="checkbox" class="sw2" data-sw="${k}" ${on?'checked':''} aria-label="${lbl}">`;
@@ -3229,10 +3283,13 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
     ${row('Buzz and chime','Plays a sound with each notification',sw('nSound',st.nSound,'Notification sound'))}
     ${'vibrate' in navigator?row('Vibrate','On phones that support it',sw('nVib',st.nVib,'Vibrate')):''}
   </div></div>
+  <div><h4>Account</h4><div class="grp">
+    ${row('Cloud sync',S.mp&&S.mp.id?'Your latest game follows you between devices':'Pick an angler name in Friends to turn this on',sw('cloud',st.cloud,'Cloud sync'))}
+    <div class="row"><span>Login PIN<small>${S.mp&&S.mp.id?(MPV.hasPin?`Set. Log in on new devices with “${esc(S.mp.name)}” and your PIN`:'Not set. Set one so you can log in on a new device'):'Pick an angler name in Friends first'}</small></span><button class="ghost" id="setPin" ${S.mp&&S.mp.id?'':'disabled'}>${MPV.hasPin?'Change':'Set PIN'}</button></div>
+    <div class="row"><span>Move your game<small>Send it to your phone or computer with a short code</small></span><button class="ghost" id="setMove">Open</button></div>
+  </div></div>
   <div><h4>Your game</h4><div class="grp">
     ${row('Live lake',S.mp&&S.mp.id?'See friends fishing the same water in real time':'Pick an angler name in Friends to turn this on',sw('live',st.live,'Live lake'))}
-    ${row('Cloud sync',S.mp&&S.mp.id?'Your latest game follows you between devices':'Pick an angler name in Friends to turn this on',sw('cloud',st.cloud,'Cloud sync'))}
-    <div class="row"><span>Move your game<small>Send it to your phone or computer with a short code</small></span><button class="ghost" id="setMove">Open</button></div>
     ${MPV.owner?`<div class="row"><span>Site owner tools<small>Players, activity, bug reports and backups</small></span><button class="ghost" id="setOwner">Open</button></div>`:''}
   </div></div>
   <div><h4>Display</h4><div class="grp">
@@ -3243,7 +3300,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   <p class="set-foot">Lantern Lake · version ${ver}</p>`;
   b.querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{let v=x.dataset.sv;if(v==='true')v=true;else if(v==='false')v=false;st[x.dataset.sk]=v;sfx('click');applyDock();applyPhTheme();applyTextSize();save();renderSettings();renderLock();renderVitals&&renderVitals()});
   b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();});
-  {const mv=$('setMove');if(mv)mv.onclick=()=>{closePhone();openSaveModal()};const ow=$('setOwner');if(ow)ow.onclick=()=>{closePhone();openOwner()}}
+  {const pn=$('setPin');if(pn)pn.onclick=()=>{closePhone();openPin(false)};const mv=$('setMove');if(mv)mv.onclick=()=>{closePhone();openSaveModal()};const ow=$('setOwner');if(ow)ow.onclick=()=>{closePhone();openOwner()}}
   b.querySelectorAll('[data-snd]').forEach(x=>x.onchange=()=>{S.snd[x.dataset.snd]=x.checked;if(x.dataset.snd==='on'&&x.checked)initAudio();applyVol();renderSnd();save();if(x.dataset.snd==='on')renderSettings()});
   b.querySelectorAll('[data-sl]').forEach(x=>{const k=x.dataset.sl;x.oninput=()=>{S.snd[k]=x.value/100;x.previousElementSibling.querySelector('small').textContent=x.value;applyVol();renderSnd()};x.onchange=()=>{save();if(k==='sfx')sfx('chime','R')}})}
 
@@ -3750,7 +3807,7 @@ const TABS=['gear','cooler','waters','log','storage','coll'];
 function openTab(t){if(t==='cooler')renderCooler();document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===t));for(const k of TABS)$('pane-'+k).hidden=k!==t}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){$('updModal').hidden=true;$('cardModal').hidden=true;closePhone();$('itemModal').hidden=true;$('decoModal').hidden=true;$('gamesModal').hidden=true;$('troModal').hidden=true;$('collModal').hidden=true;$('hotModal').hidden=true;$('tripModal').hidden=true;$('saveModal').hidden=true;$('gbModal').hidden=true;$('bugModal').hidden=true;$('ownModal').hidden=true;if(!$('tvModal').hidden)closeTV()}
+  if(e.key==='Escape'){$('updModal').hidden=true;$('cardModal').hidden=true;closePhone();$('itemModal').hidden=true;$('decoModal').hidden=true;$('gamesModal').hidden=true;$('troModal').hidden=true;$('collModal').hidden=true;$('hotModal').hidden=true;$('loginModal').hidden=true;$('lpinModal').hidden=true;$('tripModal').hidden=true;$('saveModal').hidden=true;$('gbModal').hidden=true;$('bugModal').hidden=true;$('ownModal').hidden=true;if(!$('tvModal').hidden)closeTV()}
   if(/^[1-5]$/.test(e.key)&&!e.target.closest('input,textarea')){const k=S.hot[+e.key-1];if(k)usePotion(k)}
 });
 let lastJig=0;
@@ -3842,6 +3899,47 @@ const XFER={exp:0,t:null};
 function xfSyncNote(){const m=S.mp||{};$('xfSync').textContent=!m.id?'Tip: pick an angler name in the Friends app and your devices stay in sync on their own after you move your game once.':SETS().cloud===false?'Cloud sync is off in Settings, so you’ll need a code each time you switch.':'Cloud sync is on. After you move your game once, it follows you between devices automatically.'}
 function openSaveModal(){save();$('saveTxt').value='';saveMsg('');$('xfCode').hidden=true;$('xfSub').hidden=true;$('xfMake').hidden=false;$('xfIn').value='';$('xfLoad').dataset.arm='';$('xfLoad').textContent='Load';xfSyncNote();$('saveModal').hidden=false}
 $('saveBtn').onclick=openSaveModal;
+// ==LOGIN PIN== sign in on a new device with angler name + PIN, then load that account's cloud save.
+const LG={acct:null,meta:null};
+function lgMsg(t,cls){const m=$('lgMsg');m.textContent=t||'';m.className='xf-sub lg-msg'+(cls?' '+cls:'')}
+function openLogin(){LG.acct=null;LG.meta=null;$('lgForm').hidden=false;$('lgPick').hidden=true;$('lgH').textContent='Log in';lgMsg('');$('lgPin').value='';$('lgGo').disabled=false;$('loginModal').hidden=false;setTimeout(()=>($('lgName').value?$('lgPin'):$('lgName')).focus(),50)}
+async function lgSubmit(){const name=$('lgName').value.trim(),pin=$('lgPin').value.trim();
+  if(!name){lgMsg('Type your angler name.','err');return}if(!/^\d{6}$/.test(pin)){lgMsg('Your PIN is 6 digits.','err');return}
+  $('lgGo').disabled=true;lgMsg('Checking…');
+  try{const r=await api('login',{name,pin});LG.acct=r;$('lgPin').value='';
+    const meta=await api('cloud/get',{id:r.id,key:r.key,meta:true});
+    if(meta.none){LG.acct=null;lgMsg(`That's the right PIN, but ${r.name} has no cloud save yet. Open the game on your other device with Cloud sync on (Phone → Settings), wait a minute, then log in here again.`,'err');$('lgGo').disabled=false;return}
+    LG.meta=meta;const same=S.mp&&S.mp.id===r.id,has=S.total>0||S.day>1;
+    $('lgH').textContent=`Welcome back, ${r.name}`;$('lgForm').hidden=true;$('lgPick').hidden=false;lgMsg('');
+    $('lgCard').innerHTML=`<b>${esc(r.name)}: day ${meta.day} · $${money(meta.coins)}</b><small>Saved ${ago(meta.ts)} on your ${esc(meta.kind||'other device')}</small>${has&&!same?`<small>This device has a different game (day ${S.day} · $${money(S.coins)}${S.mp&&S.mp.name?`, ${esc(S.mp.name)}`:''}). Loading replaces it here. Your other devices aren't affected.</small>`:''}`;
+    $('lgLoad').textContent=`Load ${r.name}'s game`;$('lgLoad').disabled=false;$('lgLoad').focus()}
+  catch(e){$('lgGo').disabled=false;const m=e.message||'';
+    if(m==='no-pin')lgMsg('That angler hasn’t set a login PIN yet. Set one in Phone → Settings on a device you already play on.','err');
+    else if(m.startsWith('bad-pin')){const n=+m.split(':')[1];lgMsg(n>0?`That name and PIN don’t match. ${n} ${n===1?'try':'tries'} left before a 15-minute wait.`:'That name and PIN don’t match. Too many tries: wait 15 minutes, then try again.','err')}
+    else if(m.startsWith('locked-day'))lgMsg('Too many wrong tries today for that name. Try again tomorrow, or move your game with a transfer code.','err');
+    else if(m.startsWith('locked'))lgMsg(`Too many wrong tries. Wait ${m.split(':')[1]||15} minutes, then try again.`,'err');
+    else lgMsg('Couldn’t reach the lake. Check your connection and try again.','err')}}
+async function lgLoad(){const r=LG.acct;if(!r)return;$('lgLoad').disabled=true;$('lgLoad').textContent='Loading…';
+  try{const full=await api('cloud/get',{id:r.id,key:r.key}),o=await decSave(full.data);if(!validSave(o))throw new Error('bad');
+    o.mp=Object.assign({},o.mp||{},{id:r.id,key:r.key,name:r.name});applySave(o);MPV.hasPin=true;CSYNC.offer=null;CSYNC.checked=true;$('loginModal').hidden=true;LG.acct=null;
+    showToast(`You're logged in as ${r.name} on this device`,'Welcome back')}
+  catch(e){$('lgLoad').disabled=false;$('lgLoad').textContent=`Load ${r.name}'s game`;lgMsg('Couldn’t load the game. Check your connection and try again.','err')}}
+function openPin(first){const m=mpS();if(!m.id){showToast('Pick an angler name in Friends first');return}
+  $('pnH').textContent=MPV.hasPin?'Change your login PIN':'Set a login PIN';
+  $('pnP').textContent=(first?'Protect your game! ':'')+`Pick a 6-digit PIN. On a new phone or computer you'll log in with “${m.name}” and this PIN to get your game back.`+(MPV.hasPin?' You don’t need your old PIN to change it here.':'');
+  $('pnA').value='';$('pnB').value='';$('pnMsg').textContent='';$('pnMsg').className='xf-sub lg-msg';$('pnGo').disabled=false;$('lpinModal').hidden=false;setTimeout(()=>$('pnA').focus(),50)}
+async function pinSave(){const a=$('pnA').value.trim(),b=$('pnB').value.trim(),msg=(t,c)=>{$('pnMsg').textContent=t;$('pnMsg').className='xf-sub lg-msg '+c};
+  if(!/^\d{6}$/.test(a)){msg('Your PIN needs exactly 6 digits.','err');return}if(a!==b){msg('Those two PINs don’t match. Type them again.','err');return}
+  const m=mpS();$('pnGo').disabled=true;
+  try{await api('pin/set',{id:m.id,key:m.key,pin:a});MPV.hasPin=true;m.pinAsked=true;save();try{if(cloudOn()){await cloudCheck();if(!CSYNC.offer)await cloudPush(true)}}catch(e){}$('lpinModal').hidden=true;showToast(`Log in on new devices with “${m.name}” and your PIN`,'PIN saved');if(phOpen()&&phView==='settings')renderSettings()}
+  catch(e){$('pnGo').disabled=false;msg(e.message==='pin-too-easy'?'That PIN is too easy to guess (like 111111 or 123456). Pick another.':'Couldn’t save it. Check your connection and try again.','err')}}
+// ask once, gently, when someone has an account but no PIN yet
+function pinNudge(){const m=mpS();if(!m.id||MPV.hasPin!==false||m.pinAsked||titleOn||phOpen())return;if(document.querySelector('.away:not([hidden])'))return;m.pinAsked=true;save();openPin(true)}
+$('tLogin').onclick=()=>{$('saveModal').hidden=true;openLogin()};
+{const w=$('ovlWx');const go=e=>{e.stopPropagation();e.preventDefault();openPhone();phShow('weather')};w.addEventListener('click',go);w.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')go(e)})}$('lgGo').onclick=lgSubmit;$('lgCancel').onclick=()=>$('loginModal').hidden=true;$('lgBack').onclick=()=>{LG.acct=null;$('loginModal').hidden=true};$('lgLoad').onclick=lgLoad;
+$('lgPin').onkeydown=e=>{if(e.key==='Enter')lgSubmit()};$('lgName').onkeydown=e=>{if(e.key==='Enter')$('lgPin').focus()};
+$('pnGo').onclick=pinSave;$('pnLater').onclick=()=>{$('lpinModal').hidden=true;showToast('You can set it any time in Phone → Settings','Login PIN')};$('pnB').onkeydown=e=>{if(e.key==='Enter')pinSave()};
+
 $('saveClose').onclick=()=>{$('saveModal').hidden=true;clearInterval(XFER.t)};
 $('saveModal').onclick=e=>{if(e.target.id==='saveModal'){$('saveModal').hidden=true;clearInterval(XFER.t)}};
 $('xfOff').addEventListener('toggle',async()=>{if($('xfOff').open&&!$('saveTxt').value)$('saveTxt').value=await encSave2()});
@@ -4059,7 +4157,7 @@ async function mpSync(force){const m=mpS();if(!m.id||MPV.busy)return;if(!force&&
     const cab=JSON.stringify(mpCabin()),q=m.q.slice(0,20);const body={id:m.id,key:m.key,lake:m.lake||'all',stats:mpStats(),best,catches:q,wk:m.wk,wkn:m.wkn,wkBest:m.wkBest||0};if(cab!==m.cabSent)body.cabin=cab;mpSyncExtras(body);
     const r=await api('sync',body);
     Object.assign(m.sentBest,best);m.q=m.q.slice(q.length);if(body.cabin)m.cabSent=cab;
-    MPV.online=true;MPV.err='';MPV.last=Date.now();MPV.lakes=r.lakes||[];MPV.pub=r.pub!==false;if(r.lake&&r.lake!==m.lake){m.lake=r.lake;MPV.plT=0;MPV.newsT=0}{const seen=m.mailSeen,nm=(r.mail||[]).filter(x=>x.id>(seen||0));if(nm.length){m.mailSeen=Math.max(...nm.map(x=>x.id));if(seen!=null)phNotify('friends','Friends',nm.length>1?`${nm.length} gifts in your mailbox`:`${nm[0].from_name} sent you a gift`)}else if(seen==null)m.mailSeen=0}MPV.mail=r.mail||[];MPV.records=r.records||[];MPV.weekly=r.weekly;MPV.lastWeekly=r.lastWeekly;MPV.community=r.community;MPV.next=r.next||0;
+    MPV.online=true;MPV.err='';MPV.last=Date.now();if(r.hasPin!==undefined){MPV.hasPin=!!r.hasPin;setTimeout(pinNudge,2500)}MPV.lakes=r.lakes||[];MPV.pub=r.pub!==false;if(r.lake&&r.lake!==m.lake){m.lake=r.lake;MPV.plT=0;MPV.newsT=0}{const seen=m.mailSeen,nm=(r.mail||[]).filter(x=>x.id>(seen||0));if(nm.length){m.mailSeen=Math.max(...nm.map(x=>x.id));if(seen!=null)phNotify('friends','Friends',nm.length>1?`${nm.length} gifts in your mailbox`:`${nm[0].from_name} sent you a gift`)}else if(seen==null)m.mailSeen=0}MPV.mail=r.mail||[];MPV.records=r.records||[];MPV.weekly=r.weekly;MPV.lastWeekly=r.lastWeekly;MPV.community=r.community;MPV.next=r.next||0;
     mpSyncDone(body,r);mpRecordAlerts();mpWeekRewards();save();if(phView==='friends'&&!$('slotsModal').hidden)renderFriends()}
   catch(e){MPV.err=e.message;if(e.message==='auth'){MPV.err='Your friends profile on this site was reset. Pick a name again.';delete m.id;delete m.key}
     else if(e.message==='no-db')MPV.online='nodb';else if(e.message==='offline'&&MPV.online!==true)MPV.online=false}
@@ -4392,7 +4490,10 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:42,n:'Through the Gate',items:['New: pick Male or Female for your angler in Friends → My card. It changes your contact portrait and your angler on the lake, and friends fishing with you see it live.','Bug fix: text no longer runs off the edge of the phone screen, including with Large or Extra large text. The ‹ Home button stays on one line and the login streak days fit their boxes.','Easier Lake Beast fight: a 3-second countdown before it starts, your marker starts inside the green zone, the line loses strength half as fast when you drift out, and you start with more progress.','Live raids: tap Call for help on the raid bar to alert everyone fishing the other spots on your lake. They get a banner with a Join button that takes them straight to the fight.','Hot bar: tap the pencil at the end of the bar, or hold (right-click on a computer) any slot, to swap or clear potions. A full bar no longer blocks adding from Storage, and new potions fill slots whose potions have run out.','Behind the scenes: leaderboards, records and the friends list are now shared between players for a few minutes instead of rebuilt for everyone, so the server can handle a lot more anglers. New lake records still show up right away.','Catch messages now pop up at the top of the lake view instead of the bottom, so they don’t cover pumpkins and other things to tap.','New app: Crate Expectations! Open crates for 40 boat paints across five tiers, from plain Common colors to animated Legendary paints like Solid Gold and Prismatic. Every paint fits every boat. One free crate a day, more for cash, and friends on the live lake see your paint.','Tapping the front door now walks you outside your cabin instead of straight onto the boat. Look around, then tap Where to? to pick your fishing spot. Head back out still takes you straight to where you were fishing.','New app: Lake 7 Weather. Current conditions, the next 12 hours, a 7-day forecast, storm and fog alerts and an angler’s report on what the weather means for fishing. Tap the weather widget on your home screen to open it.','New: you can leave a tournament early with Leave tournament on the scoreboard. You forfeit, so the entry fee isn’t refunded.','Photos you text now show you in your contact card look: your gender, hat, outfit and face. Photos sent before this update stay as they were.','Balance: replaying a case you’ve already solved now pays 10% of the prize, or 25% if you beat your best time. Your first solve still pays in full.','Messages: you can now send 5 photos a day to each person you text. Before, it was 2 a day in total.','Three portal realms for the biggest boats: the Sea of Tranquility on the Moon, the Ember Lake in the Underworld and the Cloud Sea. Build gates from the new Beyond the Lake section of the Waters tab.','22 new fish, from the Lunar Leviathan to the three-headed Cerberus Catfish and the Sky Whale, plus new materials, junk, collectibles and logbook sets.','Each realm has a twist: low gravity and an air supply on the Moon, melting lines and pre-cooked fish in the Underworld, and updrafts that scoop up whole schools in the Cloud Sea.','Realm gear: Big Air Tank, Moon Base, Hellforged Line and Sky Kite.','A portal ring floats beside your dock once you build a gate.']},
+ {v:45,n:'Tidy Tackle Box',items:['Achievement pop-ups no longer cover the lake: they appear in the bottom corner on computers and as a slim banner over the header on phones. Catch messages wait until they’re gone, so the two never stack.','Phone home screen: shorter labels (Weather, Crates) and a handier order, with Messages, Friends, Bounties and Shop first.','Title screen: Move your game and Log in are now one Your game button, with logging in at the top.','Hunger and stamina sit side by side on phones. Tap the weather chip on the lake to open the Weather app; the extra weather row under the lake is gone.','Settings has a new Account group for Cloud sync, Login PIN and Move your game.','Bug fix: the Set PIN and Open buttons in Settings were dark on dark and hard to read.']},
+ {v:44,n:'Welcome Back',items:['New: log in on any device with your angler name and a 6-digit PIN. Set your PIN in Phone → Settings → Login PIN, then tap Log in on the title screen of a new phone or computer to load your cloud save.','Devices you’re already playing on stay logged in, and you can change your PIN from any of them without the old one. A few wrong guesses only pause logins from that network for 15 minutes, so nobody can lock you out.']},
+ {v:43,n:'Fresh Coat',items:['New app: Crate Expectations! Open crates for 40 boat paints across five tiers, from plain Common colors to animated Legendary paints like Solid Gold and Prismatic. Every paint fits every boat. One free crate a day, more for cash, and friends on the live lake see your paint.','Live raids: tap Call for help on the raid bar to alert everyone fishing the other spots on your lake. They get a banner with a Join button that takes them straight to the fight.','New app: Lake 7 Weather. Current conditions, the next 12 hours, a 7-day forecast, storm and fog alerts and an angler’s report on what the weather means for fishing. Tap the weather widget on your home screen to open it.','New: pick Male or Female for your angler in Friends → My card. It changes your contact portrait and your angler on the lake, and friends fishing with you see it live.','Photos you text now show you in your contact card look: your gender, hat, outfit and face. Photos sent before this update stay as they were.','Tapping the front door now walks you outside your cabin instead of straight onto the boat. Look around, then tap Where to? to pick your fishing spot. Head back out still takes you straight to where you were fishing.','Hot bar: tap the pencil at the end of the bar, or hold (right-click on a computer) any slot, to swap or clear potions. A full bar no longer blocks adding from Storage, and new potions fill slots whose potions have run out.','New: you can leave a tournament early with Leave tournament on the scoreboard. You forfeit, so the entry fee isn’t refunded.','Easier Lake Beast fight: a 3-second countdown before it starts, your marker starts inside the green zone, the line loses strength half as fast when you drift out, and you start with more progress.','Catch messages now pop up at the top of the lake view instead of the bottom, so they don’t cover pumpkins and other things to tap.','Bug fix: text no longer runs off the edge of the phone screen, including with Large or Extra large text. The ‹ Home button stays on one line and the login streak days fit their boxes.','Behind the scenes: leaderboards, records and the friends list are now shared between players for a few minutes instead of rebuilt for everyone, so the server can handle a lot more anglers. New lake records still show up right away.']},
+ {v:42,n:'Through the Gate',items:['Balance: replaying a case you’ve already solved now pays 10% of the prize, or 25% if you beat your best time. Your first solve still pays in full.','Messages: you can now send 5 photos a day to each person you text. Before, it was 2 a day in total.','Three portal realms for the biggest boats: the Sea of Tranquility on the Moon, the Ember Lake in the Underworld and the Cloud Sea. Build gates from the new Beyond the Lake section of the Waters tab.','22 new fish, from the Lunar Leviathan to the three-headed Cerberus Catfish and the Sky Whale, plus new materials, junk, collectibles and logbook sets.','Each realm has a twist: low gravity and an air supply on the Moon, melting lines and pre-cooked fish in the Underworld, and updrafts that scoop up whole schools in the Cloud Sea.','Realm gear: Big Air Tank, Moon Base, Hellforged Line and Sky Kite.','A portal ring floats beside your dock once you build a gate.']},
  {v:41,n:'Second Wind',items:['Balance: fast rods no longer drain your stamina. Rare and Legendary catches now cost stamina in step with how fast you cast, so a full bar lasts about the same on every rod.','New rod perks: Heirloom Bamboo (big catches cost 25% less stamina), Starlight (+10 stamina for every Legendary), Abyssal (free jigging), Lantern Legend (big catches cost 50% less). See them in the Gear tab.','New: Thermos of Coffee in the Shop app under Supplies. Restores 30 stamina right away.']},
  {v:40,n:'Live Lake',items:['See friends fishing the same water in real time: their boats, casts and catches show up on your lake with name tags.','Big catches get a moment: rare fish light up, Legendaries set off fireworks over their boat.','Send quick emotes with the 💬 button. Tap a friend’s boat to open their card.','Live raids: when two or more friends share a water, a monster can surface. Every fish anyone lands hits it. Beat it in 3 minutes to split the bounty.','Boats now turn around to pull into the dock, and the jon boat and bass boat have a proper outboard motor on the back.','Bug fix: the raid boss health numbers were cut off. They’re now centered on a taller health bar and easy to read.','Bug fix: friends fishing Fork River showed up behind the riverbank grass. They now sit out on the water, in front of the scenery.','Bug fix: a flickering splash at the front of moving boats looked like a second propeller. It’s gone, so the only propeller is on the motor at the back.']},
  {v:39,n:'Lake Life',items:['🎃 Halloween event until November 1: four spooky fish, a pumpkin hunt with costumes and a Golden Pumpkin collectible, and a Ghost Gar contest with $100,000 for the winner. Open the new Spooky app on your phone.','Trick-or-treaters come to your cabin after 5 PM. Hand out candy for cash and bonus pumpkins.','Random scene events: ghosts, bats, a witch across the moon, deer, eagles, loons, balloons, banner planes, rainbows and the northern lights.','A stormy new title screen, plus a Continue card with your progress.','Lake projects and retiring in the Shop app. Logbook set rewards. A third case: The Keeper’s Light.','Friends: a weekly lake monster to beat together, 1v1 fishing challenges, guestbooks and yard likes with a weekly Best Yard prize.','A first-day guide for new players, a taller lake view on phones, a Text size setting, and Report a problem in Help.']},
@@ -6308,8 +6409,11 @@ async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('o
     b.innerHTML=`<div class="own-grid">${cell(st.players,'anglers')}${cell(st.a24,'played today')}${cell(st.a7,'played this week')}${cell(st.c24,'notable catches today')}${cell(st.t24,'texts today')}${cell(st.cl24,'cloud saves updated today')}${cell(st.g24,'guestbook notes today')}${cell(st.chal,'open challenges')}</div>
       <p class="own-note">Cloudflare’s free plan allows 100,000 database writes a day. A rough guide: each active player uses about 30 an hour for cloud sync plus a few for catches and texts. Check exact usage in the Cloudflare dashboard under D1.</p>
       <div class="xf-row"><button class="jig" id="ownBackup">Download a backup</button></div>
+      <h3 class="own-h">Reset a login PIN</h3><p class="own-note">For a player who lost every device and forgot their PIN. Make sure it's really them first. They can then set a new PIN after moving their game with a transfer code.</p>
+      <div class="xf-row"><input id="ownPinName" class="lg-in" placeholder="Angler name" maxlength="16" style="flex:1;min-width:0"><button class="ghost" id="ownPinGo">Reset PIN</button></div><p class="own-note" id="ownPinMsg"></p>
       <h3 class="own-h">Bug reports (${bg.bugs.length})</h3>${bg.bugs.length?`<ol class="own-bugs">${bg.bugs.map(x=>`<li><div class="ob-h"><b>${esc(x.name||'Anonymous')}</b><small>${ago(x.ts)} · v${esc(x.ver)} · ${esc(x.scr)}</small><button class="fr-mini" data-bdel="${x.id}">Delete</button></div><p>${esc(x.msg)}</p>${x.errs?`<pre>${esc(x.errs)}</pre>`:''}<small class="ob-ua">${esc(x.ua)}</small></li>`).join('')}</ol>`:'<p class="fr-muted">No reports. Nice.</p>'}`;
     b.querySelectorAll('[data-bdel]').forEach(x=>x.onclick=async()=>{x.disabled=true;try{await api('owner/bugdel',{id:m.id,key:m.key,bid:+x.dataset.bdel});x.closest('li').remove()}catch(e){x.disabled=false}});
+    $('ownPinGo').onclick=async()=>{const n=$('ownPinName').value.trim();if(!n)return;$('ownPinGo').disabled=true;try{const r=await api('owner/pinreset',{id:m.id,key:m.key,name:n});$('ownPinMsg').textContent=r.found?`${n}'s PIN is cleared. They can set a new one in Settings.`:`No angler named ${n}.`}catch(e){$('ownPinMsg').textContent='Couldn’t reset it.'}$('ownPinGo').disabled=false};
     $('ownBackup').onclick=async()=>{const bt=$('ownBackup');bt.disabled=true;bt.textContent='Preparing…';try{const r=await api('owner/backup',{id:m.id,key:m.key});const blob=new Blob([JSON.stringify(r)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`lantern-lake-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);bt.textContent='Downloaded'}catch(e){bt.textContent='Couldn’t make a backup';bt.disabled=false}}}
   catch(e){b.innerHTML=`<p class="fr-err">${e.message==='not-owner'?'Owner tools are only for the site owner.':'Couldn’t load owner tools.'}</p>`}}
 
