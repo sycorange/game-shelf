@@ -198,9 +198,65 @@ async function bugRoute(db,b,now){const n=await db.prepare('SELECT COUNT(*) AS c
   let name='',pid='';if(typeof b.id==='string'&&typeof b.key==='string'){const p=await db.prepare('SELECT id,key,name FROM players WHERE id=?').bind(b.id).first();if(p&&p.key===b.key){pid=p.id;name=p.name}}
   await db.prepare('INSERT INTO bugs(pid,name,msg,errs,ua,ver,scr,ts) VALUES(?,?,?,?,?,?,?,?)').bind(pid,name||'Anonymous',clean(b.msg,1500),String(b.errs||'').slice(0,4000),clean(b.ua,300),clean(b.ver,20),clean(b.scr,40),now).run();return json({ok:true})}
 
+
+// ==LIVE LAKE== one Durable Object room per lake scope and water. Players connect with a WebSocket while they fish;
+// the room relays boats, catches and emotes, and now and then a raid monster surfaces for everyone in the room.
+const LIVE_WATERS=['pond','lake','river','deep','bay'];
+const RAID_PER={pond:60,lake:150,river:250,deep:500,bay:900};
+const RAID_NAMES=['The Lake Leviathan','Old Ironjaw','Mother Muskie','The Bottom Dweller','Captain Whiskers','The Thing in the Reeds'];
+const RAID_MS=180000,RAID_GAP=25*60000;
+async function liveRoute(req,env,url,db){
+  if((req.headers.get('Upgrade')||'').toLowerCase()!=='websocket')return json({error:'expected-websocket'},426);
+  if(!env.LAKE)return json({error:'no-live'},503);
+  const q=url.searchParams,water=q.get('water');if(!LIVE_WATERS.includes(water))return json({error:'bad-water'},400);
+  const me=await auth(db,{id:q.get('id')||'',key:q.get('key')||''});
+  let sc;try{sc=await scopeOf(db,me,q.get('lake'))}catch(e){sc=await scopeOf(db,me,'all')}
+  const room=`${sc.code}:${water}`,stub=env.LAKE.get(env.LAKE.idFromName(room));
+  const fw=new URL('https://lake/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('water',water);
+  fw.searchParams.set('boat',String(Math.max(0,Math.min(7,q.get('boat')|0))));fw.searchParams.set('wear',clean(q.get('wear'),8));fw.searchParams.set('cid',clean(q.get('cid'),12));
+  return stub.fetch(new Request(fw.toString(),{headers:req.headers}));
+}
+export class LakeRoom{
+  constructor(ctx,env){this.ctx=ctx;this.env=env;try{ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping','pong'))}catch(e){}}
+  peers(except){return this.ctx.getWebSockets().filter(w=>w!==except).map(w=>{try{return w.deserializeAttachment()}catch(e){return null}}).filter(Boolean)}
+  bcast(o,except){const m=JSON.stringify(o);for(const w of this.ctx.getWebSockets())if(w!==except){try{w.send(m)}catch(e){}}}
+  async fetch(req){const q=new URL(req.url).searchParams;
+    const me={pid:q.get('pid'),name:q.get('name'),boat:q.get('boat')|0,wear:q.get('wear')||'',cid:q.get('cid')||Math.random().toString(36).slice(2,8),at:Date.now()};
+    for(const w of this.ctx.getWebSockets()){let a=null;try{a=w.deserializeAttachment()}catch(e){}if(a&&a.pid===me.pid){try{w.close(4000,'replaced')}catch(e){}}}
+    const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(me);
+    const water=q.get('water');if(water)await this.ctx.storage.put('water',water);
+    server.send(JSON.stringify({t:'hello',me:me.cid,peers:this.peers(server).filter(p=>p.pid!==me.pid),raid:await this.raidView()}));
+    this.bcast({t:'join',p:me},server);await this.maybeRaid();
+    return new Response(null,{status:101,webSocket:client})}
+  async webSocketMessage(ws,msg){if(typeof msg!=='string'||msg.length>600)return;if(msg==='ping'){try{ws.send('pong')}catch(e){}return}
+    let o;try{o=JSON.parse(msg)}catch(e){return}let a;try{a=ws.deserializeAttachment()}catch(e){}if(!a)return;
+    if(o.t==='st'){a.boat=Math.max(0,Math.min(7,o.boat|0));a.wear=String(o.wear||'').slice(0,8);ws.serializeAttachment(a);this.bcast({t:'st',pid:a.pid,cid:a.cid,boat:a.boat,wear:a.wear},ws)}
+    else if(o.t==='catch'){const w=+o.w;if(!(w>0&&w<5000)||typeof o.f!=='string')return;const c={t:'catch',pid:a.pid,cid:a.cid,f:o.f.slice(0,24),w:+w.toFixed(2),v:String(o.v||'').slice(0,8),r:String(o.r||'').slice(0,1)};
+      const R=await this.ctx.storage.get('raid');if(R&&!R.done&&Date.now()<R.ends){R.hp=Math.max(0,R.hp-w);R.hits[a.pid]=(R.hits[a.pid]||0)+w;R.names[a.pid]=a.name;c.raid={hp:Math.round(R.hp),max:R.max};
+        if(R.hp<=0){R.done=true;await this.ctx.storage.put('raid',R);this.bcast(c);await this.raidEnd(true);return}await this.ctx.storage.put('raid',R)}
+      this.bcast(c)}
+    else if(o.t==='emo'){const e=o.e|0;if(e>=0&&e<12)this.bcast({t:'emo',pid:a.pid,cid:a.cid,e},ws)}}
+  async webSocketClose(ws){this.left(ws)}
+  async webSocketError(ws){this.left(ws)}
+  left(ws){let a=null;try{a=ws.deserializeAttachment()}catch(e){}try{ws.close(1000,'bye')}catch(e){}if(a)this.bcast({t:'leave',pid:a.pid,cid:a.cid},ws)}
+  async raidView(){const R=await this.ctx.storage.get('raid');if(!R||R.done||Date.now()>=R.ends)return null;return {name:R.name,hp:Math.round(R.hp),max:R.max,ends:R.ends}}
+  async maybeRaid(){const n=this.peers().length,now=Date.now();if(n<2)return;const R=await this.ctx.storage.get('raid');if(R&&!R.done&&now<R.ends)return;
+    const next=(await this.ctx.storage.get('raidNext'))||0,al=await this.ctx.storage.getAlarm();if(al)return;
+    await this.ctx.storage.setAlarm(Math.max(now,next)+(3+Math.random()*5)*60000)}
+  async alarm(){const now=Date.now(),R=await this.ctx.storage.get('raid');
+    if(R&&!R.done){if(now>=R.ends-500){R.done=true;await this.ctx.storage.put('raid',R);await this.raidEnd(false)}else await this.ctx.storage.setAlarm(R.ends);return}
+    const ps=this.peers();if(ps.length<2)return;const water=(await this.ctx.storage.get('water'))||'lake';
+    const max=Math.round((RAID_PER[water]||150)*ps.length);const raid={name:RAID_NAMES[Math.floor(Math.random()*RAID_NAMES.length)],hp:max,max,ends:now+RAID_MS,hits:{},names:{},done:false};
+    await this.ctx.storage.put('raid',raid);this.bcast({t:'raid',raid:{name:raid.name,hp:max,max,ends:raid.ends}});await this.ctx.storage.setAlarm(raid.ends)}
+  async raidEnd(win){const R=await this.ctx.storage.get('raid');await this.ctx.storage.put('raidNext',Date.now()+RAID_GAP);try{await this.ctx.storage.deleteAlarm()}catch(e){}
+    const top=Object.entries(R.hits).sort((x,y)=>y[1]-x[1]).slice(0,5).map(([pid,w])=>({name:R.names[pid]||'?',w:Math.round(w)}));
+    this.bcast({t:'raidend',win,name:R.name,hits:Object.keys(R.hits),top,reward:win?Math.round(R.max*20):0});await this.maybeRaid()}
+}
+
 async function route(req,env,url){
   const db=env.DB,p=url.pathname.replace(/^\/api\//,''),now=Date.now();
-  if(p==='ping')return json({ok:true,week:weekKey(),v:6});
+  if(p==='ping')return json({ok:true,week:weekKey(),v:7,live:!!env.LAKE});
+  if(p==='live')return liveRoute(req,env,url,db);
   if(req.method!=='POST')return json({error:'not-found'},404);
   const b=await body(req);
   if(p==='hello'){

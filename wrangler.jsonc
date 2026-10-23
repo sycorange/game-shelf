@@ -9,6 +9,11 @@
     "binding": "ASSETS",
     "run_worker_first": ["/api/*"]
   },
+  // Live lake rooms (Durable Objects on the free plan use SQLite storage).
+  "durable_objects": {
+    "bindings": [{ "name": "LAKE", "class_name": "LakeRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["LakeRoom"] }],
   "d1_databases": [
     {
       "binding": "DB",

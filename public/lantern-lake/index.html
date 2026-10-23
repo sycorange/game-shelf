@@ -173,6 +173,15 @@ ol.sig{margin:6px 0;padding-left:20px;display:grid;gap:2px;font-size:.84rem}ol.s
 @media (max-width:600px){#cv{aspect-ratio:3/2}body{padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px))}
   .vitals{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.vital{padding:6px 8px;gap:2px 6px}.vital .eyebrow{font-size:.6rem}.vital .vh b{font-size:.78rem}.vital .mini{padding:3px 8px;font-size:.72rem}
   #wxinfo{display:none!important}.head h1{font-size:1.35rem}.bar{gap:8px}.tools{gap:6px}.hotbar{gap:4px}}
+.ovl.ovl-live{top:46px;right:12px;font-size:.8rem;gap:6px}.ovl-live i{width:8px;height:8px;border-radius:50%;background:#5ae07a;box-shadow:0 0 8px #5ae07a;animation:livep 2s infinite}
+@keyframes livep{50%{opacity:.45}}@media (prefers-reduced-motion:reduce){.ovl-live i{animation:none}}
+.live-emo{position:absolute;left:12px;bottom:12px;z-index:3;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(10,22,28,.8);font-size:1.15rem;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.emo-pop{position:absolute;left:12px;bottom:58px;z-index:4;display:grid;grid-template-columns:repeat(6,auto);gap:4px;padding:6px;border-radius:12px;background:rgba(10,22,28,.94);border:1px solid var(--line)}
+.emo-pop button{min-width:38px;height:34px;border-radius:8px;border:0;background:rgba(255,255,255,.08);color:#fff;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;padding:0 6px}.emo-pop button:hover{background:rgba(255,255,255,.18)}
+.raidbar{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:3;width:min(360px,calc(100% - 220px));display:grid;gap:3px;padding:7px 10px;border-radius:12px;background:rgba(40,8,8,.86);border:1px solid rgba(255,90,70,.6);color:#fff;text-align:center}
+.raidbar b{font-size:.86rem}.raidbar small{font-size:.72rem;opacity:.85}.rb-bar{position:relative;height:14px;border-radius:99px;background:rgba(0,0,0,.4);overflow:hidden}.rb-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#e04a3a,#ff9a3d);transition:width .3s}.rb-bar span{position:relative;font-size:.68rem;font-weight:800;line-height:14px}
+.scene.ystill .live-emo,.scene.in .live-emo{display:none}
+@media (max-width:600px){.raidbar{top:44px;width:calc(100% - 24px)}.ovl.ovl-live{top:40px;font-size:.72rem}.live-emo{width:34px;height:34px;left:8px;bottom:8px}.emo-pop{left:8px;bottom:48px;grid-template-columns:repeat(4,auto)}}
 .cl-card{display:grid;gap:4px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.cl-card b{font-size:1.05rem}
 .reset{background:none;border:0;color:var(--muted);font-size:.8rem;text-decoration:underline;padding:0;justify-self:start}
 .rar-M{color:var(--r-m)}
@@ -1013,6 +1022,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
     <canvas id="cv" aria-label="Lake scene with your shack, dock, boat and bobber"></canvas>
     <div class="ovl ovl-wx" id="ovlWx"><span id="wxIcon"></span><b id="wxName">Clear</b></div>
     <div class="ovl ovl-loc"><span id="locLbl">Fishing</span> <b id="waterName">Dock Pond</b></div>
+    <div class="ovl ovl-live" id="liveChip" hidden></div>
+    <div class="raidbar" id="raidBar" hidden></div>
+    <button class="live-emo" id="liveEmo" hidden aria-label="Send an emote">💬</button>
+    <div class="emo-pop" id="emoPop" hidden></div>
     <div class="hint" id="hint">Tap the water to jig</div>
     <div class="stip" id="stip" hidden></div>
     <div class="ynav" id="ynav" hidden><button data-yf="house">House</button><button data-yf="yard">Yard</button><button data-yf="dock">Dock</button><button class="yz" id="yZoom">Zoom out</button></div>
@@ -2033,7 +2046,7 @@ function doCatch(){
   const val=Math.round(saleValue(f,w)*(m.gold?2:1)*(WX[S.wx.id].sellX||1)*(vr?VAR[vr].mult:1));
   const L=S.log[f.id]||(S.log[f.id]={n:0,big:0});
   const isNew=L.n===0, isRec=!isNew&&w>L.big;
-  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);chalOnCatch(f,w);monOnCatch(w);
+  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);chalOnCatch(f,w);monOnCatch(w);liveOnCatch(f,w,vr);
   let newVar=false;if(vr){L.v=L.v||{};newVar=!L.v[vr];L.v[vr]=(L.v[vr]||0)+1}
   bountyEvent('catch',{f,w,water:S.water,ph:phaseOf(S.min)});
   addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-4);
@@ -2822,7 +2835,7 @@ async function txPoll(force){const m=mpS();if(!m.id||TX.busy||titleOn||document.
 setInterval(()=>txPoll(),2000);
 
 // ---------- Settings app
-const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:true,nText:true,nOther:true,h24:false,dock:'right',yard:true,cloud:true,text:'m'};
+const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:true,nText:true,nOther:true,h24:false,dock:'right',yard:true,cloud:true,text:'m',live:true};
 function SETS(){if(!S.set||typeof S.set!=='object')S.set={};if(S.set.cut&&!S.set.v2){if(S.set.cut==='auto')S.set.cut='always';}S.set.v2=1;for(const k in SET_DEF)if(S.set[k]===undefined)S.set[k]=SET_DEF[k];return S.set}
 const DARKQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 const phDark=()=>{const d=SETS().dark;return d==='on'||(d==='auto'&&!!DARKQ&&DARKQ.matches)};
@@ -2858,6 +2871,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
     ${'vibrate' in navigator?row('Vibrate','On phones that support it',sw('nVib',st.nVib,'Vibrate')):''}
   </div></div>
   <div><h4>Your game</h4><div class="grp">
+    ${row('Live lake',S.mp&&S.mp.id?'See friends fishing the same water in real time':'Pick an angler name in Friends to turn this on',sw('live',st.live,'Live lake'))}
     ${row('Cloud sync',S.mp&&S.mp.id?'Your latest game follows you between devices':'Pick an angler name in Friends to turn this on',sw('cloud',st.cloud,'Cloud sync'))}
     <div class="row"><span>Move your game<small>Send it to your phone or computer with a short code</small></span><button class="ghost" id="setMove">Open</button></div>
     ${MPV.owner?`<div class="row"><span>Site owner tools<small>Players, activity, bug reports and backups</small></span><button class="ghost" id="setOwner">Open</button></div>`:''}
@@ -2869,7 +2883,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   </div></div>
   <p class="set-foot">Lantern Lake · version ${ver}</p>`;
   b.querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{let v=x.dataset.sv;if(v==='true')v=true;else if(v==='false')v=false;st[x.dataset.sk]=v;sfx('click');applyDock();applyPhTheme();applyTextSize();save();renderSettings();renderLock();renderVitals&&renderVitals()});
-  b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}});
+  b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();});
   {const mv=$('setMove');if(mv)mv.onclick=()=>{closePhone();openSaveModal()};const ow=$('setOwner');if(ow)ow.onclick=()=>{closePhone();openOwner()}}
   b.querySelectorAll('[data-snd]').forEach(x=>x.onchange=()=>{S.snd[x.dataset.snd]=x.checked;if(x.dataset.snd==='on'&&x.checked)initAudio();applyVol();renderSnd();save();if(x.dataset.snd==='on')renderSettings()});
   b.querySelectorAll('[data-sl]').forEach(x=>{const k=x.dataset.sl;x.oninput=()=>{S.snd[k]=x.value/100;x.previousElementSibling.querySelector('small').textContent=x.value;applyVol();renderSnd()};x.onchange=()=>{save();if(k==='sfx')sfx('chime','R')}})}
@@ -3292,6 +3306,7 @@ function renderHelp(){
    ['Logbook sets',`<p>Catch every species in a water to claim a set reward and a Master trophy from the Logbook: $5,000 for Dock Pond up to $500,000 for Misty Bay.</p>`],
    ['The Keeper’s Light',`<p>A third case opens after you close the Emerald Wake. Its finale is a storm rescue: when the lighthouse beam crosses the lost rowboat, tap Signal (or press Space). Three good signals bring the keeper home.</p>`],
    ['Lake monster, challenges and guestbooks',`<p>Open the <b>Together</b> tab in the Friends app. Every week a lake monster appears and every pound anyone lands hits it; beat it together for a $20,000 bounty each. Challenge a friend from their contact card: biggest fish of one kind in 24 hours, winner takes both stakes. When you visit a friend you can sign their guestbook and like their yard; the most-liked yard each week wins $25,000.</p>`],
+   ['Live lake',`<p>When friends are fishing the same water as you, their boats appear on your lake in real time with name tags. You’ll see them cast, reel in fish and celebrate big catches as they happen. Tap 💬 to send a quick emote, and tap a friend’s boat to open their card. Now and then, when two or more of you share a water, a raid monster surfaces: every fish anyone lands hits it, and if you beat it within 3 minutes everyone who helped shares the bounty. Turn it off in Settings under Live lake.</p>`],
    ['Phone layout and text size',`<p>On phones the lake view is taller and follows the action. Settings has a Text size option, and the title screen shows a Continue card with your progress.</p>`]]],
   ['Getting started',[
    ['Fishing basics',`<p>Your line is always in the water. The bar under the lake fills up, and when it's full you pull something up. Tap the water or the <b>Jig</b> button to speed up the current cast. Each jig costs a little stamina.</p><p>Most casts bring up a fish. About 1 in 10 brings up something else: junk, a crafting material, a collectible or even a VHS tape. Some fish get away, more often with a weak rod or when you're hungry or tired.</p>`,true],
@@ -3397,20 +3412,20 @@ function showTip(h,e){
   else if(h.kind==='deco'&&h.data==='bed')html=`<b>Bed</b><small>${S.sleep.ph!=='awake'?'Zzz…':S.stamina>=99?'You’re fully rested. Change its style with Decorate.':`Tap to sleep until you’re rested (stamina ${Math.round(S.stamina)}%). Change its style with Decorate.`}</small>`;
   else if(h.kind==='deco'){const nm={bed:'Bed',rug:'Rug',curt:'Curtains',lamp:'Lamp',wall:'Wall decor',extra:'Fern'}[h.data]||'Decor';html=`<b>${nm}</b><small>${S.sleep.ph==='awake'?'Tap to decorate: colors and styles':'Decorate once you’re up and about'}</small>`}
   if(h.kind[0]==='y'&&!html)html=yardTip(h);
-  if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
+  if(h.kind==='peer')html=peerTip(h.data);if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
   if(h.kind==='door'&&TOT.inside)html='<b>Trick or treat!</b><small>Tap the door to hand out candy</small>';
   tip.innerHTML=html;tip.hidden=false;
   const r=$('scene').getBoundingClientRect();let x=e.clientX-r.left+14,y=e.clientY-r.top+14;
   const w=tip.offsetWidth,hh=tip.offsetHeight;if(x+w>r.width-8)x=Math.max(8,e.clientX-r.left-w-14);if(y+hh>r.height-8)y=Math.max(8,r.height-hh-8);if(h.kind[0]==='y'&&r.width<560){x=Math.max(6,(r.width-w)/2);y=6}
   tip.style.left=x+'px';tip.style.top=y+'px';
 }
-$('scene').onclick=e=>{const [x,y]=scenePt(e),h=hitAt(x,y);if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
+$('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
   if(indoor()){if(!h){hideTip();return}
   if(h.kind==='tv')openTV();else if(h.kind==='drawer'){hideTip();openTapes()}else if(h.kind==='trodrawer'){openTroDrawer()}else if(h.kind==='colldrawer'){openCollDrawer()}else if(h.kind==='craft'){openCraft()}else if(h.kind==='coll'){hideTip();openItem(h.data)}
   else if(h.kind==='stairs'){if(S.sleep.ph==='awake')goRoom('basement');else showTip(h,e)}else if(h.kind==='up')goRoom('cabin');else if(h.kind==='cswitch'){if(S.sleep.ph==='awake'){S.cLight=S.cLight===false;tone(1400,.03,{type:'square',vol:.03});hideTip();save()}else showTip(h,e)}else if(h.kind==='bplate')bAct('fish');else if(h.kind==='bfridge')bAct('beer');else if(h.kind==='pinball')pbOpen();else if(h.kind==='bswitch'){S.bLight=S.bLight===false;tone(1400,.03,{type:'square',vol:.03});hideTip();save()}else if(h.kind==='btank')showTip(h,e);else if(h.kind==='door'){if(totInsideGive()){hideTip();return}if(S.sleep.ph==='awake'){hideTip();leaveHouse()}else showTip(h,e)}else if(h.kind==='bstore'){hideTip();openTab('storage');$('pane-storage').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
   else if(h.kind==='deco'&&h.data==='bed'){if(S.sleep.ph==='awake'&&ROOM==='cabin')sleepInBed();else showTip(h,e)}
   else if(h.kind==='deco'){if(S.sleep.ph==='awake')openDeco(h.data);else showTip(h,e)}else showTip(h,e);return}
-  if(CAM.moved){CAM.moved=false;return}if(h&&h.kind==='hwpk'){hideTip();hwCollect(h.data);return}if(h&&h.kind==='tot'){hideTip();totGive(h.data);return}if(h&&h.kind==='box'){openBox(h.data);return}
+  if(CAM.moved){CAM.moved=false;return}if(h&&h.kind==='peer'){hideTip();peerOpen(h.data);return}if(h&&h.kind==='hwpk'){hideTip();hwCollect(h.data);return}if(h&&h.kind==='tot'){hideTip();totGive(h.data);return}if(h&&h.kind==='box'){openBox(h.data);return}
   if(CAMT.z>1.3&&yardCtx()){if(h&&h.kind==='ydoor'){hideTip();if(S.sleep.at==='friend')enterFriend();else yardIn();return}if(h&&h.kind[0]==='y')showTip(h,e);else hideTip();return}jig()};
 $('scene').onmousemove=e=>{if(CAM.drag&&CAM.moved)return;const [x,y]=scenePt(e),h0=hitAt(x,y),h=VISIT&&h0&&!['trophy','coll','tank','door'].includes(h0.kind)?null:h0;if(VISIT&&h){const real=S;S=VISIT.S;$('scene').style.cursor='pointer';try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}return}if(VISIT){$('scene').style.cursor='default';hideTip();return}if(!indoor()&&!h){$('scene').style.cursor='';hideTip();return}$('scene').style.cursor=h?'pointer':'default';if(h)showTip(h,e);else hideTip()};
 $('scene').onmouseleave=hideTip;
@@ -3994,6 +4009,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:40,n:'Live Lake',items:['See friends fishing the same water in real time: their boats, casts and catches show up on your lake with name tags.','Big catches get a moment: rare fish light up, Legendaries set off fireworks over their boat.','Send quick emotes with the 💬 button. Tap a friend’s boat to open their card.','Live raids: when two or more friends share a water, a monster can surface. Every fish anyone lands hits it. Beat it in 3 minutes to split the bounty.','Boats now turn around to pull into the dock, and the jon boat and bass boat have a proper outboard motor on the back.']},
  {v:39,n:'Lake Life',items:['🎃 Halloween event until November 1: four spooky fish, a pumpkin hunt with costumes and a Golden Pumpkin collectible, and a Ghost Gar contest with $100,000 for the winner. Open the new Spooky app on your phone.','Trick-or-treaters come to your cabin after 5 PM. Hand out candy for cash and bonus pumpkins.','Random scene events: ghosts, bats, a witch across the moon, deer, eagles, loons, balloons, banner planes, rainbows and the northern lights.','A stormy new title screen, plus a Continue card with your progress.','Lake projects and retiring in the Shop app. Logbook set rewards. A third case: The Keeper’s Light.','Friends: a weekly lake monster to beat together, 1v1 fishing challenges, guestbooks and yard likes with a weekly Best Yard prize.','A first-day guide for new players, a taller lake view on phones, a Text size setting, and Report a problem in Help.']},
  {v:38,n:'Take It With You',items:['Moving your game between your phone and computer now takes a 6-letter transfer code instead of a giant save string.','Cloud sync: if you have an angler name, your latest game is kept on your Lantern Lake website. Open the game on your other device and it offers to pick up where you left off.','The old save codes are about 5 times shorter, and older codes still load.','Move your game and Cloud sync are also in the Settings app.']},
  {v:37,n:'Up Close',items:['Walking up to a friend’s place now zooms in on their house, yard and dock so you can really see their decorations.','At home, tap Step outside in your cabin to stand in your own yard.','Drag to look around, or jump to the House, Yard or Dock. Zoom out any time.','Tap any decoration to see its name and where it came from. Tap the front door to go inside.','Friends’ trophies now show on their porch rail.','New setting: Close-up at houses.']},
@@ -4189,7 +4205,7 @@ function draw0(now){
   const home=loc==='pond'||loc==='friend';
   if(home&&has('lighthouse'))drawLighthouse(d,T,night);
   for(const b of AMB.boats)drawPassing(b,d,night);
-  scnDraw('water',d,T,loc);
+  scnDraw('water',d,T,loc);liveDraw(d,T,loc);
   if(home&&has('ghostship'))drawGhostShip(d,T);
   // fireworks + reflections
   for(const r of AMB.rockets){ctx.fillStyle='rgba(255,230,180,.9)';ctx.fillRect(r.x-1,r.y,2,5);ctx.fillStyle='rgba(255,200,120,.3)';ctx.fillRect(r.x-.5,r.y+5,1,10)}
@@ -4211,7 +4227,7 @@ function draw0(now){
   // fireflies
   const ff=Math.max(0,night*1.3-.2);if(ff>0)for(const f of AMB.flies){const x=f.x+Math.sin(T*.6+f.p)*8,y=f.y+Math.cos(T*.5+f.p*2)*5,a=ff*Math.max(0,Math.sin(T*2+f.p*3));if(a>.05){glow(x,y,5,a*.5,'210,255,120');ctx.fillStyle=`rgba(230,255,150,${a})`;ctx.fillRect(x-.8,y-.8,1.6,1.6)}}
   if(loc==='bay')drawGhostWake(d,T);
-  drawBoat(d,T);
+  drawBoat(d,T);liveTop(d,T,loc);
   if(!home&&loc!=='transit')drawLocFront(loc,d,T);
   if(loc==='pond')drawDrones(d,T);
   if(S.sleep)drawSleep(d,T);
@@ -4343,11 +4359,16 @@ function drawBoat(d,T){
   const hullC=[[0,0,0],[120,82,52],[118,126,130],[196,64,48],[236,234,224],[52,92,120],[236,238,242],[30,34,44]][b],hull=rgb(mix(hullC.map(v=>v*.3),hullC,d*.8+.2));
   if(b===0){ax=dockEnd()-8;ay=246}else{
     let x=[0,430,420,410,400,385,375,370][b];const y=262+bob,L=[0,90,110,130,150,180,190,200][b];if(S.sleep)x+=(dockEnd()+10-x)*boatK();if(TRV.on){x+=TRV.dx;if((TRV.cur??TRV.dir)<0){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1)}drawWake(x,y,L,d,T)}
+    if(S.sleep&&!TRV.on){const ph=S.sleep.ph,k=boatK();if(!['boatOut','pick'].includes(ph)){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1);if(ph==='boatIn'&&k<.97)drawWake(x,y,L,d,T)}else if(ph==='boatOut'&&k>.03)drawWake(x,y,L,d,T)}
     ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x+L/2,y+16,L*.6,5,0,0,7);ctx.fill();
     if(AMB.rock>.08){ctx.strokeStyle=`rgba(255,255,255,${Math.min(.35,AMB.rock*.4)})`;ctx.lineWidth=1.2;const sp=1+(1-AMB.rock)*.6;ctx.beginPath();ctx.ellipse(x+L/2,y+15,L*.62*sp,6*sp,0,0,7);ctx.stroke()}
     pv=[x+L/2,y+12];ang=AMB.rock*.1*Math.sin(T*5.2);ctx.save();ctx.translate(pv[0],pv[1]);ctx.rotate(ang);ctx.translate(-pv[0],-pv[1]);
     ctx.fillStyle=hull;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+L,y-(b>=3?6:0));ctx.lineTo(x+L-(b===2?4:16),y+14);ctx.lineTo(x+10,y+14);ctx.fill();
-    if(b===3){ctx.fillStyle='#222';ctx.fillRect(x-10,y-4,12,16)}
+    if(b===2||b===3){const s=b===3?1:.8,mx=x+1,mv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98);
+      ctx.fillStyle=rgb(mix([10,10,12],[46,48,54],d));ctx.fillRect(mx-5*s,y-1,3.2*s,19*s);
+      ctx.fillStyle=rgb(mix([12,12,14],[34,36,40],d));rrect(mx-12*s,y-13*s,13*s,13*s,3*s);ctx.fill();ctx.fillStyle=rgb(mix([40,10,10],[210,60,48],d));ctx.fillRect(mx-11*s,y-9*s,11*s,2.2*s);
+      ctx.fillStyle=rgb(mix([10,10,12],[46,48,54],d));ctx.fillRect(mx-8*s,y+15*s,8*s,2.4*s);const sp=mv?Math.sin(T*45):.7;ctx.fillStyle=rgb(mix([40,40,40],[170,172,176],d));ctx.beginPath();ctx.ellipse(mx-8.5*s,y+18*s,1.4*s,Math.max(1,5*s*Math.abs(sp)),0,0,7);ctx.fill();
+      if(mv){ctx.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(mx-13*s-i*6-Math.random()*3,y+15*s+Math.random()*4,1.5+Math.random()*1.5,0,7);ctx.fill()}}}
     if(b>=4){const cw=b>=5?56:44;ctx.fillStyle=rgb(mix([40,44,50],[220,224,218],d));ctx.fillRect(x+16,y-28,cw,28);ctx.fillStyle=lit(d)?'#ffcf70':rgb(mix([30,40,50],[110,160,190],d));ctx.fillRect(x+22,y-22,14,9);ctx.fillRect(x+40,y-22,14,9);
       if(b>=6){ctx.fillStyle=b===7?'#ff7a3d':'#e04a3a';ctx.fillRect(x,y+4,L-14,2);ctx.fillStyle='#f4f4f4';ctx.beginPath();ctx.arc(x+60,y-32,5,Math.PI,0);ctx.fill()}
       if(b===5||b===6){ctx.fillStyle=rgb(mix([20,20,20],[60,60,60],d));ctx.fillRect(x+30,y-62,2.5,34);ctx.strokeStyle=rgb(mix([20,20,20],[60,60,60],d));ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x+31,y-58);ctx.lineTo(x+4,y-20);ctx.moveTo(x+31,y-58);ctx.lineTo(x+70,y-30);ctx.stroke()}
@@ -4356,8 +4377,8 @@ function drawBoat(d,T){
   }
   const R=(px,py)=>{if(!pv)return [px,py];const c=Math.cos(ang),sn=Math.sin(ang),dx=px-pv[0],dy=py-pv[1];return [pv[0]+dx*c-dy*sn,pv[1]+dx*sn+dy*c]};
   const done=()=>{if(pv)ctx.restore()};
-  if(S.sleep&&!(b>0&&['boatIn','boatOut','pick'].includes(S.sleep.ph))){done();return}
-  drawAngler(ax,ay,d,T);
+  if(S.sleep&&!(b>0&&['boatIn','boatOut','pick'].includes(S.sleep.ph))){done();if(mir)ctx.restore();return}
+  drawAngler(ax,ay,d,T);LIVE.meXY=mir?null:[ax,ay];
   if(S.sleep||TRV.on){done();if(mir)ctx.restore();return}
   const p=cast.el/cast.dur,now=performance.now()/1000,ct=CATCH.on?(now-CATCH.t0)/CATCH.dur:2;
   const bend=CATCH.on&&ct<.84&&!CATCH.item?Math.min(14,4+Math.sqrt(CATCH.w)*1.6)*(1-ct*.6):CATCH.on&&ct<.84?3:0;
@@ -5618,7 +5639,7 @@ function drawAngler(ax,ay,d,T,ov){
   if(id==='clear'&&d>.7){ctx.fillStyle='#141414';ctx.fillRect(ax+.5,ay-30,6,2.2)}
   if(id==='windy'){ctx.fillStyle=sh([220,60,60]);ctx.fillRect(ax-6,ay-23,12,3);const f=Math.sin(T*11);ctx.beginPath();ctx.moveTo(ax-6,ay-23);ctx.lineTo(ax-19,ay-25+f*3);ctx.lineTo(ax-18,ay-21+f*3);ctx.lineTo(ax-6,ay-20);ctx.fill()}
   if(id==='fog'){ctx.fillStyle='#333';ctx.fillRect(ax-11.5,ay-15,1,5);ctx.fillRect(ax-14,ay-11,6,1.4);ctx.fillStyle='#ffd88a';ctx.fillRect(ax-13.5,ay-9.5,5,6);glow(ax-11,ay-7,24,.5)}
-  {const ck=hwWear();if(ck&&id!=='pj')drawCostume(ax,ay,d,T,ck)}
+  {const ck=LIVE.drawing?(hwOn()?LIVE.drawWear:null):hwWear();if(ck&&id!=='pj')drawCostume(ax,ay,d,T,ck)}
   if(id==='drizzle'||id==='rain'){const c=id==='rain'?[60,110,200]:[220,60,60];ctx.save();ctx.translate(ax-9,ay-12);ctx.rotate(Math.sin(T*1.3)*.05-AMB.wind/900);
     ctx.strokeStyle=rgb(mix([20,20,20],[60,50,40],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-34);ctx.moveTo(0,0);ctx.quadraticCurveTo(0,3,3,2);ctx.stroke();
     ctx.fillStyle=sh(c);ctx.beginPath();ctx.moveTo(-19,-30);ctx.quadraticCurveTo(0,-52,19,-30);ctx.quadraticCurveTo(13,-33.5,6.5,-30);ctx.quadraticCurveTo(0,-33.5,-6.5,-30);ctx.quadraticCurveTo(-13,-33.5,-19,-30);ctx.fill();
@@ -5908,6 +5929,96 @@ $('bugSend').onclick=sendBug;$('bugCancel').onclick=()=>$('bugModal').hidden=tru
 $('ownClose').onclick=()=>$('ownModal').hidden=true;$('ownModal').onclick=e=>{if(e.target.id==='ownModal')$('ownModal').hidden=true};
 addEventListener('keydown',e=>{if(!$('keeperModal').hidden&&(e.key===' '||e.key==='Enter')){e.preventDefault();keeperSignal()}});
 
+// ==LIVE LAKE== see friends fishing the same water in real time, with name tags, catches, emotes and live raids.
+const LIVE={ws:null,room:'',st:'off',peers:new Map(),raid:null,retry:0,nextTry:0,cid:'',me:'',offT:0,lastSt:'',pingT:0,myEmo:null,emoT:0,meXY:null,drawing:false,drawWear:null,hidT:null};
+const EMO=['👋','🎣','😱','🔥','🐟','🎉','Nice!','GG','Big one!','Over here!','Lol','Brb'];
+const LIVE_SLOTS=[[650,236,.62],[260,242,.64],[736,247,.68],[520,229,.54],[330,233,.58],[700,226,.5]];
+const LIVE_SLOTS_POND=[[650,236,.62],[360,236,.6],[736,247,.68],[520,229,.54],[450,226,.5],[700,226,.5]];
+const liveWanted=()=>SETS().live!==false&&!!(S.mp&&S.mp.id&&S.mp.key)&&MPV.online===true&&!titleOn&&!document.hidden&&!S.sleep&&!TRV.on&&!VISIT&&!!W(S.water)&&typeof WebSocket!=='undefined'&&/^https?:$/.test(location.protocol);
+const liveSig=()=>`${S.boat}|${hwWear()||''}`;
+function liveOpen(){const m=S.mp;LIVE.room=`${m.lake||'all'}:${S.water}`;LIVE.cid=Math.random().toString(36).slice(2,8);LIVE.peers.clear();LIVE.raid=null;
+  const u=new URL('/api/live',location.href);u.protocol=location.protocol==='https:'?'wss:':'ws:';
+  const q={id:m.id,key:m.key,lake:m.lake||'all',water:S.water,boat:S.boat,wear:hwWear()||'',cid:LIVE.cid};for(const k in q)u.searchParams.set(k,q[k]);
+  let ws;try{ws=new WebSocket(u.toString())}catch(e){liveFail();return}LIVE.ws=ws;LIVE.st='connecting';
+  ws.onopen=()=>{if(LIVE.ws!==ws)return;LIVE.st='on';LIVE.retry=0;LIVE.lastSt=liveSig();renderLiveUI()};
+  ws.onmessage=e=>{if(LIVE.ws!==ws||e.data==='pong')return;let o;try{o=JSON.parse(e.data)}catch(_){return}liveMsg(o)};
+  ws.onclose=ev=>{if(LIVE.ws!==ws)return;LIVE.ws=null;LIVE.st='off';LIVE.peers.clear();LIVE.raid=null;renderLiveUI();if(ev.code!==1000)liveFail()};
+  ws.onerror=()=>{}}
+function liveFail(){LIVE.retry=Math.min(6,LIVE.retry+1);LIVE.nextTry=Date.now()+Math.min(60000,1500*2**LIVE.retry)}
+function liveClose(){const ws=LIVE.ws;LIVE.ws=null;LIVE.room='';LIVE.st='off';LIVE.peers.clear();LIVE.raid=null;if(ws)try{ws.close(1000)}catch(e){}renderLiveUI()}
+function liveSend(o){const ws=LIVE.ws;if(ws&&ws.readyState===1)try{ws.send(typeof o==='string'?o:JSON.stringify(o))}catch(e){}}
+function liveTick(dt){for(const p of LIVE.peers.values()){p.t+=dt;p.castT+=dt;if(p.fx)p.fx.t+=dt;if(p.emo)p.emo.t+=dt;if(p.out!=null)p.out+=dt}
+  for(const [k,p] of LIVE.peers)if(p.out!=null&&p.out>1.2)LIVE.peers.delete(k);
+  if(LIVE.myEmo)LIVE.myEmo.t+=dt;LIVE.emoT=Math.max(0,LIVE.emoT-dt);
+  const want=liveWanted();if(!want){if(LIVE.ws){LIVE.offT+=dt;if(LIVE.offT>2.5)liveClose()}return}LIVE.offT=0;
+  const room=`${S.mp.lake||'all'}:${S.water}`;if(LIVE.ws&&LIVE.room!==room)liveClose();
+  if(!LIVE.ws&&Date.now()>=LIVE.nextTry)liveOpen();
+  if((LIVE.pingT+=dt)>40){LIVE.pingT=0;liveSend('ping')}
+  if(LIVE.st==='on'){const sg=liveSig();if(sg!==LIVE.lastSt){LIVE.lastSt=sg;liveSend({t:'st',boat:S.boat,wear:hwWear()||''})}}}
+function liveSlot(){const used=new Set([...LIVE.peers.values()].filter(p=>p.out==null).map(p=>p.slot));for(let i=0;i<LIVE_SLOTS.length;i++)if(!used.has(i))return i;return -1}
+function liveAdd(p,quiet){if(!p||!p.pid||(S.mp&&p.pid===S.mp.id))return;const old=LIVE.peers.get(p.pid);
+  LIVE.peers.set(p.pid,{...p,slot:old&&old.out==null?old.slot:liveSlot(),t:old?old.t:0,castT:rnd(0,6),fx:null,emo:null,out:null});
+  if(!quiet&&!old)showToast(`${p.name} is fishing ${W(S.water).n} with you`,'Live')}
+function liveMsg(o){const me=S.mp&&S.mp.id;
+  if(o.t==='hello'){LIVE.me=o.me;for(const p of o.peers||[])liveAdd(p,true);LIVE.raid=o.raid||null;const n=LIVE.peers.size;if(n)showToast(n===1?`${[...LIVE.peers.values()][0].name} is fishing here too`:`${n} friends are fishing here`,'Live lake')}
+  else if(o.t==='join')liveAdd(o.p);
+  else if(o.t==='leave'){const p=LIVE.peers.get(o.pid);if(p&&(!o.cid||p.cid===o.cid))p.out=0}
+  else if(o.t==='st'){const p=LIVE.peers.get(o.pid);if(p){p.boat=o.boat;p.wear=o.wear}}
+  else if(o.t==='catch'){if(o.raid&&LIVE.raid){LIVE.raid.hp=o.raid.hp}if(o.pid===me)return;const p=LIVE.peers.get(o.pid);if(!p)return;p.fx={f:o.f,w:o.w,v:o.v,r:o.r,t:0};p.castT=-1.6;
+    const big=o.r==='L'||o.v==='golden'||o.v==='giant';if(big){const s=liveSlotPos(p);if(s){burst(s[0],s[1]-30,[o.r==='L'?'#ffd700':'#c9a0f2','#ffffff'],50);for(let i=0;i<3;i++)AMB.rockets.push({x:s[0]+rnd(-30,30),y:240,vy:-rnd(130,170),ty:rnd(60,110),c:pick(FWC)})}
+      const f=FI(o.f);showToast(`${p.name} landed a ${o.w} lb ${o.v&&VAR[o.v]?VAR[o.v].n+' ':''}${f?f.n:o.f}!`,'Live')}}
+  else if(o.t==='emo'){const p=LIVE.peers.get(o.pid);if(p){p.emo={e:o.e,t:0};sfx('pop')}}
+  else if(o.t==='raid'){LIVE.raid=o.raid;sfx('ominous');celebrate({lbl:'Live raid!',r:'L',name:`${o.raid.name} surfaced!`,sub:'Every fish anyone here lands hits it. 3 minutes!',icon:svgI('crown','#ff6b6b')});if(typeof phNotify==='function')phNotify('friends','Live raid',`${o.raid.name} surfaced on ${W(S.water).n}!`)}
+  else if(o.t==='raidend'){const was=LIVE.raid;LIVE.raid=null;const mine=me&&(o.hits||[]).includes(me);
+    if(o.win){if(mine){S.coins+=o.reward;save();sfx('fanfare');celebrate({lbl:'Raid won!',r:'L',name:`${o.name} is beaten`,sub:`+$${money(o.reward)} · top: ${(o.top||[]).slice(0,3).map(x=>`${x.name} ${x.w} lb`).join(', ')}`,icon:cupSvg});burst(560,280,['#ffd05a','#ff6b6b','#ffffff'],90)}else showToast(`${o.name} was beaten by the others. Land a fish next time to share the bounty!`,'Live raid')}
+    else showToast(`${o.name} slipped back into the deep. Better luck next time.`,'Live raid')}
+  renderLiveUI()}
+function liveSlotPos(p){if(p.slot<0)return null;const sl=(S.water==='pond'?LIVE_SLOTS_POND:LIVE_SLOTS)[p.slot];return sl}
+function liveOnCatch(f,w,vr){if(LIVE.st!=='on')return;liveSend({t:'catch',f:f.id,w,v:vr||'',r:f.r})}
+function liveEmote(i){if(LIVE.st!=='on'||LIVE.emoT>0)return;LIVE.emoT=2;LIVE.myEmo={e:i,t:0};liveSend({t:'emo',e:i});$('emoPop').hidden=true;sfx('pop')}
+const peerHullC=[[120,82,52],[120,82,52],[118,126,130],[196,64,48],[236,234,224],[52,92,120],[236,238,242],[30,34,44]];
+function drawPeer(p,d,T){const sl=liveSlotPos(p);if(!sl)return;const [x,y0,s]=sl,b=Math.max(1,p.boat|0),L=[0,90,110,130,150,180,190,200][b],bob=Math.sin(T*1.5+p.slot*1.7)*1.8,y=y0+bob;
+  const a=p.out!=null?Math.max(0,1-p.out/1.2):Math.min(1,p.t/1.2);if(a<=0)return;ctx.save();ctx.globalAlpha=a;
+  const bobX=x+(L/2+40)*s,bobY=y+26*s+(p.castT>-.2&&p.castT<0?0:Math.sin(T*2.2+p.slot)*1);
+  ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+  ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(0,16,L*.6,5,0,0,7);ctx.fill();
+  const hc=peerHullC[b];ctx.fillStyle=rgb(mix(hc.map(v=>v*.3),hc,d*.8+.2));ctx.beginPath();ctx.moveTo(-L/2,0);ctx.lineTo(L/2,-(b>=3?6:0));ctx.lineTo(L/2-16,14);ctx.lineTo(-L/2+10,14);ctx.fill();
+  if(b===2||b===3){ctx.fillStyle=rgb(mix([14,14,16],[40,42,48],d));ctx.fillRect(-L/2-8,-10,11,12);ctx.fillRect(-L/2-4,2,3,14)}
+  if(b>=4){const cw=b>=5?56:44;ctx.fillStyle=rgb(mix([40,44,50],[220,224,218],d));ctx.fillRect(-L/2+16,-28,cw,28);ctx.fillStyle=lit(d)?'#ffcf70':rgb(mix([30,40,50],[110,160,190],d));ctx.fillRect(-L/2+22,-22,14,9);ctx.fillRect(-L/2+40,-22,14,9)}
+  const ax=L/2-36;LIVE.drawing=true;LIVE.drawWear=p.wear||null;try{drawAngler(ax,0,d,T)}finally{LIVE.drawing=false}
+  const bend=p.fx&&p.fx.t<1.2?8:0;ctx.strokeStyle=rgb(mix([60,60,60],[60,40,24],d));ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(ax+4,-14);ctx.quadraticCurveTo(ax+26,-40,ax+40-bend*.4,-58+bend);ctx.stroke();ctx.restore();
+  const tip=[x+(ax+40-bend*.4)*s,y+(-58+bend)*s];
+  if(!(p.fx&&p.fx.t<1.4)){ctx.strokeStyle='rgba(235,235,235,.55)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.quadraticCurveTo(bobX-10,bobY-20,bobX,bobY);ctx.stroke();ctx.fillStyle='#ff5a3a';ctx.beginPath();ctx.arc(bobX,bobY,2.4,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(bobX-2.4,bobY-.5,4.8,1)}
+  if(p.fx&&p.fx.t<1.4){const q=p.fx.t/1.4,fx=bobX+(x+ax*s-bobX)*q,fy=bobY+(y-10*s-bobY)*q-Math.sin(q*Math.PI)*40*s,f=FI(p.fx.f),col=p.fx.v&&VAR[p.fx.v]?VAR[p.fx.v].col:RCOL[(f&&f.r)||p.fx.r||'C'],len=Math.min(30,8+Math.sqrt(p.fx.w)*2.4)*s;
+    ctx.strokeStyle='rgba(235,235,235,.6)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.lineTo(fx,fy);ctx.stroke();ctx.save();ctx.translate(fx,fy);ctx.rotate(-1.2+Math.sin(T*18)*.3);ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(0,0,len/2,len*.2,0,0,7);ctx.fill();ctx.restore();
+    if(q<.3){ctx.strokeStyle=`rgba(255,255,255,${.6-q*2})`;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(bobX,bobY+2,4+q*40,1.5+q*8,0,0,7);ctx.stroke()}}
+  // name tag, catch tag and emote
+  const ty=y-(b>=4?40:30)*s-30*s;ctx.font='bold 9px "Sniglet",sans-serif';ctx.textAlign='center';const nw=ctx.measureText(p.name).width+10;
+  ctx.fillStyle='rgba(10,22,28,.65)';rrect(x-nw/2+(ax*s),ty-8,nw,12,6);ctx.fill();ctx.fillStyle='#eaf6ff';ctx.fillText(p.name,x+ax*s,ty+1);
+  if(p.fx&&p.fx.t<5){const f=FI(p.fx.f),k=p.fx.t,al=Math.min(1,k/.3,(5-k)/.6),txt=`${p.fx.w} lb ${p.fx.v&&VAR[p.fx.v]?VAR[p.fx.v].n+' ':''}${f?f.n:p.fx.f}`;ctx.globalAlpha=a*al;ctx.font='bold 10px "Sniglet",sans-serif';const tw=ctx.measureText(txt).width+12,yy=ty-16-Math.min(8,k*6);
+    ctx.fillStyle=p.fx.r==='L'?'rgba(120,80,0,.85)':p.fx.r==='R'?'rgba(70,40,110,.85)':'rgba(10,22,28,.8)';rrect(x+ax*s-tw/2,yy-9,tw,14,7);ctx.fill();ctx.fillStyle=p.fx.r==='L'?'#ffd700':p.fx.r==='R'?'#e2c8ff':'#ffffff';ctx.fillText(txt,x+ax*s,yy+2);ctx.globalAlpha=a}
+  if(p.emo&&p.emo.t<4)emoBubble(x+ax*s,ty-(p.fx&&p.fx.t<5?34:16),EMO[p.emo.e]||'👋',p.emo.t);
+  ctx.textAlign='left';ctx.restore();HITS.push({x:x-L*s/2,y:ty-10,w:L*s+20,h:y-ty+24,kind:'peer',data:p})}
+function emoBubble(x,y,s,t){const al=Math.min(1,t/.2,(4-t)/.5),pop=1+Math.max(0,.3-t)*1.2;ctx.save();ctx.globalAlpha*=al;ctx.translate(x,y);ctx.scale(pop,pop);const big=[...s].length<=2;ctx.font=big?'16px sans-serif':'bold 10px "Sniglet",sans-serif';const w=ctx.measureText(s).width+(big?10:14);
+  ctx.fillStyle='rgba(255,252,240,.96)';rrect(-w/2,-12,w,big?22:17,8);ctx.fill();ctx.beginPath();ctx.moveTo(-4,big?10:5);ctx.lineTo(0,big?15:10);ctx.lineTo(4,big?10:5);ctx.fill();ctx.fillStyle='#2a1a08';ctx.textAlign='center';ctx.fillText(s,0,big?5:1);ctx.restore()}
+function liveDraw(d,T,loc){if(LIVE.st!=='on'||loc!==S.water||S.sleep)return;const ps=[...LIVE.peers.values()].sort((a,b)=>liveY(a)-liveY(b));for(const p of ps)drawPeer(p,d,T);if(LIVE.raid)raidDraw(d,T)}
+const liveY=p=>{const s=liveSlotPos(p);return s?s[1]:0};
+function liveTop(d,T,loc){if(LIVE.st!=='on'||loc!==S.water||S.sleep)return;if(LIVE.myEmo&&LIVE.myEmo.t<4&&LIVE.meXY)emoBubble(LIVE.meXY[0],LIVE.meXY[1]-72,EMO[LIVE.myEmo.e]||'👋',LIVE.myEmo.t)}
+function raidDraw(d,T){const R=LIVE.raid,k=Math.max(.35,R.hp/R.max),x=560+Math.sin(T*.35)*150,y=318+Math.sin(T*.6)*8,sz=70+50*Math.min(1,R.max/3000);
+  ctx.save();ctx.globalAlpha=.42;ctx.fillStyle='#05080c';ctx.beginPath();ctx.ellipse(x,y,sz,sz*.28,Math.sin(T*.35)*.05,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(x-sz*.9,y);ctx.lineTo(x-sz*1.3,y-sz*.18);ctx.lineTo(x-sz*1.25,y+sz*.2);ctx.fill();
+  ctx.globalAlpha=.9;const fx=x+Math.cos(T*.35)*10,fy=y-sz*.24;ctx.fillStyle=rgb(mix([10,14,18],[40,52,58],d));ctx.beginPath();ctx.moveTo(fx-16,fy+8);ctx.quadraticCurveTo(fx-2,fy-26,fx+18,fy-30);ctx.quadraticCurveTo(fx+8,fy-10,fx+16,fy+8);ctx.fill();
+  ctx.strokeStyle=`rgba(255,255,255,${.35+.15*Math.sin(T*4)})`;ctx.lineWidth=1.2;ctx.beginPath();ctx.ellipse(fx,fy+9,24,3,0,0,7);ctx.stroke();
+  if(k<.6){const ex=x+sz*.55,ey=y-sz*.08;glow(ex,ey,14,.5+.3*Math.sin(T*6),'255,60,40');ctx.fillStyle='#ff4a2a';ctx.beginPath();ctx.ellipse(ex,ey,3.5,2,0,0,7);ctx.ellipse(ex+12,ey+1,3,1.8,0,0,7);ctx.fill()}
+  ctx.restore()}
+function renderLiveUI(){const chip=$('liveChip'),btn=$('liveEmo'),rb=$('raidBar');if(!chip)return;const on=LIVE.st==='on'&&!S.sleep&&!TRV.on;
+  const n=[...LIVE.peers.values()].filter(p=>p.out==null).length;chip.hidden=!on;if(on)chip.innerHTML=`<i></i>${n?`${n+1} fishing here`:'Live · just you'}`;btn.hidden=!on;if(!on)$('emoPop').hidden=true;
+  const R=on&&LIVE.raid;rb.hidden=!R;if(R){const left=Math.max(0,Math.ceil((R.ends-Date.now())/1000));rb.innerHTML=`<b>🐉 ${esc(R.name)}</b><div class="rb-bar"><i style="width:${(R.hp/R.max*100).toFixed(1)}%"></i><span>${Math.round(R.hp).toLocaleString()} / ${Math.round(R.max).toLocaleString()} lb</span></div><small>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} left · every fish hits it</small>`}}
+(()=>{const pop=$('emoPop');pop.innerHTML=EMO.map((e,i)=>`<button data-emo="${i}">${e}</button>`).join('');pop.querySelectorAll('[data-emo]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();liveEmote(+b.dataset.emo)});
+  $('liveEmo').onclick=ev=>{ev.stopPropagation();pop.hidden=!pop.hidden};
+  document.addEventListener('visibilitychange',()=>{clearTimeout(LIVE.hidT);if(document.hidden)LIVE.hidT=setTimeout(()=>{if(document.hidden)liveClose()},60000)})})();
+function peerTip(p){return `<b>${esc(p.name)}</b><small>${GEAR.boat.items[p.boat|0]?GEAR.boat.items[p.boat|0].n:'Boat'}${p.wear?' · in costume':''} · tap to see their card</small>`}
+function peerOpen(p){const pl=(MPV.players||[]).find(x=>x.id===p.pid);MPV.contact=pl||{id:p.pid,name:p.name,stats:{}};MPV.tab='boards';openPhone();phShow('friends');setTimeout(()=>{MPV.contact=pl||{id:p.pid,name:p.name,stats:{}};renderFriends()},150)}
+
 // ---------- Loop ----------
 let lastFrame=performance.now(),uiT=0,saveT=0;
 let statT=0;
@@ -5919,7 +6030,7 @@ function tick(now){
   S.wx.left-=dt*(S.sleep&&S.sleep.ph==='sleep'?(S.sleep.spd||SLEEP_SPEED):1);if(S.wx.left<=0)newWeather(true);
   vitalsTick(dt);
   if(!S.sleep&&!TRV.on){cast.el+=dt;if(cast.el>=cast.dur){cast.el=0;doCatch();cast.dur=castDur()}}
-  tourTick(dt);ambient(dt);{const L=sceneLoc();scnTick(dt,L);hwPumpTick(dt,L)}totInsideTick(dt);audioTick(dt);for(const q of AMB.drones)q.t+=dt;if(AMB.drones.some(q=>q.t>=4.2)){AMB.drones=AMB.drones.filter(q=>q.t<4.2);if(phView==='shop'&&!$('slotsModal').hidden)renderDecor()}
+  tourTick(dt);ambient(dt);{const L=sceneLoc();scnTick(dt,L);hwPumpTick(dt,L)}totInsideTick(dt);liveTick(dt);audioTick(dt);for(const q of AMB.drones)q.t+=dt;if(AMB.drones.some(q=>q.t>=4.2)){AMB.drones=AMB.drones.filter(q=>q.t<4.2);if(phView==='shop'&&!$('slotsModal').hidden)renderDecor()}
   let buffEnded=false;for(const k in S.buffs){S.buffs[k]-=dt;if(S.buffs[k]<=0){delete S.buffs[k];buffEnded=true;showToast(`${POT[k].n} wore off`)}}
   if(buffEnded){const fr=cast.el/cast.dur;cast.dur=castDur();cast.el=fr*cast.dur;renderHot()}
   S.st.play+=dt;rateT+=dt;if(rateT>=60){S.rate=S.rate?Math.round(S.rate*.6+earnAcc*.4):Math.round(earnAcc);S.crate=S.crate?S.crate*.6+catchAcc*.4:catchAcc;earnAcc=0;catchAcc=0;rateT=0}
@@ -5934,7 +6045,7 @@ function tick(now){
     $('castLabel').textContent=TRV.on?'On the move…':S.sleep?(S.sleep.at?'Visiting a friend…':S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
     refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();
     if(!$('slotsModal').hidden){if(!spinning)updateSlots();if(phView==='lock')renderLock()}else{$('phClock').textContent=fmtClock(S.min).replace(/ [AP]M/,'');$('phBat').style.width=Math.max(4,S.stamina)+'%'}
-    ensureBounties();checkStreak();qStart();renderGuide();guideCheck();projTick();if(S.mp&&S.mp.id){mpSync();cloudPush()}
+    ensureBounties();checkStreak();qStart();renderGuide();guideCheck();projTick();renderLiveUI();if(S.mp&&S.mp.id){mpSync();cloudPush()}
     {const bc=mpBadge()+TX.unread+(newsUnread()?1:0)+readyBounties()+(S.streak.claimed?0:1)+(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step?1:0)+(S.q2&&S.q2.step>0&&S.q2.step<7&&S.q2.seen!==S.q2.step?1:0)+(S.q3&&S.q3.step>0&&S.q3.step<7&&S.q3.seen!==S.q3.step?1:0);$('phoneBadge').hidden=!bc;$('phoneBadge').textContent=bc}
     if(storeDirty){renderStorage();renderHot()}
     if(collDirty)renderColl();
