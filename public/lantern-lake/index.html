@@ -3380,7 +3380,7 @@ function txPicker(b,back,title){const add=TX.view==='gadd',have=new Set(add&&TX.
     $('txPick').innerHTML=ppl===null?'<p class="tx-muted">Loading the lake directory…</p>':list.length?list.map(p=>{const on=TX.sel.has(p.id);return `<li><button data-pk="${esc(p.id)}" data-nm="${esc(p.name)}" class="${on?'on':''}" aria-pressed="${on}">${avatar(p.name,p.id)}<span class="tx-mid"><b>${esc(p.name)}</b><span>${p.seen?'Fished '+ago(p.seen):''}</span></span><span class="tx-chk">${on?'✓':''}</span></button></li>`}).join(''):`<p class="tx-muted">${(ppl||[]).length?'No one matches that name.':'No other anglers yet. Invite your friends!'}</p>`;
     $('txPick').querySelectorAll('[data-pk]').forEach(x=>x.onclick=()=>{const id=x.dataset.pk;if(TX.sel.has(id))TX.sel.delete(id);else{if(TX.sel.size>=room){sfx('miss');showToast(`Groups hold up to ${GROUP_MAX} anglers`);return}TX.sel.set(id,x.dataset.nm)}draw()});
     const n=TX.sel.size,mk=$('txMake');mk.disabled=n<need||TX.busyG;mk.textContent=TX.busyG?(add?'Adding…':'Creating…'):add?(n?`Add ${n} ${n>1?'people':'person'}`:'Pick someone to add'):n<2?`Pick at least 2 anglers (${n}/2)`:`Create group with ${n} anglers`};
-  draw();
+  draw();if(TX.people===null)txLoadDir();
   const qi=$('txQ');qi.oninput=()=>{TX.q=qi.value;draw()};
   if($('txGN'))$('txGN').oninput=e=>{TX.gname=e.target.value};
   $('txMake').onclick=async()=>{const m=mpS();if(TX.busyG)return;TX.busyG=true;draw();
@@ -4663,6 +4663,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:50,n:'Party Line Patch',items:['Bug fix: Add people in a group chat’s info screen no longer gets stuck on “Loading the lake directory…”.']},
  {v:49,n:'Party Line',items:['Group texts! In Messages, tap New, then New group chat. Pick 2 or more anglers, name the group if you like, and chat with up to 10 people at once.','Tap a group’s name at the top of the chat to see who’s in it, rename it, add people, or leave.','Photos work in groups too: 5 per group per day.']},
  {v:48,n:'Fresh Catch',items:['When a new update goes live, a banner now tells you it’s ready. Tap Refresh to get it right away; your game saves first. The game checks once every 30 minutes.']},
  {v:47,n:'Home Sweet Home',items:['Your home now grows from a Tarp Lean-to into a real house: Fishing Shack, Log Cabin, Lakeside Cottage, Two-Story Lodge, Lake House and the Lantern Lake Estate, each with its own look. Prices and perks are the same, and you keep your current level.','Inside changes too: log walls, cottage wainscoting, lodge ceiling beams, a lake house picture window and an estate chandelier. The Tarp Lean-to is now a small tent with just your bed and crafting table.','The four biggest boats each look different now: a sleek Cabin Cruiser, a Trawler with booms and nets, a Research Vessel with a radar dome and crane, and a Hydrofoil Yacht that rises up on its foils when it travels.','Crate Expectations has two new crates: Rod crates (20 rod finishes; Rare and better add an effect when you land a fish, like lightning, neon rings or a fountain of gold coins) and Bobber crates (20 bobbers, from a rubber duck to a tiny UFO). Friends on the live lake see them too.']},
