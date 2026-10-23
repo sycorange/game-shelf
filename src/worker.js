@@ -260,7 +260,7 @@ async function liveRoute(req,env,url,db){
   let sc;try{sc=await scopeOf(db,me,q.get('lake'))}catch(e){sc=await scopeOf(db,me,'all')}
   const room=`${sc.code}:${water}`,stub=env.LAKE.get(env.LAKE.idFromName(room));
   const fw=new URL('https://lake/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('water',water);
-  fw.searchParams.set('boat',String(Math.max(0,Math.min(7,q.get('boat')|0))));fw.searchParams.set('wear',clean(q.get('wear'),8));fw.searchParams.set('cid',clean(q.get('cid'),12));fw.searchParams.set('g',q.get('g')==='f'?'f':'m');fw.searchParams.set('pt',clean(q.get('pt'),12));fw.searchParams.set('room',room);
+  fw.searchParams.set('boat',String(Math.max(0,Math.min(7,q.get('boat')|0))));fw.searchParams.set('wear',clean(q.get('wear'),8));fw.searchParams.set('cid',clean(q.get('cid'),12));fw.searchParams.set('g',q.get('g')==='f'?'f':'m');fw.searchParams.set('pt',clean(q.get('pt'),12));fw.searchParams.set('rd',clean(q.get('rd'),14));fw.searchParams.set('bb',clean(q.get('bb'),14));fw.searchParams.set('room',room);
   return stub.fetch(new Request(fw.toString(),{headers:req.headers}));
 }
 export class LakeRoom{
@@ -270,7 +270,7 @@ export class LakeRoom{
   async fetch(req){const u=new URL(req.url),q=u.searchParams;
     // a call for help from a raid in another spot on the same lake: pass it to everyone fishing here
     if(u.pathname==='/help'){let o={};try{o=await req.json()}catch(e){}const n=this.ctx.getWebSockets().length;if(n)this.bcast({t:'help',...o});return new Response(JSON.stringify({n}))}
-    const me={pid:q.get('pid'),name:q.get('name'),boat:q.get('boat')|0,wear:q.get('wear')||'',g:q.get('g')==='f'?'f':'m',pt:String(q.get('pt')||'').slice(0,12),cid:q.get('cid')||Math.random().toString(36).slice(2,8),at:Date.now()};
+    const me={pid:q.get('pid'),name:q.get('name'),boat:q.get('boat')|0,wear:q.get('wear')||'',g:q.get('g')==='f'?'f':'m',pt:String(q.get('pt')||'').slice(0,12),rd:String(q.get('rd')||'').replace(/[^a-z0-9_]/g,'').slice(0,14),bb:String(q.get('bb')||'').replace(/[^a-z0-9_]/g,'').slice(0,14),cid:q.get('cid')||Math.random().toString(36).slice(2,8),at:Date.now()};
     for(const w of this.ctx.getWebSockets()){let a=null;try{a=w.deserializeAttachment()}catch(e){}if(a&&a.pid===me.pid){try{w.close(4000,'replaced')}catch(e){}}}
     const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(me);
     const water=q.get('water');if(water)await this.ctx.storage.put('water',water);const room=q.get('room');if(room)await this.ctx.storage.put('room',room);
@@ -279,7 +279,7 @@ export class LakeRoom{
     return new Response(null,{status:101,webSocket:client})}
   async webSocketMessage(ws,msg){if(typeof msg!=='string'||msg.length>600)return;if(msg==='ping'){try{ws.send('pong')}catch(e){}return}
     let o;try{o=JSON.parse(msg)}catch(e){return}let a;try{a=ws.deserializeAttachment()}catch(e){}if(!a)return;
-    if(o.t==='st'){a.boat=Math.max(0,Math.min(7,o.boat|0));a.wear=String(o.wear||'').slice(0,8);if(o.g)a.g=o.g==='f'?'f':'m';a.pt=String(o.pt||'').replace(/[^a-z0-9]/g,'').slice(0,12);ws.serializeAttachment(a);this.bcast({t:'st',pid:a.pid,cid:a.cid,boat:a.boat,wear:a.wear,g:a.g||'m',pt:a.pt},ws)}
+    if(o.t==='st'){a.boat=Math.max(0,Math.min(7,o.boat|0));a.wear=String(o.wear||'').slice(0,8);if(o.g)a.g=o.g==='f'?'f':'m';a.pt=String(o.pt||'').replace(/[^a-z0-9]/g,'').slice(0,12);a.rd=String(o.rd||'').replace(/[^a-z0-9_]/g,'').slice(0,14);a.bb=String(o.bb||'').replace(/[^a-z0-9_]/g,'').slice(0,14);ws.serializeAttachment(a);this.bcast({t:'st',pid:a.pid,cid:a.cid,boat:a.boat,wear:a.wear,g:a.g||'m',pt:a.pt,rd:a.rd,bb:a.bb},ws)}
     else if(o.t==='catch'){const w=+o.w;if(!(w>0&&w<5000)||typeof o.f!=='string')return;const c={t:'catch',pid:a.pid,cid:a.cid,f:o.f.slice(0,24),w:+w.toFixed(2),v:String(o.v||'').slice(0,8),r:String(o.r||'').slice(0,1)};
       const R=await this.ctx.storage.get('raid');if(R&&!R.done&&Date.now()<R.ends){R.hp=Math.max(0,R.hp-w);R.hits[a.pid]=(R.hits[a.pid]||0)+w;R.names[a.pid]=a.name;c.raid={hp:Math.round(R.hp),max:R.max};
         if(R.hp<=0){R.done=true;await this.ctx.storage.put('raid',R);this.bcast(c);await this.raidEnd(true);return}await this.ctx.storage.put('raid',R)}
