@@ -7,7 +7,7 @@ const NAME_RE=/^[A-Za-z0-9 _.'-]{2,16}$/;
 const LAKE_RE=/^[A-Za-z0-9 _.'!&-]{2,24}$/;
 const WORDS=['PERCH','BASS','PIKE','TROUT','CARP','SMELT','EEL','GAR','SHAD','CHUB','DACE','BREAM','ROACH','TENCH','WALLEYE','MUSKIE','BOBBER','LURE','REEL','DOCK','COVE','REED','LILY','LOON','OTTER','HERON','CANOE','PADDLE','LANTERN','MOON'];
 const MAX_SAVE=150000,XFER_MS=30*60*1000,XABC='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-const MAX_MEMBERS=50,MAX_LAKES=10,TEXT_DAYS=7,PHOTOS_PER_DAY=5,TEXTS_PER_DAY=400;
+const GROUP_MAX=10,GROUPS_PER_DAY=10,MAX_MEMBERS=50,MAX_LAKES=10,TEXT_DAYS=7,PHOTOS_PER_DAY=5,TEXTS_PER_DAY=400;
 let ready=false;
 async function init(db){
   if(ready)return;
@@ -46,6 +46,13 @@ async function init(db){
   ]);
   try{await db.prepare('ALTER TABLE players ADD COLUMN pub INTEGER DEFAULT 1').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN pin TEXT').run()}catch(e){/* already there */}
+  await db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS gchat(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,owner TEXT,created INTEGER,last INTEGER)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS gmem(gid INTEGER,pid TEXT,seen INTEGER DEFAULT 0,joined INTEGER,PRIMARY KEY(gid,pid))`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS gmem_pid ON gmem(pid)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS gmsg(id INTEGER PRIMARY KEY AUTOINCREMENT,gid INTEGER,a TEXT,body TEXT,photo TEXT,ts INTEGER,sys INTEGER DEFAULT 0)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS gmsg_g ON gmsg(gid,id)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS gmsg_a ON gmsg(a,ts)`)]);
   try{await db.prepare('CREATE TABLE IF NOT EXISTS pinfail(k TEXT PRIMARY KEY,n INTEGER,ts INTEGER)').run()}catch(e){}
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
@@ -488,7 +495,12 @@ async function route(req,env,url){
         db.prepare('SELECT COUNT(*) AS c FROM texts WHERE b=? AND seen=0 AND ts>?').bind(me.id,cutoff).first(),
         db.prepare('SELECT t.id,t.a,p.name,t.body,t.photo,t.ts FROM texts t JOIN players p ON p.id=t.a WHERE t.b=? AND t.id>? AND t.ts>? ORDER BY t.id DESC LIMIT 10').bind(me.id,after,cutoff).all()]);
       const top=await db.prepare('SELECT COALESCE(MAX(id),0) AS m FROM texts').first();
-      return json({unread:un.c|0,fresh:fresh.results.reverse(),top:top.m|0});
+      const gafter=Math.max(0,+b.gafter||0);
+      const [gun,gfresh,gtop]=await Promise.all([
+        db.prepare('SELECT COUNT(x.id) AS c FROM gmem m JOIN gmsg x ON x.gid=m.gid AND x.id>m.seen AND x.a<>m.pid AND x.ts>? WHERE m.pid=?').bind(cutoff,me.id).first(),
+        db.prepare('SELECT x.id,x.gid,x.a,p.name,g.name AS gname,x.body,x.photo,x.ts,x.sys FROM gmem m JOIN gmsg x ON x.gid=m.gid AND x.id>? AND x.a<>m.pid JOIN gchat g ON g.id=x.gid LEFT JOIN players p ON p.id=x.a WHERE m.pid=? ORDER BY x.id DESC LIMIT 10').bind(gafter,me.id).all(),
+        db.prepare('SELECT COALESCE(MAX(id),0) AS m FROM gmsg').first()]);
+      return json({unread:(un.c|0)+(gun.c|0),fresh:fresh.results.reverse(),top:top.m|0,gfresh:gfresh.results.reverse(),gtop:gtop.m|0});
     }
     if(p==='texts/dir'){
       const r=await db.prepare(`SELECT id,name,seen FROM players WHERE id<>? AND stats IS NOT NULL AND (COALESCE(pub,1)=1 OR id IN (SELECT m2.pid FROM members m1 JOIN members m2 ON m1.code=m2.code WHERE m1.pid=?)) ORDER BY lname LIMIT 500`).bind(me.id,me.id).all();
@@ -496,8 +508,54 @@ async function route(req,env,url){
     }
     if(p==='texts/inbox'){
       const r=await db.prepare(`SELECT x.o,x.mid,x.un,t.a,t.body,t.photo,t.ts,p.name FROM (SELECT CASE WHEN a=? THEN b ELSE a END AS o,MAX(id) AS mid,SUM(CASE WHEN b=? AND seen=0 THEN 1 ELSE 0 END) AS un FROM texts WHERE (a=? OR b=?) AND ts>? GROUP BY o) x JOIN texts t ON t.id=x.mid JOIN players p ON p.id=x.o ORDER BY x.mid DESC LIMIT 60`).bind(me.id,me.id,me.id,me.id,cutoff).all();
-      return json({threads:r.results.map(x=>({id:x.o,name:x.name,un:x.un|0,mine:x.a===me.id,body:x.body,photo:!!x.photo,ts:x.ts}))});
+      const threads=r.results.map(x=>({id:x.o,name:x.name,un:x.un|0,mine:x.a===me.id,body:x.body,photo:!!x.photo,ts:x.ts}));
+      const gs=(await db.prepare(`SELECT g.id,g.name,g.created,m.seen,(SELECT COUNT(*) FROM gmem m2 WHERE m2.gid=g.id) AS n,(SELECT MAX(id) FROM gmsg WHERE gid=g.id) AS mid FROM gmem m JOIN gchat g ON g.id=m.gid WHERE m.pid=? LIMIT 30`).bind(me.id).all()).results;
+      if(gs.length){const ids=gs.map(g=>g.mid).filter(Boolean),last=ids.length?(await db.prepare(`SELECT x.id,x.gid,x.a,x.body,x.photo,x.ts,x.sys,p.name FROM gmsg x LEFT JOIN players p ON p.id=x.a WHERE x.id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all()).results:[];
+        const un=(await db.prepare('SELECT m.gid,COUNT(x.id) AS c FROM gmem m JOIN gmsg x ON x.gid=m.gid AND x.id>m.seen AND x.a<>m.pid AND x.ts>? WHERE m.pid=? GROUP BY m.gid').bind(cutoff,me.id).all()).results;
+        for(const g of gs){const l=last.find(x=>x.gid===g.id),u=un.find(x=>x.gid===g.id);
+          threads.push({id:'g:'+g.id,group:true,n:g.n|0,name:g.name,un:u?u.c|0:0,mine:!!l&&l.a===me.id,from:l&&!l.sys&&l.a!==me.id?l.name:'',body:l?l.body:'Group created',photo:!!(l&&l.photo),ts:l?l.ts:g.created})}
+        threads.sort((a,b)=>b.ts-a.ts)}
+      return json({threads});
     }
+    // ----- group texts: up to 10 anglers, made from people you can already text
+    const gmember=async gid=>await db.prepare('SELECT g.id,g.name,g.owner,m.seen FROM gmem m JOIN gchat g ON g.id=m.gid WHERE m.gid=? AND m.pid=?').bind(gid|0,me.id).first();
+    const gsys=(gid,body)=>db.prepare('INSERT INTO gmsg(gid,a,body,photo,ts,sys) VALUES(?,?,?,NULL,?,1)').bind(gid,me.id,body,now);
+    if(p==='texts/gnew'){const name=clean(b.name,30)||'Group chat';const ids=[...new Set((Array.isArray(b.members)?b.members:[]).map(String))].filter(x=>x!==me.id).slice(0,GROUP_MAX-1);
+      if(ids.length<2)return json({error:'need-two'},400);
+      const made=await db.prepare('SELECT COUNT(*) AS c FROM gchat WHERE owner=? AND created>?').bind(me.id,now-864e5).first();if((made.c|0)>=GROUPS_PER_DAY)return json({error:'slow-down'},429);
+      const ok=[];for(const id of ids){const s=await canSee(db,me,id);if(s)ok.push(s)}if(ok.length<2)return json({error:'need-two'},400);
+      const r=await db.prepare('INSERT INTO gchat(name,owner,created,last) VALUES(?,?,?,?)').bind(name,me.id,now,now).run();const gid=r.meta.last_row_id||(await db.prepare('SELECT MAX(id) AS id FROM gchat WHERE owner=?').bind(me.id).first()).id;
+      await db.batch([db.prepare('INSERT INTO gmem(gid,pid,seen,joined) VALUES(?,?,0,?)').bind(gid,me.id,now),...ok.map(s=>db.prepare('INSERT OR IGNORE INTO gmem(gid,pid,seen,joined) VALUES(?,?,0,?)').bind(gid,s.id,now)),gsys(gid,`${me.name} started the group`)]);
+      return json({ok:true,gid,name})}
+    if(p==='texts/gthread'){const g=await gmember(b.gid);if(!g)return json({error:'not-member'},404);const after=Math.max(0,+b.after||0);
+      const [msgs,mem]=await Promise.all([db.prepare('SELECT x.id,x.a,x.body,x.photo,x.ts,x.sys,p.name FROM gmsg x LEFT JOIN players p ON p.id=x.a WHERE x.gid=? AND x.ts>? AND x.id>? ORDER BY x.id DESC LIMIT 150').bind(g.id,cutoff,after).all(),
+        db.prepare('SELECT p.id,p.name,p.seen FROM gmem m JOIN players p ON p.id=m.pid WHERE m.gid=? ORDER BY p.lname').bind(g.id).all()]);
+      const top=msgs.results.length?msgs.results[0].id:g.seen;if(top>g.seen)await db.prepare('UPDATE gmem SET seen=? WHERE gid=? AND pid=?').bind(top,g.id,me.id).run();
+      return json({name:g.name,gid:g.id,owner:g.owner===me.id,members:mem.results.map(x=>({id:x.id,name:x.name,seen:x.seen,me:x.id===me.id})),msgs:msgs.results.reverse().map(x=>({id:x.id,mine:x.a===me.id&&!x.sys,from:x.name||'?',fromId:x.a,sys:!!x.sys,body:x.body,photo:x.photo?JSON.parse(x.photo):null,ts:x.ts}))})}
+    if(p==='texts/gsend'){const g=await gmember(b.gid);if(!g)return json({error:'not-member'},404);
+      const text=clean(b.body,280),photo=b.photo?cleanPhoto(b.photo):null;if(!text&&!photo)return json({error:'empty'},400);if(b.photo&&!photo)return json({error:'bad-photo'},400);
+      const since=dayStart(now,b.tz);
+      const [c1,c2]=await Promise.all([db.prepare('SELECT COUNT(*) AS c FROM texts WHERE a=? AND ts>=?').bind(me.id,since).first(),db.prepare('SELECT COUNT(*) AS c FROM gmsg WHERE a=? AND ts>=? AND sys=0').bind(me.id,since).first()]);
+      if((c1.c|0)+(c2.c|0)>=TEXTS_PER_DAY)return json({error:'slow-down'},429);
+      const pc=photo?await db.prepare('SELECT COUNT(*) AS c FROM gmsg WHERE a=? AND gid=? AND ts>=? AND photo IS NOT NULL').bind(me.id,g.id,since).first():{c:0};
+      if(photo&&(pc.c|0)>=PHOTOS_PER_DAY)return json({error:'photo-limit',photos:pc.c|0},429);
+      const r=await db.prepare('INSERT INTO gmsg(gid,a,body,photo,ts,sys) VALUES(?,?,?,?,?,0)').bind(g.id,me.id,text,photo,now).run();
+      const id=r.meta.last_row_id||(await db.prepare('SELECT MAX(id) AS id FROM gmsg WHERE gid=? AND a=?').bind(g.id,me.id).first()).id;
+      const st=[db.prepare('UPDATE gchat SET last=? WHERE id=?').bind(now,g.id),db.prepare('UPDATE gmem SET seen=? WHERE gid=? AND pid=?').bind(id,g.id,me.id)];
+      if(Math.random()<.05)st.push(db.prepare('DELETE FROM gmsg WHERE ts<?').bind(cutoff));await db.batch(st);
+      return json({ok:true,id,ts:now,photos:(pc.c|0)+(photo?1:0)})}
+    if(p==='texts/gadd'){const g=await gmember(b.gid);if(!g)return json({error:'not-member'},404);
+      const n=await db.prepare('SELECT COUNT(*) AS c FROM gmem WHERE gid=?').bind(g.id).first(),room=GROUP_MAX-(n.c|0);if(room<=0)return json({error:'group-full'},400);
+      const add=[];for(const id of [...new Set((Array.isArray(b.members)?b.members:[]).map(String))].slice(0,room)){const s=await canSee(db,me,id);if(s&&!(await db.prepare('SELECT 1 FROM gmem WHERE gid=? AND pid=?').bind(g.id,s.id).first()))add.push(s)}
+      if(!add.length)return json({ok:true,added:0});
+      await db.batch([...add.map(s=>db.prepare('INSERT OR IGNORE INTO gmem(gid,pid,seen,joined) VALUES(?,?,0,?)').bind(g.id,s.id,now)),gsys(g.id,`${me.name} added ${add.map(s=>s.name).join(', ')}`)]);return json({ok:true,added:add.length})}
+    if(p==='texts/grename'){const g=await gmember(b.gid);if(!g)return json({error:'not-member'},404);const name=clean(b.name,30);if(!name)return json({error:'bad-name'},400);
+      await db.batch([db.prepare('UPDATE gchat SET name=? WHERE id=?').bind(name,g.id),gsys(g.id,`${me.name} renamed the group “${name}”`)]);return json({ok:true,name})}
+    if(p==='texts/gleave'){const g=await gmember(b.gid);if(!g)return json({ok:true});
+      await db.batch([db.prepare('DELETE FROM gmem WHERE gid=? AND pid=?').bind(g.id,me.id),gsys(g.id,`${me.name} left the group`)]);
+      const n=await db.prepare('SELECT COUNT(*) AS c FROM gmem WHERE gid=?').bind(g.id).first();
+      if(!(n.c|0))await db.batch([db.prepare('DELETE FROM gmsg WHERE gid=?').bind(g.id),db.prepare('DELETE FROM gchat WHERE id=?').bind(g.id)]);
+      return json({ok:true})}
     if(p==='texts/thread'){
       const w=String(b.with||''),after=Math.max(0,+b.after||0);
       const who=await db.prepare('SELECT id,name,seen FROM players WHERE id=?').bind(w).first();if(!who)return json({error:'no-player'},404);
