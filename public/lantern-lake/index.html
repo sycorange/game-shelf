@@ -1120,6 +1120,11 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 
 .cr-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.cr-kinds button{border:1px solid rgba(255,255,255,.14);background:transparent;color:#cbbcdc;font:700 .76rem inherit;padding:6px 4px;border-radius:9px;cursor:pointer;white-space:nowrap}
 .cr-kinds button[aria-pressed="true"]{background:rgba(255,194,58,.16);border-color:#ffc23a;color:#ffe2a0}.cr-kinds button:disabled{opacity:.5}
+
+/* ==NEW VERSION== */
+.newver{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);z-index:45;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:4px 10px;align-items:center;width:min(460px,calc(100% - 24px));box-sizing:border-box;padding:10px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--buoy);box-shadow:0 12px 30px rgba(0,0,0,.45);color:var(--fg)}
+.newver .nv-ic{font-size:1.4rem}.newver b{display:block;font-size:.92rem}.newver small{color:var(--muted);font-size:.78rem}.newver button{padding:6px 12px}
+@media (max-width:700px){.newver{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 8px);grid-template-columns:auto minmax(0,1fr) auto}.newver #nvNo{grid-column:1/-1;justify-self:end;padding:2px 6px;font-size:.78rem}}
 </style>
 
 </head>
@@ -1234,6 +1239,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 </div>
 
 <div class="ach-wrap" id="achWrap" aria-live="polite"></div>
+<div class="newver" id="newVer" role="status" hidden><span class="nv-ic" aria-hidden="true">✨</span><div><b id="nvT">A new update is ready</b><small>Refresh to get it. Your game is saved first.</small></div><button class="jig" id="nvGo">Refresh</button><button class="ghost" id="nvNo" aria-label="Remind me later">Later</button></div>
 
 <div class="away" id="itemModal" hidden>
   <div class="box" id="itemBox"></div>
@@ -3109,6 +3115,18 @@ function crPrevLoop(){cancelAnimationFrame(CR.prevRaf);const cv=$('crPrev');if(!
     CR.prevRaf=requestAnimationFrame(draw)};CR.prevRaf=requestAnimationFrame(draw)}
 
 
+
+// ==NEW VERSION== every 30 minutes (and when you come back to the tab after 30+ minutes away) the game
+// fetches a tiny version.json that sits next to it. If the site has a newer update, a banner offers a refresh.
+// It's a static file, so these checks never count toward the server's daily limits.
+const NV={last:0,shown:0,snooze:0};const nvCur=()=>Math.max(...UPDATES.map(u=>u.v));
+async function nvCheck(force){const now=Date.now();if(!force&&now-NV.last<30*60000)return;NV.last=now;if(location.protocol==='file:')return;
+  try{const r=await fetch('version.json?t='+now,{cache:'no-store'});if(!r.ok)return;const j=await r.json();if(!(+j.v>nvCur()))return;
+    if(NV.snooze&&now<NV.snooze)return;NV.shown=+j.v;$('nvT').textContent=j.n?`Update ${j.v} · ${j.n} is ready`:'A new update is ready';$('newVer').hidden=false}catch(e){}}
+$('nvGo').onclick=()=>{try{save()}catch(e){}$('nvGo').disabled=true;$('nvGo').textContent='Refreshing…';const go=()=>location.reload();try{const p=cloudPush(true,true);if(p&&p.then)p.finally(go);else go();setTimeout(go,2500)}catch(e){go()}};
+$('nvNo').onclick=()=>{$('newVer').hidden=true;NV.snooze=Date.now()+30*60000};
+setInterval(()=>nvCheck(),60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)nvCheck()});setTimeout(()=>nvCheck(true),20000);
+
 let WXA_H=-1;setInterval(()=>{try{if(phOpen()&&phView==='weather'){const h=S.day*24+Math.floor(S.min/60);if(h!==WXA_H){WXA_H=h;const sc=$('wxBody').querySelector('.l7-hours'),x=sc?sc.scrollLeft:0;renderWeatherApp();const n=$('wxBody').querySelector('.l7-hours');if(n)n.scrollLeft=x}}}catch(e){}},2000);
 function renderHome(){
   const fc=S.fc&&S.fc[S.day];
@@ -4579,6 +4597,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:48,n:'Fresh Catch',items:['When a new update goes live, a banner now tells you it’s ready. Tap Refresh to get it right away; your game saves first. The game checks once every 30 minutes.']},
  {v:47,n:'Home Sweet Home',items:['Your home now grows from a Tarp Lean-to into a real house: Fishing Shack, Log Cabin, Lakeside Cottage, Two-Story Lodge, Lake House and the Lantern Lake Estate, each with its own look. Prices and perks are the same, and you keep your current level.','Inside changes too: log walls, cottage wainscoting, lodge ceiling beams, a lake house picture window and an estate chandelier. The Tarp Lean-to is now a small tent with just your bed and crafting table.','The four biggest boats each look different now: a sleek Cabin Cruiser, a Trawler with booms and nets, a Research Vessel with a radar dome and crane, and a Hydrofoil Yacht that rises up on its foils when it travels.','Crate Expectations has two new crates: Rod crates (20 rod finishes; Rare and better add an effect when you land a fish, like lightning, neon rings or a fountain of gold coins) and Bobber crates (20 bobbers, from a rubber duck to a tiny UFO). Friends on the live lake see them too.']},
  {v:46,n:'Smooth Sailing',items:['Bug fix: heading home (or to a friend’s dock) no longer flashes the spot you just left for a split second when the boat arrives.']},
  {v:45,n:'Tidy Tackle Box',items:['Achievement pop-ups no longer cover the lake: they appear in the bottom corner on computers and as a slim banner over the header on phones. Catch messages wait until they’re gone, so the two never stack.','Phone home screen: shorter labels (Weather, Crates) and a handier order, with Messages, Friends, Bounties and Shop first.','Title screen: Move your game and Log in are now one Your game button, with logging in at the top.','Hunger and stamina sit side by side on phones. Tap the weather chip on the lake to open the Weather app; the extra weather row under the lake is gone.','Settings has a new Account group for Cloud sync, Login PIN and Move your game.','Bug fix: the Set PIN and Open buttons in Settings were dark on dark and hard to read.']},
