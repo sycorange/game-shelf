@@ -45,6 +45,15 @@ async function init(db){
     db.prepare(`CREATE TABLE IF NOT EXISTS cloud(pid TEXT PRIMARY KEY,data TEXT,ts INTEGER,dev TEXT,kind TEXT,day INTEGER,coins REAL,up INTEGER)`),
   ]);
   try{await db.prepare('ALTER TABLE players ADD COLUMN pub INTEGER DEFAULT 1').run()}catch(e){/* already there */}
+  await db.batch([
+    db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS grec(fish TEXT PRIMARY KEY,pid TEXT,w REAL,ts INTEGER)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS evbest_w ON evbest(ev,w)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS weekly_w ON weekly(week,w)`)]);
+  // One-time fill of the global record table from everyone's personal bests (a single full read, ever).
+  if(!(await db.prepare("SELECT 1 FROM kvc WHERE k='grec:v1'").first())){
+    await db.prepare(`INSERT OR REPLACE INTO grec(fish,pid,w,ts) SELECT fish,pid,w,ts FROM (SELECT b.fish,b.pid,b.w,b.ts,ROW_NUMBER() OVER (PARTITION BY b.fish ORDER BY b.w DESC,b.ts ASC) AS rn FROM pbest b JOIN players p ON p.id=b.pid WHERE COALESCE(p.pub,1)=1) WHERE rn=1`).run();
+    await db.prepare("INSERT OR REPLACE INTO kvc(k,v,ts) VALUES('grec:v1','1',?)").bind(Date.now()).run()}
   ready=true;
 }
 const rid=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return [...a].map(b=>b.toString(16).padStart(2,'0')).join('')};
@@ -66,6 +75,17 @@ async function scopeOf(db,me,lake){
   if(!m)throw new Error('not-member');
   return {code,sql:'(SELECT pid FROM members WHERE code=?)',args:[code]};
 }
+// Shared results cache. Leaderboards are the same for everyone in a lake, so they're built at most once per
+// few minutes and then served to every player from one cached row instead of re-reading whole tables per sync.
+async function cached(db,key,ttl,fn){const now=Date.now();
+  try{const r=await db.prepare('SELECT v,ts FROM kvc WHERE k=?').bind(key).first();if(r&&now-r.ts<ttl)return JSON.parse(r.v)}catch(e){}
+  const v=await fn();try{await db.prepare('INSERT INTO kvc(k,v,ts) VALUES(?,?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v,ts=excluded.ts').bind(key,JSON.stringify(v),now).run()}catch(e){}return v}
+const MIN=60000;
+async function recordsFor(db,sc){
+  if(sc.code==='all')return cached(db,'rec:all',10*MIN,async()=>(await db.prepare('SELECT g.fish,g.pid,p.name,g.w FROM grec g JOIN players p ON p.id=g.pid WHERE COALESCE(p.pub,1)=1').all()).results);
+  return cached(db,'rec:'+sc.code,4*MIN,async()=>(await db.prepare(`SELECT fish,pid,name,w FROM (SELECT b.fish,b.pid,p.name,b.w,ROW_NUMBER() OVER (PARTITION BY b.fish ORDER BY b.w DESC,b.ts ASC) AS rn FROM pbest b JOIN players p ON p.id=b.pid WHERE b.pid IN ${sc.sql}) WHERE rn=1`).bind(...sc.args).all()).results)}
+const scKey=sc=>sc.code==='all'?'all':sc.code;
+const pubScope={code:'all',sql:'(SELECT id FROM players WHERE COALESCE(pub,1)=1)',args:[]};
 async function weeklyTop(db,wk,sc){const r=await db.prepare(`SELECT pid,name,w FROM weekly WHERE week=? AND w>0 AND pid IN ${sc.sql} ORDER BY w DESC LIMIT 10`).bind(wk,...sc.args).all();return r.results}
 async function myLakes(db,me){
   const r=await db.prepare('SELECT l.code,l.name,l.owner,(SELECT COUNT(*) FROM members m2 WHERE m2.code=l.code) AS n FROM members m JOIN lakes l ON l.code=m.code WHERE m.pid=? ORDER BY m.joined').bind(me.id).all();
@@ -122,7 +142,7 @@ async function evPart(db,me,b,now){
     if(ins.meta&&ins.meta.changes===1){const top=await db.prepare('SELECT pid,w FROM evbest WHERE ev=? ORDER BY w DESC,ts ASC LIMIT 3').bind(HW_EV).all();
       const st=top.results.map((x,i)=>sysMail(db,x.pid,'evprize',`${i+1}|${HW_PRIZE[i]}`,`Ghost Gar contest: you placed #${i+1} with ${(+x.w).toFixed(2)} lb`,now));if(st.length)await db.batch(st)}}
   if(now>HW_END+14*864e5)return null;
-  const [top,mine]=await Promise.all([db.prepare('SELECT e.pid,e.name,e.w,COALESCE(p.pub,1) AS pub FROM evbest e LEFT JOIN players p ON p.id=e.pid WHERE e.ev=? ORDER BY e.w DESC,e.ts ASC LIMIT 10').bind(HW_EV).all(),
+  const [top,mine]=await Promise.all([cached(db,'ev:'+HW_EV,2*MIN,async()=>({results:(await db.prepare('SELECT e.pid,e.name,e.w,COALESCE(p.pub,1) AS pub FROM evbest e LEFT JOIN players p ON p.id=e.pid WHERE e.ev=? ORDER BY e.w DESC,e.ts ASC LIMIT 10').bind(HW_EV).all()).results})),
     db.prepare('SELECT w,ts FROM evbest WHERE ev=? AND pid=?').bind(HW_EV,me.id).first()]);
   let rank=0;if(mine){const r=await db.prepare('SELECT COUNT(*) AS c FROM evbest WHERE ev=? AND (w>? OR (w=? AND ts<?))').bind(HW_EV,mine.w,mine.w,mine.ts).first();rank=(r.c|0)+1}
   return {id:HW_EV,ended:now>=HW_END,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:x.w,me:x.pid===me.id})),me:mine?{w:mine.w,rank}:null}}
@@ -132,7 +152,7 @@ async function monPart(db,me,b,now,wk){
     await db.prepare('INSERT OR IGNORE INTO mon(week,maxhp,dead) VALUES(?,?,0)').bind(wk,maxhp).run();m=await db.prepare('SELECT maxhp,dead FROM mon WHERE week=?').bind(wk).first()}
   const dmg=Math.min(5000,Math.max(0,+b.mdmg||0));
   if(dmg>0&&!m.dead)await db.prepare('INSERT INTO monhit(week,pid,dmg) VALUES(?,?,?) ON CONFLICT(week,pid) DO UPDATE SET dmg=monhit.dmg+excluded.dmg').bind(wk,me.id,dmg).run();
-  const [tot,mine]=await Promise.all([db.prepare('SELECT COALESCE(SUM(dmg),0) AS s,COUNT(*) AS n FROM monhit WHERE week=?').bind(wk).first(),db.prepare('SELECT dmg FROM monhit WHERE week=? AND pid=?').bind(wk,me.id).first()]);
+  const [tot,mine]=await Promise.all([cached(db,'mon:'+wk,MIN,async()=>await db.prepare('SELECT COALESCE(SUM(dmg),0) AS s,COUNT(*) AS n FROM monhit WHERE week=?').bind(wk).first()),db.prepare('SELECT dmg FROM monhit WHERE week=? AND pid=?').bind(wk,me.id).first()]);
   let dead=m.dead;
   if(!dead&&tot.s>=m.maxhp){const up=await db.prepare('UPDATE mon SET dead=? WHERE week=? AND dead=0').bind(now,wk).run();
     if(up.meta&&up.meta.changes===1){dead=now;const who=await db.prepare('SELECT pid FROM monhit WHERE week=? AND dmg>0').bind(wk).all();const st=who.results.map(x=>sysMail(db,x.pid,'monster',`${MON_REWARD}|${monName(wk)}`,`${monName(wk)} is beaten! Your share of the bounty.`,now));if(st.length)await db.batch(st)}}
@@ -213,18 +233,20 @@ async function liveRoute(req,env,url,db){
   let sc;try{sc=await scopeOf(db,me,q.get('lake'))}catch(e){sc=await scopeOf(db,me,'all')}
   const room=`${sc.code}:${water}`,stub=env.LAKE.get(env.LAKE.idFromName(room));
   const fw=new URL('https://lake/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('water',water);
-  fw.searchParams.set('boat',String(Math.max(0,Math.min(7,q.get('boat')|0))));fw.searchParams.set('wear',clean(q.get('wear'),8));fw.searchParams.set('cid',clean(q.get('cid'),12));fw.searchParams.set('g',q.get('g')==='f'?'f':'m');fw.searchParams.set('pt',clean(q.get('pt'),12));
+  fw.searchParams.set('boat',String(Math.max(0,Math.min(7,q.get('boat')|0))));fw.searchParams.set('wear',clean(q.get('wear'),8));fw.searchParams.set('cid',clean(q.get('cid'),12));fw.searchParams.set('g',q.get('g')==='f'?'f':'m');fw.searchParams.set('pt',clean(q.get('pt'),12));fw.searchParams.set('room',room);
   return stub.fetch(new Request(fw.toString(),{headers:req.headers}));
 }
 export class LakeRoom{
   constructor(ctx,env){this.ctx=ctx;this.env=env;try{ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping','pong'))}catch(e){}}
   peers(except){return this.ctx.getWebSockets().filter(w=>w!==except).map(w=>{try{return w.deserializeAttachment()}catch(e){return null}}).filter(Boolean)}
   bcast(o,except){const m=JSON.stringify(o);for(const w of this.ctx.getWebSockets())if(w!==except){try{w.send(m)}catch(e){}}}
-  async fetch(req){const q=new URL(req.url).searchParams;
+  async fetch(req){const u=new URL(req.url),q=u.searchParams;
+    // a call for help from a raid in another spot on the same lake: pass it to everyone fishing here
+    if(u.pathname==='/help'){let o={};try{o=await req.json()}catch(e){}const n=this.ctx.getWebSockets().length;if(n)this.bcast({t:'help',...o});return new Response(JSON.stringify({n}))}
     const me={pid:q.get('pid'),name:q.get('name'),boat:q.get('boat')|0,wear:q.get('wear')||'',g:q.get('g')==='f'?'f':'m',pt:String(q.get('pt')||'').slice(0,12),cid:q.get('cid')||Math.random().toString(36).slice(2,8),at:Date.now()};
     for(const w of this.ctx.getWebSockets()){let a=null;try{a=w.deserializeAttachment()}catch(e){}if(a&&a.pid===me.pid){try{w.close(4000,'replaced')}catch(e){}}}
     const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(me);
-    const water=q.get('water');if(water)await this.ctx.storage.put('water',water);
+    const water=q.get('water');if(water)await this.ctx.storage.put('water',water);const room=q.get('room');if(room)await this.ctx.storage.put('room',room);
     server.send(JSON.stringify({t:'hello',me:me.cid,peers:this.peers(server).filter(p=>p.pid!==me.pid),raid:await this.raidView()}));
     this.bcast({t:'join',p:me},server);await this.maybeRaid();
     return new Response(null,{status:101,webSocket:client})}
@@ -235,7 +257,16 @@ export class LakeRoom{
       const R=await this.ctx.storage.get('raid');if(R&&!R.done&&Date.now()<R.ends){R.hp=Math.max(0,R.hp-w);R.hits[a.pid]=(R.hits[a.pid]||0)+w;R.names[a.pid]=a.name;c.raid={hp:Math.round(R.hp),max:R.max};
         if(R.hp<=0){R.done=true;await this.ctx.storage.put('raid',R);this.bcast(c);await this.raidEnd(true);return}await this.ctx.storage.put('raid',R)}
       this.bcast(c)}
+    else if(o.t==='help'){await this.callHelp(ws,a)}
     else if(o.t==='emo'){const e=o.e|0;if(e>=0&&e<12)this.bcast({t:'emo',pid:a.pid,cid:a.cid,e},ws)}}
+  // One call per player per raid, and at most one every 20 seconds per room, sent to the other spots on this lake.
+  async callHelp(ws,a){const R=await this.ctx.storage.get('raid'),now=Date.now();if(!R||R.done||now>=R.ends||a.help===R.ends)return;
+    const last=(await this.ctx.storage.get('helpAt'))||0;if(now-last<20000){try{ws.send(JSON.stringify({t:'helpsent',n:-1}))}catch(e){}return}
+    a.help=R.ends;ws.serializeAttachment(a);await this.ctx.storage.put('helpAt',now);
+    const room=(await this.ctx.storage.get('room'))||'',water=(await this.ctx.storage.get('water'))||'lake',scope=room.slice(0,room.lastIndexOf(':'));if(!scope)return;
+    const msg={from:a.name,pid:a.pid,water,name:R.name,hp:Math.round(R.hp),max:R.max,ends:R.ends};let n=0;
+    await Promise.all(LIVE_WATERS.filter(w=>w!==water).map(async w=>{try{const st=this.env.LAKE.get(this.env.LAKE.idFromName(`${scope}:${w}`));const r=await st.fetch(new Request('https://lake/help',{method:'POST',body:JSON.stringify(msg)}));const j=await r.json();n+=j.n|0}catch(e){}}));
+    try{ws.send(JSON.stringify({t:'helpsent',n}))}catch(e){}this.bcast({t:'helpcalled',from:a.name},ws)}
   async webSocketClose(ws){this.left(ws)}
   async webSocketError(ws){this.left(ws)}
   left(ws){let a=null;try{a=ws.deserializeAttachment()}catch(e){}try{ws.close(1000,'bye')}catch(e){}if(a)this.bcast({t:'leave',pid:a.pid,cid:a.cid},ws)}
@@ -338,7 +369,7 @@ async function route(req,env,url){
     return json({ok:true,lakes:await myLakes(db,me)});
   }
   if(p==='sync'){
-    const wk=weekKey(),st=[];
+    const wk=weekKey(),st=[],gi=[];
     const stats=b.stats&&typeof b.stats==='object'?JSON.stringify(b.stats).slice(0,4000):me.stats;
     const wkn=String(b.wk)===wk?Math.max(0,Math.min(1e6,b.wkn|0)):0;
     const hasCab=typeof b.cabin==='string'&&b.cabin.length<20000;
@@ -350,32 +381,37 @@ async function route(req,env,url){
     if(b.best&&typeof b.best==='object')for(const [fish,w0] of Object.entries(b.best).slice(0,120)){
       const w=+w0;if(!(w>0&&w<5000))continue;
       st.push(db.prepare('INSERT INTO pbest(pid,fish,w,ts) VALUES(?,?,?,?) ON CONFLICT(pid,fish) DO UPDATE SET w=excluded.w,ts=excluded.ts WHERE excluded.w>pbest.w').bind(me.id,clean(fish,24),w,now));
+      if((me.pub??1)!==0)gi.push(st.length),st.push(db.prepare('INSERT INTO grec(fish,pid,w,ts) VALUES(?,?,?,?) ON CONFLICT(fish) DO UPDATE SET pid=excluded.pid,w=excluded.w,ts=excluded.ts WHERE excluded.w>grec.w').bind(clean(fish,24),me.id,w,now));
     }
     const wb=+b.wkBest;if(String(b.wk)===wk&&wb>0&&wb<5000)st.push(db.prepare('INSERT INTO weekly(week,pid,name,w,ts) VALUES(?,?,?,?,?) ON CONFLICT(week,pid) DO UPDATE SET w=excluded.w,name=excluded.name,ts=excluded.ts WHERE excluded.w>weekly.w').bind(wk,me.id,me.name,wb,now));
-    if(Math.random()<.02){st.push(db.prepare('DELETE FROM catches WHERE ts<?').bind(now-14*864e5));st.push(db.prepare('DELETE FROM mail WHERE claimed=1 AND ts<?').bind(now-30*864e5))}
-    await db.batch(st);
+    if(Math.random()<.02){st.push(db.prepare('DELETE FROM kvc WHERE ts<? AND k NOT LIKE ?').bind(now-7*864e5,'grec:%'));st.push(db.prepare('DELETE FROM catches WHERE ts<?').bind(now-14*864e5));st.push(db.prepare('DELETE FROM mail WHERE claimed=1 AND ts<?').bind(now-30*864e5))}
+    const res=await db.batch(st);
+    // a new lake-wide record clears the cached record list so it shows up on the next sync
+    if(gi.some(i=>res[i]&&res[i].meta&&res[i].meta.changes>0))try{await db.prepare("DELETE FROM kvc WHERE k='rec:all'").run()}catch(e){}
     const X=await syncExtras(db,me,b,now,wk);
     let sc;try{sc=await scopeOf(db,me,b.lake)}catch(e){sc=await scopeOf(db,me,'all')}
     const lw=String(+wk-1);
+    const scc=sc.code==='all'?pubScope:sc,k=scKey(sc);
     const [mail,records,comm,top,ltop,lakes]=await Promise.all([
       db.prepare('SELECT id,from_name,kind,item,n,msg,ts FROM mail WHERE to_pid=? AND claimed=0 ORDER BY id LIMIT 30').bind(me.id).all(),
-      db.prepare(`SELECT fish,pid,name,w FROM (SELECT b.fish,b.pid,p.name,b.w,ROW_NUMBER() OVER (PARTITION BY b.fish ORDER BY b.w DESC,b.ts ASC) AS rn FROM pbest b JOIN players p ON p.id=b.pid WHERE b.pid IN ${sc.sql}) WHERE rn=1`).bind(...sc.args).all(),
-      db.prepare(`SELECT COALESCE(SUM(wkn),0) AS total,COUNT(*) AS players FROM players WHERE wk=? AND wkn>0 AND id IN ${sc.sql}`).bind(wk,...sc.args).first(),
-      weeklyTop(db,wk,sc),weeklyTop(db,lw,sc),myLakes(db,me)]);
+      recordsFor(db,scc),
+      cached(db,`comm:${k}:${wk}`,3*MIN,async()=>await db.prepare(`SELECT COALESCE(SUM(wkn),0) AS total,COUNT(*) AS players FROM players WHERE wk=? AND wkn>0 AND id IN ${scc.sql}`).bind(wk,...scc.args).first()),
+      cached(db,`wt:${k}:${wk}`,3*MIN,()=>weeklyTop(db,wk,scc)),cached(db,`wt:${k}:${lw}`,60*MIN,()=>weeklyTop(db,lw,scc)),myLakes(db,me)]);
     const players=Math.max(1,comm.players|0);
-    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,mail:mail.results,records:records.results,
+    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,mail:mail.results,records,
       community:{week:wk,lake:sc.code,total:comm.total|0,players,goal:2000+1500*players},
       weekly:{week:wk,top},lastWeekly:{week:lw,lake:sc.code,top:ltop},next:((+wk+1)*7-3)*864e5});
   }
   if(p==='players'){
-    const sc=await scopeOf(db,me,b.lake);
-    const r=await db.prepare(`SELECT id,name,stats,seen FROM players WHERE stats IS NOT NULL AND id IN ${sc.sql} ORDER BY seen DESC LIMIT 300`).bind(...sc.args).all();
-    return json({players:r.results.map(x=>({id:x.id,name:x.name,seen:x.seen,stats:(()=>{try{return JSON.parse(x.stats)}catch(e){return {}}})()}))});
+    const sc=await scopeOf(db,me,b.lake),scc=sc.code==='all'?pubScope:sc;
+    const rows=await cached(db,'pl:'+scKey(sc),2*MIN,async()=>(await db.prepare(`SELECT id,name,stats,seen FROM players WHERE stats IS NOT NULL AND id IN ${scc.sql} ORDER BY seen DESC LIMIT 300`).bind(...scc.args).all()).results);
+    if(!rows.some(x=>x.id===me.id)&&me.stats)rows.unshift({id:me.id,name:me.name,stats:me.stats,seen:me.seen});
+    return json({players:rows.map(x=>({id:x.id,name:x.name,seen:x.seen,stats:(()=>{try{return JSON.parse(x.stats)}catch(e){return {}}})()}))});
   }
   if(p==='news'){
     const sc=await scopeOf(db,me,b.lake);
-    const r=await db.prepare(`SELECT pid,name,fish,w,v,water,ts FROM catches WHERE ts>? AND pid IN ${sc.sql} ORDER BY ts DESC LIMIT 60`).bind(now-36*36e5,...sc.args).all();
-    return json({catches:r.results});
+    const rows=await cached(db,'news:'+scKey(sc),2*MIN,async()=>(await db.prepare(`SELECT pid,name,fish,w,v,water,ts FROM catches WHERE ts>? AND pid IN ${sc.sql} ORDER BY ts DESC LIMIT 60`).bind(now-36*36e5,...sc.args).all()).results);
+    return json({catches:rows});
   }
   if(p==='cabin'){
     const t=await db.prepare('SELECT id,name,cabin,COALESCE(pub,1) AS pub FROM players WHERE id=?').bind(String(b.target||'')).first();

@@ -792,8 +792,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .ovl-wx svg{width:20px;height:20px}
 .scene:not(.in) .leave{top:50px}
 .scene:not(.in) .toast{bottom:auto;top:12px;left:170px;right:170px}
-.scene:not(.in):has(.raidbar:not([hidden])) .toast{top:96px}
-@media (max-width:700px){.scene:not(.in) .toast{top:48px;left:12px;right:12px}.scene:not(.in):has(.ovl-live:not([hidden])) .toast{top:74px}.scene:not(.in):has(.raidbar:not([hidden])) .toast{top:118px}}
+.scene:not(.in):has(.raidbar:not([hidden])) .toast{top:140px}
+@media (max-width:700px){.scene:not(.in) .toast{top:48px;left:12px;right:12px}.scene:not(.in):has(.ovl-live:not([hidden])) .toast{top:74px}.scene:not(.in):has(.raidbar:not([hidden])) .toast{top:168px}}
 /* FinDuel sportsbook */
 .ph-screen.v-book{background:#071426;color:#eaf2ff}
 .ph-screen.v-book .ph-home{background:rgba(255,255,255,.6)}
@@ -1075,6 +1075,22 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .cr-item.on{background:#2e2240;box-shadow:0 0 0 2px var(--tc) inset}
 .cr-odds{list-style:none;margin:0;padding:0;display:grid;gap:6px}.cr-odds li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);border-left:4px solid var(--tc)}
 .cr-odds b{color:var(--tc)}.cr-odds span{font-weight:800}.cr-odds small{grid-column:1/-1;font-size:.7rem;color:#a898bc}
+
+/* ==HOT BAR EDIT== */
+.hslot.edit{border-style:dashed;color:var(--muted)}.hslot.edit svg{width:20px;height:20px}
+.hbe-tip{margin:0 0 10px;font-size:.86rem;color:var(--muted)}
+.hbe-slots{display:flex;gap:8px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+.hbe-slots .hslot{cursor:pointer}.hbe-slots .hslot.sel{border-color:var(--buoy);box-shadow:0 0 0 2px var(--buoy)}
+.hbe .tripopt{grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:2px 10px}.hbe .tripopt svg{width:28px;height:28px;grid-row:span 2}.hbe .tripopt em{font-style:normal;font-size:.75rem;color:var(--buoy);grid-row:span 2}
+.hbe .tripopt.clear{grid-template-columns:1fr;text-align:center}
+
+/* ==RAID HELP== */
+.raidbar .rb-help{justify-self:center;margin-top:3px;border:1px solid rgba(255,210,120,.7);background:rgba(255,170,60,.22);color:#ffe2a8;font:700 .74rem inherit;padding:4px 12px;border-radius:999px;cursor:pointer}
+.raidbar .rb-help:disabled{opacity:.6;cursor:default}
+.helpcall{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:4;width:min(380px,calc(100% - 24px));box-sizing:border-box;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(40,8,8,.92);border:1px solid rgba(255,120,80,.7);color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.helpcall .hc-ic{font-size:1.6rem;grid-row:span 2}.helpcall b{font-size:.9rem}.helpcall small{display:block;font-size:.76rem;opacity:.85}
+.helpcall .hc-btns{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}.helpcall .hc-btns button{padding:5px 12px}
+@media (max-width:600px){.helpcall{top:48px}}
 </style>
 
 </head>
@@ -1107,7 +1123,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div class="ovl ovl-loc"><span id="locLbl">Fishing</span> <b id="waterName">Dock Pond</b></div>
     <div class="ovl ovl-live" id="liveChip" hidden></div>
     <div class="ovl ovl-realm" id="realmHud" hidden></div>
-    <div class="raidbar" id="raidBar" hidden></div>
+    <div class="raidbar" id="raidBar" hidden><div id="rbIn"></div><button class="rb-help" id="rbHelp" type="button">📣 Call for help</button></div>
+    <div class="helpcall" id="helpCall" hidden role="status"></div>
     <button class="live-emo" id="liveEmo" hidden aria-label="Send an emote">💬</button>
     <div class="emo-pop" id="emoPop" hidden></div>
     <div class="hint" id="hint">Tap the water to jig</div>
@@ -1336,6 +1353,14 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
     <div class="dw-top"><div class="dw-h"><b>In the display cabinet</b><small id="collCount"></small></div><div class="dw-shelf cab" id="collShelf"></div></div>
     <div class="dw-chips" id="collChips"></div>
     <div class="dw-grid" id="collGrid"></div>
+  </div>
+</div>
+<div class="away" id="hotModal" hidden>
+  <div class="box trip hbe">
+    <div class="slots-h"><div><span class="eyebrow">Potions</span><h2>Edit hot bar</h2></div><button class="x" data-close="hotModal" aria-label="Done">×</button></div>
+    <p class="hbe-tip" id="hbTip"></p>
+    <div class="hbe-slots" id="hbSlots"></div>
+    <div class="tripl" id="hbList"></div>
   </div>
 </div>
 <div class="away" id="tripModal" hidden>
@@ -2138,7 +2163,7 @@ function addCollectible(c,live){
   if('RLM'.includes(c.r)){celebrate({lbl:`${RAR[c.r]} find!`,r:c.r,name:c.n,sub:first?'New for your collection':`Found ×${e.n}`,icon:svgI(c.ic,c.col)});burst(BOB.x,BOB.y-10,[RCOL[c.r],'#ffffff'],c.r==='R'?30:60)}
   else showToast(`Collectible: ${c.n}`,first?'New!':'');
 }
-function givePotion(p,n){S.pots[p]=(S.pots[p]||0)+n;if(!S.hot.includes(p)){const i=S.hot.indexOf(null);if(i>=0)S.hot[i]=p}storeDirty=true;renderHot()}
+function givePotion(p,n){S.pots[p]=(S.pots[p]||0)+n;if(!S.hot.includes(p)){let i=S.hot.indexOf(null);if(i<0)i=S.hot.findIndex(k=>k&&!(S.pots[k]>0));if(i>=0)S.hot[i]=p}storeDirty=true;renderHot()}
 function usePotion(p){
   if(!(S.pots[p]>0))return;if(POT[p].inst){if(S.stamina>=99){showToast('You’re already full of energy');return}S.pots[p]--;S.stamina=Math.min(100,S.stamina+30);sfx('pop');showToast('Ahh, coffee. +30 stamina',POT[p].n);storeDirty=true;renderHot();renderVitals();save();return}S.pots[p]--;
   const frac=cast.el/cast.dur;S.buffs[p]=Math.min(300,(S.buffs[p]||0)+60);cast.dur=castDur();cast.el=frac*cast.dur;
@@ -2635,8 +2660,8 @@ function renderStorage(){
     const a=document.createElement('div');a.className='acts';
     const u=document.createElement('button');u.className='mini';u.textContent='Drink';u.disabled=!n;u.onclick=()=>usePotion(k);
     const hb=document.createElement('button');hb.className='mini'+(on?' hot':'');hb.textContent=on?'On hot bar ✓':'Add to hot bar';
-    hb.disabled=!on&&!S.hot.includes(null);
-    hb.onclick=()=>{if(on)S.hot[S.hot.indexOf(k)]=null;else{const i=S.hot.indexOf(null);if(i<0)return;S.hot[i]=k}renderStorage();renderHot();save()};
+    if(!on&&!S.hot.includes(null))hb.textContent='Swap onto hot bar';
+    hb.onclick=()=>{if(on)S.hot[S.hot.indexOf(k)]=null;else{const i=S.hot.indexOf(null);if(i<0){openHotEdit(null,k);return}S.hot[i]=k}renderStorage();renderHot();save()};
     a.append(u,hb);c.append(a);g.append(c)}
   p.append(g);
   let junkV=0;for(const id in S.junk){const j=JUNK.find(x=>x.id===id);if(j)junkV+=j.v*S.junk[id]}
@@ -2663,9 +2688,25 @@ function renderHot(){
   S.hot.forEach((k,i)=>{const b=document.createElement('button');b.id='hot'+i;
     if(!k){b.className='hslot empty';b.innerHTML=`<span class="k">${i+1}</span>+`;b.title='Empty slot. Add potions from Storage.';b.onclick=()=>openTab('storage')}
     else{const n=S.pots[k]||0;b.className='hslot'+(n?'':' zero')+(S.buffs[k]>0?' on':'');b.innerHTML=`<span class="k">${i+1}</span>${svgI(POT[k].ic||'potion',POT[k].col)}<span class="n">${n}</span>`;
-      b.title=`${POT[k].n}: ${POT[k].d} (press ${i+1})`;b.setAttribute('aria-label',`${POT[k].n}, ${n} left`);b.onclick=()=>usePotion(k)}
-    el.append(b)});
+      b.title=`${POT[k].n}: ${POT[k].d} (press ${i+1}). Hold or right-click to change.`;b.setAttribute('aria-label',`${POT[k].n}, ${n} left`);b.onclick=()=>{if(b.dataset.held){delete b.dataset.held;return}usePotion(k)}}
+    hbHold(b,i);el.append(b)});
+  const e=document.createElement('button');e.className='hslot edit';e.title='Edit hot bar';e.setAttribute('aria-label','Edit hot bar');
+  e.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';e.onclick=()=>openHotEdit();el.append(e);
 }
+// ==HOT BAR EDIT== pick a slot, then a potion. Putting a potion that's already on the bar into another slot swaps them.
+const HBE={sel:0,pend:null};
+function hbHold(b,i){let t=null;const go=()=>{b.dataset.held=1;openHotEdit(i)};
+  b.addEventListener('pointerdown',()=>{clearTimeout(t);t=setTimeout(go,500)});['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>clearTimeout(t)));
+  b.addEventListener('contextmenu',e=>{e.preventDefault();clearTimeout(t);openHotEdit(i)})}
+function openHotEdit(slot,pend){HBE.sel=slot??Math.max(0,S.hot.indexOf(null));HBE.pend=pend||null;
+  if(pend){const z=S.hot.findIndex(k=>k&&!(S.pots[k]>0));HBE.sel=z>=0?z:HBE.sel}renderHotEdit();$('hotModal').hidden=false}
+function hbPut(slot,k){const cur=S.hot[slot];if(k){const at=S.hot.indexOf(k);if(at>=0&&at!==slot)S.hot[at]=cur}S.hot[slot]=k;sfx('click');renderHot();renderStorage();save()}
+function renderHotEdit(){
+  $('hbTip').textContent=HBE.pend?`Pick a slot for ${POT[HBE.pend].n}. It replaces what's there.`:`Slot ${HBE.sel+1} selected. Pick a potion for it, or tap another slot.`;
+  $('hbSlots').innerHTML=S.hot.map((k,i)=>`<button class="hslot${i===HBE.sel&&!HBE.pend?' sel':''}${k?(S.pots[k]>0?'':' zero'):' empty'}" data-hs="${i}" aria-label="Slot ${i+1}${k?': '+POT[k].n:', empty'}"><span class="k">${i+1}</span>${k?svgI(POT[k].ic||'potion',POT[k].col)+`<span class="n">${S.pots[k]||0}</span>`:'+'}</button>`).join('');
+  $('hbList').innerHTML=HBE.pend?'':PKEYS.map(k=>{const at=S.hot.indexOf(k),n=S.pots[k]||0;return `<button class="tripopt" data-hp="${k}">${svgI(POT[k].ic||'potion',POT[k].col)}<b>${POT[k].n} <span style="color:var(--muted);font-weight:400">×${n}</span></b><em>${at===HBE.sel?'In this slot':at>=0?`Slot ${at+1} · swap`:''}</em><span>${POT[k].d}</span></button>`}).join('')+(S.hot[HBE.sel]?`<button class="tripopt clear" data-hp="">Clear slot ${HBE.sel+1}</button>`:'');
+  $('hbSlots').querySelectorAll('[data-hs]').forEach(b=>b.onclick=()=>{const i=+b.dataset.hs;if(HBE.pend){hbPut(i,HBE.pend);HBE.pend=null;HBE.sel=i;$('hotModal').hidden=true;showToast(`${POT[S.hot[i]].n} is in slot ${i+1}`,'Hot bar');return}HBE.sel=i;sfx('click');renderHotEdit()});
+  $('hbList').querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{hbPut(HBE.sel,b.dataset.hp||null);renderHotEdit()})}
 function renderBuffs(){
   const ks=Object.keys(S.buffs).filter(k=>S.buffs[k]>0);
   $('buffs').innerHTML=ks.length?ks.map(k=>`<span class="buff" title="${POT[k].d}">${svgI('potion',POT[k].col)}${POT[k].n.split(' ')[0]} ${Math.ceil(S.buffs[k])}s</span>`).join(''):'<span class="none">No potions active</span>';
@@ -3139,7 +3180,7 @@ $('txCompose').onsubmit=e=>{e.preventDefault();const v=$('txInput').value.trim()
 $('txCam').onclick=txPhoto;
 async function txPoll(force){const m=mpS();if(!m.id||TX.busy||titleOn||document.hidden||MPV.online===false||MPV.online==='nodb')return;
   const inApp=phOpen()&&phView==='texts',inThread=inApp&&TX.view==='thread';
-  if(!force&&Date.now()-TX.lastPoll<(inThread?4000:inApp?8000:25000))return;TX.lastPoll=Date.now();TX.busy=true;
+  if(!force&&Date.now()-TX.lastPoll<(inThread?4000:inApp?8000:45000))return;TX.lastPoll=Date.now();TX.busy=true;
   try{if(inThread)await txLoadThread();
     const first=m.txLast==null,r=await api('texts/poll',{id:m.id,key:m.key,after:m.txLast||0});
     const fresh=first?[]:r.fresh.filter(x=>x.id>(m.txLast||0)&&!(inThread&&x.a===TX.with));
@@ -3709,7 +3750,7 @@ const TABS=['gear','cooler','waters','log','storage','coll'];
 function openTab(t){if(t==='cooler')renderCooler();document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===t));for(const k of TABS)$('pane-'+k).hidden=k!==t}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){$('updModal').hidden=true;$('cardModal').hidden=true;closePhone();$('itemModal').hidden=true;$('decoModal').hidden=true;$('gamesModal').hidden=true;$('troModal').hidden=true;$('collModal').hidden=true;$('tripModal').hidden=true;$('saveModal').hidden=true;$('gbModal').hidden=true;$('bugModal').hidden=true;$('ownModal').hidden=true;if(!$('tvModal').hidden)closeTV()}
+  if(e.key==='Escape'){$('updModal').hidden=true;$('cardModal').hidden=true;closePhone();$('itemModal').hidden=true;$('decoModal').hidden=true;$('gamesModal').hidden=true;$('troModal').hidden=true;$('collModal').hidden=true;$('hotModal').hidden=true;$('tripModal').hidden=true;$('saveModal').hidden=true;$('gbModal').hidden=true;$('bugModal').hidden=true;$('ownModal').hidden=true;if(!$('tvModal').hidden)closeTV()}
   if(/^[1-5]$/.test(e.key)&&!e.target.closest('input,textarea')){const k=S.hot[+e.key-1];if(k)usePotion(k)}
 });
 let lastJig=0;
@@ -4351,7 +4392,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:42,n:'Through the Gate',items:['New: pick Male or Female for your angler in Friends → My card. It changes your contact portrait and your angler on the lake, and friends fishing with you see it live.','Bug fix: text no longer runs off the edge of the phone screen, including with Large or Extra large text. The ‹ Home button stays on one line and the login streak days fit their boxes.','Catch messages now pop up at the top of the lake view instead of the bottom, so they don’t cover pumpkins and other things to tap.','New app: Crate Expectations! Open crates for 40 boat paints across five tiers, from plain Common colors to animated Legendary paints like Solid Gold and Prismatic. Every paint fits every boat. One free crate a day, more for cash, and friends on the live lake see your paint.','Tapping the front door now walks you outside your cabin instead of straight onto the boat. Look around, then tap Where to? to pick your fishing spot. Head back out still takes you straight to where you were fishing.','New app: Lake 7 Weather. Current conditions, the next 12 hours, a 7-day forecast, storm and fog alerts and an angler’s report on what the weather means for fishing. Tap the weather widget on your home screen to open it.','New: you can leave a tournament early with Leave tournament on the scoreboard. You forfeit, so the entry fee isn’t refunded.','Photos you text now show you in your contact card look: your gender, hat, outfit and face. Photos sent before this update stay as they were.','Balance: replaying a case you’ve already solved now pays 10% of the prize, or 25% if you beat your best time. Your first solve still pays in full.','Messages: you can now send 5 photos a day to each person you text. Before, it was 2 a day in total.','Three portal realms for the biggest boats: the Sea of Tranquility on the Moon, the Ember Lake in the Underworld and the Cloud Sea. Build gates from the new Beyond the Lake section of the Waters tab.','22 new fish, from the Lunar Leviathan to the three-headed Cerberus Catfish and the Sky Whale, plus new materials, junk, collectibles and logbook sets.','Each realm has a twist: low gravity and an air supply on the Moon, melting lines and pre-cooked fish in the Underworld, and updrafts that scoop up whole schools in the Cloud Sea.','Realm gear: Big Air Tank, Moon Base, Hellforged Line and Sky Kite.','A portal ring floats beside your dock once you build a gate.']},
+ {v:42,n:'Through the Gate',items:['New: pick Male or Female for your angler in Friends → My card. It changes your contact portrait and your angler on the lake, and friends fishing with you see it live.','Bug fix: text no longer runs off the edge of the phone screen, including with Large or Extra large text. The ‹ Home button stays on one line and the login streak days fit their boxes.','Easier Lake Beast fight: a 3-second countdown before it starts, your marker starts inside the green zone, the line loses strength half as fast when you drift out, and you start with more progress.','Live raids: tap Call for help on the raid bar to alert everyone fishing the other spots on your lake. They get a banner with a Join button that takes them straight to the fight.','Hot bar: tap the pencil at the end of the bar, or hold (right-click on a computer) any slot, to swap or clear potions. A full bar no longer blocks adding from Storage, and new potions fill slots whose potions have run out.','Behind the scenes: leaderboards, records and the friends list are now shared between players for a few minutes instead of rebuilt for everyone, so the server can handle a lot more anglers. New lake records still show up right away.','Catch messages now pop up at the top of the lake view instead of the bottom, so they don’t cover pumpkins and other things to tap.','New app: Crate Expectations! Open crates for 40 boat paints across five tiers, from plain Common colors to animated Legendary paints like Solid Gold and Prismatic. Every paint fits every boat. One free crate a day, more for cash, and friends on the live lake see your paint.','Tapping the front door now walks you outside your cabin instead of straight onto the boat. Look around, then tap Where to? to pick your fishing spot. Head back out still takes you straight to where you were fishing.','New app: Lake 7 Weather. Current conditions, the next 12 hours, a 7-day forecast, storm and fog alerts and an angler’s report on what the weather means for fishing. Tap the weather widget on your home screen to open it.','New: you can leave a tournament early with Leave tournament on the scoreboard. You forfeit, so the entry fee isn’t refunded.','Photos you text now show you in your contact card look: your gender, hat, outfit and face. Photos sent before this update stay as they were.','Balance: replaying a case you’ve already solved now pays 10% of the prize, or 25% if you beat your best time. Your first solve still pays in full.','Messages: you can now send 5 photos a day to each person you text. Before, it was 2 a day in total.','Three portal realms for the biggest boats: the Sea of Tranquility on the Moon, the Ember Lake in the Underworld and the Cloud Sea. Build gates from the new Beyond the Lake section of the Waters tab.','22 new fish, from the Lunar Leviathan to the three-headed Cerberus Catfish and the Sky Whale, plus new materials, junk, collectibles and logbook sets.','Each realm has a twist: low gravity and an air supply on the Moon, melting lines and pre-cooked fish in the Underworld, and updrafts that scoop up whole schools in the Cloud Sea.','Realm gear: Big Air Tank, Moon Base, Hellforged Line and Sky Kite.','A portal ring floats beside your dock once you build a gate.']},
  {v:41,n:'Second Wind',items:['Balance: fast rods no longer drain your stamina. Rare and Legendary catches now cost stamina in step with how fast you cast, so a full bar lasts about the same on every rod.','New rod perks: Heirloom Bamboo (big catches cost 25% less stamina), Starlight (+10 stamina for every Legendary), Abyssal (free jigging), Lantern Legend (big catches cost 50% less). See them in the Gear tab.','New: Thermos of Coffee in the Shop app under Supplies. Restores 30 stamina right away.']},
  {v:40,n:'Live Lake',items:['See friends fishing the same water in real time: their boats, casts and catches show up on your lake with name tags.','Big catches get a moment: rare fish light up, Legendaries set off fireworks over their boat.','Send quick emotes with the 💬 button. Tap a friend’s boat to open their card.','Live raids: when two or more friends share a water, a monster can surface. Every fish anyone lands hits it. Beat it in 3 minutes to split the bounty.','Boats now turn around to pull into the dock, and the jon boat and bass boat have a proper outboard motor on the back.','Bug fix: the raid boss health numbers were cut off. They’re now centered on a taller health bar and easy to read.','Bug fix: friends fishing Fork River showed up behind the riverbank grass. They now sit out on the water, in front of the scenery.','Bug fix: a flickering splash at the front of moving boats looked like a second propeller. It’s gone, so the only propeller is on the motor at the back.']},
  {v:39,n:'Lake Life',items:['🎃 Halloween event until November 1: four spooky fish, a pumpkin hunt with costumes and a Golden Pumpkin collectible, and a Ghost Gar contest with $100,000 for the winner. Open the new Spooky app on your phone.','Trick-or-treaters come to your cabin after 5 PM. Hand out candy for cash and bonus pumpkins.','Random scene events: ghosts, bats, a witch across the moon, deer, eagles, loons, balloons, banner planes, rainbows and the northern lights.','A stormy new title screen, plus a Continue card with your progress.','Lake projects and retiring in the Shop app. Logbook set rewards. A third case: The Keeper’s Light.','Friends: a weekly lake monster to beat together, 1v1 fishing challenges, guestbooks and yard likes with a weekly Best Yard prize.','A first-day guide for new players, a taller lake view on phones, a Text size setting, and Report a problem in Help.']},
@@ -5822,13 +5863,19 @@ function renderCase2(){const q=Q2(),p=$('caseBody');q.seen=q.step;const ok=v=>v?
   return html+`<div class="ptitle">Evidence</div><div class="ev">${ev.map(e=>`<span>${e}</span>`).join('')}</div></div>`}
 
 let BF=null;
-function openBeast(){if(BF)return;sfx('ominous');BF={z:.36,zv:.004,zw:.28,m:.3,mv:0,prog:.3,hold:false,last:performance.now(),done:false};
-  $('beastModal').hidden=false;$('rMsg').textContent='Hold REEL to keep the gold marker inside the green zone. Let go to give it line.';$('reelBtn').textContent='Hold to reel';$('reelBtn').focus();requestAnimationFrame(beastLoop)}
-function beastLoop(now){if(!BF||BF.done)return;const dt=Math.min(3,(now-BF.last)/16.67);BF.last=now;
+function openBeast(){if(BF)return;sfx('ominous');BF={z:.36,zv:.004,zw:.28,m:.5,mv:0,prog:.4,hold:false,last:performance.now(),done:false,cd:3000,cdS:4};
+  $('beastModal').hidden=false;$('rMsg').textContent='Get ready… 3';$('reelBtn').textContent='Hold to reel';$('reelBtn').focus();requestAnimationFrame(beastLoop)}
+function beastLoop(now){if(!BF||BF.done)return;
+  // 3-second countdown before the fight: everything holds still so you can get your thumb on the button
+  if(BF.cd>0){BF.cd-=now-BF.last;BF.last=now;const sec=Math.ceil(Math.max(0,BF.cd)/1000);
+    if(sec!==BF.cdS){BF.cdS=sec;if(sec>0){$('rMsg').textContent=`Get ready… ${sec}`;tone(660,.12,{vol:.05})}else{$('rMsg').textContent='REEL! Hold to keep the gold marker inside the green zone. Let go to give it line.';tone(990,.25,{vol:.06})}}
+    $('rZone').style.left=BF.z*100+'%';$('rZone').style.width=BF.zw*100+'%';$('rZone').classList.add('hit');$('rMark').style.left=BF.m*100+'%';$('rProg').style.width=BF.prog*100+'%';
+    return requestAnimationFrame(beastLoop)}
+  const dt=Math.min(3,(now-BF.last)/16.67);BF.last=now;
   if(Math.random()<.025*dt)BF.zv=(Math.random()-.5)*.02;BF.z+=BF.zv*dt;if(BF.z<0){BF.z=0;BF.zv=Math.abs(BF.zv)}if(BF.z>1-BF.zw){BF.z=1-BF.zw;BF.zv=-Math.abs(BF.zv)}
   BF.mv+=(BF.hold?.0008:-.0007)*dt;BF.mv*=Math.pow(.94,dt);BF.m+=BF.mv*dt;if(BF.m<0){BF.m=0;BF.mv=0}if(BF.m>1){BF.m=1;BF.mv=0}
   if(BF.hold&&Math.random()<.22*dt)sfx('ratchet');
-  const inz=BF.m>=BF.z&&BF.m<=BF.z+BF.zw;BF.prog+=(inz?.0036:-.0018)*dt;
+  const inz=BF.m>=BF.z&&BF.m<=BF.z+BF.zw;BF.prog+=(inz?.0036:-.0009)*dt;
   $('rZone').style.left=BF.z*100+'%';$('rZone').style.width=BF.zw*100+'%';$('rZone').classList.toggle('hit',inz);$('rMark').style.left=BF.m*100+'%';$('rProg').style.width=Math.max(0,Math.min(1,BF.prog))*100+'%';
   const pct=BF.z/(1-BF.zw)*100;$('bShadow').style.left=`calc(${pct}% - ${pct*2}px)`;
   if(BF.prog>=1)return beastWin();if(BF.prog<=0)return beastLose();requestAnimationFrame(beastLoop)}
@@ -6322,10 +6369,22 @@ function liveMsg(o){const me=S.mp&&S.mp.id;
       const f=FI(o.f);showToast(`${p.name} landed a ${o.w} lb ${o.v&&VAR[o.v]?VAR[o.v].n+' ':''}${f?f.n:o.f}!`,'Live')}}
   else if(o.t==='emo'){const p=LIVE.peers.get(o.pid);if(p){p.emo={e:o.e,t:0};sfx('pop')}}
   else if(o.t==='raid'){LIVE.raid=o.raid;sfx('ominous');celebrate({lbl:'Live raid!',r:'L',name:`${o.raid.name} surfaced!`,sub:'Every fish anyone here lands hits it. 3 minutes!',icon:svgI('crown','#ff6b6b')});if(typeof phNotify==='function')phNotify('friends','Live raid',`${o.raid.name} surfaced on ${W(S.water).n}!`)}
+  else if(o.t==='help'){if(o.water!==S.water&&o.pid!==S.mp.id&&o.ends>Date.now())helpShow(o)}
+  else if(o.t==='helpsent'){if(o.n<0){LIVE.helped=0;showToast('Someone here just called for help. Try again in a moment.','Live raid')}else{LIVE.helpN=o.n;showToast(o.n?`Help is on the way: ${o.n} angler${o.n>1?'s':''} elsewhere on the lake got your call`:'Your call went out, but nobody is fishing the other spots right now','Live raid')}}
+  else if(o.t==='helpcalled'){showToast(`${o.from} called for backup from the rest of the lake`,'Live raid')}
   else if(o.t==='raidend'){const was=LIVE.raid;LIVE.raid=null;const mine=me&&(o.hits||[]).includes(me);
     if(o.win){if(mine){S.coins+=o.reward;save();sfx('fanfare');celebrate({lbl:'Raid won!',r:'L',name:`${o.name} is beaten`,sub:`+$${money(o.reward)} · top: ${(o.top||[]).slice(0,3).map(x=>`${x.name} ${x.w} lb`).join(', ')}`,icon:cupSvg});burst(560,280,['#ffd05a','#ff6b6b','#ffffff'],90)}else showToast(`${o.name} was beaten by the others. Land a fish next time to share the bounty!`,'Live raid')}
     else showToast(`${o.name} slipped back into the deep. Better luck next time.`,'Live raid')}
   renderLiveUI()}
+
+// ==RAID HELP== the caller's room relays to the other four spots on the same lake; anyone fishing there gets a banner to join.
+const HC={o:null};
+function helpShow(o){HC.o=o;sfx('ominous');hcRender();if(typeof phNotify==='function'&&document.hidden)phNotify('friends','Raid help',`${o.from} needs help with ${o.name} at ${W(o.water).n}`)}
+function hcRender(){const el=$('helpCall'),o=HC.o;if(!o){el.hidden=true;return}const w=W(o.water),ok=S.boat>=w.boat,busy=TRV.on||!!S.sleep;
+  el.innerHTML=`<span class="hc-ic" aria-hidden="true">📣</span><div><b>${esc(o.from)} needs help!</b><small>${esc(o.name)} surfaced at ${w.n} · <span id="hcLeft"></span> left</small></div>
+    <div class="hc-btns"><button class="ghost" id="hcNo">Not now</button><button class="jig" id="hcGo" ${ok&&!busy?'':'disabled'}>${ok?`Join at ${w.n}`:`Needs a ${GEAR.boat.items[w.boat].n}`}</button></div>`;el.hidden=false;
+  $('hcNo').onclick=e=>{e.stopPropagation();HC.o=null;hcRender()};$('hcGo').onclick=e=>{e.stopPropagation();const to=o.water;HC.o=null;hcRender();if(S.tour&&S.tour.phase==='live'&&S.tour.water!==to)showToast('Your tournament catches only count back at '+W(S.tour.water).n,'Heads up');travelTo(to)};hcTick()}
+function hcTick(){const o=HC.o;if(!o)return;const left=Math.max(0,Math.ceil((o.ends-Date.now())/1000));if(!left||o.water===S.water){HC.o=null;hcRender();return}const t=$('hcLeft');if(t)t.textContent=`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`}
 function liveSlotPos(p){if(p.slot<0)return null;return (LIVE_SLOTS_BY[S.water]||LIVE_SLOTS)[p.slot]}
 function liveOnCatch(f,w,vr){if(LIVE.st!=='on')return;liveSend({t:'catch',f:f.id,w,v:vr||'',r:f.r})}
 function liveEmote(i){if(LIVE.st!=='on'||LIVE.emoT>0)return;LIVE.emoT=2;LIVE.myEmo={e:i,t:0};liveSend({t:'emo',e:i});$('emoPop').hidden=true;sfx('pop')}
@@ -6365,9 +6424,10 @@ function raidDraw(d,T){const R=LIVE.raid,k=Math.max(.35,R.hp/R.max),x=560+Math.s
   ctx.restore()}
 function renderLiveUI(){const chip=$('liveChip'),btn=$('liveEmo'),rb=$('raidBar');if(!chip)return;const on=LIVE.st==='on'&&!S.sleep&&!TRV.on;
   const n=[...LIVE.peers.values()].filter(p=>p.out==null).length;chip.hidden=!on;if(on)chip.innerHTML=`<i></i>${n?`${n+1} fishing here`:'Live · just you'}`;btn.hidden=!on;if(!on)$('emoPop').hidden=true;
-  const R=on&&LIVE.raid;rb.hidden=!R;if(R){const left=Math.max(0,Math.ceil((R.ends-Date.now())/1000));rb.innerHTML=`<b>🐉 ${esc(R.name)}</b><div class="rb-bar"><i style="width:${(R.hp/R.max*100).toFixed(1)}%"></i><span>${Math.round(R.hp).toLocaleString()} / ${Math.round(R.max).toLocaleString()} lb</span></div><small>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} left · every fish hits it</small>`}}
+  const R=on&&LIVE.raid;rb.hidden=!R;if(R){const left=Math.max(0,Math.ceil((R.ends-Date.now())/1000)),hb=$('rbHelp');hb.disabled=LIVE.helped===R.ends;hb.textContent=LIVE.helped===R.ends?(LIVE.helpN>0?`📣 Help called · ${LIVE.helpN} angler${LIVE.helpN>1?'s':''} alerted`:'📣 Help called'):'📣 Call for help';$('rbIn').innerHTML=`<b>🐉 ${esc(R.name)}</b><div class="rb-bar"><i style="width:${(R.hp/R.max*100).toFixed(1)}%"></i><span>${Math.round(R.hp).toLocaleString()} / ${Math.round(R.max).toLocaleString()} lb</span></div><small>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} left · every fish hits it</small>`}hcTick()}
 (()=>{const pop=$('emoPop');pop.innerHTML=EMO.map((e,i)=>`<button data-emo="${i}">${e}</button>`).join('');pop.querySelectorAll('[data-emo]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();liveEmote(+b.dataset.emo)});
   $('liveEmo').onclick=ev=>{ev.stopPropagation();pop.hidden=!pop.hidden};
+  $('rbHelp').onclick=ev=>{ev.stopPropagation();const R=LIVE.raid;if(!R||LIVE.helped===R.ends||LIVE.st!=='on')return;LIVE.helped=R.ends;LIVE.helpN=0;liveSend({t:'help'});sfx('click');renderLiveUI()};
   document.addEventListener('visibilitychange',()=>{clearTimeout(LIVE.hidT);if(document.hidden)LIVE.hidT=setTimeout(()=>{if(document.hidden)liveClose()},60000)})})();
 function peerTip(p){return `<b>${esc(p.name)}</b><small>${GEAR.boat.items[p.boat|0]?GEAR.boat.items[p.boat|0].n:'Boat'}${p.wear?' · in costume':''} · tap to see their card</small>`}
 function peerOpen(p){const pl=(MPV.players||[]).find(x=>x.id===p.pid);MPV.contact=pl||{id:p.pid,name:p.name,stats:{}};MPV.tab='boards';openPhone();phShow('friends');setTimeout(()=>{MPV.contact=pl||{id:p.pid,name:p.name,stats:{}};renderFriends()},150)}
