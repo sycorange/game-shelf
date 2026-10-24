@@ -46,6 +46,7 @@ async function init(db){
   ]);
   try{await db.prepare('ALTER TABLE players ADD COLUMN pub INTEGER DEFAULT 1').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN pin TEXT').run()}catch(e){/* already there */}
+  await db.prepare('CREATE TABLE IF NOT EXISTS cfg(k TEXT PRIMARY KEY,v TEXT)').run();
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS gchat(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,owner TEXT,created INTEGER,last INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS gmem(gid INTEGER,pid TEXT,seen INTEGER DEFAULT 0,joined INTEGER,PRIMARY KEY(gid,pid))`),
@@ -214,7 +215,7 @@ async function syncExtras(db,me,b,now,wk){const out={};
   try{out.chal=await chalPart(db,me,b,now)}catch(e){}
   try{out.owner=(await ownerId(db))===me.id}catch(e){}
   return out}
-async function extraRoutes(p,db,me,b,now){
+async function extraRoutes(p,db,me,b,now,url){
   if(p==='guest/sign'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);
     const t=await db.prepare('SELECT id FROM players WHERE id=?').bind(to).first();if(!t)return json({error:'no-player'},404);
     const r=await db.prepare('INSERT OR IGNORE INTO guest(to_pid,from_pid,from_name,st,note,day,ts) VALUES(?,?,?,?,?,?,?)').bind(to,me.id,me.name,Math.max(0,Math.min(11,b.st|0)),clean(b.note,80),dayKey(now),now).run();
@@ -241,6 +242,13 @@ async function extraRoutes(p,db,me,b,now){
   if(p==='owner/stats'){const d=now-864e5,q=(sql,...a)=>db.prepare(sql).bind(...a).first();
     const r=await Promise.all([q('SELECT COUNT(*) AS c FROM players'),q('SELECT COUNT(*) AS c FROM players WHERE seen>?',d),q('SELECT COUNT(*) AS c FROM players WHERE seen>?',now-7*864e5),q('SELECT COUNT(*) AS c FROM catches WHERE ts>?',d),q('SELECT COUNT(*) AS c FROM texts WHERE ts>?',d),q('SELECT COUNT(*) AS c FROM cloud WHERE up>?',d),q('SELECT COUNT(*) AS c FROM bugs'),q('SELECT COUNT(*) AS c FROM guest WHERE ts>?',d),q("SELECT COUNT(*) AS c FROM chal WHERE st IN ('pend','live')"),q('SELECT COUNT(*) AS c FROM mail WHERE ts>?',d)]);
     const [players,a24,a7,c24,t24,cl24,bugs,g24,chal,m24]=r.map(x=>x?x.c|0:0);return json({players,a24,a7,c24,t24,cl24,bugs,g24,chal,m24})}
+  if(p==='owner/dc'){const c=await dcCfg(db),mask=u=>u?u.replace(/\/[\w-]{20,100}$/,'/••••••'):'';return json({raids:mask(c.raids),catches:mask(c.catches),news:mask(c.news),role:c.role||''})}
+  if(p==='owner/dcset'){const st=[];for(const k of ['raids','catches','news']){if(b[k]===undefined)continue;const v=String(b[k]||'').trim();if(v&&!DC_RE.test(v))return json({error:'bad-webhook',which:k},400);st.push(db.prepare('INSERT INTO cfg(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind('dc:'+k,v))}
+    if(b.role!==undefined){const r=String(b.role||'').replace(/\D/g,'').slice(0,25);st.push(db.prepare('INSERT INTO cfg(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind('dc:role',r))}
+    st.push(db.prepare('INSERT INTO cfg(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind('dc:site',url.origin+'/lantern-lake/'));await db.batch(st);DCC=null;return json({ok:true})}
+  if(p==='owner/dctest'){const ch=['raids','catches','news'].includes(b.ch)?b.ch:'news';DCC=null;const r=await dcPost(db,ch,{embeds:[{color:0x4aa8d0,title:'🎣 Test from Lantern Lake',description:`This channel will get ${ch==='raids'?'raid alerts':ch==='catches'?'new lake records':'patch notes'} from the game.`}]});return json({ok:!!r})}
+  if(p==='owner/dcnews'){const v=Math.max(0,b.v|0),n=clean(b.n,40),items=(Array.isArray(b.items)?b.items:[]).slice(0,8).map(x=>String(x||'').slice(0,400));if(!items.length)return json({error:'empty'},400);
+    const c=await dcCfg(db);const r=await dcPost(db,'news',{embeds:[{color:0xff7a3d,title:`📰 Update ${v}: ${n}`,description:(items.map(x=>'• '+x).join('\n')).slice(0,3800)+(c.site?`\n\n[Play now](${c.site})`:'')}]});return json({ok:!!r})}
   if(p==='owner/bugs'){const r=await db.prepare('SELECT id,name,msg,errs,ua,ver,scr,ts FROM bugs ORDER BY id DESC LIMIT 60').all();return json({bugs:r.results})}
   if(p==='owner/pinreset'){const n=clean(b.name,16).toLowerCase();const r=await db.prepare('UPDATE players SET pin=NULL WHERE lname=?').bind(n).run();
     await db.prepare("DELETE FROM pinfail WHERE k LIKE ?").bind('%:'+n+'|%').run();return json({ok:true,found:!!(r.meta&&r.meta.changes)})}
@@ -253,6 +261,20 @@ async function bugRoute(db,b,now){const n=await db.prepare('SELECT COUNT(*) AS c
   await db.prepare('INSERT INTO bugs(pid,name,msg,errs,ua,ver,scr,ts) VALUES(?,?,?,?,?,?,?,?)').bind(pid,name||'Anonymous',clean(b.msg,1500),String(b.errs||'').slice(0,4000),clean(b.ua,300),clean(b.ver,20),clean(b.scr,40),now).run();return json({ok:true})}
 
 
+
+// ==DISCORD== the game posts raids, big records and patch notes to the owner's Discord through webhooks.
+// Webhook links are secret, so they live in the cfg table (set from Owner tools), never in the code.
+const DC_RE=/^https:\/\/(?:(?:ptb|canary)\.)?discord(?:app)?\.com\/api\/webhooks\/\d{5,25}\/[\w-]{20,100}$/;
+const DC_FISH={"pickerel": "Chain Pickerel", "grasscarp": "Grass Carp", "eel": "American Eel", "koi": "Ghost Koi", "tench": "Golden Tench", "bowfin": "Bowfin", "whitefish": "Lake Whitefish", "spotgar": "Spotted Gar", "tiger": "Tiger Muskie", "bluepike": "Blue Pike", "flathead": "Flathead Catfish", "shovelnose": "Shovelnose Sturgeon", "steelhead": "Steelhead", "golden": "Golden Trout", "alligar": "Alligator Gar", "muskie": "Muskellunge", "paddle": "Paddlefish", "atlsalmon": "Atlantic Salmon", "sturgeon": "Lake Sturgeon", "aurora": "Aurora Trout", "cobia": "Cobia", "tarpon": "Tarpon", "blackdrum": "Black Drum", "tuna": "Atlantic Bluefin Tuna", "swordfish": "Swordfish", "orfe": "Golden Orfe", "stormkoi": "Storm Koi", "lamprey": "Silver Lamprey", "thundermusk": "Thunderhead Muskie", "grayling": "Arctic Grayling", "boltsturg": "Thunderbolt Sturgeon", "sculpin": "Deepwater Sculpin", "frostchar": "Frost Char", "cod": "Atlantic Cod", "marlin": "Blue Marlin", "lakebeast": "The Lake Beast", "cometrout": "Comet Trout", "eclipseray": "Eclipse Ray", "lunarlev": "Lunar Leviathan", "soulcarp": "Soul Carp", "obsidiangar": "Obsidian Gar", "cerberus": "Cerberus Catfish", "prismtrout": "Prism Trout", "thundereel": "Thunder Eel", "skywhale": "Sky Whale", "ghostgar": "Ghost Gar", "witcheel": "Witch’s Eel", "bonepike": "Skeleton Pike"};
+const WATER_N={pond:'Dock Pond',lake:'Reed Lake',river:'Fork River',deep:'Deepwater Basin',bay:'Misty Bay'};
+let DCC=null,DCT=0;
+async function dcCfg(db){if(DCC&&Date.now()-DCT<60000)return DCC;try{const r=await db.prepare("SELECT k,v FROM cfg WHERE k LIKE 'dc:%'").all();DCC={};for(const x of r.results)DCC[x.k.slice(3)]=x.v}catch(e){DCC={}}DCT=Date.now();return DCC}
+async function dcPost(db,ch,body,wait){const c=await dcCfg(db),u=c[ch];if(!u||!DC_RE.test(u))return null;
+  try{const r=await fetch(u+(wait?'?wait=true':''),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({username:'Lantern Lake',allowed_mentions:{parse:[]}},body))});
+    if(!wait||!r.ok)return r.ok?'ok':null;const j=await r.json();return j.id||null}catch(e){return null}}
+async function dcEdit(db,ch,id,body){const c=await dcCfg(db),u=c[ch];if(!u||!DC_RE.test(u)||!/^\d+$/.test(String(id)))return;
+  try{await fetch(`${u}/messages/${id}`,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({allowed_mentions:{parse:[]}},body))})}catch(e){}}
+const dcLink=c=>c.site?`\n[Open Lantern Lake](${c.site})`:'';
 // ==LIVE LAKE== one Durable Object room per lake scope and water. Players connect with a WebSocket while they fish;
 // the room relays boats, catches and emotes, and now and then a raid monster surfaces for everyone in the room.
 const LIVE_WATERS=['pond','lake','river','deep','bay'];
@@ -312,13 +334,19 @@ export class LakeRoom{
     if(R&&!R.done){if(now>=R.ends-500){R.done=true;await this.ctx.storage.put('raid',R);await this.raidEnd(false)}else await this.ctx.storage.setAlarm(R.ends);return}
     const ps=this.peers();if(ps.length<2)return;const water=(await this.ctx.storage.get('water'))||'lake';
     const max=Math.round((RAID_PER[water]||150)*ps.length);const raid={name:RAID_NAMES[Math.floor(Math.random()*RAID_NAMES.length)],hp:max,max,ends:now+RAID_MS,hits:{},names:{},done:false};
-    await this.ctx.storage.put('raid',raid);this.bcast({t:'raid',raid:{name:raid.name,hp:max,max,ends:raid.ends}});await this.ctx.storage.setAlarm(raid.ends)}
+    await this.ctx.storage.put('raid',raid);this.bcast({t:'raid',raid:{name:raid.name,hp:max,max,ends:raid.ends}});await this.ctx.storage.setAlarm(raid.ends);
+    try{const room=(await this.ctx.storage.get('room'))||'';if(room.startsWith('all:')&&this.env.DB){const c=await dcCfg(this.env.DB),role=/^\d{5,25}$/.test(c.role||'')?c.role:'';
+      const id=await dcPost(this.env.DB,'raids',{content:role?`<@&${role}>`:undefined,allowed_mentions:{roles:role?[role]:[]},embeds:[{color:0xff7a3d,title:`🛟 Raid! ${raid.name} on ${WATER_N[water]||water}`,description:`${ps.length} anglers are fighting it right now. You have 3 minutes to jump in and help.${dcLink(c)}`}]},true);
+      if(id){raid.dc=id;await this.ctx.storage.put('raid',raid)}}}catch(e){}}
   async raidEnd(win){const R=await this.ctx.storage.get('raid');await this.ctx.storage.put('raidNext',Date.now()+RAID_GAP);try{await this.ctx.storage.deleteAlarm()}catch(e){}
     const top=Object.entries(R.hits).sort((x,y)=>y[1]-x[1]).slice(0,5).map(([pid,w])=>({name:R.names[pid]||'?',w:Math.round(w)}));
-    this.bcast({t:'raidend',win,name:R.name,hits:Object.keys(R.hits),top,reward:win?Math.round(R.max*20):0});await this.maybeRaid()}
+    this.bcast({t:'raidend',win,name:R.name,hits:Object.keys(R.hits),top,reward:win?Math.round(R.max*20):0});
+    if(R.dc&&this.env.DB){const water=(await this.ctx.storage.get('water'))||'lake';
+      try{await dcEdit(this.env.DB,'raids',R.dc,{content:'',embeds:[{color:win?0x3fb950:0x8b949e,title:`${win?'🏆 Won':'🌊 Got away'}: ${R.name} on ${WATER_N[water]||water}`,description:win?`${Object.keys(R.hits).length} anglers landed it.${top.length?' Top haulers: '+top.slice(0,3).map(x=>`**${x.name}** (${x.w} lb)`).join(', ')+'.':''}`:`It escaped this time. The next raid could start any minute.`}]})}catch(e){}}
+    await this.maybeRaid()}
 }
 
-async function route(req,env,url){
+async function route(req,env,url,ctx){
   const db=env.DB,p=url.pathname.replace(/^\/api\//,''),now=Date.now();
   if(p==='ping')return json({ok:true,week:weekKey(),v:7,live:!!env.LAKE});
   if(p==='live')return liveRoute(req,env,url,db);
@@ -361,7 +389,7 @@ async function route(req,env,url){
     if(/^(\d)\1{5}$/.test(pin)||'0123456789'.includes(pin)||'9876543210'.includes(pin))return json({error:'pin-too-easy'},400);
     await db.prepare('UPDATE players SET pin=? WHERE id=?').bind(await pinMake(pin),me.id).run();return json({ok:true})}
   if(p==='pin/clear'){await db.prepare('UPDATE players SET pin=NULL WHERE id=?').bind(me.id).run();return json({ok:true})}
-  {const xr=await extraRoutes(p,db,me,b,now);if(xr)return xr}
+  {const xr=await extraRoutes(p,db,me,b,now,url);if(xr)return xr}
   // Cloud save: the latest copy of this player's game, so their devices stay in sync.
   if(p==='cloud/put'){
     const d=String(b.data||'');if(d.length<20||d.length>MAX_SAVE)return json({error:'bad-save'},400);
@@ -437,6 +465,9 @@ async function route(req,env,url){
     const res=await db.batch(st);
     // a new lake-wide record clears the cached record list so it shows up on the next sync
     if(gi.some(i=>res[i]&&res[i].meta&&res[i].meta.changes>0))try{await db.prepare("DELETE FROM kvc WHERE k='rec:all'").run()}catch(e){}
+    {const bestE=Object.entries(b.best||{}).slice(0,120).filter(([,w0])=>{const w=+w0;return w>0&&w<5000});const won=[];let k=0;
+      for(const i of gi){const fish=clean(bestE[k]&&bestE[k][0],24);k++;if(res[i]&&res[i].meta&&res[i].meta.changes>0&&DC_FISH[fish])won.push([DC_FISH[fish],+bestE[k-1][1]])}
+      if(won.length&&ctx)ctx.waitUntil((async()=>{const c=await dcCfg(db);await dcPost(db,'catches',{embeds:[{color:0xffd05a,title:`🏆 New lake record${won.length>1?'s':''} by ${me.name}`,description:won.slice(0,5).map(([n,w])=>`**${n}**: ${(+w).toFixed(2)} lb`).join('\n')+dcLink(c)}]})})())}
     const X=await syncExtras(db,me,b,now,wk);
     let sc;try{sc=await scopeOf(db,me,b.lake)}catch(e){sc=await scopeOf(db,me,'all')}
     const lw=String(+wk-1);
@@ -593,11 +624,11 @@ async function route(req,env,url){
   return json({error:'not-found'},404);
 }
 export default {
-  async fetch(req,env){
+  async fetch(req,env,ctx){
     const url=new URL(req.url);
     if(!url.pathname.startsWith('/api/'))return env.ASSETS.fetch(req);
     if(!env.DB)return json({error:'no-db'},503);
-    try{await init(env.DB);return await route(req,env,url)}
+    try{await init(env.DB);return await route(req,env,url,ctx)}
     catch(e){const m=String(e&&e.message||e);return json({error:m},m==='auth'?401:m==='bad-request'?400:m==='not-member'?403:500)}
   }
 };

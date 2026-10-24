@@ -909,6 +909,13 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .polaroid{display:block;width:150px;aspect-ratio:600/720;background:#fbf9f2;border-radius:2px;box-shadow:0 5px 14px rgba(0,0,0,.28);transform:rotate(-2.5deg)}
 .bub.me .polaroid{transform:rotate(2.5deg)}
 .polaroid.big{width:min(170px,70%);margin:6px auto 8px;transform:rotate(-1.5deg)}
+.fact-box{max-width:460px}
+.fact-box img.fc-pic{display:block;width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin:6px 0 10px;background:rgba(255,255,255,.05)}
+.fact-box .fc-sci{font-style:italic;color:var(--muted);margin:-4px 0 8px;font-size:.88rem}
+.fact-box .fc-txt{line-height:1.5;margin:0 0 10px}
+.fact-box .fc-src{font-size:.75rem;color:var(--muted);margin:0 0 6px}.fact-box .fc-src a{color:inherit}
+.fact-box .fc-lore{border-left:3px solid var(--buoy,#ff7a3d);padding:4px 0 4px 12px;margin:6px 0 12px;line-height:1.5}
+.fact-box .fc-tag{display:inline-block;font-size:.7rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,122,61,.15);color:#ffb08a;border-radius:999px;padding:3px 9px;margin-bottom:6px}
 .tx-gav{background:linear-gradient(135deg,#2f9e8f,#1f7bf2);position:relative}.tx-gav svg{width:24px;height:24px}
 .tx-empty .tx-gav svg{width:32px;height:32px}
 .tx-ttl{border:0;background:none;font:inherit;color:inherit;padding:0;display:grid;justify-items:center;cursor:pointer;max-width:100%}
@@ -1023,6 +1030,12 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 @media (prefers-reduced-motion:reduce){.toast div{transition:none}.vital.crit,.flames span{animation:none}.ach,.ach.out,.ach::after{animation:none}}
 
 /* ==LAKE 7 WEATHER== */
+.ph-screen.v-dc{background:linear-gradient(180deg,#1e2140,#16182e 60%,#111325);color:#eef0ff}.ph-screen.v-dc .ph-bar{color:#fff}.ph-screen.v-dc .ph-home{background:rgba(255,255,255,.6)}
+#app-discord{overflow:auto;gap:10px}
+.dc-hero{display:grid;gap:4px;text-align:center;padding:4px 6px 2px}.dc-hero b{font-size:1rem}.dc-hero p{margin:0;font-size:.78rem;color:#b9bde6;line-height:1.4}
+.dc-frame{flex:none;width:100%;height:430px;border:0;border-radius:12px;background:#2b2d42}
+.dc-note{font-size:.7rem;color:#9a9ec8;line-height:1.4;margin:0 2px}
+.dc-setup{background:rgba(255,255,255,.07);border-radius:12px;padding:10px 12px;font-size:.78rem;line-height:1.45}.dc-setup ol{margin:6px 0 0;padding-left:18px}
 .ph-screen.v-radio{background:linear-gradient(180deg,#10261c,#0f1a17 60%,#0b1210);color:#e8f5ee}.ph-screen.v-radio .ph-bar{color:#fff}.ph-screen.v-radio .ph-home{background:rgba(255,255,255,.6)}
 #app-radio{overflow:auto;gap:10px}
 .rd-embed{flex:none;border-radius:12px;overflow:hidden;min-height:152px;background:rgba(255,255,255,.06)}
@@ -1366,6 +1379,10 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Lake 7 Weather</b><i></i></div>
         <div id="wxBody"></div>
       </section>
+      <section class="ph-view" id="app-discord" hidden>
+        <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Community</b><i></i></div>
+        <div id="dcBody"></div>
+      </section>
       <section class="ph-view" id="app-radio" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Radio</b><i></i></div>
         <div class="rd-embed" id="rdEmbedWrap"><div id="rdEmbed"></div></div>
@@ -1581,6 +1598,13 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
     <label class="lg-l">Type it again<input id="pnB" class="lg-in lg-pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="new-password"></label>
     <div class="xf-row"><button class="jig" id="pnGo">Save PIN</button><button class="ghost" id="pnLater">Later</button></div>
     <p class="xf-sub lg-msg" id="pnMsg" role="status"></p>
+  </div>
+</div>
+<div class="away" id="factModal" hidden>
+  <div class="box fact-box" role="dialog" aria-modal="true" aria-labelledby="fcH">
+    <span class="eyebrow" id="fcEye">Fish facts</span><h2 id="fcH"></h2>
+    <div id="fcBody"></div>
+    <div class="xf-row"><button class="ghost" id="fcClose">Close</button></div>
   </div>
 </div>
 <div class="away" id="cloudModal" hidden>
@@ -2716,7 +2740,7 @@ function renderLog(){
       c.innerHTML=`${fishSvg(RCOL[f.r])}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]}</span>`+
         (L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+
         `<div class="chips">${times}${f.wx?f.wx.map(x=>`<span class="chip wx${x===S.wx.id?' now':''}">${WX[x].n}</span>`).join(''):''}${lureNote}</div>`+
-        (L&&L.big>0?`<button class="mini share" data-share="${f.id}">Share catch card</button>`:'')+(f.quest?'':`<div class="vstamps">${['golden','albino','giant'].map(k=>{const n=L&&L.v&&L.v[k];return `<span class="vchip${n?' on':''}" style="--vc:${VAR[k].col}" title="${VAR[k].n} ${f.n} · ${n?'caught ×'+n:'not caught yet'}"><i></i>${n?'✓ ':''}${VAR[k].n}</span>`}).join('')}</div>`)+`</div>`;
+        logBtns(f,L)+(f.quest?'':`<div class="vstamps">${['golden','albino','giant'].map(k=>{const n=L&&L.v&&L.v[k];return `<span class="vchip${n?' on':''}" style="--vc:${VAR[k].col}" title="${VAR[k].n} ${f.n} · ${n?'caught ×'+n:'not caught yet'}"><i></i>${n?'✓ ':''}${VAR[k].n}</span>`}).join('')}</div>`)+`</div>`;
       g.append(c);
     }
     p.append(g);
@@ -2898,6 +2922,7 @@ const APPS=[
   {id:'friends',n:'Friends',bg:'linear-gradient(145deg,#ff8ab0,#d04a7a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="#fff"/><circle cx="22" cy="13" r="4" fill="#ffd6e4"/><path d="M3 27c0-6 4-9 9-9s9 3 9 9z" fill="#fff"/><path d="M19 27c0-4 1-6 3-7.5 4 0 7 2.5 7 7.5z" fill="#ffd6e4"/></svg>`},
   {id:'texts',n:'Messages',bg:'linear-gradient(145deg,#6ee07a,#1fa83a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6C9.4 6 4 10.3 4 15.6c0 3 1.7 5.6 4.4 7.4L7 27.5l5.2-2.6c1.2.3 2.5.5 3.8.5 6.6 0 12-4.3 12-9.8S22.6 6 16 6z" fill="#fff"/></svg>`},
   {id:'sports',n:'FinDuel',bg:'linear-gradient(145deg,#1e6aff,#0a2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="10" fill="#ff8a2a"/><path d="M6 17h20M16 7v20M9 10c4 4 4 10 0 14M23 10c-4 4-4 10 0 14" stroke="#3a1a00" stroke-width="1.6" fill="none"/><path d="M20 3c3 2 4 5 3 8-2-2-4-3-6-3 1-2 2-4 3-5z" fill="#7cf0ff"/></svg>`},
+  {id:'discord',n:'Community',s:'Community',when:()=>!!DISCORD_ID||!!MPV.owner,bg:'linear-gradient(145deg,#6b74f0,#3b3fb0)',ic:()=>'<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 8.5h15a2.5 2.5 0 0 1 2.5 2.5v7a2.5 2.5 0 0 1-2.5 2.5h-8l-5 4v-4H5A2.5 2.5 0 0 1 2.5 18v-7A2.5 2.5 0 0 1 5 8.5z" fill="#fff"/><path d="M24.5 12.5H27a2.5 2.5 0 0 1 2.5 2.5v6.5a2.5 2.5 0 0 1-2.5 2.5h-1v3.5l-4.5-3.5h-5" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" opacity=".8"/><circle cx="8.5" cy="14.5" r="1.4" fill="#4a50c8"/><circle cx="12.5" cy="14.5" r="1.4" fill="#4a50c8"/><circle cx="16.5" cy="14.5" r="1.4" fill="#4a50c8"/></svg>'},
   {id:'radio',n:'Radio',s:'Radio',bg:'linear-gradient(145deg,#1ed760,#0d6b3a)',ic:()=>radioIc},
   {id:'weather',n:'Lake 7 Weather',s:'Weather',bg:'linear-gradient(145deg,#3a8aff,#0c2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="#ffd05a"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7" stroke="#ffd05a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 25.5a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6 3.8 3.8 0 0 1 .4 7.4z" fill="#fff"/><rect x="19" y="20" width="11" height="9" rx="2" fill="#d8312a"/><path d="M22 22.4h5l-2.6 4.8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
   {id:'crate',n:'Crate Expectations',s:'Crates',bg:'linear-gradient(145deg,#ff5ad8,#3a1a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11l12-6 12 6v12l-12 6-12-6z" fill="#b07a3a"/><path d="M4 11l12 6 12-6M16 17v12" stroke="#5a3814" stroke-width="1.6" fill="none"/><path d="M14 18l4-2v5l-4 2z" fill="#ffc23a"/><path d="M24 3l1 2.4 2.4 1-2.4 1L24 10l-1-2.6-2.4-1 2.4-1z" fill="#fff"/></svg>`},
@@ -2905,12 +2930,12 @@ const APPS=[
   {id:'settings',n:'Settings',bg:'linear-gradient(145deg,#a8aeb8,#5e6470)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4l2.2 3.1 3.7-.9.9 3.7 3.1 2.2-1.7 3.4 1.7 3.4-3.1 2.2-.9 3.7-3.7-.9L16 28l-2.2-3.1-3.7.9-.9-3.7-3.1-2.2 1.7-3.4-1.7-3.4 3.1-2.2.9-3.7 3.7.9z" fill="#fff"/><circle cx="16" cy="16" r="4.5" fill="#6e7480"/></svg>`},
   {id:'help',n:'Help',bg:'linear-gradient(145deg,#5aa8ff,#2a5ad0)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12" fill="#fff"/><path d="M12.4 12.6a3.6 3.6 0 1 1 5.2 3.2c-1 .5-1.6 1.2-1.6 2.3v1" stroke="#2a5ad0" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="16" cy="23.2" r="1.7" fill="#2a5ad0"/></svg>`},
 ];
-const APP_ORDER=['texts','friends','bounty','shop','case','news','weather','radio','crate','sports','slots','hw','settings','help'];
+const APP_ORDER=['texts','discord','friends','bounty','shop','case','news','weather','radio','crate','sports','slots','hw','settings','help'];
 const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
-  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
-  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case')renderCase();if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
+  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='discord'?'v-dc':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
+  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case')renderCase();if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
   const sec=v==='lock'?$('phLock'):v==='home'?$('phApps'):$('app-'+v);if(sec)sec.scrollTop=0;
 }
 
@@ -3505,6 +3530,70 @@ function renderRadio(){const b=$('radioBody'),r=RDS();if(!b)return;
   $('rdForm').onsubmit=e=>{e.preventDefault();const u=rdParse($('rdUrl').value);if(!u){RADIO.err='That doesn’t look like a Spotify link. In Spotify, tap Share, then Copy link.';renderRadio();return}radioPick(u,'Your music')};
   const st=$('rdStop');if(st)st.onclick=radioStop;
   if(!RADIO.api&&!RADIO.failed)rdLoadApi()}
+
+// ---------- Fish facts: real species pull a summary and photo from Wikipedia (free, no key, CC BY-SA);
+// the game's own made-up fish get field notes written for Lantern Lake. Unlocks once you've caught the fish.
+const logBtns=(f,L)=>L?`<div style="display:flex;gap:6px;flex-wrap:wrap">${L.big>0?`<button class="mini share" data-share="${f.id}">Share catch card</button>`:''}<button class="mini facts" data-facts="${f.id}">Fish facts</button></div>`:'';
+const WIKI={bluegill:'Bluegill',pumpkin:'Pumpkinseed',shiner:'Golden shiner',bullhead:'Brown bullhead',carp:'Common carp',warmouth:'Warmouth',lmb:'Largemouth bass',redear:'Redear sunfish',pickerel:'Chain pickerel',grasscarp:'Grass carp',eel:'American eel',koi:'Koi',tench:'Tench',perch:'Yellow perch',crappie:'Black crappie',rockbass:'Rock bass',sucker:'White sucker',walleye:'Walleye',pike:'Northern pike',smb:'Smallmouth bass',whitebass:'White bass',bowfin:'Bowfin',whitefish:'Lake whitefish',spotgar:'Spotted gar',tiger:'Tiger muskellunge',bluepike:'Blue walleye',rainbow:'Rainbow trout',chub:'Creek chub',channel:'Channel catfish',fallfish:'Fallfish',brown:'Brown trout',gar:'Longnose gar',sauger:'Sauger',brook:'Brook trout',flathead:'Flathead catfish',shovelnose:'Shovelnose sturgeon',steelhead:'Rainbow trout',golden:'Golden trout',alligar:'Alligator gar',laker:'Lake trout',cisco:'Coregonus artedi',roundwf:'Round whitefish',smelt:'Rainbow smelt',burbot:'Burbot',chinook:'Chinook salmon',coho:'Coho salmon',siscowet:'Lake trout',muskie:'Muskellunge',paddle:'American paddlefish',atlsalmon:'Atlantic salmon',sturgeon:'Lake sturgeon',aurora:'Aurora trout',croaker:'Atlantic croaker',spot:'Spot (fish)',scup:'Scup',weakfish:'Weakfish',striper:'Striped bass',bluefish:'Bluefish',fluke:'Summer flounder',reddrum:'Red drum',cobia:'Cobia',tarpon:'Atlantic tarpon',blackdrum:'Black drum',tuna:'Atlantic bluefin tuna',swordfish:'Swordfish',mudminnow:'Central mudminnow',orfe:'Ide (fish)',drum:'Freshwater drum',lamprey:'Silver lamprey',mooneye:'Mooneye',grayling:'Arctic grayling',kiyi:'Kiyi',sculpin:'Deepwater sculpin',mackerel:'Atlantic mackerel',cod:'Atlantic cod',marlin:'Atlantic blue marlin'};
+const WIKI_NOTE={koi:'The Ghost Koi is a real koi variety: a cross between koi and metallic carp. Here’s the koi family it comes from.',tench:'The Golden Tench is a golden color form of the tench, bred for ornamental ponds.',steelhead:'Steelhead are rainbow trout that spend part of their lives in big lakes or the ocean, then head back up rivers to spawn.',siscowet:'The siscowet is a deep-water, extra-fatty form of the lake trout found in Lake Superior.',bluepike:'The blue pike was a form of walleye from Lake Erie. It was declared extinct in 1983.',orfe:'The golden orfe is the golden pond form of the ide.'};
+const LORE={
+ stormkoi:'Only surfaces when thunder rolls over the pond. Old-timers say each scale holds a tiny static charge, and that a fresh Storm Koi will make your fishing line hum.',
+ thundermusk:'A muskie that hunts during storms, timing its strikes to lightning flashes. Anglers swear the water goes still for one second before it bites.',
+ boltsturg:'An ancient sturgeon said to have been struck by lightning three times and kept swimming. The zigzag stripe down its back is supposedly a scar from the first strike.',
+ frostchar:'A char so cold-blooded that ice forms on the line as you reel it in. It spawns under the thickest ice of winter and has never been seen in summer.',
+ lakebeast:'Lantern Lake’s legend. Described in town records going back over a century, usually by people who were the only ones in the boat. Now you know it’s real.',
+ moonjelly:'Drifts through the Sea of Tranquility in low gravity, pulsing faintly with stored sunlight. It weighs almost nothing up here, which makes landing a big one a real brag.',
+ cratereel:'Lives in the shadows of crater walls where it is always night. It finds prey by feeling tiny moonquakes through the dust.',
+ dustminnow:'Schools of Dust Minnows kick up silver clouds of moon dust as they swim. Astronauts reportedly mistook them for static on their camera feed.',
+ selenekoi:'Named for the moon goddess Selene. Its pale scales glow brighter when Earth is full in the lunar sky.',
+ orbitperch:'Swims in perfect circles, always in the same direction. Nobody knows what it is orbiting.',
+ cometrout:'Leaves a short glowing trail behind it as it darts away. Said to be most active when a comet is visible from the Moon.',
+ eclipseray:'Its wings are dark on top and blinding white underneath. It only rises from the deep during an eclipse, when the light is just right.',
+ lunarlev:'The largest thing ever seen in the Sea of Tranquility. It surfaces so rarely that most anglers who reach the Moon never see one.',
+ cinderminnow:'Tiny, fast and glowing orange, like a spark that learned to swim. Schools of them light up the Ember Lake at night.',
+ magmabass:'A largemouth bass that likes it hot. Very hot. Its scales are cooled lava rock, and it stays warm to the touch long after you land it.',
+ embereel:'Slides through the cracks between lava flows. Hold it up and it crackles like a campfire.',
+ brimpike:'Smells faintly of struck matches. An ambush hunter that waits motionless in the sulfur clouds, then strikes faster than you can blink.',
+ soulcarp:'Translucent and quiet, with a faint face-like pattern on each side. Local legend says every one is a fisherman who never paid the ferryman.',
+ obsidiangar:'Its body is black volcanic glass, sharp enough to cut line if you are not careful. Polished Obsidian Gar scales were once traded as coins.',
+ cerberus:'A catfish with three sets of whiskers and a temper to match. It guards the deepest pool in the Ember Lake and does not like visitors.',
+ puffguppy:'Fills itself with warm air to float between cloud banks. When startled it pops back to normal size and drops like a stone.',
+ cumuluscarp:'Big, slow and fluffy-looking. Easy to mistake for a small cloud until it opens its mouth.',
+ kitefish:'Rides the jet stream on long ribbon fins. Kids on the ground sometimes think they have spotted a lost kite.',
+ stormray:'Glides along the edge of thunderheads, soaking up the charge. Its tail sparks when it is about to dive.',
+ prismtrout:'Splits sunlight into rainbows as it swims, which is how most anglers find one. It is said to be happiest just after a rain shower.',
+ thundereel:'Sleeps inside storm clouds and wakes with the thunder. A strong one can light up a whole cloud from the inside.',
+ skywhale:'The gentle giant of the Cloud Sea. Its song is a low rumble that people on the ground mistake for distant thunder.',
+ jacksun:'Glows orange from the inside every October, carved-pumpkin face and all. Nobody is sure whether it carves itself.',
+ ghostgar:'You can see right through it, except for the eyes. It only appears on foggy autumn nights and never shows up in photos.',
+ witcheel:'Long, green and wrinkly, with a crooked little hook on its chin. It cackles. Probably.',
+ bonepike:'A pike made of nothing but bones that still somehow bites. Great for scaring friends, terrible for eating.'};
+const FACTS={};
+function openFacts(id){const f=FI(id);if(!f)return;$('fcH').textContent=f.n;$('factModal').hidden=false;$('fcClose').focus();
+  if(LORE[id]){$('fcEye').textContent='Field notes';$('fcBody').innerHTML=`<span class="fc-tag">Only at Lantern Lake</span><p class="fc-lore">${esc(LORE[id])}</p><p class="fc-src">Not a real species, as far as scientists know. These notes come from Lantern Lake’s anglers.</p>`;return}
+  const title=WIKI[id];if(!title){$('fcEye').textContent='Field notes';$('fcBody').innerHTML='<p class="fc-txt">No notes on this one yet.</p>';return}
+  $('fcEye').textContent='Fish facts';
+  const show=d=>{if($('fcH').textContent!==f.n)return;if(!d){$('fcBody').innerHTML=`${WIKI_NOTE[id]?`<p class="fc-lore">${esc(WIKI_NOTE[id])}</p>`:''}<p class="fc-txt">Couldn’t load facts right now. Check your connection and try again.</p>`;return}
+    $('fcBody').innerHTML=(d.img?`<img class="fc-pic" src="${esc(d.img)}" alt="Photo of a ${esc(d.title)}">`:'')+(d.desc?`<p class="fc-sci">${esc(d.desc)}</p>`:'')+(WIKI_NOTE[id]?`<p class="fc-lore">${esc(WIKI_NOTE[id])}</p>`:'')+
+      `<p class="fc-txt">${esc(d.text)}</p><p class="fc-src">From Wikipedia’s article <a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.title)}</a> · text under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></p>`};
+  if(FACTS[title]){show(FACTS[title]);return}
+  $('fcBody').innerHTML='<p class="fc-txt">Looking it up…</p>';
+  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title.replace(/ /g,'_'))+'?redirect=true',{headers:{'Api-User-Agent':'LanternLake/1.0 (fishing game)'}})
+    .then(r=>r.ok?r.json():null).then(j=>{if(!j||j.type==='disambiguation'||!j.extract)return show(null);
+      const d={title:j.title,desc:j.description||'',text:j.extract.length>700?j.extract.slice(0,700).replace(/\s\S*$/,'')+'…':j.extract,img:(j.thumbnail&&j.thumbnail.source)||'',url:(j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page)||('https://en.wikipedia.org/wiki/'+encodeURIComponent(title.replace(/ /g,'_')))};FACTS[title]=d;show(d)})
+    .catch(()=>show(null))}
+$('fcClose').onclick=()=>{$('factModal').hidden=true};$('factModal').onclick=e=>{if(e.target.id==='factModal')$('factModal').hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('factModal').hidden)$('factModal').hidden=true});
+
+// ---------- Community app: Lantern Lake's Discord server, through Discord's official server widget.
+// Set DISCORD_ID to the server's ID (Server Settings → Widget → Enable Server Widget). Until then only the site owner sees the app.
+const DISCORD_ID='443847151580348428';
+function renderDiscord(){const b=$('dcBody');if(!b)return;
+  if(!DISCORD_ID){b.innerHTML=`<div class="dc-hero"><b>Community</b><p>Players will see your Discord server here once it’s connected.</p></div><div class="dc-setup"><b>Only you can see this app for now.</b><ol><li>In Discord, open Server Settings → <b>Widget</b>.</li><li>Turn on <b>Enable Server Widget</b> and pick an invite channel.</li><li>Send Claude the <b>Server ID</b> from that page.</li></ol></div>`;return}
+  if(b.querySelector('iframe'))return; // keep the widget loaded while you flip between apps
+  b.innerHTML=`<div class="dc-hero"><b>Lantern Lake on Discord</b><p>See who’s online, plan raids and tournaments, and share your best catches.</p></div>
+    <iframe class="dc-frame" src="https://discord.com/widget?id=${DISCORD_ID}&theme=dark" title="Lantern Lake Discord server" allowtransparency="true" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+    <p class="dc-note">Tap <b>Join Discord</b> in the panel to open the server. You’ll need a free Discord account.</p>`}
 
 // ---------- Settings app
 const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:true,nText:true,nOther:true,h24:false,dock:'right',yard:true,cloud:true,text:'m',live:true,fps:'60'};
@@ -4124,7 +4213,7 @@ $('scene').onmousemove=e=>{if(CAM.drag&&CAM.moved)return;const [x,y]=scenePt(e),
 $('scene').onmouseleave=hideTip;
 $('leaveBtn').onclick=e=>{e.stopPropagation();leaveHouse()};
 $('cardClose').onclick=()=>$('cardModal').hidden=true;$('cardModal').onclick=e=>{if(e.target.id==='cardModal')$('cardModal').hidden=true};
-$('pane-log').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b){e.stopPropagation();openCatchCard(b.dataset.share)}});
+$('pane-log').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b){e.stopPropagation();openCatchCard(b.dataset.share)}const fb=e.target.closest('[data-facts]');if(fb){e.stopPropagation();openFacts(fb.dataset.facts)}});
 $('decoBtn').onclick=e=>{e.stopPropagation();openDeco()};
 $('decoClose').onclick=()=>$('decoModal').hidden=true;
 $('decoModal').onclick=e=>{if(e.target.id==='decoModal')$('decoModal').hidden=true};
@@ -4758,6 +4847,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:56,n:'Tall Tales',items:['New: Fish facts! In your Logbook, tap Fish facts on any fish you’ve caught. Real fish show a photo and facts from Wikipedia. Lantern Lake’s own fish (the Moon, Ember Lake, Cloud Sea, storm and Halloween fish, and a certain beast) come with field notes from local anglers.','New Community app on your phone: see who’s online in the Lantern Lake Discord and tap Join to hop in. Plan raids, find tournament buddies and show off your catches.','Lantern Lake now posts to Discord: raid alerts, new lake records for Rare and Legendary fish, and patch notes.']},
  {v:55,n:'Radio Waves',items:['New Radio app on your phone! Pick a station or paste any Spotify playlist, album or song link, and listen while you fish.','Music keeps playing when you put your phone away. Pause it from the Radio app or right from your lock screen, and skip songs with the buttons in the Spotify player.','Signed in to Spotify in your browser? You’ll hear full songs. Otherwise Spotify plays 30-second previews.','The game’s own music fades out while the radio plays, and comes back when you pause.']},
  {v:54,n:'Clean Sweep II',items:['Bug fix: the chimney fix now covers every home. On the Fishing Shack, Two-Story Lodge and Lakeside Cottage, the chimney sits at the back and pokes up through the roof, so it never runs over a window.','Bug fix: the Log Cabin’s porch roof no longer cuts across the front door. It now sits above the door on its two posts.','Walking up to your home now looks right: you get a little smaller as you head up from the dock, so you arrive door-sized and standing on the doorstep instead of towering over the door.','New Frame rate setting in the phone’s Settings app, under Motion: Saver, 30, 60 or Max. The game now runs at 60 by default. If the game slows down other games or apps you have open, try Saver or 30.']},
  {v:53,n:'Clean Sweep',items:['Bug fix: the Log Cabin’s stone chimney no longer runs down through the side window. It now sits at the back of the cabin and pokes up through the roof.']},
@@ -6815,6 +6905,17 @@ function openBug(){$('bugTxt').value='';$('bugMsg').textContent='';$('bugMeta').
 async function sendBug(){const msg=$('bugTxt').value.trim();if(msg.length<4){$('bugMsg').textContent='Tell us a little about what happened.';return}const m=S.mp||{};$('bugSend').disabled=true;
   try{await api('bug',{id:m.id,key:m.key,msg,errs:ERRS.join('\n'),ua:navigator.userAgent,ver:String(UPDATES[0].v),scr:`${innerWidth}x${innerHeight}`});$('bugMsg').style.color='var(--reed)';$('bugMsg').textContent='Sent. Thanks for the report!';setTimeout(()=>$('bugModal').hidden=true,1200)}
   catch(e){$('bugMsg').style.color='var(--buoy)';$('bugMsg').textContent=e.message==='offline'||e.message.startsWith('HTTP')?'Bug reports go to your Lantern Lake website, so this only works there.':'Couldn’t send it. Try again in a minute.'}$('bugSend').disabled=false}
+async function ownDcLoad(){const m=mpS(),box=$('ownDc');if(!box)return;let c;try{c=await api('owner/dc',{id:m.id,key:m.key})}catch(e){box.innerHTML='<p class="fr-err">Your server needs the latest update for Discord posts.</p>';return}
+  const row=(k,l,sub)=>`<label class="lg-l">${l}<small class="own-note" style="display:block;margin:0">${sub}</small><div class="xf-row"><input id="dc_${k}" class="lg-in" placeholder="${c[k]?esc(c[k]):'https://discord.com/api/webhooks/…'}" autocomplete="off" spellcheck="false" style="flex:1;min-width:0"><button class="ghost" data-dctest="${k}" ${c[k]?'':'disabled'}>Test</button></div></label>`;
+  const latest=UPDATES.reduce((a,u)=>u.v>a.v?u:a,UPDATES[0]);
+  box.innerHTML=row('raids','Raid alerts','Posts when a raid starts on the Everyone lake, then updates with the result.')+row('catches','Lake records','Posts when someone sets a new lake record for a Rare or Legendary fish.')+row('news','Patch notes','Posts when you press the button below.')+
+    `<label class="lg-l">Raid ping role ID <small class="own-note" style="display:block;margin:0">Optional. In Discord, right-click the role (Developer Mode on) → Copy Role ID. Raid alerts will ping it.</small><input id="dc_role" class="lg-in" value="${esc(c.role)}" inputmode="numeric" autocomplete="off"></label>
+    <div class="xf-row"><button class="jig" id="dcSave">Save Discord settings</button><button class="ghost" id="dcNews" ${c.news?'':'disabled'}>Post update ${latest.v} notes</button></div><p class="own-note" id="dcMsg" role="status"></p>`;
+  const msg=s=>$('dcMsg').textContent=s;
+  $('dcSave').onclick=async()=>{const body={id:m.id,key:m.key};for(const k of ['raids','catches','news']){const v=$('dc_'+k).value.trim();if(v)body[k]=v}body.role=$('dc_role').value.trim();
+    $('dcSave').disabled=true;try{await api('owner/dcset',body);msg('Saved.');ownDcLoad()}catch(e){msg(e.message==='bad-webhook'?'One of those isn’t a Discord webhook link. Copy it again from the channel’s Webhooks page.':'Couldn’t save. Try again.');$('dcSave').disabled=false}};
+  box.querySelectorAll('[data-dctest]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const r=await api('owner/dctest',{id:m.id,key:m.key,ch:b.dataset.dctest});msg(r.ok?'Test message sent. Check the channel.':'Discord didn’t accept it. Check that the webhook still exists.')}catch(e){msg('Couldn’t send the test.')}b.disabled=false});
+  $('dcNews').onclick=async()=>{const b=$('dcNews');b.disabled=true;try{const r=await api('owner/dcnews',{id:m.id,key:m.key,v:latest.v,n:latest.n,items:latest.items});msg(r.ok?`Posted update ${latest.v} to Discord.`:'Discord didn’t accept it.')}catch(e){msg('Couldn’t post the notes.')}b.disabled=false}}
 async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('ownBody');b.innerHTML='<p class="fr-muted">Loading…</p>';
   try{const [st,bg]=await Promise.all([api('owner/stats',{id:m.id,key:m.key}),api('owner/bugs',{id:m.id,key:m.key})]);
     const cell=(n,l)=>`<div><b>${n.toLocaleString()}</b><span>${l}</span></div>`;
@@ -6823,8 +6924,11 @@ async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('o
       <div class="xf-row"><button class="jig" id="ownBackup">Download a backup</button></div>
       <h3 class="own-h">Reset a login PIN</h3><p class="own-note">For a player who lost every device and forgot their PIN. Make sure it's really them first. They can then set a new PIN after moving their game with a transfer code.</p>
       <div class="xf-row"><input id="ownPinName" class="lg-in" placeholder="Angler name" maxlength="16" style="flex:1;min-width:0"><button class="ghost" id="ownPinGo">Reset PIN</button></div><p class="own-note" id="ownPinMsg"></p>
+      <h3 class="own-h">Discord posts</h3><p class="own-note">Paste a webhook link for each channel (in Discord: Edit Channel → Integrations → Webhooks → New Webhook → Copy Webhook URL). Leave one blank to turn it off. Links are kept on your server and never shown in full again.</p>
+      <div class="own-dc" id="ownDc"><p class="fr-muted">Loading…</p></div>
       <h3 class="own-h">Bug reports (${bg.bugs.length})</h3>${bg.bugs.length?`<ol class="own-bugs">${bg.bugs.map(x=>`<li><div class="ob-h"><b>${esc(x.name||'Anonymous')}</b><small>${ago(x.ts)} · v${esc(x.ver)} · ${esc(x.scr)}</small><button class="fr-mini" data-bdel="${x.id}">Delete</button></div><p>${esc(x.msg)}</p>${x.errs?`<pre>${esc(x.errs)}</pre>`:''}<small class="ob-ua">${esc(x.ua)}</small></li>`).join('')}</ol>`:'<p class="fr-muted">No reports. Nice.</p>'}`;
     b.querySelectorAll('[data-bdel]').forEach(x=>x.onclick=async()=>{x.disabled=true;try{await api('owner/bugdel',{id:m.id,key:m.key,bid:+x.dataset.bdel});x.closest('li').remove()}catch(e){x.disabled=false}});
+    ownDcLoad();
     $('ownPinGo').onclick=async()=>{const n=$('ownPinName').value.trim();if(!n)return;$('ownPinGo').disabled=true;try{const r=await api('owner/pinreset',{id:m.id,key:m.key,name:n});$('ownPinMsg').textContent=r.found?`${n}'s PIN is cleared. They can set a new one in Settings.`:`No angler named ${n}.`}catch(e){$('ownPinMsg').textContent='Couldn’t reset it.'}$('ownPinGo').disabled=false};
     $('ownBackup').onclick=async()=>{const bt=$('ownBackup');bt.disabled=true;bt.textContent='Preparing…';try{const r=await api('owner/backup',{id:m.id,key:m.key});const blob=new Blob([JSON.stringify(r)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`lantern-lake-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);bt.textContent='Downloaded'}catch(e){bt.textContent='Couldn’t make a backup';bt.disabled=false}}}
   catch(e){b.innerHTML=`<p class="fr-err">${e.message==='not-owner'?'Owner tools are only for the site owner.':'Couldn’t load owner tools.'}</p>`}}
@@ -6834,7 +6938,7 @@ function hwLogSection(p){const any=EVFISH.some(f=>S.log[f.id]);if(!hwOn()&&!any)
   const h=document.createElement('div');h.className='sec-h hw-sec';h.innerHTML=`<h3>🎃 Halloween 2026</h3><small>${hwOn()?`Limited time · ${hwDaysLeft()} day${hwDaysLeft()===1?'':'s'} left`:'Event over'}</small>`;p.append(h);
   const g=document.createElement('div');g.className='grid';
   for(const f of EVFISH){const L=S.log[f.id];if(!hwOn()&&!L)continue;const c=document.createElement('div');c.className='card fish'+(L?'':' unk');
-    c.innerHTML=`${fishSvg(f.col)}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]} · ${W(f.at).n}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+`<div class="chips">${f.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div></div>`;g.append(c)}
+    c.innerHTML=`${fishSvg(f.col)}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]} · ${W(f.at).n}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+`<div class="chips">${f.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div>${L?`<button class="mini facts" data-facts="${f.id}">Fish facts</button>`:''}</div>`;g.append(c)}
   p.append(g)}
 document.querySelectorAll('#app-hw [data-home]').forEach(b=>b.onclick=()=>phShow('home'));
 $('kpSig').onclick=keeperSignal;$('kpCv').onclick=keeperSignal;$('kpClose').onclick=keeperClose;$('kpOk').onclick=()=>{KP.on=false;$('keeperModal').hidden=true;renderCase&&!$('slotsModal').hidden&&phView==='case'&&renderCase()};
@@ -7090,7 +7194,7 @@ function bindRealmWaters(p){p.querySelectorAll('[data-gate]').forEach(b=>b.oncli
 function realmLogSections(p,fn){const ph=phaseOf(S.min);for(const r of REALMS){const all=FISH.filter(f=>f.at===r.id);if(!gateOwned(r.id)&&!all.some(f=>S.log[f.id]))continue;const sp=all.filter(fn);if(!sp.length)continue;
   const h=document.createElement('div');h.className='sec-h';h.innerHTML=`<h3>${r.n}</h3><small>${all.filter(f=>S.log[f.id]).length}/${all.length} · ${setHdr(r.id)}</small>`;p.append(h);const g=document.createElement('div');g.className='grid';
   for(const f of sp){const L=S.log[f.id],c=document.createElement('div');c.className='card fish'+(L?'':' unk');
-    c.innerHTML=`${fishSvg(RCOL[f.r])}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1].toLocaleString()} lb</span>`)+(L&&L.big>0?`<button class="mini share" data-share="${f.id}">Share catch card</button>`:'')+`</div>`;g.append(c)}
+    c.innerHTML=`${fishSvg(RCOL[f.r])}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1].toLocaleString()} lb</span>`)+logBtns(f,L)+`</div>`;g.append(c)}
   p.append(g)}}
 
 // ---------- Loop ----------
