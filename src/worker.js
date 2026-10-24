@@ -46,6 +46,8 @@ async function init(db){
   ]);
   try{await db.prepare('ALTER TABLE players ADD COLUMN pub INTEGER DEFAULT 1').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN pin TEXT').run()}catch(e){/* already there */}
+  try{await db.prepare('ALTER TABLE players ADD COLUMN host TEXT').run()}catch(e){/* already there */}
+  try{await db.prepare('ALTER TABLE players ADD COLUMN hts INTEGER').run()}catch(e){/* already there */}
   await db.prepare('CREATE TABLE IF NOT EXISTS cfg(k TEXT PRIMARY KEY,v TEXT)').run();
   await db.batch([db.prepare('CREATE TABLE IF NOT EXISTS museum(slot TEXT PRIMARY KEY,fish TEXT,v TEXT,pid TEXT,name TEXT,w REAL,ts INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS mnote(id INTEGER PRIMARY KEY AUTOINCREMENT,pid TEXT,body TEXT,ts INTEGER,seen INTEGER DEFAULT 0)'),
@@ -60,6 +62,7 @@ async function init(db){
   try{await db.prepare('CREATE TABLE IF NOT EXISTS pinfail(k TEXT PRIMARY KEY,n INTEGER,ts INTEGER)').run()}catch(e){}
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS hostping(dev TEXT PRIMARY KEY,host TEXT,ts INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS sess(pid TEXT PRIMARY KEY,sid TEXT,kind TEXT,ts INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS grec(fish TEXT PRIMARY KEY,pid TEXT,w REAL,ts INTEGER)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS evbest_w ON evbest(ev,w)`),
@@ -171,6 +174,8 @@ const MON_REWARD=20000,YARD_REWARD=25000,CHAL_MS=24*36e5,CHAL_STAKES=[100,500,10
 const dayKey=now=>new Date(now).toISOString().slice(0,10);
 // Owner tools belong to the angler named OWNER_NAME (not case sensitive).
 const OWNER_NAME='sycorange';
+// Beta Tester frame: every angler whose account was made before lanternlake.app went live (24 Oct 2026, 07:50 UTC).
+const BETA_CUT=1792828200000;
 async function ownerId(db){const r=await db.prepare('SELECT id FROM players WHERE lname=?').bind(OWNER_NAME).first();return r?r.id:null}
 const sysMail=(db,to,kind,item,msg,now)=>db.prepare('INSERT INTO mail(to_pid,from_pid,from_name,kind,item,n,msg,ts) VALUES(?,?,?,?,?,?,?,?)').bind(to,'lake','Lantern Lake',kind,item,1,msg,now);
 async function evPart(db,me,b,now){
@@ -248,6 +253,19 @@ async function extraRoutes(p,db,me,b,now,url){
   if(p==='owner/stats'){const d=now-864e5,q=(sql,...a)=>db.prepare(sql).bind(...a).first();
     const r=await Promise.all([q('SELECT COUNT(*) AS c FROM players'),q('SELECT COUNT(*) AS c FROM players WHERE seen>?',d),q('SELECT COUNT(*) AS c FROM players WHERE seen>?',now-7*864e5),q('SELECT COUNT(*) AS c FROM catches WHERE ts>?',d),q('SELECT COUNT(*) AS c FROM texts WHERE ts>?',d),q('SELECT COUNT(*) AS c FROM cloud WHERE up>?',d),q('SELECT COUNT(*) AS c FROM bugs'),q('SELECT COUNT(*) AS c FROM guest WHERE ts>?',d),q("SELECT COUNT(*) AS c FROM chal WHERE st IN ('pend','live')"),q('SELECT COUNT(*) AS c FROM mail WHERE ts>?',d)]);
     const [players,a24,a7,c24,t24,cl24,bugs,g24,chal,m24]=r.map(x=>x?x.c|0:0);return json({players,a24,a7,c24,t24,cl24,bugs,g24,chal,m24})}
+  // Site move: who is still playing on the old workers.dev address, and a one-tap text nudge to them.
+  if(p==='owner/move'){const wk=now-7*864e5,NEW='lanternlake.app';
+    const named=(await db.prepare("SELECT CASE WHEN host=? THEN 'new' WHEN host LIKE '%.workers.dev' THEN 'old' ELSE 'other' END AS h,COUNT(*) AS c FROM players WHERE hts>? GROUP BY h").bind(NEW,wk).all()).results;
+    const old=(await db.prepare("SELECT id,name,hts FROM players WHERE hts>? AND host LIKE '%.workers.dev' AND id<>? ORDER BY hts DESC LIMIT 200").bind(wk,me.id).all()).results;
+    const devs=(await db.prepare("SELECT CASE WHEN host=? THEN 'new' WHEN host LIKE '%.workers.dev' THEN 'old' ELSE 'other' END AS h,COUNT(*) AS c FROM hostping WHERE ts>? GROUP BY h").bind(NEW,wk).all()).results;
+    const n=(a,k)=>{const x=a.find(r=>r.h===k);return x?x.c|0:0};
+    const nudged=await db.prepare("SELECT v FROM kvc WHERE k='move:nudge'").first();
+    return json({named:{new:n(named,'new'),old:n(named,'old')},devs:{new:n(devs,'new'),old:n(devs,'old')},old:old.map(r=>({id:r.id,name:r.name,ts:r.hts})),nudged:nudged?JSON.parse(nudged.v):null})}
+  if(p==='owner/nudge'){const text=clean(b.body,280);if(text.length<5)return json({error:'empty'},400);
+    const ids=[...new Set((Array.isArray(b.to)?b.to:[]).map(String))].filter(x=>x&&x!==me.id).slice(0,200);if(!ids.length)return json({error:'no-player'},400);
+    const ok=(await db.prepare(`SELECT id FROM players WHERE id IN (${ids.map(()=>'?').join(',')}) AND host LIKE '%.workers.dev'`).bind(...ids).all()).results.map(r=>r.id);
+    if(ok.length)await db.batch(ok.map(id=>db.prepare('INSERT INTO texts(a,b,body,photo,ts) VALUES(?,?,?,?,?)').bind(me.id,id,text,null,now)).concat([db.prepare("INSERT OR REPLACE INTO kvc(k,v,ts) VALUES('move:nudge',?,?)").bind(JSON.stringify({n:ok.length,ts:now}),now)]));
+    return json({ok:true,sent:ok.length})}
   if(p==='owner/dc'){const c=await dcCfg(db),mask=u=>u?u.replace(/\/[\w-]{20,100}$/,'/••••••'):'';return json({raids:mask(c.raids),catches:mask(c.catches),news:mask(c.news),role:c.role||''})}
   if(p==='owner/dcset'){const st=[];for(const k of ['raids','catches','news']){if(b[k]===undefined)continue;const v=String(b[k]||'').trim();if(v&&!DC_RE.test(v))return json({error:'bad-webhook',which:k},400);st.push(db.prepare('INSERT INTO cfg(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind('dc:'+k,v))}
     if(b.role!==undefined){const r=String(b.role||'').replace(/\D/g,'').slice(0,25);st.push(db.prepare('INSERT INTO cfg(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind('dc:role',r))}
@@ -377,6 +395,11 @@ async function route(req,env,url,ctx){
     await db.prepare('INSERT INTO players(id,key,name,lname,seen,created,pub) VALUES(?,?,?,?,?,?,?)').bind(id,key,name,name.toLowerCase(),now,now,pub).run();
     return json({id,key,name});
   }
+  // Site move tracker: each copy of the game says once a day which address it runs on (random device id only, no account).
+  if(p==='hostping'){const dev=clean(b.dev,16);if(dev.length<4)return json({error:'bad-request'},400);
+    await db.prepare('INSERT INTO hostping(dev,host,ts) VALUES(?,?,?) ON CONFLICT(dev) DO UPDATE SET host=excluded.host,ts=excluded.ts').bind(dev+'@'+clean(url.hostname,40),clean(url.hostname,40),now).run();
+    if(Math.random()<.02)await db.prepare('DELETE FROM hostping WHERE ts<?').bind(now-60*864e5).run();
+    return json({ok:true})}
   // Save transfer: a short one-time code that holds a save for 30 minutes. No account needed.
   if(p==='xfer/put'){
     const d=String(b.data||'');if(d.length<20||d.length>MAX_SAVE)return json({error:'bad-save'},400);
@@ -480,9 +503,11 @@ async function route(req,env,url,ctx){
   }
   if(p==='sync'){
     const wk=weekKey(),st=[],gi=[];
-    const stats=b.stats&&typeof b.stats==='object'?JSON.stringify(b.stats).slice(0,4000):me.stats;
+    const isBeta=(Number(me.created)||0)<BETA_CUT,so=b.stats&&typeof b.stats==='object'?Object.assign({},b.stats,isBeta?{beta:1}:{}):null;
+    const stats=so?JSON.stringify(so).slice(0,4000):me.stats;
     const wkn=String(b.wk)===wk?Math.max(0,Math.min(1e6,b.wkn|0)):0;
     const hasCab=typeof b.cabin==='string'&&b.cabin.length<20000;
+    st.push(db.prepare('UPDATE players SET host=?,hts=? WHERE id=?').bind(clean(url.hostname,40),now,me.id));
     st.push(db.prepare('UPDATE players SET stats=?,wk=?,wkn=?,seen=?'+(hasCab?',cabin=?':'')+' WHERE id=?').bind(...[stats,wk,wkn,now].concat(hasCab?[b.cabin]:[]),me.id));
     for(const c of (Array.isArray(b.catches)?b.catches:[]).slice(0,20)){
       const w=+c.w;if(!(w>0&&w<5000)||typeof c.fish!=='string')continue;
@@ -511,7 +536,7 @@ async function route(req,env,url,ctx){
       cached(db,`comm:${k}:${wk}`,3*MIN,async()=>await db.prepare(`SELECT COALESCE(SUM(wkn),0) AS total,COUNT(*) AS players FROM players WHERE wk=? AND wkn>0 AND id IN ${scc.sql}`).bind(wk,...scc.args).first()),
       cached(db,`wt:${k}:${wk}`,3*MIN,()=>weeklyTop(db,wk,scc)),cached(db,`wt:${k}:${lw}`,60*MIN,()=>weeklyTop(db,lw,scc)),myLakes(db,me)]);
     const players=Math.max(1,comm.players|0);
-    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,hasPin:!!me.pin,mail:mail.results,records,
+    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,hasPin:!!me.pin,beta:isBeta,mail:mail.results,records,
       community:{week:wk,lake:sc.code,total:comm.total|0,players,goal:2000+1500*players},
       weekly:{week:wk,top},lastWeekly:{week:lw,lake:sc.code,top:ltop},next:((+wk+1)*7-3)*864e5});
   }
