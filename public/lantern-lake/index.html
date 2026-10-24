@@ -85,6 +85,13 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 #sessCover .sc-link{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:12px;cursor:pointer}#sessCover a.jig{text-decoration:none;display:inline-block}
 #moveBar{position:fixed;left:50%;top:max(8px,env(safe-area-inset-top));transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:var(--panel);border:1px solid var(--buoy);border-radius:12px;padding:8px 10px 8px 14px;box-shadow:0 8px 30px rgba(0,0,0,.45);max-width:calc(100vw - 24px);font-size:14px}
 #moveBar .jig{padding:6px 12px}
+#movePop{position:fixed;inset:0;z-index:95;background:rgba(6,14,18,.72);backdrop-filter:blur(3px);display:grid;place-items:center;padding:16px}
+#movePop .mp-box{background:var(--panel);border:2px solid var(--buoy);border-radius:18px;padding:24px 22px 16px;max-width:400px;width:100%;display:grid;gap:10px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.55);animation:mpIn .35s ease-out}
+@keyframes mpIn{from{transform:translateY(14px) scale(.97);opacity:0}}
+#movePop .mp-eye{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--buoy);font-weight:700}
+#movePop h2{margin:0;font-family:var(--font-display);font-size:24px;line-height:1.2}#movePop h2 span{color:var(--gold)}
+#movePop p{margin:0;opacity:.85;line-height:1.45}#movePop .jig{justify-self:center;padding:12px 26px;font-size:16px;margin-top:4px}
+#movePop .mp-later{background:none;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:4px}
 #sessCover h2{margin:0;font-size:20px}#sessCover p{margin:0;opacity:.85;line-height:1.45}#sessCover small{opacity:.6}#sessCover .jig{justify-self:center;padding:10px 22px;font-size:15px}#sessCover h2{font-family:var(--font-display)}
 .card{background:var(--panel-2);border-radius:11px;padding:12px;display:grid;gap:6px;align-content:start;min-width:0}
 .eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
@@ -4396,7 +4403,7 @@ async function decSave(code){code=String(code||'').replace(/\s+/g,'');
   if(code.startsWith('LL2.')){if(!HASCZ)throw new Error('old-browser');return JSON.parse(await unzipStr(B64U.dec(code.slice(4))))}
   return JSON.parse(decodeURIComponent(escape(atob(code.replace(/^LL1\./,'')))))}
 const validSave=o=>!!o&&typeof o==='object'&&typeof o.coins==='number'&&!!o.log&&typeof o.log==='object';
-function applySave(o){S=o;delete S.cbase;BOOT_LAST=Date.now();for(const [k,v] of Object.entries(fresh()))if(S[k]===undefined)S[k]=v;S.last=Date.now();S.sleep=null;VT=null;VISIT=null;ROOM='cabin';if(!W(S.water))S.water='pond';
+function applySave(o){S=o;try{$('streakModal').hidden=true;setTimeout(()=>{if(S.streak&&S.streak.last===todayKey()&&!S.streak.claimed&&!titleOn)openStreak()},1200)}catch(e){}delete S.cbase;BOOT_LAST=Date.now();for(const [k,v] of Object.entries(fresh()))if(S[k]===undefined)S[k]=v;S.last=Date.now();S.sleep=null;VT=null;VISIT=null;ROOM='cabin';if(!W(S.water))S.water='pond';
   cast={el:0,dur:castDur()};MPV.last=0;renderAll();save();CSYNC.checked=true;CSYNC.lastUp=0;setTimeout(()=>cloudPush(true),1500)}
 const DEV=(()=>{try{let d=localStorage.getItem('ll-dev');if(!d){d=Math.random().toString(36).slice(2,10);localStorage.setItem('ll-dev',d)}return d}catch(e){return 'nodev'}})();
 const DEVK=/iPad|Tablet/i.test(navigator.userAgent)?'tablet':/Android|iPhone|iPod|Mobile/i.test(navigator.userAgent)?'phone':'computer';
@@ -4512,9 +4519,14 @@ async function moveBoot(){if(!OLDHOST)return;let moved=0;try{moved=+localStorage
   const up=await newHomeUp();
   if(moved){if(up)sessPause('moved');else{try{localStorage.removeItem('ll-moved')}catch(e){}}return}
   if(!up)return;
+  // A big popup over the title screen first; "Later" shrinks it to the slim banner at the top.
+  const pop=document.createElement('div');pop.id='movePop';pop.innerHTML=`<div class="mp-box"><div class="mp-eye">🏠 New home</div><h2>Lantern Lake has moved to <span>lanternlake.app</span></h2><p>Same game, shorter address. Tap below and your save, coins and friends come with you in one click.</p><button class="jig" id="mpGo">Move my game</button><button class="mp-later" id="mpLater">Later</button></div>`;
+  document.body.appendChild(pop);document.getElementById('mpGo').onclick=()=>moveGame('mpGo');
+  document.getElementById('mpLater').onclick=()=>{pop.remove();moveBar()}}
+function moveBar(){
   const d=document.createElement('div');d.id='moveBar';d.innerHTML=`<span>🏠 Lantern Lake has a new home: <b>lanternlake.app</b></span><button class="jig" id="mvGo">Move my game</button>`;document.body.appendChild(d);
-  document.getElementById('mvGo').onclick=moveGame}
-async function moveGame(){const b=document.getElementById('mvGo');if(b){b.disabled=true;b.textContent='Packing…'}
+  document.getElementById('mvGo').onclick=()=>moveGame('mvGo')}
+async function moveGame(id){const b=document.getElementById(id||'mvGo');if(b){b.disabled=true;b.textContent='Packing…'}
   try{if(!(await newHomeUp())){if(b){b.disabled=false;b.textContent='Move my game'}showToast('The new address isn’t ready yet. Try again in a little while.','Move');return}
     let url=NEWHOME;if(S.total>0||(S.mp&&S.mp.id)){const r=await api('xfer/put',{data:await encSave2()});url+='?code='+r.code+'&moved=1'}
     try{localStorage.setItem('ll-moved',String(Date.now()))}catch(e){}SESS.paused=true;location.href=url}
@@ -5029,6 +5041,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:64,n:'New Home III',items:['The Move my game notice on the old address is now a big popup over the title screen, so it’s hard to miss. Tap Later to shrink it to a banner.','Bug fix: after moving or loading your game, the daily reward box no longer shows the wrong day with a Claim button that does nothing. It now matches your loaded game.']},
  {v:63,n:'New Home II',items:['Bug fix: the Move my game banner now only appears once lanternlake.app is reachable, so it can never send you to a page that won’t load.','Bug fix: moving your game no longer depends on pressing Go fishing first. The “Bring your game over?” box opens as soon as the new site loads, and the move survives a reload.','Bug fix: if you tapped Move my game before the new address was ready, the old address goes back to normal instead of saying your game moved.']},
  {v:62,n:'New Home',items:['Lantern Lake has its own address: lanternlake.app. Playing on the old address? Tap Move my game in the banner and your save comes with you in one click.']},
  {v:61,n:'One Rod at a Time',items:['Lantern Lake now runs in one place at a time. Open it in a second tab, or start playing on another device, and the older one pauses with a Play here button, so two copies can never fight over your save.','Bug fix: a phone or tab left open in the background can no longer quietly overwrite progress you made on another device.']},
@@ -6527,7 +6540,7 @@ const STREAK=[{s:'Cash',m:10},{s:'Coins',cc:25},{s:'Potion',pots:1},{s:'Cash+',m
 const streakDay=()=>((Math.max(1,S.streak.count)-1)%7)+1;
 const streakRw=i=>{const d=STREAK[i-1];return {coins:d.m?rwCoins(d.m):0,cc:d.cc||0,pots:d.pots||0}};
 function streakRow(){const cur=streakDay();return STREAK.map((d,i)=>{const n=i+1,cls=n<cur||(n===cur&&S.streak.claimed)?'got':n===cur?'now':'';return `<span class="sd ${cls}"><small>Day ${n}</small>${d.s}</span>`}).join('')}
-function checkStreak(){const d=todayKey();S.streak=S.streak||{last:'',count:0,claimed:true};if(S.streak.last===d)return;
+function checkStreak(){if(URLX)return;const d=todayKey();S.streak=S.streak||{last:'',count:0,claimed:true};if(S.streak.last===d)return;
   const y=new Date();y.setDate(y.getDate()-1);S.streak.count=S.streak.last===dkey(y)?S.streak.count+1:1;S.streak.last=d;S.streak.claimed=false;save();openStreak()}
 function openStreak(){const cur=streakDay(),rw=streakRw(cur);$('stTitle').textContent=`Day ${cur} of 7`;
   $('stSub').textContent=`${S.streak.count} day${S.streak.count>1?'s':''} in a row. Today's reward: ${rwText(rw)}.${cur<7?' Come back tomorrow to keep the streak going.':' The streak starts a new week tomorrow.'}`;
