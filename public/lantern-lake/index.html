@@ -135,6 +135,7 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .trophy b{display:block;line-height:1.25}
 .trophy span{color:var(--muted);font-variant-numeric:tabular-nums}
 .empty{color:var(--muted);font-size:.86rem;margin:8px 0 0}
+.away.over-title{z-index:70}
 .away{position:fixed;inset:0;background:rgba(5,12,16,.7);display:grid;place-items:center;padding:20px;z-index:20}
 .away .box{max-width:380px;width:100%;display:grid;gap:10px}
 .away p{margin:0;color:var(--muted)}
@@ -4497,23 +4498,33 @@ function showCloudOffer(r){$('clEye').textContent='Cloud save';$('clH').textCont
   $('cloudModal').hidden=false}
 // A link like …/lantern-lake/?code=ABCDEF opens straight to loading that transfer code.
 let URLMOVED=false;
-const URLX=(()=>{try{const u=new URL(location.href),c=(u.searchParams.get('code')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');URLMOVED=u.searchParams.has('moved');if(c||URLMOVED){u.searchParams.delete('code');u.searchParams.delete('moved');history.replaceState(null,'',u.pathname+u.search+u.hash)}return c.length===6?c:''}catch(e){return ''}})();
+// The code is also kept in sessionStorage for 30 minutes, so a reload (or a page that failed to load the first time) doesn't lose it.
+let URLX=(()=>{try{const u=new URL(location.href),c=(u.searchParams.get('code')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');URLMOVED=u.searchParams.has('moved');if(c||URLMOVED){u.searchParams.delete('code');u.searchParams.delete('moved');history.replaceState(null,'',u.pathname+u.search+u.hash)}
+  if(c.length===6){try{sessionStorage.setItem('ll-xfer',JSON.stringify({c,m:URLMOVED,t:Date.now()}))}catch(e){}return c}
+  try{const x=JSON.parse(sessionStorage.getItem('ll-xfer')||'null');if(x&&Date.now()-x.t<30*60000){URLMOVED=!!x.m;return x.c}}catch(e){}return ''}catch(e){return ''}})();
+const xferDone=()=>{URLX='';try{sessionStorage.removeItem('ll-xfer')}catch(e){}};
 // New home: lanternlake.app. Browsers keep saves per address, so the old workers.dev site offers a one-click move
 // (a transfer code carried in the link), then shows a "your game moved" screen if the player comes back.
 const NEWHOME='https://lanternlake.app/lantern-lake/',OLDHOST=/\.workers\.dev$/.test(location.hostname);
-function moveBoot(){if(!OLDHOST)return;let moved=0;try{moved=+localStorage.getItem('ll-moved')||0}catch(e){}
-  if(moved){sessPause('moved');return}
+// Only offer the move once the new address actually answers (a no-cors ping fails if the domain isn't live yet).
+const newHomeUp=()=>fetch(NEWHOME+'version.json?t='+Date.now(),{mode:'no-cors',cache:'no-store'}).then(()=>true,()=>false);
+async function moveBoot(){if(!OLDHOST)return;let moved=0;try{moved=+localStorage.getItem('ll-moved')||0}catch(e){}
+  const up=await newHomeUp();
+  if(moved){if(up)sessPause('moved');else{try{localStorage.removeItem('ll-moved')}catch(e){}}return}
+  if(!up)return;
   const d=document.createElement('div');d.id='moveBar';d.innerHTML=`<span>🏠 Lantern Lake has a new home: <b>lanternlake.app</b></span><button class="jig" id="mvGo">Move my game</button>`;document.body.appendChild(d);
   document.getElementById('mvGo').onclick=moveGame}
 async function moveGame(){const b=document.getElementById('mvGo');if(b){b.disabled=true;b.textContent='Packing…'}
-  try{let url=NEWHOME;if(S.total>0||(S.mp&&S.mp.id)){const r=await api('xfer/put',{data:await encSave2()});url+='?code='+r.code+'&moved=1'}
+  try{if(!(await newHomeUp())){if(b){b.disabled=false;b.textContent='Move my game'}showToast('The new address isn’t ready yet. Try again in a little while.','Move');return}
+    let url=NEWHOME;if(S.total>0||(S.mp&&S.mp.id)){const r=await api('xfer/put',{data:await encSave2()});url+='?code='+r.code+'&moved=1'}
     try{localStorage.setItem('ll-moved',String(Date.now()))}catch(e){}SESS.paused=true;location.href=url}
   catch(e){if(b){b.disabled=false;b.textContent='Move my game'}showToast('Couldn’t pack your game. Check your connection and try again.','Move')}}
 function urlCodeOffer(){if(!URLX)return;$('clEye').textContent=URLMOVED?'Welcome to lanternlake.app':'Transfer code';$('clH').textContent=URLMOVED?'Bring your game over?':'Load your game?';$('clP').textContent=URLMOVED?'This is the game you moved from the old address. Load it here and keep playing.':'This link has a transfer code from your other device.';
   $('clCard').innerHTML=`<b>${fmtXC(URLX)}</b><small>${S.total>0?`Replaces the game on this device (day ${S.day} · $${money(S.coins)})`:'Loads your game onto this device'}</small>`;
   $('clYes').textContent='Load it';$('clNo').textContent='Not now';$('clMsg').textContent='';$('clYes').disabled=false;
-  $('clYes').onclick=async()=>{$('clYes').disabled=true;try{await xfLoadCode(URLX);$('cloudModal').hidden=true;showToast('Game loaded','Welcome back')}catch(e){$('clMsg').textContent=e.message==='no-code'?'That code expired or was already used.':'Couldn’t load it.';$('clYes').disabled=false}};
-  $('clNo').onclick=()=>{$('cloudModal').hidden=true};$('cloudModal').hidden=false}
+  $('cloudModal').classList.add('over-title');
+  $('clYes').onclick=async()=>{$('clYes').disabled=true;try{await xfLoadCode(URLX);xferDone();$('cloudModal').hidden=true;$('cloudModal').classList.remove('over-title');if(titleOn){hideTitle();mpCheck().then(sessClaim)}showToast(URLMOVED?'Your game made the move':'Game loaded','Welcome back')}catch(e){$('clMsg').textContent=e.message==='no-code'?'That code expired or was already used.':'Couldn’t load it.';$('clYes').disabled=false}};
+  $('clNo').onclick=()=>{xferDone();$('cloudModal').hidden=true;$('cloudModal').classList.remove('over-title')};$('cloudModal').hidden=false}
 $('resetNo').onclick=()=>$('confirmReset').hidden=true;
 $('resetYes').onclick=()=>{S=fresh();cast={el:0,dur:castDur()};$('confirmReset').hidden=true;renderAll();save()};
 
@@ -5018,6 +5029,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:63,n:'New Home II',items:['Bug fix: the Move my game banner now only appears once lanternlake.app is reachable, so it can never send you to a page that won’t load.','Bug fix: moving your game no longer depends on pressing Go fishing first. The “Bring your game over?” box opens as soon as the new site loads, and the move survives a reload.','Bug fix: if you tapped Move my game before the new address was ready, the old address goes back to normal instead of saying your game moved.']},
  {v:62,n:'New Home',items:['Lantern Lake has its own address: lanternlake.app. Playing on the old address? Tap Move my game in the banner and your save comes with you in one click.']},
  {v:61,n:'One Rod at a Time',items:['Lantern Lake now runs in one place at a time. Open it in a second tab, or start playing on another device, and the older one pauses with a Play here button, so two copies can never fight over your save.','Bug fix: a phone or tab left open in the background can no longer quietly overwrite progress you made on another device.']},
  {v:60,n:'Tidy Logbook',items:['Logbook cards are tidier: the fish icon sits beside the name, details stay in the same order, and buttons and variant chips line up along the bottom of every card in a row.']},
@@ -7450,7 +7462,7 @@ function start(data){
   const gap=(Date.now()-(BOOT_LAST||Date.now()))/1000;if(gap>60)offline(gap);
   renderAll();requestAnimationFrame(t=>{lastFrame=t;tick(t)});setTimeout(ddCross,1500);
   if(!(data&&typeof data.coins==='number'))showTitle();
-  sessBoot();moveBoot();
+  sessBoot();moveBoot();if(URLX)setTimeout(urlCodeOffer,400);
   setTimeout(()=>{if(S.mp&&S.mp.id)mpSync(true)},4000);
 }
 try{window.claude?.hot?.snapshot?.(()=>JSON.parse(JSON.stringify(S)))}catch(e){}
