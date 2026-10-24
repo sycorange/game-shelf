@@ -47,6 +47,9 @@ async function init(db){
   try{await db.prepare('ALTER TABLE players ADD COLUMN pub INTEGER DEFAULT 1').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN pin TEXT').run()}catch(e){/* already there */}
   await db.prepare('CREATE TABLE IF NOT EXISTS cfg(k TEXT PRIMARY KEY,v TEXT)').run();
+  await db.batch([db.prepare('CREATE TABLE IF NOT EXISTS museum(slot TEXT PRIMARY KEY,fish TEXT,v TEXT,pid TEXT,name TEXT,w REAL,ts INTEGER)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS mnote(id INTEGER PRIMARY KEY AUTOINCREMENT,pid TEXT,body TEXT,ts INTEGER,seen INTEGER DEFAULT 0)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS mnote_p ON mnote(pid,seen)'),db.prepare('CREATE INDEX IF NOT EXISTS museum_p ON museum(pid)')]);
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS gchat(id INTEGER PRIMARY KEY AUTOINCREMENT,name TEXT,owner TEXT,created INTEGER,last INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS gmem(gid INTEGER,pid TEXT,seen INTEGER DEFAULT 0,joined INTEGER,PRIMARY KEY(gid,pid))`),
@@ -214,6 +217,8 @@ async function syncExtras(db,me,b,now,wk){const out={};
   try{out.gb=await yardPart(db,me,b,now,wk)}catch(e){}
   try{out.chal=await chalPart(db,me,b,now)}catch(e){}
   try{out.owner=(await ownerId(db))===me.id}catch(e){}
+  try{out.musv=await musVer(db);const n=await db.prepare('SELECT id,body,ts FROM mnote WHERE pid=? AND seen=0 ORDER BY id LIMIT 10').bind(me.id).all();
+    if(n.results.length){out.mnotes=n.results;await db.prepare('UPDATE mnote SET seen=1 WHERE pid=? AND id<=?').bind(me.id,n.results[n.results.length-1].id).run()}}catch(e){}
   return out}
 async function extraRoutes(p,db,me,b,now,url){
   if(p==='guest/sign'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);
@@ -275,6 +280,11 @@ async function dcPost(db,ch,body,wait){const c=await dcCfg(db),u=c[ch];if(!u||!D
 async function dcEdit(db,ch,id,body){const c=await dcCfg(db),u=c[ch];if(!u||!DC_RE.test(u)||!/^\d+$/.test(String(id)))return;
   try{await fetch(`${u}/messages/${id}`,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({allowed_mentions:{parse:[]}},body))})}catch(e){}}
 const dcLink=c=>c.site?`\n[Open Lantern Lake](${c.site})`:'';
+
+// ==MUSEUM== one plaque per species (main hall) and per species+variant (rare wing), held by the heaviest donated fish.
+const MUS_W={"bluegill":[1.5,"C"],"pumpkin":[1.0,"C"],"shiner":[0.8,"C"],"bullhead":[3.0,"C"],"carp":[35.0,"U"],"warmouth":[1.2,"U"],"lmb":[11.0,"U"],"redear":[2.5,"U"],"pickerel":[6.0,"R"],"grasscarp":[60.0,"R"],"eel":[8.0,"R"],"koi":[20.0,"L"],"tench":[8.0,"L"],"perch":[2.0,"C"],"crappie":[3.0,"C"],"rockbass":[1.6,"C"],"sucker":[5.0,"C"],"walleye":[13.0,"U"],"pike":[35.0,"U"],"smb":[8.0,"U"],"whitebass":[5.0,"U"],"bowfin":[14.0,"R"],"whitefish":[12.0,"R"],"spotgar":[10.0,"R"],"tiger":[40.0,"L"],"bluepike":[15.0,"L"],"rainbow":[10.0,"C"],"chub":[1.2,"C"],"channel":[40.0,"C"],"fallfish":[3.0,"C"],"brown":[22.0,"U"],"gar":[28.0,"U"],"sauger":[6.0,"U"],"brook":[6.0,"U"],"flathead":[110.0,"R"],"shovelnose":[8.0,"R"],"steelhead":[25.0,"R"],"golden":[5.0,"L"],"alligar":[300.0,"L"],"laker":[50.0,"C"],"cisco":[4.0,"C"],"roundwf":[4.0,"C"],"smelt":[0.6,"C"],"burbot":[18.0,"U"],"chinook":[60.0,"U"],"coho":[30.0,"U"],"siscowet":[40.0,"U"],"muskie":[65.0,"R"],"paddle":[140.0,"R"],"atlsalmon":[30.0,"R"],"sturgeon":[250.0,"L"],"aurora":[8.0,"L"],"croaker":[4.0,"C"],"spot":[1.5,"C"],"scup":[4.0,"C"],"weakfish":[18.0,"C"],"striper":[70.0,"U"],"bluefish":[25.0,"U"],"fluke":[22.0,"U"],"reddrum":[90.0,"U"],"cobia":[120.0,"R"],"tarpon":[250.0,"R"],"blackdrum":[110.0,"R"],"tuna":[1000.0,"L"],"swordfish":[1100.0,"L"],"mudminnow":[0.3,"U"],"orfe":[7.0,"R"],"stormkoi":[24.0,"L"],"drum":[20.0,"U"],"lamprey":[1.0,"R"],"thundermusk":[55.0,"L"],"mooneye":[2.0,"U"],"grayling":[4.0,"R"],"boltsturg":[200.0,"L"],"kiyi":[1.0,"U"],"sculpin":[0.4,"R"],"frostchar":[20.0,"L"],"mackerel":[4.0,"U"],"cod":[60.0,"R"],"marlin":[900.0,"L"],"lakebeast":[2400.0,"L"],"moonjelly":[60.0,"C"],"cratereel":[90.0,"C"],"dustminnow":[12.0,"C"],"selenekoi":[200.0,"U"],"orbitperch":[70.0,"U"],"cometrout":[260.0,"R"],"eclipseray":[500.0,"R"],"lunarlev":[6000.0,"L"],"cinderminnow":[8.0,"C"],"magmabass":[60.0,"C"],"embereel":[90.0,"U"],"brimpike":[120.0,"U"],"soulcarp":[260.0,"R"],"obsidiangar":[400.0,"R"],"cerberus":[3000.0,"L"],"puffguppy":[10.0,"C"],"cumuluscarp":[120.0,"C"],"kitefish":[40.0,"U"],"stormray":[300.0,"U"],"prismtrout":[150.0,"R"],"thundereel":[400.0,"R"],"skywhale":[15000.0,"L"],"jacksun":[2.4,"U"],"ghostgar":[40.0,"R"],"witcheel":[14.0,"L"],"bonepike":[30.0,"R"]}; // id -> [max normal weight, rarity]
+const MUS_V=['','golden','albino','giant'],VAR_N={golden:'Golden',albino:'Albino',giant:'Giant'};
+async function musVer(db){try{const r=await db.prepare("SELECT v FROM kvc WHERE k='mus:v'").first();return r?+r.v:0}catch(e){return 0}}
 // ==LIVE LAKE== one Durable Object room per lake scope and water. Players connect with a WebSocket while they fish;
 // the room relays boats, catches and emotes, and now and then a raid monster surfaces for everyone in the room.
 const LIVE_WATERS=['pond','lake','river','deep','bay'];
@@ -389,6 +399,22 @@ async function route(req,env,url,ctx){
     if(/^(\d)\1{5}$/.test(pin)||'0123456789'.includes(pin)||'9876543210'.includes(pin))return json({error:'pin-too-easy'},400);
     await db.prepare('UPDATE players SET pin=? WHERE id=?').bind(await pinMake(pin),me.id).run();return json({ok:true})}
   if(p==='pin/clear'){await db.prepare('UPDATE players SET pin=NULL WHERE id=?').bind(me.id).run();return json({ok:true})}
+  if(p==='museum/list'){const list=await cached(db,'mus:list',60000,async()=>(await db.prepare('SELECT slot,fish,v,pid,name,w,ts FROM museum').all()).results);return json({list,ver:await musVer(db)})}
+  if(p==='museum/donate'){const fish=String(b.fish||''),v=String(b.v||''),w=+b.w,info=MUS_W[fish],fname=clean(b.name,40)||fish;
+    if(!info||!MUS_V.includes(v)||(fish==='lakebeast'&&v))return json({error:'bad-fish'},400);
+    if(!(w>0)||w>info[0]*(v==='giant'?1.65:2.05))return json({error:'bad-weight'},400);
+    if((me.pub??1)===0)return json({error:'private'},403);
+    const day=await db.prepare('SELECT COUNT(*) AS c FROM museum WHERE pid=? AND ts>?').bind(me.id,now-864e5).first();if((day.c|0)>=60)return json({error:'slow-down'},429);
+    const slot=fish+'|'+v,prev=await db.prepare('SELECT pid,name,w FROM museum WHERE slot=?').bind(slot).first();
+    if(prev&&!(w>prev.w))return json({error:'beaten',cur:prev},409);
+    const r=await db.prepare('INSERT INTO museum(slot,fish,v,pid,name,w,ts) VALUES(?,?,?,?,?,?,?) ON CONFLICT(slot) DO UPDATE SET pid=excluded.pid,name=excluded.name,w=excluded.w,ts=excluded.ts WHERE excluded.w>museum.w').bind(slot,fish,v,me.id,me.name,w,now).run();
+    if(!(r.meta&&r.meta.changes>0))return json({error:'beaten'},409);
+    const st=[db.prepare("INSERT INTO kvc(k,v,ts) VALUES('mus:v',?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v,ts=excluded.ts").bind(String(now),now),db.prepare("DELETE FROM kvc WHERE k='mus:list'")];
+    if(prev&&prev.pid!==me.id)st.push(db.prepare('INSERT INTO mnote(pid,body,ts) VALUES(?,?,?)').bind(prev.pid,`${me.name} took your ${v?VAR_N[v]+' ':''}${fname} plaque with a ${w.toFixed(2)} lb catch (yours was ${(+prev.w).toFixed(2)} lb). Catch a bigger one to win it back!`,now));
+    if(Math.random()<.05)st.push(db.prepare('DELETE FROM mnote WHERE ts<?').bind(now-14*864e5));
+    await db.batch(st);
+    if(ctx)ctx.waitUntil((async()=>{const c=await dcCfg(db);await dcPost(db,'catches',{embeds:[{color:0xc9a227,title:`🏛️ New museum plaque by ${me.name}`,description:`**${v?VAR_N[v]+' ':''}${fname}**: ${w.toFixed(2)} lb${prev?` (beat ${prev.name}'s ${(+prev.w).toFixed(2)} lb)`:' (first one!)'}`+dcLink(c)}]})})());
+    return json({ok:true,prev:prev?{name:prev.name,w:prev.w,mine:prev.pid===me.id}:null})}
   {const xr=await extraRoutes(p,db,me,b,now,url);if(xr)return xr}
   // Cloud save: the latest copy of this player's game, so their devices stay in sync.
   if(p==='cloud/put'){
