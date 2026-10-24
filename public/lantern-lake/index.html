@@ -4062,7 +4062,7 @@ async function decSave(code){code=String(code||'').replace(/\s+/g,'');
   if(code.startsWith('LL2.')){if(!HASCZ)throw new Error('old-browser');return JSON.parse(await unzipStr(B64U.dec(code.slice(4))))}
   return JSON.parse(decodeURIComponent(escape(atob(code.replace(/^LL1\./,'')))))}
 const validSave=o=>!!o&&typeof o==='object'&&typeof o.coins==='number'&&!!o.log&&typeof o.log==='object';
-function applySave(o){S=o;for(const [k,v] of Object.entries(fresh()))if(S[k]===undefined)S[k]=v;S.last=Date.now();S.sleep=null;VT=null;VISIT=null;ROOM='cabin';if(!W(S.water))S.water='pond';
+function applySave(o){S=o;delete S.cbase;BOOT_LAST=Date.now();for(const [k,v] of Object.entries(fresh()))if(S[k]===undefined)S[k]=v;S.last=Date.now();S.sleep=null;VT=null;VISIT=null;ROOM='cabin';if(!W(S.water))S.water='pond';
   cast={el:0,dur:castDur()};MPV.last=0;renderAll();save();CSYNC.checked=true;CSYNC.lastUp=0;setTimeout(()=>cloudPush(true),1500)}
 const DEV=(()=>{try{let d=localStorage.getItem('ll-dev');if(!d){d=Math.random().toString(36).slice(2,10);localStorage.setItem('ll-dev',d)}return d}catch(e){return 'nodev'}})();
 const DEVK=/iPad|Tablet/i.test(navigator.userAgent)?'tablet':/Android|iPhone|iPod|Mobile/i.test(navigator.userAgent)?'phone':'computer';
@@ -4094,7 +4094,7 @@ async function lgSubmit(){const name=$('lgName').value.trim(),pin=$('lgPin').val
     else lgMsg('Couldn’t reach the lake. Check your connection and try again.','err')}}
 async function lgLoad(){const r=LG.acct;if(!r)return;$('lgLoad').disabled=true;$('lgLoad').textContent='Loading…';
   try{const full=await api('cloud/get',{id:r.id,key:r.key}),o=await decSave(full.data);if(!validSave(o))throw new Error('bad');
-    o.mp=Object.assign({},o.mp||{},{id:r.id,key:r.key,name:r.name});applySave(o);MPV.hasPin=true;CSYNC.offer=null;CSYNC.checked=true;$('loginModal').hidden=true;LG.acct=null;
+    o.mp=Object.assign({},o.mp||{},{id:r.id,key:r.key,name:r.name});applySave(o);S.cbase=full.up||0;save();MPV.hasPin=true;CSYNC.offer=null;CSYNC.checked=true;$('loginModal').hidden=true;LG.acct=null;
     showToast(`You're logged in as ${r.name} on this device`,'Welcome back')}
   catch(e){$('lgLoad').disabled=false;$('lgLoad').textContent=`Load ${r.name}'s game`;lgMsg('Couldn’t load the game. Check your connection and try again.','err')}}
 function openPin(first){const m=mpS();if(!m.id){showToast('Pick an angler name in Friends first');return}
@@ -4137,22 +4137,30 @@ $('saveLoad').onclick=async()=>{let o=null;try{o=await decSave($('saveTxt').valu
   if(!validSave(o)){saveMsg("That code didn't work. Make sure you copied the whole thing.",true);return}
   applySave(o);$('saveModal').hidden=true;showToast('Save loaded','Welcome back')};
 // Cloud sync: players with an angler name keep their latest game on the server.
-const CSYNC={busy:false,lastUp:0,checked:false,offer:null,hidT:0};
+// S.cbase = the cloud version this device last uploaded or loaded. BOOT_LAST = when this device last saved before this visit
+// (S.last itself gets bumped as soon as the game starts running, so it can't tell us who played most recently).
+const CSYNC={busy:false,lastUp:0,checked:false,offer:null,hidT:0};let BOOT_LAST=0;
 const cloudOn=()=>SETS().cloud!==false&&!!(S.mp&&S.mp.id&&S.mp.key)&&MPV.online!==false&&MPV.online!=='nodb';
 async function cloudPush(force,keep){if(!cloudOn()||CSYNC.busy||!CSYNC.checked||CSYNC.offer||titleOn)return;if(!force&&Date.now()-CSYNC.lastUp<120000)return;
-  CSYNC.busy=true;try{const data=await encSave2(),body={id:S.mp.id,key:S.mp.key,data,ts:S.last,dev:DEV,kind:DEVK,day:S.day,coins:S.coins};
-    if(keep)fetch('/api/cloud/put',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:data.length<60000}).catch(()=>{});else await api('cloud/put',body);CSYNC.lastUp=Date.now()}catch(e){}CSYNC.busy=false}
+  CSYNC.busy=true;try{const data=await encSave2(),body={id:S.mp.id,key:S.mp.key,data,ts:S.last,dev:DEV,kind:DEVK,day:S.day,coins:S.coins,base:S.cbase||0};
+    if(keep)fetch('/api/cloud/put',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:data.length<60000}).catch(()=>{});
+    else{const r=await api('cloud/put',body);if(r.up){S.cbase=r.up;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}CSYNC.lastUp=Date.now()}
+  catch(e){if(e.message==='stale'){CSYNC.checked=false;CSYNC.busy=false;CSYNC.lastUp=Date.now();cloudCheck();return}}CSYNC.busy=false}
 async function cloudCheck(){if(!cloudOn()||CSYNC.offer)return;const m=S.mp,mine=S.last;
   try{const r=await api('cloud/get',{id:m.id,key:m.key,meta:true});CSYNC.checked=true;
-    if(r.none||r.dev===DEV||!(r.ts>mine+15000))return;CSYNC.offer=r;showCloudOffer(r)}catch(e){if(e.message==='auth'||e.message==='bad-request')CSYNC.checked=true}}
+    if(r.none)return;
+    if(r.dev===DEV){S.cbase=Math.max(S.cbase||0,r.up||0);return}
+    if(S.cbase&&!((r.up||0)>S.cbase))return;               // nothing new since this device last synced
+    if(!S.cbase&&!(r.ts>(BOOT_LAST||mine)+15000)){S.cbase=r.up||0;return} // first sync after the update: this device was played last
+    CSYNC.offer=r;showCloudOffer(r)}catch(e){if(e.message==='auth'||e.message==='bad-request')CSYNC.checked=true}}
 function showCloudOffer(r){$('clEye').textContent='Cloud save';$('clH').textContent='Pick up where you left off?';
   $('clP').textContent=`You played more recently on your ${r.kind||'other device'}. Continue that game here?`;
   $('clCard').innerHTML=`<b>Day ${r.day} · $${money(r.coins)}</b><small>Saved ${ago(r.ts)} on your ${esc(r.kind||'other device')}</small><small>This device: day ${S.day} · $${money(S.coins)}</small>`;
   $('clYes').textContent=`Continue from ${r.kind||'there'}`;$('clNo').textContent='Keep this game';$('clMsg').textContent='';$('clYes').disabled=false;
   $('clYes').onclick=async()=>{$('clYes').disabled=true;$('clYes').textContent='Loading…';
-    try{const m=S.mp,full=await api('cloud/get',{id:m.id,key:m.key}),o=await decSave(full.data);if(!validSave(o))throw new Error('bad');CSYNC.offer=null;applySave(o);$('cloudModal').hidden=true;showToast('Game loaded from your '+(r.kind||'other device'),'Welcome back')}
+    try{const m=S.mp,full=await api('cloud/get',{id:m.id,key:m.key}),o=await decSave(full.data);if(!validSave(o))throw new Error('bad');CSYNC.offer=null;applySave(o);S.cbase=full.up||r.up||0;save();$('cloudModal').hidden=true;showToast('Game loaded from your '+(r.kind||'other device'),'Welcome back')}
     catch(e){$('clMsg').textContent='Couldn’t load it. Check your connection and try again.';$('clYes').disabled=false;$('clYes').textContent=`Continue from ${r.kind||'there'}`}};
-  $('clNo').onclick=()=>{CSYNC.offer=null;$('cloudModal').hidden=true;cloudPush(true)};
+  $('clNo').onclick=()=>{CSYNC.offer=null;S.cbase=r.up||0;$('cloudModal').hidden=true;cloudPush(true)};
   $('cloudModal').hidden=false}
 // A link like …/lantern-lake/?code=ABCDEF opens straight to loading that transfer code.
 const URLX=(()=>{try{const u=new URL(location.href),c=(u.searchParams.get('code')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c){u.searchParams.delete('code');history.replaceState(null,'',u.pathname+u.search+u.hash)}return c.length===6?c:''}catch(e){return ''}})();
@@ -4663,6 +4671,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:51,n:'Safe Harbor',items:['Bug fix: switching between your phone and computer now picks up where you actually left off. Before, a device could think its older game was newer, skip the “Pick up where you left off?” prompt, and then save over your progress from the other device.','Your cloud save is now protected: a device can no longer overwrite a newer save from another device without asking you first.','Your game now also saves to the cloud when you close the tab.']},
  {v:50,n:'Party Line Patch',items:['Bug fix: Add people in a group chat’s info screen no longer gets stuck on “Loading the lake directory…”.']},
  {v:49,n:'Party Line',items:['Group texts! In Messages, tap New, then New group chat. Pick 2 or more anglers, name the group if you like, and chat with up to 10 people at once.','Tap a group’s name at the top of the chat to see who’s in it, rename it, add people, or leave.','Photos work in groups too: 5 per group per day.']},
  {v:48,n:'Fresh Catch',items:['When a new update goes live, a banner now tells you it’s ready. Tap Refresh to get it right away; your game saves first. The game checks once every 30 minutes.']},
@@ -7019,10 +7028,10 @@ function tick(now){
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden){save();CSYNC.hidT=Date.now();cloudPush(true,true)}else{ddCross();mpSync(true);if(!titleOn&&Date.now()-CSYNC.hidT>20000)cloudCheck()}});
 function ddCross(){try{const x=JSON.parse(localStorage.getItem('deep-dive-ll')||'{}');for(const [k,id] of [['medal','divemedal'],['pearl','blackpearl']]){if(x[k]&&!(S.coll[id]&&S.coll[id].n)){const c=COLL.find(q=>q.id===id);addCollectible(c,true);showToast('From Deep Dive: '+c.n,'Mythic')}}}catch(e){}}
-window.addEventListener('pagehide',save);
+window.addEventListener('pagehide',()=>{save();try{if(Date.now()-CSYNC.lastUp>5000)cloudPush(true,true)}catch(e){}});
 
 function start(data){
-  S=(data&&typeof data.coins==='number')?data:(load()||fresh());
+  S=(data&&typeof data.coins==='number')?data:(load()||fresh());BOOT_LAST=S.last||0;
   for(const [k,v] of Object.entries(fresh()))if(S[k]===undefined)S[k]=v;
   S.boat=Math.min(S.boat,GEAR.boat.items.length-1);S.shack=Math.min(S.shack,GEAR.shack.items.length-1);
   if(!W(S.water))S.water='pond';
@@ -7035,7 +7044,7 @@ function start(data){
   if(!S.wx||!WX[S.wx.id])S.wx={id:'clear',left:300};
   {const X=WX[S.wx.id];AMB.cover=X.cover;AMB.wind=X.wind;AMB.rainK=X.rain||0;AMB.snowK=X.snow||0;AMB.fogK=S.wx.id==='fog'?1:0;AMB.snowAcc=S.wx.id==='snow'?.6:0}
   cast.dur=castDur();resize();renderAll();
-  const gap=(Date.now()-(S.last||Date.now()))/1000;if(gap>60)offline(gap);
+  const gap=(Date.now()-(BOOT_LAST||Date.now()))/1000;if(gap>60)offline(gap);
   renderAll();requestAnimationFrame(t=>{lastFrame=t;tick(t)});setTimeout(ddCross,1500);
   if(!(data&&typeof data.coins==='number'))showTitle();
   setTimeout(()=>{if(S.mp&&S.mp.id)mpSync(true)},4000);

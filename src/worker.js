@@ -361,14 +361,18 @@ async function route(req,env,url){
   if(p==='cloud/put'){
     const d=String(b.data||'');if(d.length<20||d.length>MAX_SAVE)return json({error:'bad-save'},400);
     const ts=Math.min(now+60000,Number(b.ts)||now);
+    // Safety net: never let a device overwrite a newer save from another device it hasn't seen yet.
+    // 'base' is the cloud version (server 'up' time) this device last uploaded or loaded.
+    if(b.base!=null){const cur=await db.prepare('SELECT ts,dev,kind,day,coins,up FROM cloud WHERE pid=?').bind(me.id).first();
+      if(cur&&cur.dev!==clean(b.dev,16)&&(Number(cur.up)||0)>(Number(b.base)||0))return json({error:'stale',ts:cur.ts,dev:cur.dev,kind:cur.kind,day:cur.day,coins:cur.coins,up:cur.up},409)}
     await db.prepare('INSERT INTO cloud(pid,data,ts,dev,kind,day,coins,up) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(pid) DO UPDATE SET data=excluded.data,ts=excluded.ts,dev=excluded.dev,kind=excluded.kind,day=excluded.day,coins=excluded.coins,up=excluded.up')
       .bind(me.id,d,ts,clean(b.dev,16),clean(b.kind,12),Number(b.day)|0,Number(b.coins)||0,now).run();
-    return json({ok:true,ts});
+    return json({ok:true,ts,up:now});
   }
   if(p==='cloud/get'){
-    const r=await db.prepare('SELECT data,ts,dev,kind,day,coins FROM cloud WHERE pid=?').bind(me.id).first();
+    const r=await db.prepare('SELECT data,ts,dev,kind,day,coins,up FROM cloud WHERE pid=?').bind(me.id).first();
     if(!r)return json({none:true});
-    if(b.meta)return json({ts:r.ts,dev:r.dev,kind:r.kind,day:r.day,coins:r.coins});
+    if(b.meta)return json({ts:r.ts,dev:r.dev,kind:r.kind,day:r.day,coins:r.coins,up:r.up});
     return json(r);
   }
   if(p==='rename'){
