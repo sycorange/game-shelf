@@ -3421,7 +3421,7 @@ async function txPoll(force){const m=mpS();if(!m.id||TX.busy||titleOn||document.
 setInterval(()=>txPoll(),2000);
 
 // ---------- Settings app
-const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:true,nText:true,nOther:true,h24:false,dock:'right',yard:true,cloud:true,text:'m',live:true};
+const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:true,nText:true,nOther:true,h24:false,dock:'right',yard:true,cloud:true,text:'m',live:true,fps:'60'};
 function SETS(){if(!S.set||typeof S.set!=='object')S.set={};if(S.set.cut&&!S.set.v2){if(S.set.cut==='auto')S.set.cut='always';}S.set.v2=1;for(const k in SET_DEF)if(S.set[k]===undefined)S.set[k]=SET_DEF[k];return S.set}
 const DARKQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 const phDark=()=>{const d=SETS().dark;return d==='on'||(d==='auto'&&!!DARKQ&&DARKQ.matches)};
@@ -3444,6 +3444,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
     ${row('Lightning flashes','Soft keeps the bolt but drops the bright screen flash',seg('flash',[['full','Full'],['soft','Soft']]))}
     ${row('Boat rocking','Heavy fish rock the boat',sw('rock',st.rock,'Boat rocking'))}
     ${row('Close-up at houses','Zoom in on the yard when you walk up to a house',sw('yard',st.yard,'Close-up at houses'))}
+    ${row('Frame rate',{'20':'Battery saver: easiest on your computer and battery','30':'Light: smooth enough, uses less power','60':'Smooth: the default','max':'Max: matches your screen. Uses the most power'}[st.fps]||'',seg('fps',[['20','Saver'],['30','30'],['60','60'],['max','Max']]))}
   </div></div>
   <div><h4>Sound</h4><div class="grp">
     ${row('Sound',s.on?'On':'Off',`<input type="checkbox" class="sw2" data-snd="on" ${s.on?'checked':''} aria-label="Sound on">`)}
@@ -4671,6 +4672,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:54,n:'Clean Sweep II',items:['Bug fix: the chimney fix now covers every home. On the Fishing Shack, Two-Story Lodge and Lakeside Cottage, the chimney sits at the back and pokes up through the roof, so it never runs over a window.','Bug fix: the Log Cabin’s porch roof no longer cuts across the front door. It now sits above the door on its two posts.','Walking up to your home now looks right: you get a little smaller as you head up from the dock, so you arrive door-sized and standing on the doorstep instead of towering over the door.','New Frame rate setting in the phone’s Settings app, under Motion: Saver, 30, 60 or Max. The game now runs at 60 by default. If the game slows down other games or apps you have open, try Saver or 30.']},
  {v:53,n:'Clean Sweep',items:['Bug fix: the Log Cabin’s stone chimney no longer runs down through the side window. It now sits at the back of the cabin and pokes up through the roof.']},
  {v:52,n:'Coffee Break',items:['Bug fix: Thermos of Coffee now always shows in Storage under Potions, and you can put it on your hot bar from the hot bar editor. Before, it only appeared if it landed in a free hot bar slot when you bought it, so players with a full hot bar couldn’t find theirs. Any coffee you bought is still there.']},
  {v:51,n:'Safe Harbor',items:['Bug fix: switching between your phone and computer now picks up where you actually left off. Before, a device could think its older game was newer, skip the “Pick up where you left off?” prompt, and then save over your progress from the other device.','Your cloud save is now protected: a device can no longer overwrite a newer save from another device without asking you first.','Your game now also saves to the cloud when you close the tab.']},
@@ -4948,29 +4950,32 @@ function gable(G,col,ov){const {x,y,w}=G,o=ov??8;ctx.fillStyle=col;ctx.beginPath
 function drawHomeBody(G,d,T){const {t,x,y,w,ht}=G,glass=lit(d)?`rgba(255,200,110,${.95-d*.6})`:HCol([168,206,216],d),wins=homeWins(G);
   const winFrame=(wx,wy,ww,wh,fc)=>{ctx.fillStyle=fc;ctx.fillRect(wx-1.5,wy-1.5,ww+3,wh+3);ctx.fillStyle=glass;ctx.fillRect(wx,wy,ww,wh);ctx.fillStyle=fc;ctx.fillRect(wx+ww/2-.5,wy,1,wh);ctx.fillRect(wx,wy+wh/2-.5,ww,1)};
   if(t===1){// Fishing Shack: weathered vertical boards, tin roof, stovepipe
+    backChim(x+w-20,G.py-6,4,G,d,T,'pipe',.8);
     ctx.fillStyle=HCol([124,114,100],d);ctx.fillRect(x,y,w,ht);ctx.fillStyle=HCol([88,80,70],d);for(let xx=x+6;xx<x+w;xx+=7)ctx.fillRect(xx,y,1.2,ht);
     gable(G,HCol([150,156,162],d),6);ctx.strokeStyle=HCol([110,116,124],d);ctx.lineWidth=.8;for(let i=1;i<9;i++){const p=i/9;ctx.beginPath();ctx.moveTo(x-6+(G.px-x+6)*p,y+2+(G.py-y-2)*p);ctx.lineTo(x-6+(G.px-x+6)*p+2,y+2);ctx.stroke();ctx.beginPath();ctx.moveTo(G.px+(x+w+6-G.px)*p,G.py+(y+2-G.py)*p);ctx.lineTo(G.px+(x+w+6-G.px)*p-2,y+2);ctx.stroke()}
-    ctx.fillStyle=HCol([70,70,74],d);ctx.fillRect(x+w-20,G.py-6,4,y-G.py+10);smoke(x+w-18,G.py-8,T,.8);
     ctx.fillStyle=HCol([70,56,44],d);ctx.fillRect(G.door,218,14,24);for(const [wx,wy] of wins)winFrame(wx,wy,12,10,HCol([90,80,70],d));
     ctx.fillStyle=HCol([96,70,46],d);ctx.fillRect(x+w+2,232,8,10);ctx.fillStyle=HCol([60,44,30],d);ctx.fillRect(x+w+2,232,8,1.5);return wins}
   if(t===2){// Log Cabin: round logs, shingle roof, stone chimney (at the back, poking up through the roof), front porch
-    {const cx=x+20,ctop=G.py+2;ctx.fillStyle=HCol([130,130,128],d);ctx.fillRect(cx,ctop,12,y-ctop+4);ctx.fillStyle=HCol([96,96,96],d);for(let yy=ctop+3;yy<y+2;yy+=5)ctx.fillRect(cx+(yy%10<5?0:5),yy,6,1.2);
-      ctx.fillStyle=HCol([104,104,102],d);ctx.fillRect(cx-1.5,ctop-2,15,3);smoke(cx+6,ctop-3,T,1)}
+    backChim(x+20,G.py+2,12,G,d,T,'stone');
     const lg=HCol([128,88,58],d),ld=HCol([86,58,38],d);ctx.fillStyle=lg;ctx.fillRect(x,y,w,ht);for(let yy=y+2;yy<242;yy+=6){ctx.fillStyle=ld;ctx.fillRect(x,yy+4.5,w,1.5);ctx.fillStyle=HCol([148,104,70],d);ctx.beginPath();ctx.arc(x-1,yy+3,3,0,7);ctx.arc(x+w+1,yy+3,3,0,7);ctx.fill()}
     gable(G,HCol([84,54,44],d));ctx.fillStyle=HCol([64,40,32],d);for(let i=1;i<5;i++){const yy=y+2-(y+2-G.py)*i/5;ctx.fillRect(x-8+(G.px-x+8)*i/5,yy,(w+16)*(1-i/5),1.2)}
-    ctx.fillStyle=HCol([110,76,48],d);ctx.fillRect(x+w-36,236,46,6);ctx.fillStyle=HCol([76,52,36],d);ctx.fillRect(x+w-34,222,2.5,14);ctx.fillRect(x+w+6,222,2.5,14);ctx.fillStyle=HCol([84,54,44],d);ctx.fillRect(x+w-38,219,50,4);
-    ctx.fillStyle=HCol([76,50,32],d);ctx.fillRect(G.door,216,14,26);ctx.fillStyle=HCol([220,180,90],d);ctx.fillRect(G.door+10,229,2,2);for(const [wx,wy] of wins)winFrame(wx,wy,14,12,HCol([86,58,38],d));return wins}
+    ctx.fillStyle=HCol([110,76,48],d);ctx.fillRect(x+w-36,236,46,6);
+    ctx.fillStyle=HCol([76,50,32],d);ctx.fillRect(G.door,216,14,26);ctx.fillStyle=HCol([220,180,90],d);ctx.fillRect(G.door+10,229,2,2);for(const [wx,wy] of wins)winFrame(wx,wy,14,12,HCol([86,58,38],d));
+    // porch cover sits above the door frame, on two posts
+    ctx.fillStyle=HCol([76,52,36],d);ctx.fillRect(x+w-35,213,2.5,23);ctx.fillRect(x+w+6,213,2.5,23);
+    ctx.fillStyle=HCol([84,54,44],d);ctx.beginPath();ctx.moveTo(x+w-39,214);ctx.lineTo(x+w-37,208);ctx.lineTo(x+w+11,208);ctx.lineTo(x+w+13,214);ctx.fill();ctx.fillStyle=HCol([64,40,32],d);ctx.fillRect(x+w-39,213,52,1.4);return wins}
   if(t===3){// Lakeside Cottage: painted siding, white trim, shutters, slate roof, porch swing
+    backChim(x+w-32,G.py+2,10,G,d,T,'brick',.9);
     const side=HCol([150,182,168],d),trim=HCol([240,240,232],d);ctx.fillStyle=side;ctx.fillRect(x,y,w,ht);ctx.fillStyle=HCol([126,158,144],d);for(let yy=y+5;yy<242;yy+=5)ctx.fillRect(x,yy,w,1);
     ctx.fillStyle=trim;ctx.fillRect(x,y,3,ht);ctx.fillRect(x+w-3,y,3,ht);gable(G,HCol([78,82,98],d));ctx.fillStyle=trim;ctx.beginPath();ctx.moveTo(x-8,y+2);ctx.lineTo(G.px,G.py);ctx.lineTo(x+w+8,y+2);ctx.lineTo(x+w+5,y+3.5);ctx.lineTo(G.px,G.py+2.5);ctx.lineTo(x-5,y+3.5);ctx.fill();
-    winFrame(G.px-6,y-14,12,9,trim);ctx.fillStyle=HCol([120,120,124],d);ctx.fillRect(x+w-26,G.py+8,9,y-G.py);smoke(x+w-21,G.py+6,T,.9);
+    winFrame(G.px-6,y-14,12,9,trim);
     for(const [wx,wy] of wins){winFrame(wx,wy,14,12,trim);ctx.fillStyle=HCol([46,96,74],d);ctx.fillRect(wx-6,wy-1,4,14);ctx.fillRect(wx+16,wy-1,4,14)}
     ctx.fillStyle=HCol([58,110,90],d);ctx.fillRect(G.door,216,14,26);ctx.fillStyle=trim;ctx.fillRect(G.door-1.5,214.5,17,1.5);ctx.fillStyle=HCol([230,190,90],d);ctx.fillRect(G.door+10,229,2,2);
     ctx.fillStyle=HCol([170,130,90],d);ctx.fillRect(x+w-40,237,52,5);const sw=Math.sin(T*1.2)*1.5;ctx.strokeStyle=HCol([90,70,50],d);ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(x+w+4,224);ctx.lineTo(x+w+4+sw,232);ctx.moveTo(x+w+12,224);ctx.lineTo(x+w+12+sw,232);ctx.stroke();ctx.fillStyle=HCol([150,104,64],d);ctx.fillRect(x+w+3+sw,232,11,2);return wins}
   if(t===4){// Two-Story Lodge: stone ground floor, log upper floor with a balcony, big chimney, green roof
+    backChim(x+14,G.py+4,16,G,d,T,'stone',1.2);
     const mid=y+ht*.48;ctx.fillStyle=HCol([128,90,60],d);ctx.fillRect(x,y,w,mid-y);ctx.fillStyle=HCol([88,60,40],d);for(let yy=y+5;yy<mid;yy+=6)ctx.fillRect(x,yy,w,1.4);
     ctx.fillStyle=HCol([146,142,134],d);ctx.fillRect(x,mid,w,242-mid);ctx.fillStyle=HCol([112,108,102],d);for(let yy=mid+3,r=0;yy<242;yy+=7,r++)for(let xx=x+(r%2)*6;xx<x+w;xx+=12)ctx.fillRect(xx,yy,10,1.2),ctx.fillRect(xx,yy,1.2,6);
-    ctx.fillStyle=HCol([132,128,122],d);ctx.fillRect(x-10,G.py+2,14,242-G.py-2);ctx.fillStyle=HCol([100,96,92],d);for(let yy=G.py+5;yy<242;yy+=6)ctx.fillRect(x-10+(yy%12?0:6),yy,7,1.2);smoke(x-3,G.py,T,1.2);
     gable(G,HCol([62,86,66],d),10);ctx.fillStyle=HCol([46,66,50],d);ctx.fillRect(x-10,y,w+20,3);
     const by=mid-2;ctx.fillStyle=HCol([100,70,46],d);ctx.fillRect(x+4,by,w-8,3);ctx.fillStyle=HCol([84,58,38],d);for(let xx=x+6;xx<x+w-4;xx+=5)ctx.fillRect(xx,by-8,1.2,8);ctx.fillRect(x+4,by-9,w-8,1.6);
     for(const [wx,wy] of wins)winFrame(wx,wy,14,wy===212?12:11,HCol([84,58,38],d));ctx.fillStyle=HCol([96,62,40],d);ctx.fillRect(G.door,212,14,30);ctx.fillStyle=HCol([230,190,90],d);ctx.fillRect(G.door+10,228,2,2);return wins}
@@ -4993,6 +4998,11 @@ function drawHomeBody(G,d,T){const {t,x,y,w,ht}=G,glass=lit(d)?`rgba(255,200,110
     for(const px of [6,168]){ctx.fillStyle=HCol([40,40,44],d);ctx.fillRect(px,224,2,18);ctx.fillStyle=on?'#ffdc8a':HCol([210,200,170],d);ctx.fillRect(px-2,219,6,6);if(on)glow(px+1,222,18,.5*(1-d))}
     return wins}
   return wins}
+// Chimneys sit at the back of every home: drawn before the walls and roof so only the top pokes up above the roofline.
+function backChim(cx,ctop,cw,G,d,T,kind,k){if(kind==='pipe'){ctx.fillStyle=HCol([70,70,74],d);ctx.fillRect(cx,ctop,cw,G.y-ctop+4);ctx.fillStyle=HCol([54,54,58],d);ctx.fillRect(cx-1,ctop,cw+2,2);smoke(cx+cw/2,ctop-2,T,k||.8);return}
+  ctx.fillStyle=HCol(kind==='brick'?[150,92,74]:[130,130,128],d);ctx.fillRect(cx,ctop,cw,G.y-ctop+4);ctx.fillStyle=HCol(kind==='brick'?[112,66,52]:[96,96,96],d);
+  for(let yy=ctop+3,r=0;yy<G.y+2;yy+=5,r++)ctx.fillRect(cx+(r%2?cw/2-1:1),yy,Math.max(3,cw/2-2),1.2);
+  ctx.fillStyle=HCol(kind==='brick'?[96,60,50]:[104,104,102],d);ctx.fillRect(cx-1.5,ctop-2,cw+3,3);smoke(cx+cw/2,ctop-3,T,k||1)}
 function smoke(cx,cy,T,k){for(let i=0;i<4;i++){const p=((T*.25+i/4)%1);ctx.fillStyle=`rgba(200,200,210,${.33*(1-p)})`;ctx.beginPath();ctx.arc(cx+Math.sin(p*6+i)*6*k,cy-p*40*k,(3+p*8)*k,0,7);ctx.fill()}}
 function drawShack(d,h,T){
   const G=shackGeo(),{t,x,y,w,ht}=G,dark=rgb(mix([24,18,16],[76,52,36],d));
@@ -5305,9 +5315,11 @@ function drawSleep(d,T){
   const seg1=start[0]-mid[0],seg2=Math.hypot(mid[0]-door[0],mid[1]-door[1]),dist=p*(seg1+seg2);
   let x,y;if(dist<seg1){x=start[0]-dist;y=start[1]}else{const q=(dist-seg1)/seg2;x=mid[0]+(door[0]-mid[0])*q;y=mid[1]+(door[1]-mid[1])*q}
   const sp=ph==='run'?20:13,mv=st?0:1,leg=Math.sin(T*sp)*3.5*mv,bob=Math.abs(Math.sin(T*sp))*1.5*mv;
-  ctx.save();ctx.translate(x,0);ctx.scale(ph==='walkOut'||ph==='yard'?1:-1,1);
-  ctx.strokeStyle=rgb(mix([20,20,30],[50,60,90],d));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,y-3-bob);ctx.lineTo(-2+leg,y+5);ctx.moveTo(2,y-3-bob);ctx.lineTo(2-leg,y+5);ctx.stroke();
-  drawAngler(0,y-bob-2,d,T);ctx.restore();
+  // Shrink toward the house (it sits further back than the dock) so you arrive door-sized, feet on the doorstep.
+  const k=1-.34*ease(dist/(seg1+seg2)),fy=y+5-5*ease(dist/(seg1+seg2));
+  ctx.save();ctx.translate(x,fy);ctx.scale((ph==='walkOut'||ph==='yard'?1:-1)*k,k);
+  ctx.strokeStyle=rgb(mix([20,20,30],[50,60,90],d));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,-8-bob);ctx.lineTo(-2+leg,0);ctx.moveTo(2,-8-bob);ctx.lineTo(2-leg,0);ctx.stroke();
+  drawAngler(0,-7-bob,d,T);ctx.restore();
 }
 function drawBox(x,y,s){ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x,y+1,10*s,2.6*s,0,0,7);ctx.fill();
   ctx.fillStyle='#c08a4a';ctx.fillRect(x-9*s,y-14*s,18*s,14*s);ctx.fillStyle='#a8743a';ctx.fillRect(x-9*s,y-14*s,18*s,3*s);ctx.fillStyle='#ecdcb0';ctx.fillRect(x-1.6*s,y-14*s,3.2*s,14*s);
@@ -6997,7 +7009,10 @@ function realmLogSections(p,fn){const ph=phaseOf(S.min);for(const r of REALMS){c
 // ---------- Loop ----------
 let lastFrame=performance.now(),uiT=0,saveT=0;
 let statT=0;
+// Frame rate cap from Settings (Battery saver 20 / 30 / 60 / Max). Skipped frames just wait for the next one; the clock still uses real time.
+const FPS_OF={'20':20,'30':30,'60':60,max:0};
 function tick(now){
+  {const cap=FPS_OF[SETS().fps]??60;if(cap&&now-lastFrame<1000/cap-1.5){requestAnimationFrame(tick);return}}
   let dt=(now-lastFrame)/1000;lastFrame=now;
   if(dt>2){offline(dt);dt=0;renderAll()}
   dt=Math.min(dt,.25);
