@@ -78,6 +78,10 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .tabs button[aria-selected="true"]{background:var(--panel-2);color:var(--fg)}
 .tabs small{font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+#sessCover{position:fixed;inset:0;z-index:99999;background:rgba(6,14,18,.86);backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px}
+#sessCover .sc-box{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:22px 22px 18px;max-width:380px;width:100%;display:grid;gap:10px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#sessCover .sc-eye{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--buoy);font-weight:700}
+#sessCover h2{margin:0;font-size:20px}#sessCover p{margin:0;opacity:.85;line-height:1.45}#sessCover small{opacity:.6}#sessCover .jig{justify-self:center;padding:10px 22px;font-size:15px}#sessCover h2{font-family:var(--font-display)}
 .card{background:var(--panel-2);border-radius:11px;padding:12px;display:grid;gap:6px;align-content:start;min-width:0}
 .eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
 .card h3{font-size:1.08rem}
@@ -2275,7 +2279,26 @@ const KEY='lantern-lake-v1';
 const fresh=()=>({coins:0,rod:0,lure:0,boat:0,shack:0,water:'pond',min:330,day:1,log:{},recent:[],total:0,decor:{},trophies:[],tour:null,nextTour:150,cc:0,junk:{},pots:{},hot:[null,null,null,null,null],buffs:{},coll:{},rate:0,off:{},wx:{id:'clear',left:300},cooler:{},hunger:100,stamina:100,stamRate:.07,stamT:0,sleep:null,vs:{h:0,s:0},fc:{},sched:[],schedDays:{},snd:{on:true,master:.7,sfx:.7,amb:.4,music:.5,bg:true,v:2},boxes:[],newsDay:0,today:null,yday:null,tapes:{horror:1},tvInput:'tv',tape:null,mats:{},bty:null,streak:{last:'',count:0,claimed:true},q:{step:0,scales:0,photo:false,lure:false,seen:0},locked:{},pin:null,st:{play:0,earn:0,best:{n:0,day:0}},crate:0,cab:cabDef(),last:Date.now()});
 let S, cast={el:0,dur:8}, fx=[], toastT=0;
 function load(){try{const r=localStorage.getItem(KEY);return r?JSON.parse(r):null}catch(e){return null}}
-function save(){S.last=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+// One session at a time. Tabs on this browser talk over a BroadcastChannel; across devices, pressing Play claims the
+// session on the server and any older session gets 'taken' on its next sync. A paused session never saves or syncs.
+const SESS={sid:Math.random().toString(36).slice(2,12),claimed:false,paused:false,checking:false,
+  take:(()=>{try{const t=sessionStorage.getItem('ll-take')||'';sessionStorage.removeItem('ll-take');return t}catch(e){return ''}})()};
+let TABCH=null;try{TABCH=new BroadcastChannel('ll-tab')}catch(e){}
+function sessPause(why,kind){if(SESS.paused)return;SESS.paused=true;
+  try{if(AU.ctx)AU.ctx.suspend()}catch(e){}try{if(RADIO.ctl)RADIO.ctl.pause()}catch(e){}
+  const tab=why==='tab',d=document.createElement('div');d.id='sessCover';
+  d.innerHTML=`<div class="sc-box"><div class="sc-eye">Lantern Lake</div><h2>${tab?'Open in another tab':'Playing on another device'}</h2><p>${tab?'Lantern Lake is already running in another tab or window. Only one can play at a time, so this one is paused.':`You started playing on another device (your ${esc(kind||'other device')}). This one is paused so your progress stays in one place.`}</p><button class="jig" id="scGo">Play here</button><small>${tab?'The other tab will pause instead.':'Your latest cloud save loads first. Away time still counts.'}</small></div>`;
+  document.body.appendChild(d);document.getElementById('scGo').onclick=()=>{try{sessionStorage.setItem('ll-take',why)}catch(e){}location.reload()}}
+if(TABCH)TABCH.onmessage=e=>{const m=e.data||{};if(!m.sid||m.sid===SESS.sid)return;
+  if(m.t==='ping'&&!SESS.paused&&!SESS.checking)TABCH.postMessage({t:'here',sid:SESS.sid});
+  else if(m.t==='here'&&SESS.checking){SESS.checking=false;sessPause('tab')}
+  else if(m.t==='claim')sessPause('tab')};
+function sessBoot(){if(!TABCH)return;if(SESS.take){TABCH.postMessage({t:'claim',sid:SESS.sid});return}
+  SESS.checking=true;TABCH.postMessage({t:'ping',sid:SESS.sid});setTimeout(()=>{SESS.checking=false},700)}
+async function sessClaim(){const m=S&&S.mp;if(SESS.claimed||SESS.paused||titleOn||!m||!m.id||!m.key)return;
+  try{await api('sess/claim',{id:m.id,key:m.key,sid:SESS.sid,kind:DEVK});SESS.claimed=true}catch(e){}}
+function sessErr(e){if(e&&e.message==='taken'){sessPause('dev',e.j&&e.j.kind);return true}return false}
+function save(){if(SESS.paused)return;S.last=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 const vitalX=()=>(S.hunger<=0?1.4:S.hunger<25?1.1:1)*(S.stamina<=0?1.5:S.stamina<20?1.1:1);
 const vitalMiss=()=>(S.hunger<=0?.1:0)+(S.stamina<=0?.12:0);
@@ -4445,18 +4468,18 @@ $('saveLoad').onclick=async()=>{let o=null;try{o=await decSave($('saveTxt').valu
 // (S.last itself gets bumped as soon as the game starts running, so it can't tell us who played most recently).
 const CSYNC={busy:false,lastUp:0,checked:false,offer:null,hidT:0};let BOOT_LAST=0;
 const cloudOn=()=>SETS().cloud!==false&&!!(S.mp&&S.mp.id&&S.mp.key)&&MPV.online!==false&&MPV.online!=='nodb';
-async function cloudPush(force,keep){if(!cloudOn()||CSYNC.busy||!CSYNC.checked||CSYNC.offer||titleOn)return;if(!force&&Date.now()-CSYNC.lastUp<120000)return;
-  CSYNC.busy=true;try{const data=await encSave2(),body={id:S.mp.id,key:S.mp.key,data,ts:S.last,dev:DEV,kind:DEVK,day:S.day,coins:S.coins,base:S.cbase||0};
+async function cloudPush(force,keep){if(SESS.paused||!cloudOn()||CSYNC.busy||!CSYNC.checked||CSYNC.offer||titleOn)return;if(!force&&Date.now()-CSYNC.lastUp<120000)return;
+  CSYNC.busy=true;try{const data=await encSave2(),body={id:S.mp.id,key:S.mp.key,data,ts:S.last,dev:DEV,kind:DEVK,day:S.day,coins:S.coins,base:S.cbase||0};if(SESS.claimed)body.sid=SESS.sid;
     if(keep)fetch('/api/cloud/put',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:data.length<60000}).catch(()=>{});
     else{const r=await api('cloud/put',body);if(r.up){S.cbase=r.up;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}CSYNC.lastUp=Date.now()}
-  catch(e){if(e.message==='stale'){CSYNC.checked=false;CSYNC.busy=false;CSYNC.lastUp=Date.now();cloudCheck();return}}CSYNC.busy=false}
+  catch(e){if(sessErr(e)){CSYNC.busy=false;return}if(e.message==='stale'){CSYNC.checked=false;CSYNC.busy=false;CSYNC.lastUp=Date.now();cloudCheck();return}}CSYNC.busy=false}
 async function cloudCheck(){if(!cloudOn()||CSYNC.offer)return;const m=S.mp,mine=S.last;
   try{const r=await api('cloud/get',{id:m.id,key:m.key,meta:true});CSYNC.checked=true;
     if(r.none)return;
     if(r.dev===DEV){S.cbase=Math.max(S.cbase||0,r.up||0);return}
     if(S.cbase&&!((r.up||0)>S.cbase))return;               // nothing new since this device last synced
     if(!S.cbase&&!(r.ts>(BOOT_LAST||mine)+15000)){S.cbase=r.up||0;return} // first sync after the update: this device was played last
-    CSYNC.offer=r;showCloudOffer(r)}catch(e){if(e.message==='auth'||e.message==='bad-request')CSYNC.checked=true}}
+    CSYNC.offer=r;showCloudOffer(r);if(SESS.take==='dev'){SESS.take='';$('clYes').click()}}catch(e){if(e.message==='auth'||e.message==='bad-request')CSYNC.checked=true}}
 function showCloudOffer(r){$('clEye').textContent='Cloud save';$('clH').textContent='Pick up where you left off?';
   $('clP').textContent=`You played more recently on your ${r.kind||'other device'}. Continue that game here?`;
   $('clCard').innerHTML=`<b>Day ${r.day} · $${money(r.coins)}</b><small>Saved ${ago(r.ts)} on your ${esc(r.kind||'other device')}</small><small>This device: day ${S.day} · $${money(S.coins)}</small>`;
@@ -4631,20 +4654,20 @@ function mpCatch(f,w,vr,notable,quiet){noteDayBest(f,w,vr);const m=mpS();m.wkn=(
   if(sp&&f.id===sp.id&&w>(m.wkBest||0)){m.wkBest=+w.toFixed(2);if(!quiet&&m.id)showToast(`New best for the Friends Cup: ${w} lb ${f.n}`,'This week')}
   if(m.id&&(notable||f.r==='R'||f.r==='L'||vr)){m.q.push({fish:f.id,w:+(+w).toFixed(2),v:vr||'',water:S.water,ts:Date.now()});if(m.q.length>20)m.q.shift()}}
 async function api(path,body){const r=await fetch('/api/'+path,body?{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}:{cache:'no-store'});
-  let j=null;try{j=await r.json()}catch(e){throw new Error('offline')}if(!r.ok||j.error)throw new Error(j.error||('HTTP '+r.status));return j}
+  let j=null;try{j=await r.json()}catch(e){throw new Error('offline')}if(!r.ok||j.error){const er=new Error(j.error||('HTTP '+r.status));er.j=j;throw er}return j}
 async function mpCheck(){if(MPV.online!==null)return MPV.online;try{await api('ping');MPV.online=true}catch(e){MPV.online=e.message==='no-db'?'nodb':false}return MPV.online}
 function mpStats(){const _mus=musMine();let big=null;for(const [id,L] of Object.entries(S.log))if(L&&L.big>0&&FI(id)&&(!big||L.big>big.w))big={fish:id,w:+L.big.toFixed(2)};
   return {mus:_mus,day:S.day,coins:Math.floor(S.coins),total:S.total,species:Object.keys(S.log).filter(k=>S.log[k].n>0).length,coll:COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,trophies:S.trophies.length,variants:varN(),big,look:lookOf(S.look),pin:S.pinHi||0,bet:S.sb&&S.sb.rec?{w:S.sb.rec.w,l:S.sb.rec.l,net:S.sb.rec.net}:null,today:(()=>{const d=dayBest();return d?{f:d.f,w:d.w,v:d.v,d:d.d}:null})()}}
 function mpCabin(){return {cab:CAB(),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,decor:Object.keys(S.decor).filter(has)},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
-async function mpSync(force){const m=mpS();if(!m.id||MPV.busy)return;if(!force&&Date.now()-MPV.last<110000)return;if(MPV.online===false&&!force)return;
+async function mpSync(force){const m=mpS();if(SESS.paused||!m.id||MPV.busy)return;if(!SESS.claimed&&!titleOn)await sessClaim();if(SESS.paused)return;if(!force&&Date.now()-MPV.last<110000)return;if(MPV.online===false&&!force)return;
   MPV.busy=true;
   try{const best={};for(const [id,L] of Object.entries(S.log))if(L&&L.big>(m.sentBest[id]||0)&&FI(id))best[id]=+L.big.toFixed(2);
-    const cab=JSON.stringify(mpCabin()),q=m.q.slice(0,20);const body={id:m.id,key:m.key,lake:m.lake||'all',stats:mpStats(),best,catches:q,wk:m.wk,wkn:m.wkn,wkBest:m.wkBest||0};if(cab!==m.cabSent)body.cabin=cab;mpSyncExtras(body);
+    const cab=JSON.stringify(mpCabin()),q=m.q.slice(0,20);const body={id:m.id,key:m.key,lake:m.lake||'all',stats:mpStats(),best,catches:q,wk:m.wk,wkn:m.wkn,wkBest:m.wkBest||0};if(cab!==m.cabSent)body.cabin=cab;mpSyncExtras(body);if(SESS.claimed)body.sid=SESS.sid;
     const r=await api('sync',body);
     Object.assign(m.sentBest,best);m.q=m.q.slice(q.length);if(body.cabin)m.cabSent=cab;
     MPV.online=true;MPV.err='';MPV.last=Date.now();if(r.hasPin!==undefined){MPV.hasPin=!!r.hasPin;setTimeout(pinNudge,2500)}MPV.lakes=r.lakes||[];MPV.pub=r.pub!==false;if(r.lake&&r.lake!==m.lake){m.lake=r.lake;MPV.plT=0;MPV.newsT=0}{const seen=m.mailSeen,nm=(r.mail||[]).filter(x=>x.id>(seen||0));if(nm.length){m.mailSeen=Math.max(...nm.map(x=>x.id));if(seen!=null)phNotify('friends','Friends',nm.length>1?`${nm.length} gifts in your mailbox`:`${nm[0].from_name} sent you a gift`)}else if(seen==null)m.mailSeen=0}MPV.mail=r.mail||[];MPV.records=r.records||[];MPV.weekly=r.weekly;MPV.lastWeekly=r.lastWeekly;MPV.community=r.community;MPV.next=r.next||0;
     mpSyncDone(body,r);mpRecordAlerts();mpWeekRewards();save();if(phView==='friends'&&!$('slotsModal').hidden)renderFriends()}
-  catch(e){MPV.err=e.message;if(e.message==='auth'){MPV.err='Your friends profile on this site was reset. Pick a name again.';delete m.id;delete m.key}
+  catch(e){if(sessErr(e))return;MPV.err=e.message;if(e.message==='auth'){MPV.err='Your friends profile on this site was reset. Pick a name again.';delete m.id;delete m.key}
     else if(e.message==='no-db')MPV.online='nodb';else if(e.message==='offline'&&MPV.online!==true)MPV.online=false}
   finally{MPV.busy=false}}
 function mpRecordAlerts(){const m=mpS(),key=m.lake||'all',held=m.heldBy[key],mine=MPV.records.filter(r=>r.pid===m.id).map(r=>r.fish),msgs=[];
@@ -4977,6 +5000,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:61,n:'One Rod at a Time',items:['Lantern Lake now runs in one place at a time. Open it in a second tab, or start playing on another device, and the older one pauses with a Play here button, so two copies can never fight over your save.','Bug fix: a phone or tab left open in the background can no longer quietly overwrite progress you made on another device.']},
  {v:60,n:'Tidy Logbook',items:['Logbook cards are tidier: the fish icon sits beside the name, details stay in the same order, and buttons and variant chips line up along the bottom of every card in a row.']},
  {v:59,n:'Curator’s Corner',items:['Logbook cards now show who holds each fish’s museum plaque, or that the plaque is still open.','Tap any plaque in the museum to see its fish facts.','Museum-worthy fish get a gold Museum Case tag in Recent catches.','New Top curators board in the museum: see who holds the most plaques.','Your phone’s lock screen now shows how many plaques you hold, and warns you when someone takes one.','Discord posts from the game now show the Lantern Lake fish icon.']},
  {v:58,n:'Hall of Fame',items:['The Lantern Lake Museum is open! Travel there from the Waters tab or the “Where to?” menu outside your home, and donate record-breaking fish to put your name on a plaque. There’s a plaque for every species.','New rare wing: separate plaques for golden, albino and giant fish of every species.','When you land a fish heavier than its plaque, you get a gold “Museum-worthy!” banner and it’s saved in your new Museum Case (in the Cooler tab) so it can’t be sold by accident. This works for fish caught while you’re away too.','Donating pays a reward based on rarity, and your plaque count shows on your contact card. If someone beats your plaque, you’ll get a notification so you can win it back.']},
@@ -5074,7 +5098,7 @@ function drawTitle(now){if(!titleOn)return;const c=$('titleCv'),x=c.getContext('
   const ry=HZ+(HZ-ly)*.35;if(ry<H){x.fillStyle=`rgba(255,190,90,${.18*fl})`;x.fillRect(lx-3*s,ry,6*s,2)}}
  x.fillStyle='#120c18';for(let i=0;i<26;i++){const side=i<13?0:1,rx=side?W-((i-13)*9+4):i*9+4,h=H*(.08+((i*37)%10)/100)+(side?0:6),sw=Math.sin(T*.8+i)*3;x.beginPath();x.moveTo(rx-2,H);x.quadraticCurveTo(rx+sw,H-h*.6,rx+sw*1.5,H-h);x.quadraticCurveTo(rx+2+sw,H-h*.5,rx+3,H);x.fill()}
  titleRAF=requestAnimationFrame(drawTitle)}
-$('tGo').onclick=()=>{initAudio&&initAudio();hideTitle();if(URLX)urlCodeOffer();else mpCheck().then(cloudCheck)};
+$('tGo').onclick=()=>{initAudio&&initAudio();hideTitle();if(URLX)urlCodeOffer();else mpCheck().then(async()=>{await sessClaim();if(!SESS.paused)cloudCheck()})};
 $('tUpd').onclick=openUpdates;
 $('tRibbon').onclick=openUpdates;
 $('updClose').onclick=()=>$('updModal').hidden=true;
@@ -7353,7 +7377,7 @@ let lastFrame=performance.now(),uiT=0,saveT=0;
 let statT=0;
 // Frame rate cap from Settings (Battery saver 20 / 30 / 60 / Max). Skipped frames just wait for the next one; the clock still uses real time.
 const FPS_OF={'20':20,'30':30,'60':60,max:0};
-function tick(now){
+function tick(now){if(SESS.paused)return;
   {const cap=FPS_OF[SETS().fps]??60;if(cap&&now-lastFrame<1000/cap-1.5){requestAnimationFrame(tick);return}}
   let dt=(now-lastFrame)/1000;lastFrame=now;
   if(dt>2){offline(dt);dt=0;renderAll()}
@@ -7407,6 +7431,7 @@ function start(data){
   const gap=(Date.now()-(BOOT_LAST||Date.now()))/1000;if(gap>60)offline(gap);
   renderAll();requestAnimationFrame(t=>{lastFrame=t;tick(t)});setTimeout(ddCross,1500);
   if(!(data&&typeof data.coins==='number'))showTitle();
+  sessBoot();
   setTimeout(()=>{if(S.mp&&S.mp.id)mpSync(true)},4000);
 }
 try{window.claude?.hot?.snapshot?.(()=>JSON.parse(JSON.stringify(S)))}catch(e){}

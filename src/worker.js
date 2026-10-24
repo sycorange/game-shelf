@@ -60,6 +60,7 @@ async function init(db){
   try{await db.prepare('CREATE TABLE IF NOT EXISTS pinfail(k TEXT PRIMARY KEY,n INTEGER,ts INTEGER)').run()}catch(e){}
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS sess(pid TEXT PRIMARY KEY,sid TEXT,kind TEXT,ts INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS grec(fish TEXT PRIMARY KEY,pid TEXT,w REAL,ts INTEGER)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS evbest_w ON evbest(ev,w)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS weekly_w ON weekly(week,w)`)]);
@@ -416,6 +417,12 @@ async function route(req,env,url,ctx){
     if(ctx)ctx.waitUntil((async()=>{const c=await dcCfg(db);await dcPost(db,'catches',{embeds:[{color:0xc9a227,title:`🏛️ New museum plaque by ${me.name}`,description:`**${v?VAR_N[v]+' ':''}${fname}**: ${w.toFixed(2)} lb${prev?` (beat ${prev.name}'s ${(+prev.w).toFixed(2)} lb)`:' (first one!)'}`+dcLink(c)}]})})());
     return json({ok:true,prev:prev?{name:prev.name,w:prev.w,mine:prev.pid===me.id}:null})}
   {const xr=await extraRoutes(p,db,me,b,now,url);if(xr)return xr}
+  // One session at a time: pressing Play claims the session; saves and syncs from any older session are refused with 'taken'.
+  if(p==='sess/claim'){const sid=clean(b.sid,16);if(sid.length<6)return json({error:'bad-request'},400);
+    await db.prepare('INSERT INTO sess(pid,sid,kind,ts) VALUES(?,?,?,?) ON CONFLICT(pid) DO UPDATE SET sid=excluded.sid,kind=excluded.kind,ts=excluded.ts').bind(me.id,sid,clean(b.kind,12),now).run();
+    return json({ok:true})}
+  if(b.sid&&(p==='sync'||p==='cloud/put')){const cur=await db.prepare('SELECT sid,kind,ts FROM sess WHERE pid=?').bind(me.id).first();
+    if(cur&&cur.sid!==clean(b.sid,16))return json({error:'taken',kind:cur.kind,ts:cur.ts},409)}
   // Cloud save: the latest copy of this player's game, so their devices stay in sync.
   if(p==='cloud/put'){
     const d=String(b.data||'');if(d.length<20||d.length>MAX_SAVE)return json({error:'bad-save'},400);
