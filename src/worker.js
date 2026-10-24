@@ -47,6 +47,7 @@ async function init(db){
   try{await db.prepare('ALTER TABLE players ADD COLUMN pub INTEGER DEFAULT 1').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN pin TEXT').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN host TEXT').run()}catch(e){/* already there */}
+  try{await db.prepare('ALTER TABLE players ADD COLUMN sup INTEGER DEFAULT 0').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN hts INTEGER').run()}catch(e){/* already there */}
   await db.prepare('CREATE TABLE IF NOT EXISTS cfg(k TEXT PRIMARY KEY,v TEXT)').run();
   await db.batch([db.prepare('CREATE TABLE IF NOT EXISTS museum(slot TEXT PRIMARY KEY,fish TEXT,v TEXT,pid TEXT,name TEXT,w REAL,ts INTEGER)'),
@@ -266,6 +267,12 @@ async function extraRoutes(p,db,me,b,now,url){
     const ok=(await db.prepare(`SELECT id FROM players WHERE id IN (${ids.map(()=>'?').join(',')}) AND host LIKE '%.workers.dev'`).bind(...ids).all()).results.map(r=>r.id);
     if(ok.length)await db.batch(ok.map(id=>db.prepare('INSERT INTO texts(a,b,body,photo,ts) VALUES(?,?,?,?,?)').bind(me.id,id,text,null,now)).concat([db.prepare("INSERT OR REPLACE INTO kvc(k,v,ts) VALUES('move:nudge',?,?)").bind(JSON.stringify({n:ok.length,ts:now}),now)]));
     return json({ok:true,sent:ok.length})}
+  // Supporter badge: granted by hand from Owner tools after a donation (only the server can set it).
+  if(p==='owner/sups'){const r=await db.prepare('SELECT id,name,seen FROM players WHERE sup=1 ORDER BY lname LIMIT 500').all();return json({sups:r.results})}
+  if(p==='owner/sup'){const name=clean(b.name,16).toLowerCase();if(!name)return json({error:'bad-name'},400);
+    const t=await db.prepare('SELECT id,name,stats FROM players WHERE lname=?').bind(name).first();if(!t)return json({found:false});
+    let st={};try{st=JSON.parse(t.stats||'{}')||{}}catch(e){}st.sup=b.on?1:0;
+    await db.prepare('UPDATE players SET sup=?,stats=? WHERE id=?').bind(b.on?1:0,JSON.stringify(st).slice(0,4000),t.id).run();return json({found:true,name:t.name,on:!!b.on})}
   if(p==='owner/dc'){const c=await dcCfg(db),mask=u=>u?u.replace(/\/[\w-]{20,100}$/,'/••••••'):'';return json({raids:mask(c.raids),catches:mask(c.catches),news:mask(c.news),role:c.role||''})}
   if(p==='owner/dcset'){const st=[];for(const k of ['raids','catches','news']){if(b[k]===undefined)continue;const v=String(b[k]||'').trim();if(v&&!DC_RE.test(v))return json({error:'bad-webhook',which:k},400);st.push(db.prepare('INSERT INTO cfg(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind('dc:'+k,v))}
     if(b.role!==undefined){const r=String(b.role||'').replace(/\D/g,'').slice(0,25);st.push(db.prepare('INSERT INTO cfg(k,v) VALUES(?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind('dc:role',r))}
@@ -503,7 +510,7 @@ async function route(req,env,url,ctx){
   }
   if(p==='sync'){
     const wk=weekKey(),st=[],gi=[];
-    const isBeta=(Number(me.created)||0)<BETA_CUT,so=b.stats&&typeof b.stats==='object'?Object.assign({},b.stats,isBeta?{beta:1}:{}):null;
+    const isBeta=(Number(me.created)||0)<BETA_CUT,isSup=!!me.sup,isAdm=me.lname===OWNER_NAME,so=b.stats&&typeof b.stats==='object'?Object.assign({},b.stats,isBeta?{beta:1}:{},{sup:isSup?1:0,adm:isAdm?1:0}):null;
     const stats=so?JSON.stringify(so).slice(0,4000):me.stats;
     const wkn=String(b.wk)===wk?Math.max(0,Math.min(1e6,b.wkn|0)):0;
     const hasCab=typeof b.cabin==='string'&&b.cabin.length<20000;
@@ -536,7 +543,7 @@ async function route(req,env,url,ctx){
       cached(db,`comm:${k}:${wk}`,3*MIN,async()=>await db.prepare(`SELECT COALESCE(SUM(wkn),0) AS total,COUNT(*) AS players FROM players WHERE wk=? AND wkn>0 AND id IN ${scc.sql}`).bind(wk,...scc.args).first()),
       cached(db,`wt:${k}:${wk}`,3*MIN,()=>weeklyTop(db,wk,scc)),cached(db,`wt:${k}:${lw}`,60*MIN,()=>weeklyTop(db,lw,scc)),myLakes(db,me)]);
     const players=Math.max(1,comm.players|0);
-    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,hasPin:!!me.pin,beta:isBeta,mail:mail.results,records,
+    return json({...X,week:wk,lake:sc.code,lakes,pub:(me.pub??1)!==0,hasPin:!!me.pin,beta:isBeta,sup:isSup,mail:mail.results,records,
       community:{week:wk,lake:sc.code,total:comm.total|0,players,goal:2000+1500*players},
       weekly:{week:wk,top},lastWeekly:{week:lw,lake:sc.code,top:ltop},next:((+wk+1)*7-3)*864e5});
   }
