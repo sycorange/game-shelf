@@ -1034,6 +1034,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 #app-discord{overflow:auto;gap:10px}
 .dc-hero{display:grid;gap:4px;text-align:center;padding:4px 6px 2px}.dc-hero b{font-size:1rem}.dc-hero p{margin:0;font-size:.78rem;color:#b9bde6;line-height:1.4}
 .dc-frame{flex:none;width:100%;height:430px;border:0;border-radius:12px;background:#2b2d42}
+.dc-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dc-ref{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#eef0ff;border-radius:999px;font:inherit;font-size:.74rem;font-weight:700;padding:5px 12px;flex:none}
 .dc-note{font-size:.7rem;color:#9a9ec8;line-height:1.4;margin:0 2px}
 .dc-setup{background:rgba(255,255,255,.07);border-radius:12px;padding:10px 12px;font-size:.78rem;line-height:1.45}.dc-setup ol{margin:6px 0 0;padding-left:18px}
 .ph-screen.v-radio{background:linear-gradient(180deg,#10261c,#0f1a17 60%,#0b1210);color:#e8f5ee}.ph-screen.v-radio .ph-bar{color:#fff}.ph-screen.v-radio .ph-home{background:rgba(255,255,255,.6)}
@@ -3590,10 +3592,17 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('factModal').hid
 const DISCORD_ID='443847151580348428';
 function renderDiscord(){const b=$('dcBody');if(!b)return;
   if(!DISCORD_ID){b.innerHTML=`<div class="dc-hero"><b>Community</b><p>Players will see your Discord server here once it’s connected.</p></div><div class="dc-setup"><b>Only you can see this app for now.</b><ol><li>In Discord, open Server Settings → <b>Widget</b>.</li><li>Turn on <b>Enable Server Widget</b> and pick an invite channel.</li><li>Send Claude the <b>Server ID</b> from that page.</li></ol></div>`;return}
-  if(b.querySelector('iframe'))return; // keep the widget loaded while you flip between apps
+  // Keep the panel while you flip between apps, but reload it if it's more than 3 minutes old so the online list stays fresh.
+  const fr=b.querySelector('iframe');if(fr){if(Date.now()-(DCW.t||0)>180000)dcReload();return}
   b.innerHTML=`<div class="dc-hero"><b>Lantern Lake on Discord</b><p>See who’s online, plan raids and tournaments, and share your best catches.</p></div>
-    <iframe class="dc-frame" src="https://discord.com/widget?id=${DISCORD_ID}&theme=dark" title="Lantern Lake Discord server" allowtransparency="true" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
-    <p class="dc-note">Tap <b>Join Discord</b> in the panel to open the server. You’ll need a free Discord account.</p>`}
+    <iframe class="dc-frame" id="dcFrame" src="https://discord.com/widget?id=${DISCORD_ID}&theme=dark" title="Lantern Lake Discord server" allowtransparency="true" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+    <div class="dc-row"><p class="dc-note" id="dcAge">Updated just now</p><button class="dc-ref" id="dcRef">Refresh</button></div>
+    <p class="dc-note">Tap <b>Join Discord</b> in the panel to open the server. You’ll need a free Discord account.</p>`;
+  DCW.t=Date.now();$('dcRef').onclick=()=>{sfx('click');dcReload()}}
+const DCW={t:0};
+function dcReload(){const fr=$('dcFrame');if(!fr)return;fr.src=`https://discord.com/widget?id=${DISCORD_ID}&theme=dark&r=${Date.now()}`;DCW.t=Date.now();dcAge()}
+function dcAge(){const a=$('dcAge');if(a)a.textContent=Date.now()-DCW.t<60000?'Updated just now':`Updated ${ago(DCW.t)}`}
+setInterval(()=>{if(phOpen()&&phView==='discord')dcAge()},20000);
 
 // ---------- Settings app
 const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:true,nText:true,nOther:true,h24:false,dock:'right',yard:true,cloud:true,text:'m',live:true,fps:'60'};
@@ -4847,6 +4856,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:57,n:'Fresh Faces',items:['The Community app now keeps its list of who’s online in Discord up to date. It refreshes when you open the app if the list is more than 3 minutes old, and there’s a Refresh button for an instant update.']},
  {v:56,n:'Tall Tales',items:['New: Fish facts! In your Logbook, tap Fish facts on any fish you’ve caught. Real fish show a photo and facts from Wikipedia. Lantern Lake’s own fish (the Moon, Ember Lake, Cloud Sea, storm and Halloween fish, and a certain beast) come with field notes from local anglers.','New Community app on your phone: see who’s online in the Lantern Lake Discord and tap Join to hop in. Plan raids, find tournament buddies and show off your catches.','Lantern Lake now posts to Discord: raid alerts, new lake records for Rare and Legendary fish, and patch notes.']},
  {v:55,n:'Radio Waves',items:['New Radio app on your phone! Pick a station or paste any Spotify playlist, album or song link, and listen while you fish.','Music keeps playing when you put your phone away. Pause it from the Radio app or right from your lock screen, and skip songs with the buttons in the Spotify player.','Signed in to Spotify in your browser? You’ll hear full songs. Otherwise Spotify plays 30-second previews.','The game’s own music fades out while the radio plays, and comes back when you pause.']},
  {v:54,n:'Clean Sweep II',items:['Bug fix: the chimney fix now covers every home. On the Fishing Shack, Two-Story Lodge and Lakeside Cottage, the chimney sits at the back and pokes up through the roof, so it never runs over a window.','Bug fix: the Log Cabin’s porch roof no longer cuts across the front door. It now sits above the door on its two posts.','Walking up to your home now looks right: you get a little smaller as you head up from the dock, so you arrive door-sized and standing on the doorstep instead of towering over the door.','New Frame rate setting in the phone’s Settings app, under Motion: Saver, 30, 60 or Max. The game now runs at 60 by default. If the game slows down other games or apps you have open, try Saver or 30.']},
