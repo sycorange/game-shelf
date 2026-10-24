@@ -4671,6 +4671,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:53,n:'Clean Sweep',items:['Bug fix: the Log Cabin’s stone chimney no longer runs down through the side window. It now sits at the back of the cabin and pokes up through the roof.']},
  {v:52,n:'Coffee Break',items:['Bug fix: Thermos of Coffee now always shows in Storage under Potions, and you can put it on your hot bar from the hot bar editor. Before, it only appeared if it landed in a free hot bar slot when you bought it, so players with a full hot bar couldn’t find theirs. Any coffee you bought is still there.']},
  {v:51,n:'Safe Harbor',items:['Bug fix: switching between your phone and computer now picks up where you actually left off. Before, a device could think its older game was newer, skip the “Pick up where you left off?” prompt, and then save over your progress from the other device.','Your cloud save is now protected: a device can no longer overwrite a newer save from another device without asking you first.','Your game now also saves to the cloud when you close the tab.']},
  {v:50,n:'Party Line Patch',items:['Bug fix: Add people in a group chat’s info screen no longer gets stuck on “Loading the lake directory…”.']},
@@ -4952,9 +4953,10 @@ function drawHomeBody(G,d,T){const {t,x,y,w,ht}=G,glass=lit(d)?`rgba(255,200,110
     ctx.fillStyle=HCol([70,70,74],d);ctx.fillRect(x+w-20,G.py-6,4,y-G.py+10);smoke(x+w-18,G.py-8,T,.8);
     ctx.fillStyle=HCol([70,56,44],d);ctx.fillRect(G.door,218,14,24);for(const [wx,wy] of wins)winFrame(wx,wy,12,10,HCol([90,80,70],d));
     ctx.fillStyle=HCol([96,70,46],d);ctx.fillRect(x+w+2,232,8,10);ctx.fillStyle=HCol([60,44,30],d);ctx.fillRect(x+w+2,232,8,1.5);return wins}
-  if(t===2){// Log Cabin: round logs, shingle roof, stone chimney, front porch
+  if(t===2){// Log Cabin: round logs, shingle roof, stone chimney (at the back, poking up through the roof), front porch
+    {const cx=x+20,ctop=G.py+2;ctx.fillStyle=HCol([130,130,128],d);ctx.fillRect(cx,ctop,12,y-ctop+4);ctx.fillStyle=HCol([96,96,96],d);for(let yy=ctop+3;yy<y+2;yy+=5)ctx.fillRect(cx+(yy%10<5?0:5),yy,6,1.2);
+      ctx.fillStyle=HCol([104,104,102],d);ctx.fillRect(cx-1.5,ctop-2,15,3);smoke(cx+6,ctop-3,T,1)}
     const lg=HCol([128,88,58],d),ld=HCol([86,58,38],d);ctx.fillStyle=lg;ctx.fillRect(x,y,w,ht);for(let yy=y+2;yy<242;yy+=6){ctx.fillStyle=ld;ctx.fillRect(x,yy+4.5,w,1.5);ctx.fillStyle=HCol([148,104,70],d);ctx.beginPath();ctx.arc(x-1,yy+3,3,0,7);ctx.arc(x+w+1,yy+3,3,0,7);ctx.fill()}
-    ctx.fillStyle=HCol([130,130,128],d);ctx.fillRect(x+8,G.py+4,12,y-G.py+ht-4);ctx.fillStyle=HCol([96,96,96],d);for(let yy=G.py+6;yy<242;yy+=5)ctx.fillRect(x+8+(yy%10?0:5),yy,6,1.2);smoke(x+14,G.py+2,T,1);
     gable(G,HCol([84,54,44],d));ctx.fillStyle=HCol([64,40,32],d);for(let i=1;i<5;i++){const yy=y+2-(y+2-G.py)*i/5;ctx.fillRect(x-8+(G.px-x+8)*i/5,yy,(w+16)*(1-i/5),1.2)}
     ctx.fillStyle=HCol([110,76,48],d);ctx.fillRect(x+w-36,236,46,6);ctx.fillStyle=HCol([76,52,36],d);ctx.fillRect(x+w-34,222,2.5,14);ctx.fillRect(x+w+6,222,2.5,14);ctx.fillStyle=HCol([84,54,44],d);ctx.fillRect(x+w-38,219,50,4);
     ctx.fillStyle=HCol([76,50,32],d);ctx.fillRect(G.door,216,14,26);ctx.fillStyle=HCol([220,180,90],d);ctx.fillRect(G.door+10,229,2,2);for(const [wx,wy] of wins)winFrame(wx,wy,14,12,HCol([86,58,38],d));return wins}
