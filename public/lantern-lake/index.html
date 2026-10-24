@@ -1023,6 +1023,29 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 @media (prefers-reduced-motion:reduce){.toast div{transition:none}.vital.crit,.flames span{animation:none}.ach,.ach.out,.ach::after{animation:none}}
 
 /* ==LAKE 7 WEATHER== */
+.ph-screen.v-radio{background:linear-gradient(180deg,#10261c,#0f1a17 60%,#0b1210);color:#e8f5ee}.ph-screen.v-radio .ph-bar{color:#fff}.ph-screen.v-radio .ph-home{background:rgba(255,255,255,.6)}
+#app-radio{overflow:auto;gap:10px}
+.rd-embed{flex:none;border-radius:12px;overflow:hidden;min-height:152px;background:rgba(255,255,255,.06)}
+.rd-embed:empty,.rd-embed.off{display:none}
+.rd-np{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:rgba(255,255,255,.07);border-radius:14px;padding:10px 12px}
+.rd-np small{display:block;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:#7fd6a4;font-weight:800}
+.rd-np b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-np span{display:block;font-size:.74rem;color:#a9c7b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd-pp{width:44px;height:44px;border-radius:50%;border:0;background:#1ed760;color:#0b1210;display:grid;place-items:center;padding:0}
+.rd-pp svg{width:20px;height:20px}
+.rd-h{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#7fa892;font-weight:800;margin:4px 2px 0}
+.rd-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.rd-grid button{border:0;border-radius:12px;padding:10px 9px;text-align:left;font:inherit;color:#fff;font-weight:800;font-size:.8rem;line-height:1.15;min-height:48px}
+.rd-grid button small{display:block;font-weight:500;font-size:.68rem;opacity:.85}
+.rd-grid button[aria-pressed="true"]{outline:2px solid #1ed760;outline-offset:1px}
+.rd-link{display:flex;gap:6px}.rd-link input{flex:1;min-width:0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;border-radius:10px;padding:8px 10px;font:inherit;font-size:.8rem}
+.rd-link button{border:0;border-radius:10px;background:#1ed760;color:#0b1210;font:inherit;font-weight:800;padding:0 12px}
+.rd-note{font-size:.7rem;color:#8fae9d;line-height:1.35;margin:0 2px}.rd-err{color:#ff9b8a;font-size:.74rem;margin:0 2px;font-weight:700}
+.rd-stop{border:1px solid rgba(255,255,255,.18);background:none;color:#cfe5d8;border-radius:10px;font:inherit;font-size:.78rem;padding:7px;font-weight:700}
+.lk-np{text-align:left;display:grid;grid-template-columns:30px minmax(0,1fr) 34px;gap:9px;align-items:center;background:rgba(10,20,16,.55);backdrop-filter:blur(8px);border-radius:14px;padding:8px 10px;color:#fff;margin-bottom:6px;font-size:.78rem}
+.lk-np .ai{width:30px;height:30px;border-radius:8px;display:grid;place-items:center}.lk-np .ai svg{width:20px;height:20px}
+.lk-np b{display:block;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;opacity:.8}.lk-np span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.lk-np button{width:34px;height:34px;border-radius:50%;border:0;background:#fff;color:#111;display:grid;place-items:center;padding:0}.lk-np button svg{width:16px;height:16px}
 .ph-screen.v-wx{background:linear-gradient(180deg,#0c1f3a,#12325a 55%,#0c1f3a);color:#eef4ff}.ph-screen.v-wx .ph-bar{color:#fff}.ph-screen.v-wx .ph-home{background:rgba(255,255,255,.6)}
 #wxBody{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:0 2px 14px}#wxBody>*{min-width:0}
 .l7-brand{display:flex;align-items:center;justify-content:center;gap:6px;font:900 .78rem/1 system-ui,sans-serif;letter-spacing:.14em;color:#cfe0ff}
@@ -1342,6 +1365,11 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
       <section class="ph-view" id="app-weather" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Lake 7 Weather</b><i></i></div>
         <div id="wxBody"></div>
+      </section>
+      <section class="ph-view" id="app-radio" hidden>
+        <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Radio</b><i></i></div>
+        <div class="rd-embed" id="rdEmbedWrap"><div id="rdEmbed"></div></div>
+        <div id="radioBody"></div>
       </section>
       <section class="ph-view" id="app-crate" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Crate Expectations</b><i></i></div>
@@ -2870,18 +2898,19 @@ const APPS=[
   {id:'friends',n:'Friends',bg:'linear-gradient(145deg,#ff8ab0,#d04a7a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="#fff"/><circle cx="22" cy="13" r="4" fill="#ffd6e4"/><path d="M3 27c0-6 4-9 9-9s9 3 9 9z" fill="#fff"/><path d="M19 27c0-4 1-6 3-7.5 4 0 7 2.5 7 7.5z" fill="#ffd6e4"/></svg>`},
   {id:'texts',n:'Messages',bg:'linear-gradient(145deg,#6ee07a,#1fa83a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6C9.4 6 4 10.3 4 15.6c0 3 1.7 5.6 4.4 7.4L7 27.5l5.2-2.6c1.2.3 2.5.5 3.8.5 6.6 0 12-4.3 12-9.8S22.6 6 16 6z" fill="#fff"/></svg>`},
   {id:'sports',n:'FinDuel',bg:'linear-gradient(145deg,#1e6aff,#0a2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="10" fill="#ff8a2a"/><path d="M6 17h20M16 7v20M9 10c4 4 4 10 0 14M23 10c-4 4-4 10 0 14" stroke="#3a1a00" stroke-width="1.6" fill="none"/><path d="M20 3c3 2 4 5 3 8-2-2-4-3-6-3 1-2 2-4 3-5z" fill="#7cf0ff"/></svg>`},
+  {id:'radio',n:'Radio',s:'Radio',bg:'linear-gradient(145deg,#1ed760,#0d6b3a)',ic:()=>radioIc},
   {id:'weather',n:'Lake 7 Weather',s:'Weather',bg:'linear-gradient(145deg,#3a8aff,#0c2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="#ffd05a"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7" stroke="#ffd05a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 25.5a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6 3.8 3.8 0 0 1 .4 7.4z" fill="#fff"/><rect x="19" y="20" width="11" height="9" rx="2" fill="#d8312a"/><path d="M22 22.4h5l-2.6 4.8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
   {id:'crate',n:'Crate Expectations',s:'Crates',bg:'linear-gradient(145deg,#ff5ad8,#3a1a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11l12-6 12 6v12l-12 6-12-6z" fill="#b07a3a"/><path d="M4 11l12 6 12-6M16 17v12" stroke="#5a3814" stroke-width="1.6" fill="none"/><path d="M14 18l4-2v5l-4 2z" fill="#ffc23a"/><path d="M24 3l1 2.4 2.4 1-2.4 1L24 10l-1-2.6-2.4-1 2.4-1z" fill="#fff"/></svg>`},
   {id:'hw',n:'Spooky',bg:'linear-gradient(145deg,#ff8a2a,#5a1a6a)',ic:()=>pumpkinSvg,when:()=>hwOn()},
   {id:'settings',n:'Settings',bg:'linear-gradient(145deg,#a8aeb8,#5e6470)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4l2.2 3.1 3.7-.9.9 3.7 3.1 2.2-1.7 3.4 1.7 3.4-3.1 2.2-.9 3.7-3.7-.9L16 28l-2.2-3.1-3.7.9-.9-3.7-3.1-2.2 1.7-3.4-1.7-3.4 3.1-2.2.9-3.7 3.7.9z" fill="#fff"/><circle cx="16" cy="16" r="4.5" fill="#6e7480"/></svg>`},
   {id:'help',n:'Help',bg:'linear-gradient(145deg,#5aa8ff,#2a5ad0)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12" fill="#fff"/><path d="M12.4 12.6a3.6 3.6 0 1 1 5.2 3.2c-1 .5-1.6 1.2-1.6 2.3v1" stroke="#2a5ad0" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="16" cy="23.2" r="1.7" fill="#2a5ad0"/></svg>`},
 ];
-const APP_ORDER=['texts','friends','bounty','shop','case','news','weather','crate','sports','slots','hw','settings','help'];
+const APP_ORDER=['texts','friends','bounty','shop','case','news','weather','radio','crate','sports','slots','hw','settings','help'];
 const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
-  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='weather'?'v-wx':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
-  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case')renderCase();if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
+  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
+  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case')renderCase();if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
   const sec=v==='lock'?$('phLock'):v==='home'?$('phApps'):$('app-'+v);if(sec)sec.scrollTop=0;
 }
 
@@ -3165,8 +3194,12 @@ function renderLock(){
   {const q2=Q2();if(q2.step>0&&q2.step<7&&q2.seen!==q2.step)notes.push(['case','Casefile','New lead in the Emerald Wake case'])}
   if(MPV.mail.length)notes.push(['friends','Friends',`${MPV.mail.length} gift${MPV.mail.length>1?'s':''} waiting in your mailbox`]);else if(mpCommClaimable())notes.push(['friends','Friends','The community goal is done. Claim your reward!']);
   const ct=coolTotals();if(ct.n)notes.push(['help','Cooler',`${ct.n} fish worth $${money(ct.v)} waiting to be sold`]);
-  $('lkNotes').innerHTML=notes.slice(0,3).map(([a,t,m])=>{const A=APPS.find(x=>x.id===a);return `<div class="lk-note" data-app="${a}" role="button" tabindex="0"><span class="ai" style="background:${A.bg}">${A.ic()}</span><div><b>${t}</b>${m}</div></div>`}).join('');
+  const np=radioLockCard();
+  $('lkNotes').innerHTML=np+notes.slice(0,np?2:3).map(([a,t,m])=>{const A=APPS.find(x=>x.id===a);return `<div class="lk-note" data-app="${a}" role="button" tabindex="0"><span class="ai" style="background:${A.bg}">${A.ic()}</span><div><b>${t}</b>${m}</div></div>`}).join('');
 }
+function radioLockCard(){if(!RADIO.ctl||(RADIO.paused&&!RADIO.started))return '';
+  return `<div class="lk-np"><span class="ai" style="background:linear-gradient(145deg,#1ed760,#0d6b3a)">${radioIc}</span><div data-app="radio" role="button" tabindex="0"><b>${RADIO.paused?'Paused':'Now playing'}</b><span>${esc(RADIO.track||RADIO.plName||'Spotify')}</span></div><button id="lkRadioPP" aria-label="${RADIO.paused?'Play':'Pause'}">${RADIO.paused?rdPlaySvg:rdPauseSvg}</button></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#lkRadioPP');if(b){e.stopPropagation();radioToggle()}},true);
 function resetSlider(){const k=$('slideKnob');k.classList.add('snap');k.style.transform='translateX(0)'}
 function openPhone(){if(phOpen())return;const pend=PDK.pending,pw=PDK.pendingWith;PDK.pending=null;PDK.pendingWith=null;clearTimeout(PDK.pingT);
   resetSlider();renderLock();$('slotsModal').hidden=false;phSetOpen(true);
@@ -3419,6 +3452,59 @@ async function txPoll(force){const m=mpS();if(!m.id||TX.busy||titleOn||document.
     else if(first&&r.unread)phNotify('texts','Messages',`${r.unread} unread message${r.unread>1?'s':''}`)}
   catch(e){}finally{TX.busy=false}}
 setInterval(()=>txPoll(),2000);
+
+// ---------- Radio app: a Spotify player that lives in the phone (Spotify's embed + iFrame API).
+// Spotify's player handles next/back and sign-in; the game adds play/pause, the track name, presets and links.
+const radioIc='<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M13 22.5V9.5l11-2.6v12.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="10" cy="22.5" r="3.3" fill="#fff"/><circle cx="21" cy="19.5" r="3.3" fill="#fff"/></svg>';
+const rdPlaySvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>',rdPauseSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5.5" width="4" height="13" rx="1" fill="currentColor"/><rect x="13.5" y="5.5" width="4" height="13" rx="1" fill="currentColor"/></svg>';
+const RD_PRESETS=[
+  {n:'Lo-fi Beats',s:'Chill while you fish',u:'spotify:playlist:37i9dQZF1DWWQRwui0ExPn',bg:'linear-gradient(135deg,#6b5bd6,#2f2a6b)'},
+  {n:'Hot Country',s:'New country hits',u:'spotify:playlist:37i9dQZF1DX1lVhptIYRda',bg:'linear-gradient(135deg,#d88a2a,#7a3a12)'},
+  {n:'Rock Classics',s:'Turn it up',u:'spotify:playlist:37i9dQZF1DWXRqgorJj26U',bg:'linear-gradient(135deg,#c8352d,#4a1210)'},
+  {n:'Peaceful Piano',s:'Calm on the water',u:'spotify:playlist:37i9dQZF1DX4sWSpwq3LiO',bg:'linear-gradient(135deg,#4a8ab0,#163a52)'},
+  {n:'Today’s Top Hits',s:'What’s big right now',u:'spotify:playlist:37i9dQZF1DXcBWIGoYBM5M',bg:'linear-gradient(135deg,#1ed760,#0d5a30)'}];
+var RADIO={api:null,ctl:null,loading:false,failed:false,paused:true,started:false,uri:'',track:'',plName:'',err:'',names:{},want:null};
+const radioOn=()=>!!(RADIO.ctl&&!RADIO.paused);
+function RDS(){if(!S.radio||typeof S.radio!=='object')S.radio={u:'',n:''};return S.radio}
+function rdParse(s){s=String(s||'').trim();let m=s.match(/^spotify:(playlist|album|track|artist|show|episode):([A-Za-z0-9]{22})$/);if(m)return `spotify:${m[1]}:${m[2]}`;
+  m=s.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(?:embed\/)?(playlist|album|track|artist|show|episode)\/([A-Za-z0-9]{22})/);return m?`spotify:${m[1]}:${m[2]}`:null}
+function rdLoadApi(){if(RADIO.api||RADIO.loading)return;RADIO.loading=true;RADIO.failed=false;
+  window.onSpotifyIframeApiReady=api=>{RADIO.api=api;RADIO.loading=false;if(RADIO.want)rdMake(RADIO.want);if(phView==='radio')renderRadio()};
+  const sc=document.createElement('script');sc.src='https://open.spotify.com/embed/iframe-api/v1';sc.async=true;sc.onerror=()=>{RADIO.loading=false;RADIO.failed=true;if(phView==='radio')renderRadio()};document.head.appendChild(sc);
+  setTimeout(()=>{if(!RADIO.api&&RADIO.loading){RADIO.loading=false;RADIO.failed=true;if(phView==='radio')renderRadio()}},12000)}
+function rdMake(uri){RADIO.want=uri;if(!RADIO.api){rdLoadApi();return}
+  if(RADIO.ctl){try{(RADIO.ctl.loadEntity||RADIO.ctl.loadUri).call(RADIO.ctl,uri)}catch(e){try{RADIO.ctl.loadUri(uri)}catch(e2){}}RADIO.uri=uri;RADIO.track='';return}
+  const wrap=$('rdEmbedWrap');wrap.classList.remove('off');wrap.innerHTML='<div id="rdEmbed"></div>';
+  RADIO.api.createController($('rdEmbed'),{uri,width:'100%',height:152,theme:'dark'},ctl=>{RADIO.ctl=ctl;RADIO.uri=uri;
+    ctl.addListener('playback_update',e=>{const d=(e&&e.data)||{},was=RADIO.paused;RADIO.paused=!!d.isPaused;if(!d.isPaused)RADIO.started=true;if(was!==RADIO.paused){applyVol();rdRefresh()}});
+    ctl.addListener('playback_started',e=>{const u=(e&&e.data&&e.data.playingURI)||'';RADIO.started=true;rdName(u)})})}
+async function rdName(u){const m=String(u).match(/^spotify:(track|episode):([A-Za-z0-9]{22})$/);if(!m){RADIO.track='';rdRefresh();return}
+  if(RADIO.names[u]!=null){RADIO.track=RADIO.names[u];rdRefresh();return}
+  RADIO.track='';rdRefresh();try{const r=await fetch(`/api/spname?k=${m[1]}&id=${m[2]}`);const j=await r.json();RADIO.names[u]=j.title||''}catch(e){RADIO.names[u]=''}
+  if(RADIO.ctl)RADIO.track=RADIO.names[u];rdRefresh()}
+function rdRefresh(){if(phOpen()&&phView==='radio')renderRadioNP();if(phOpen()&&phView==='lock')renderLock()}
+function radioToggle(){if(!RADIO.ctl)return;try{RADIO.ctl.togglePlay()}catch(e){}sfx('click')}
+function radioPick(uri,name){const r=RDS();r.u=uri;r.n=name||'';save();RADIO.plName=r.n;RADIO.err='';rdMake(uri);renderRadio()}
+function radioStop(){if(RADIO.ctl){try{RADIO.ctl.pause()}catch(e){}try{RADIO.ctl.destroy()}catch(e){}}RADIO.ctl=null;RADIO.paused=true;RADIO.started=false;RADIO.track='';RADIO.uri='';RADIO.want=null;
+  const w=$('rdEmbedWrap');w.innerHTML='';w.classList.add('off');const r=RDS();r.u='';r.n='';save();applyVol();renderRadio()}
+function renderRadioNP(){const el=$('rdNP');if(!el)return;
+  el.innerHTML=RADIO.ctl?`<div><small>${RADIO.paused?(RADIO.started?'Paused':'Ready'):'Now playing'}</small><b>${esc(RADIO.track||(RADIO.paused&&!RADIO.started?'Press play to start':'Spotify'))}</b><span>${esc(RADIO.plName||'Spotify')}</span></div><button class="rd-pp" id="rdPP" aria-label="${RADIO.paused?'Play':'Pause'}">${RADIO.paused?rdPlaySvg:rdPauseSvg}</button>`
+    :`<div><small>Radio</small><b>Pick a station</b><span>Music plays here while you fish</span></div>`;
+  const pp=$('rdPP');if(pp)pp.onclick=radioToggle}
+function renderRadio(){const b=$('radioBody'),r=RDS();if(!b)return;
+  if(r.u&&!RADIO.ctl&&!RADIO.failed)rdMake(r.u);RADIO.plName=r.n||RADIO.plName;
+  b.innerHTML=`<div class="rd-np" id="rdNP"></div>
+    ${RADIO.failed?`<p class="rd-err">Couldn’t load Spotify. Check your connection, or try again on your Lantern Lake website.</p>`:RADIO.loading&&!RADIO.ctl?'<p class="rd-note">Tuning in to Spotify…</p>':''}
+    <p class="rd-h">Stations</p><div class="rd-grid">${RD_PRESETS.map(p=>`<button data-rd="${p.u}" data-rn="${esc(p.n)}" style="background:${p.bg}" aria-pressed="${r.u===p.u}">${p.n}<small>${p.s}</small></button>`).join('')}</div>
+    <p class="rd-h">Your own music</p><form class="rd-link" id="rdForm"><input id="rdUrl" placeholder="Paste a Spotify playlist, album or song link" autocomplete="off" aria-label="Spotify link"><button>Play</button></form>
+    ${RADIO.err?`<p class="rd-err">${esc(RADIO.err)}</p>`:''}
+    <p class="rd-note">Use the buttons in the Spotify player to skip songs. Signed in to Spotify in this browser? You’ll hear full songs. If not, Spotify plays 30-second previews. Music keeps playing when you put your phone away, and the game’s own music fades out while it plays.</p>
+    ${RADIO.ctl?'<button class="rd-stop" id="rdStop">Turn off radio</button>':''}`;
+  renderRadioNP();
+  b.querySelectorAll('[data-rd]').forEach(x=>x.onclick=()=>radioPick(x.dataset.rd,x.dataset.rn));
+  $('rdForm').onsubmit=e=>{e.preventDefault();const u=rdParse($('rdUrl').value);if(!u){RADIO.err='That doesn’t look like a Spotify link. In Spotify, tap Share, then Copy link.';renderRadio();return}radioPick(u,'Your music')};
+  const st=$('rdStop');if(st)st.onclick=radioStop;
+  if(!RADIO.api&&!RADIO.failed)rdLoadApi()}
 
 // ---------- Settings app
 const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:true,nText:true,nOther:true,h24:false,dock:'right',yard:true,cloud:true,text:'m',live:true,fps:'60'};
@@ -4672,6 +4758,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:55,n:'Radio Waves',items:['New Radio app on your phone! Pick a station or paste any Spotify playlist, album or song link, and listen while you fish.','Music keeps playing when you put your phone away. Pause it from the Radio app or right from your lock screen, and skip songs with the buttons in the Spotify player.','Signed in to Spotify in your browser? You’ll hear full songs. Otherwise Spotify plays 30-second previews.','The game’s own music fades out while the radio plays, and comes back when you pause.']},
  {v:54,n:'Clean Sweep II',items:['Bug fix: the chimney fix now covers every home. On the Fishing Shack, Two-Story Lodge and Lakeside Cottage, the chimney sits at the back and pokes up through the roof, so it never runs over a window.','Bug fix: the Log Cabin’s porch roof no longer cuts across the front door. It now sits above the door on its two posts.','Walking up to your home now looks right: you get a little smaller as you head up from the dock, so you arrive door-sized and standing on the doorstep instead of towering over the door.','New Frame rate setting in the phone’s Settings app, under Motion: Saver, 30, 60 or Max. The game now runs at 60 by default. If the game slows down other games or apps you have open, try Saver or 30.']},
  {v:53,n:'Clean Sweep',items:['Bug fix: the Log Cabin’s stone chimney no longer runs down through the side window. It now sits at the back of the cabin and pokes up through the roof.']},
  {v:52,n:'Coffee Break',items:['Bug fix: Thermos of Coffee now always shows in Storage under Potions, and you can put it on your hot bar from the hot bar editor. Before, it only appeared if it landed in a free hot bar slot when you bought it, so players with a full hot bar couldn’t find theirs. Any coffee you bought is still there.']},
@@ -6344,7 +6431,7 @@ function initAudio(){
   applyVol();
 }
 function applyVol(){if(!AU.ctx)return;const s=S.snd,t=AU.ctx.currentTime,bg=document.hidden&&s.bg?.3:1;
-  AU.master.gain.setTargetAtTime(s.on?s.master*bg:0,t,.25);AU.sfx.gain.setTargetAtTime(s.sfx*1.7,t,.1);AU.amb.gain.setTargetAtTime(s.amb*2.6,t,.3);AU.mus.gain.setTargetAtTime(s.music*2,t,.3)}
+  AU.master.gain.setTargetAtTime(s.on?s.master*bg:0,t,.25);AU.sfx.gain.setTargetAtTime(s.sfx*1.7,t,.1);AU.amb.gain.setTargetAtTime(s.amb*2.6,t,.3);AU.mus.gain.setTargetAtTime(radioOn()?0:s.music*2,t,.6)}
 const live=()=>AU.ctx&&S.snd.on&&AU.ctx.state==='running';
 function tone(f,dur,o={}){if(!live())return;const c=AU.ctx,t=c.currentTime+(o.delay||0),os=c.createOscillator(),g=c.createGain();os.type=o.type||'sine';os.frequency.setValueAtTime(f,t);if(o.to)os.frequency.exponentialRampToValueAtTime(o.to,t+dur);
   const at=o.at||.006;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(o.vol||.06,t+at);g.gain.exponentialRampToValueAtTime(.0001,t+Math.max(dur,at+.02));os.connect(g);g.connect(o.dest||AU.sfx);

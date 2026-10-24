@@ -322,6 +322,11 @@ async function route(req,env,url){
   const db=env.DB,p=url.pathname.replace(/^\/api\//,''),now=Date.now();
   if(p==='ping')return json({ok:true,week:weekKey(),v:7,live:!!env.LAKE});
   if(p==='live')return liveRoute(req,env,url,db);
+  // Radio app: look up a Spotify track's name (public oEmbed, no key), cached for 30 days.
+  if(p==='spname'){const id=String(url.searchParams.get('id')||''),k=String(url.searchParams.get('k')||'track');
+    if(!/^[A-Za-z0-9]{22}$/.test(id)||!['track','episode'].includes(k))return json({error:'bad-id'},400);
+    const r=await cached(db,'sp:'+k+':'+id,30*864e5,async()=>{try{const x=await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/${k}/${id}`,{headers:{'user-agent':'LanternLake/1.0'}});if(!x.ok)return {title:''};const j=await x.json();return {title:String(j.title||'').slice(0,120)}}catch(e){return {title:''}}});
+    return json(r)}
   if(req.method!=='POST')return json({error:'not-found'},404);
   const b=await body(req);
   if(p==='hello'){
