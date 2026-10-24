@@ -2154,7 +2154,7 @@ const POT={
   giant:{n:'Big Fish Brew',d:'Fish run much heavier.',col:'#ff7a3d'},
   coffee:{n:'Thermos of Coffee',d:'Restores 30 stamina right away.',col:'#8a5a34',ic:'mug',inst:true},
 };
-const PKEYS=Object.keys(POT).filter(k=>!POT[k].inst);
+const PKEYS=Object.keys(POT).filter(k=>!POT[k].inst),PALL=Object.keys(POT); // PKEYS: random reward pool. PALL: everything you can hold (incl. coffee)
 const MT=(id,n,r,at,night,ic,col,d)=>({id,n,r,at,night,ic,col,d});
 const MATS=[
   MT('drift','Driftwood','C','any',0,'branch','#a07a4a','Bleached and sturdy. Good for hulls and walls.'),
@@ -2575,7 +2575,7 @@ function renderDecor(){
   p.append(ch);
   if(shopFilter==='sup'){const sd=document.createElement('div');sd.className='pj-wrap';const n=S.pots.coffee||0;
     sd.innerHTML=`<div class="pj-card"><div class="pj-h"><b>☕ Thermos of Coffee</b><span>You have ${n}</span></div><p>Restores 30 stamina right away, so you can keep fishing without heading home. Lands on your potion bar.</p><div class="xf-row"><button class="sbtn" data-buyc="1" ${S.coins<300?'disabled':''}>Buy 1 · $300</button><button class="sbtn" data-buyc="5" ${S.coins<1400?'disabled':''}>Buy 5 · $1,400</button></div></div>`;
-    p.append(sd);sd.querySelectorAll('[data-buyc]').forEach(b=>b.onclick=()=>{const q=+b.dataset.buyc,c=q===5?1400:300;if(S.coins<c)return;S.coins-=c;givePotion('coffee',q);sfx('coin');showToast(`+${q} Thermos of Coffee`,`-$${money(c)}`);save();renderDecor()});return}
+    p.append(sd);sd.querySelectorAll('[data-buyc]').forEach(b=>b.onclick=()=>{const q=+b.dataset.buyc,c=q===5?1400:300;if(S.coins<c)return;S.coins-=c;givePotion('coffee',q);sfx('coin');showToast(S.hot.includes('coffee')?`+${q} Thermos of Coffee`:`+${q} Thermos of Coffee · in Storage (hot bar full)`,`-$${money(c)}`);save();renderDecor()});return}
   if(shopFilter==='proj'){const pd=document.createElement('div');pd.className='pj-wrap';pd.innerHTML=projHTML();p.append(pd);bindProj(pd);return}
   const n=document.createElement('div');n.className='shop-note';
   n.textContent=S.boxes.length?`${S.boxes.length} box${S.boxes.length>1?'es are':' is'} waiting in your yard. Tap a box in the lake view to unpack it.`:'Orders arrive by drone and get dropped in your yard. Tap the box to unpack it and put it on display.';
@@ -2734,11 +2734,11 @@ function renderStorage(){
   p.append(mg);
   h=document.createElement('div');h.className='sec-h';h.innerHTML='<h3>Potions</h3><small>Use from here or from the hot bar under the scene</small>';p.append(h);
   let g=document.createElement('div');g.className='grid';
-  for(const k of PKEYS){const P=POT[k],n=S.pots[k]||0,on=S.hot.includes(k);
+  for(const k of PALL){const P=POT[k],n=S.pots[k]||0,on=S.hot.includes(k);
     const c=document.createElement('div');c.className='card srow';
-    c.innerHTML=`${svgI('potion',P.col)}<div style="min-width:0"><b>${P.n}</b> <span style="color:var(--muted);font-variant-numeric:tabular-nums">×${n}</span><p>${P.d} Lasts 1 minute.</p></div>`;
+    c.innerHTML=`${svgI(P.ic||'potion',P.col)}<div style="min-width:0"><b>${P.n}</b> <span style="color:var(--muted);font-variant-numeric:tabular-nums">×${n}</span><p>${P.d}${P.inst?'':' Lasts 1 minute.'}</p></div>`;
     const a=document.createElement('div');a.className='acts';
-    const u=document.createElement('button');u.className='mini';u.textContent='Drink';u.disabled=!n;u.onclick=()=>usePotion(k);
+    const u=document.createElement('button');u.className='mini';u.textContent=P.inst?'Use':'Drink';u.disabled=!n;u.onclick=()=>usePotion(k);
     const hb=document.createElement('button');hb.className='mini'+(on?' hot':'');hb.textContent=on?'On hot bar ✓':'Add to hot bar';
     if(!on&&!S.hot.includes(null))hb.textContent='Swap onto hot bar';
     hb.onclick=()=>{if(on)S.hot[S.hot.indexOf(k)]=null;else{const i=S.hot.indexOf(null);if(i<0){openHotEdit(null,k);return}S.hot[i]=k}renderStorage();renderHot();save()};
@@ -2784,7 +2784,7 @@ function hbPut(slot,k){const cur=S.hot[slot];if(k){const at=S.hot.indexOf(k);if(
 function renderHotEdit(){
   $('hbTip').textContent=HBE.pend?`Pick a slot for ${POT[HBE.pend].n}. It replaces what's there.`:`Slot ${HBE.sel+1} selected. Pick a potion for it, or tap another slot.`;
   $('hbSlots').innerHTML=S.hot.map((k,i)=>`<button class="hslot${i===HBE.sel&&!HBE.pend?' sel':''}${k?(S.pots[k]>0?'':' zero'):' empty'}" data-hs="${i}" aria-label="Slot ${i+1}${k?': '+POT[k].n:', empty'}"><span class="k">${i+1}</span>${k?svgI(POT[k].ic||'potion',POT[k].col)+`<span class="n">${S.pots[k]||0}</span>`:'+'}</button>`).join('');
-  $('hbList').innerHTML=HBE.pend?'':PKEYS.map(k=>{const at=S.hot.indexOf(k),n=S.pots[k]||0;return `<button class="tripopt" data-hp="${k}">${svgI(POT[k].ic||'potion',POT[k].col)}<b>${POT[k].n} <span style="color:var(--muted);font-weight:400">×${n}</span></b><em>${at===HBE.sel?'In this slot':at>=0?`Slot ${at+1} · swap`:''}</em><span>${POT[k].d}</span></button>`}).join('')+(S.hot[HBE.sel]?`<button class="tripopt clear" data-hp="">Clear slot ${HBE.sel+1}</button>`:'');
+  $('hbList').innerHTML=HBE.pend?'':PALL.map(k=>{const at=S.hot.indexOf(k),n=S.pots[k]||0;return `<button class="tripopt" data-hp="${k}">${svgI(POT[k].ic||'potion',POT[k].col)}<b>${POT[k].n} <span style="color:var(--muted);font-weight:400">×${n}</span></b><em>${at===HBE.sel?'In this slot':at>=0?`Slot ${at+1} · swap`:''}</em><span>${POT[k].d}</span></button>`}).join('')+(S.hot[HBE.sel]?`<button class="tripopt clear" data-hp="">Clear slot ${HBE.sel+1}</button>`:'');
   $('hbSlots').querySelectorAll('[data-hs]').forEach(b=>b.onclick=()=>{const i=+b.dataset.hs;if(HBE.pend){hbPut(i,HBE.pend);HBE.pend=null;HBE.sel=i;$('hotModal').hidden=true;showToast(`${POT[S.hot[i]].n} is in slot ${i+1}`,'Hot bar');return}HBE.sel=i;sfx('click');renderHotEdit()});
   $('hbList').querySelectorAll('[data-hp]').forEach(b=>b.onclick=()=>{hbPut(HBE.sel,b.dataset.hp||null);renderHotEdit()})}
 function renderBuffs(){
@@ -4671,6 +4671,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:52,n:'Coffee Break',items:['Bug fix: Thermos of Coffee now always shows in Storage under Potions, and you can put it on your hot bar from the hot bar editor. Before, it only appeared if it landed in a free hot bar slot when you bought it, so players with a full hot bar couldn’t find theirs. Any coffee you bought is still there.']},
  {v:51,n:'Safe Harbor',items:['Bug fix: switching between your phone and computer now picks up where you actually left off. Before, a device could think its older game was newer, skip the “Pick up where you left off?” prompt, and then save over your progress from the other device.','Your cloud save is now protected: a device can no longer overwrite a newer save from another device without asking you first.','Your game now also saves to the cloud when you close the tab.']},
  {v:50,n:'Party Line Patch',items:['Bug fix: Add people in a group chat’s info screen no longer gets stuck on “Loading the lake directory…”.']},
  {v:49,n:'Party Line',items:['Group texts! In Messages, tap New, then New group chat. Pick 2 or more anglers, name the group if you like, and chat with up to 10 people at once.','Tap a group’s name at the top of the chat to see who’s in it, rename it, add people, or leave.','Photos work in groups too: 5 per group per day.']},
