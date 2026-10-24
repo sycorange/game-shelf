@@ -514,8 +514,7 @@ async function route(req,env,url,ctx){
     const stats=so?JSON.stringify(so).slice(0,4000):me.stats;
     const wkn=String(b.wk)===wk?Math.max(0,Math.min(1e6,b.wkn|0)):0;
     const hasCab=typeof b.cabin==='string'&&b.cabin.length<20000;
-    st.push(db.prepare('UPDATE players SET host=?,hts=? WHERE id=?').bind(clean(url.hostname,40),now,me.id));
-    st.push(db.prepare('UPDATE players SET stats=?,wk=?,wkn=?,seen=?'+(hasCab?',cabin=?':'')+' WHERE id=?').bind(...[stats,wk,wkn,now].concat(hasCab?[b.cabin]:[]),me.id));
+    st.push(db.prepare('UPDATE players SET stats=?,wk=?,wkn=?,seen=?,host=?,hts=?'+(hasCab?',cabin=?':'')+' WHERE id=?').bind(...[stats,wk,wkn,now,clean(url.hostname,40),now].concat(hasCab?[b.cabin]:[]),me.id));
     for(const c of (Array.isArray(b.catches)?b.catches:[]).slice(0,20)){
       const w=+c.w;if(!(w>0&&w<5000)||typeof c.fish!=='string')continue;
       st.push(db.prepare('INSERT INTO catches(pid,name,fish,w,v,water,ts) VALUES(?,?,?,?,?,?,?)').bind(me.id,me.name,clean(c.fish,24),w,clean(c.v,10),clean(c.water,10),Math.min(now,+c.ts||now)));
