@@ -13,6 +13,7 @@ body{margin:0;font-size:14px}
 img{max-width:100%}
 </style>
 <title>Lantern Lake</title>
+<script>if(location.hostname==='www.lanternlake.app')location.replace('https://lanternlake.app'+location.pathname+location.search+location.hash)</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&family=Figtree:wght@400;600;700&family=Playfair+Display:wght@700;900&family=Press+Start+2P&family=Permanent+Marker&display=swap">
 <style>
@@ -81,6 +82,9 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 #sessCover{position:fixed;inset:0;z-index:99999;background:rgba(6,14,18,.86);backdrop-filter:blur(4px);display:grid;place-items:center;padding:16px}
 #sessCover .sc-box{background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:22px 22px 18px;max-width:380px;width:100%;display:grid;gap:10px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 #sessCover .sc-eye{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--buoy);font-weight:700}
+#sessCover .sc-link{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;font-size:12px;cursor:pointer}#sessCover a.jig{text-decoration:none;display:inline-block}
+#moveBar{position:fixed;left:50%;top:max(8px,env(safe-area-inset-top));transform:translateX(-50%);z-index:9000;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:var(--panel);border:1px solid var(--buoy);border-radius:12px;padding:8px 10px 8px 14px;box-shadow:0 8px 30px rgba(0,0,0,.45);max-width:calc(100vw - 24px);font-size:14px}
+#moveBar .jig{padding:6px 12px}
 #sessCover h2{margin:0;font-size:20px}#sessCover p{margin:0;opacity:.85;line-height:1.45}#sessCover small{opacity:.6}#sessCover .jig{justify-self:center;padding:10px 22px;font-size:15px}#sessCover h2{font-family:var(--font-display)}
 .card{background:var(--panel-2);border-radius:11px;padding:12px;display:grid;gap:6px;align-content:start;min-width:0}
 .eyebrow{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
@@ -2287,6 +2291,8 @@ let TABCH=null;try{TABCH=new BroadcastChannel('ll-tab')}catch(e){}
 function sessPause(why,kind){if(SESS.paused)return;SESS.paused=true;
   try{if(AU.ctx)AU.ctx.suspend()}catch(e){}try{if(RADIO.ctl)RADIO.ctl.pause()}catch(e){}
   const tab=why==='tab',d=document.createElement('div');d.id='sessCover';
+  if(why==='moved'){d.innerHTML=`<div class="sc-box"><div class="sc-eye">New home</div><h2>Your game moved</h2><p>You moved your game to <b>lanternlake.app</b>. Play there from now on so your progress stays in one place.</p><a class="jig" id="scGo" href="${NEWHOME}">Open lanternlake.app</a><button class="sc-link" id="scStay">Keep playing the copy on this old address</button></div>`;
+    document.body.appendChild(d);document.getElementById('scStay').onclick=()=>{try{localStorage.removeItem('ll-moved')}catch(e){}location.reload()};return}
   d.innerHTML=`<div class="sc-box"><div class="sc-eye">Lantern Lake</div><h2>${tab?'Open in another tab':'Playing on another device'}</h2><p>${tab?'Lantern Lake is already running in another tab or window. Only one can play at a time, so this one is paused.':`You started playing on another device (your ${esc(kind||'other device')}). This one is paused so your progress stays in one place.`}</p><button class="jig" id="scGo">Play here</button><small>${tab?'The other tab will pause instead.':'Your latest cloud save loads first. Away time still counts.'}</small></div>`;
   document.body.appendChild(d);document.getElementById('scGo').onclick=()=>{try{sessionStorage.setItem('ll-take',why)}catch(e){}location.reload()}}
 if(TABCH)TABCH.onmessage=e=>{const m=e.data||{};if(!m.sid||m.sid===SESS.sid)return;
@@ -4490,8 +4496,20 @@ function showCloudOffer(r){$('clEye').textContent='Cloud save';$('clH').textCont
   $('clNo').onclick=()=>{CSYNC.offer=null;S.cbase=r.up||0;$('cloudModal').hidden=true;cloudPush(true)};
   $('cloudModal').hidden=false}
 // A link like …/lantern-lake/?code=ABCDEF opens straight to loading that transfer code.
-const URLX=(()=>{try{const u=new URL(location.href),c=(u.searchParams.get('code')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c){u.searchParams.delete('code');history.replaceState(null,'',u.pathname+u.search+u.hash)}return c.length===6?c:''}catch(e){return ''}})();
-function urlCodeOffer(){if(!URLX)return;$('clEye').textContent='Transfer code';$('clH').textContent='Load your game?';$('clP').textContent='This link has a transfer code from your other device.';
+let URLMOVED=false;
+const URLX=(()=>{try{const u=new URL(location.href),c=(u.searchParams.get('code')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');URLMOVED=u.searchParams.has('moved');if(c||URLMOVED){u.searchParams.delete('code');u.searchParams.delete('moved');history.replaceState(null,'',u.pathname+u.search+u.hash)}return c.length===6?c:''}catch(e){return ''}})();
+// New home: lanternlake.app. Browsers keep saves per address, so the old workers.dev site offers a one-click move
+// (a transfer code carried in the link), then shows a "your game moved" screen if the player comes back.
+const NEWHOME='https://lanternlake.app/lantern-lake/',OLDHOST=/\.workers\.dev$/.test(location.hostname);
+function moveBoot(){if(!OLDHOST)return;let moved=0;try{moved=+localStorage.getItem('ll-moved')||0}catch(e){}
+  if(moved){sessPause('moved');return}
+  const d=document.createElement('div');d.id='moveBar';d.innerHTML=`<span>🏠 Lantern Lake has a new home: <b>lanternlake.app</b></span><button class="jig" id="mvGo">Move my game</button>`;document.body.appendChild(d);
+  document.getElementById('mvGo').onclick=moveGame}
+async function moveGame(){const b=document.getElementById('mvGo');if(b){b.disabled=true;b.textContent='Packing…'}
+  try{let url=NEWHOME;if(S.total>0||(S.mp&&S.mp.id)){const r=await api('xfer/put',{data:await encSave2()});url+='?code='+r.code+'&moved=1'}
+    try{localStorage.setItem('ll-moved',String(Date.now()))}catch(e){}SESS.paused=true;location.href=url}
+  catch(e){if(b){b.disabled=false;b.textContent='Move my game'}showToast('Couldn’t pack your game. Check your connection and try again.','Move')}}
+function urlCodeOffer(){if(!URLX)return;$('clEye').textContent=URLMOVED?'Welcome to lanternlake.app':'Transfer code';$('clH').textContent=URLMOVED?'Bring your game over?':'Load your game?';$('clP').textContent=URLMOVED?'This is the game you moved from the old address. Load it here and keep playing.':'This link has a transfer code from your other device.';
   $('clCard').innerHTML=`<b>${fmtXC(URLX)}</b><small>${S.total>0?`Replaces the game on this device (day ${S.day} · $${money(S.coins)})`:'Loads your game onto this device'}</small>`;
   $('clYes').textContent='Load it';$('clNo').textContent='Not now';$('clMsg').textContent='';$('clYes').disabled=false;
   $('clYes').onclick=async()=>{$('clYes').disabled=true;try{await xfLoadCode(URLX);$('cloudModal').hidden=true;showToast('Game loaded','Welcome back')}catch(e){$('clMsg').textContent=e.message==='no-code'?'That code expired or was already used.':'Couldn’t load it.';$('clYes').disabled=false}};
@@ -5000,6 +5018,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:62,n:'New Home',items:['Lantern Lake has its own address: lanternlake.app. Playing on the old address? Tap Move my game in the banner and your save comes with you in one click.']},
  {v:61,n:'One Rod at a Time',items:['Lantern Lake now runs in one place at a time. Open it in a second tab, or start playing on another device, and the older one pauses with a Play here button, so two copies can never fight over your save.','Bug fix: a phone or tab left open in the background can no longer quietly overwrite progress you made on another device.']},
  {v:60,n:'Tidy Logbook',items:['Logbook cards are tidier: the fish icon sits beside the name, details stay in the same order, and buttons and variant chips line up along the bottom of every card in a row.']},
  {v:59,n:'Curator’s Corner',items:['Logbook cards now show who holds each fish’s museum plaque, or that the plaque is still open.','Tap any plaque in the museum to see its fish facts.','Museum-worthy fish get a gold Museum Case tag in Recent catches.','New Top curators board in the museum: see who holds the most plaques.','Your phone’s lock screen now shows how many plaques you hold, and warns you when someone takes one.','Discord posts from the game now show the Lantern Lake fish icon.']},
@@ -7431,7 +7450,7 @@ function start(data){
   const gap=(Date.now()-(BOOT_LAST||Date.now()))/1000;if(gap>60)offline(gap);
   renderAll();requestAnimationFrame(t=>{lastFrame=t;tick(t)});setTimeout(ddCross,1500);
   if(!(data&&typeof data.coins==='number'))showTitle();
-  sessBoot();
+  sessBoot();moveBoot();
   setTimeout(()=>{if(S.mp&&S.mp.id)mpSync(true)},4000);
 }
 try{window.claude?.hot?.snapshot?.(()=>JSON.parse(JSON.stringify(S)))}catch(e){}
