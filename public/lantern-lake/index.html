@@ -3570,7 +3570,7 @@ function txGInfo(b,back,title){const mem=TX.members||[];back.textContent='‹ Ch
     $('alNo').onclick=txAlertClose;$('alYes').onclick=async()=>{txAlertClose();const m=mpS();try{await api('texts/gleave',{id:m.id,key:m.key,gid:gidOf(TX.with)});showToast('You left the group')}catch(e){}TX.view='inbox';TX.with=null;TX.threads=null;renderTexts()}}}
 async function txPoll(force){const m=mpS();if(!m.id||TX.busy||titleOn||document.hidden||MPV.online===false||MPV.online==='nodb')return;
   const inApp=phOpen()&&phView==='texts',inThread=inApp&&TX.view==='thread';
-  if(!force&&Date.now()-TX.lastPoll<(inThread?4000:inApp?8000:afk()?180000:45000))return;TX.lastPoll=Date.now();TX.busy=true;
+  if(!force&&Date.now()-TX.lastPoll<(inThread?4000:inApp?8000:45000))return;TX.lastPoll=Date.now();TX.busy=true;
   try{if(inThread)await txLoadThread();
     const first=m.txLast==null,gFirst=m.gLast==null,r=await api('texts/poll',{id:m.id,key:m.key,after:m.txLast||0,gafter:m.gLast||0});
     const fresh=first?[]:r.fresh.filter(x=>x.id>(m.txLast||0)&&!(inThread&&x.a===TX.with));
@@ -5109,6 +5109,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:71,n:'Quick Replies',items:['Texts are checked every 45 seconds again, even when you’ve stepped away from the game, so new messages still show up quickly.']},
  {v:70,n:'Quiet Hours',items:['Behind the scenes: when you leave the game running without touching it for 5 minutes, it checks in with the server less often (every 10 minutes instead of every 2). Fishing and earnings carry on exactly the same, and everything catches up the moment you move the mouse or tap. This lets many more anglers share the lake.']},
  {v:69,n:'Radio to Go',items:['Radio on phones: Spotify only plays 30-second previews in mobile browsers, even when you’re signed in. The Radio app now explains this and adds an Open in Spotify button, so you can hear the full songs in the Spotify app while you fish. You can also switch your browser to its desktop site to hear full songs right in the game.']},
  {v:68,n:'Save Point',items:['New Force Cloud Save button next to the Lantern Lake title. Your game still saves to the cloud on its own, so you never need to press it. It’s there for when you want to save right away, like before switching devices. It can be used once a minute.']},
