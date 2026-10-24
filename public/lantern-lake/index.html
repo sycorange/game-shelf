@@ -1127,6 +1127,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .rd-grid button[aria-pressed="true"]{outline:2px solid #1ed760;outline-offset:1px}
 .rd-link{display:flex;gap:6px}.rd-link input{flex:1;min-width:0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;border-radius:10px;padding:8px 10px;font:inherit;font-size:.8rem}
 .rd-link button{border:0;border-radius:10px;background:#1ed760;color:#0b1210;font:inherit;font-weight:800;padding:0 12px}
+.rd-mob{background:rgba(30,215,96,.1);border:1px solid rgba(30,215,96,.35);border-radius:12px;padding:10px 12px;margin:8px 0;display:grid;gap:8px}.rd-mob p{margin:0;font-size:.82rem;line-height:1.45}.rd-mob small{font-size:.75rem;opacity:.7}
+.rd-mob .rd-alt{font-size:.78rem;opacity:.85;border-top:1px solid rgba(30,215,96,.25);padding-top:8px}
+.rd-app{justify-self:start;display:inline-flex;align-items:center;gap:6px;background:#1ed760;color:#06150b;font-weight:700;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:.88rem}
 .rd-note{font-size:.7rem;color:#8fae9d;line-height:1.35;margin:0 2px}.rd-err{color:#ff9b8a;font-size:.74rem;margin:0 2px;font-weight:700}
 .rd-stop{border:1px solid rgba(255,255,255,.18);background:none;color:#cfe5d8;border-radius:10px;font:inherit;font-size:.78rem;padding:7px;font-weight:700}
 .lk-np{text-align:left;display:grid;grid-template-columns:30px minmax(0,1fr) 34px;gap:9px;align-items:center;background:rgba(10,20,16,.55);backdrop-filter:blur(8px);border-radius:14px;padding:8px 10px;color:#fff;margin-bottom:6px;font-size:.78rem}
@@ -3619,6 +3622,9 @@ function radioToggle(){if(!RADIO.ctl)return;try{RADIO.ctl.togglePlay()}catch(e){
 function radioPick(uri,name){const r=RDS();r.u=uri;r.n=name||'';save();RADIO.plName=r.n;RADIO.err='';rdMake(uri);renderRadio()}
 function radioStop(){if(RADIO.ctl){try{RADIO.ctl.pause()}catch(e){}try{RADIO.ctl.destroy()}catch(e){}}RADIO.ctl=null;RADIO.paused=true;RADIO.started=false;RADIO.track='';RADIO.uri='';RADIO.want=null;
   const w=$('rdEmbedWrap');w.innerHTML='';w.classList.add('off');const r=RDS();r.u='';r.n='';save();applyVol();renderRadio()}
+// Phones: Spotify only plays 30-second previews in mobile browsers (its rule, even when signed in), so offer the app instead.
+const rdMobile=()=>typeof DEVK!=='undefined'&&DEVK!=='computer';
+const rdWebUrl=uri=>{const m=String(uri||'').match(/^spotify:(\w+):([A-Za-z0-9]{22})$/);return m?`https://open.spotify.com/${m[1]}/${m[2]}`:''};
 function renderRadioNP(){const el=$('rdNP');if(!el)return;
   el.innerHTML=RADIO.ctl?`<div><small>${RADIO.paused?(RADIO.started?'Paused':'Ready'):'Now playing'}</small><b>${esc(RADIO.track||(RADIO.paused&&!RADIO.started?'Press play to start':'Spotify'))}</b><span>${esc(RADIO.plName||'Spotify')}</span></div><button class="rd-pp" id="rdPP" aria-label="${RADIO.paused?'Play':'Pause'}">${RADIO.paused?rdPlaySvg:rdPauseSvg}</button>`
     :`<div><small>Radio</small><b>Pick a station</b><span>Music plays here while you fish</span></div>`;
@@ -3627,15 +3633,17 @@ function renderRadio(){const b=$('radioBody'),r=RDS();if(!b)return;
   if(r.u&&!RADIO.ctl&&!RADIO.failed)rdMake(r.u);RADIO.plName=r.n||RADIO.plName;
   b.innerHTML=`<div class="rd-np" id="rdNP"></div>
     ${RADIO.failed?`<p class="rd-err">Couldn’t load Spotify. Check your connection, or try again on your Lantern Lake website.</p>`:RADIO.loading&&!RADIO.ctl?'<p class="rd-note">Tuning in to Spotify…</p>':''}
+    ${rdMobile()?`<div class="rd-mob"><p><b>On phones, Spotify plays 30-second previews here</b>, even when you’re signed in. That’s Spotify’s rule for mobile browsers. For full songs, open it in the Spotify app. It keeps playing while you fish.</p><p class="rd-alt"><b>Or</b> switch your browser to the desktop site and full songs play right here. On Android Chrome, tap <b>⋮</b> then <b>Desktop site</b>. On iPhone Safari, open the page menu by the address bar (the <b>aA</b> or page button, then <b>⋯</b> on newer iPhones) and tap <b>Request Desktop Website</b>. In Chrome on iPhone, tap <b>⋯</b> then <b>Request Desktop Site</b>.</p>${r.u?`<a class="rd-app" id="rdApp" href="${rdWebUrl(r.u)}" target="_blank" rel="noopener">Open in Spotify</a>`:'<small>Pick a station or paste a link first, then open it in Spotify.</small>'}</div>`:''}
     <p class="rd-h">Stations</p><div class="rd-grid">${RD_PRESETS.map(p=>`<button data-rd="${p.u}" data-rn="${esc(p.n)}" style="background:${p.bg}" aria-pressed="${r.u===p.u}">${p.n}<small>${p.s}</small></button>`).join('')}</div>
     <p class="rd-h">Your own music</p><form class="rd-link" id="rdForm"><input id="rdUrl" placeholder="Paste a Spotify playlist, album or song link" autocomplete="off" aria-label="Spotify link"><button>Play</button></form>
     ${RADIO.err?`<p class="rd-err">${esc(RADIO.err)}</p>`:''}
-    <p class="rd-note">Use the buttons in the Spotify player to skip songs. Signed in to Spotify in this browser? You’ll hear full songs. If not, Spotify plays 30-second previews. Music keeps playing when you put your phone away, and the game’s own music fades out while it plays.</p>
+    <p class="rd-note">Use the buttons in the Spotify player to skip songs.${rdMobile()?'':' Signed in to Spotify in this browser? You’ll hear full songs. If not, Spotify plays 30-second previews.'} Music keeps playing when you put your phone away, and the game’s own music fades out while it plays.</p>
     ${RADIO.ctl?'<button class="rd-stop" id="rdStop">Turn off radio</button>':''}`;
   renderRadioNP();
   b.querySelectorAll('[data-rd]').forEach(x=>x.onclick=()=>radioPick(x.dataset.rd,x.dataset.rn));
   $('rdForm').onsubmit=e=>{e.preventDefault();const u=rdParse($('rdUrl').value);if(!u){RADIO.err='That doesn’t look like a Spotify link. In Spotify, tap Share, then Copy link.';renderRadio();return}radioPick(u,'Your music')};
   const st=$('rdStop');if(st)st.onclick=radioStop;
+  const ap=$('rdApp');if(ap)ap.onclick=()=>{try{if(RADIO.ctl&&!RADIO.paused)RADIO.ctl.pause()}catch(e){}};
   if(!RADIO.api&&!RADIO.failed)rdLoadApi()}
 
 // ---------- Fish facts: real species pull a summary and photo from Wikipedia (free, no key, CC BY-SA);
@@ -5097,6 +5105,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:69,n:'Radio to Go',items:['Radio on phones: Spotify only plays 30-second previews in mobile browsers, even when you’re signed in. The Radio app now explains this and adds an Open in Spotify button, so you can hear the full songs in the Spotify app while you fish. You can also switch your browser to its desktop site to hear full songs right in the game.']},
  {v:68,n:'Save Point',items:['New Force Cloud Save button next to the Lantern Lake title. Your game still saves to the cloud on its own, so you never need to press it. It’s there for when you want to save right away, like before switching devices. It can be used once a minute.']},
  {v:67,n:'Keep the Lake Lit',items:['New ⚑ Admin badge on the contact card of whoever runs the lake. Badges now sit on their own row under your name so they never crowd it.','You can now support Lantern Lake with a donation from the Settings app or the top of these update notes. Any amount earns a ♥ Supporter badge on your contact card. Just put your angler name in the PayPal note.','The game stays free and nothing in it changes for supporters. The badge is a thank-you.']},
  {v:66,n:'Lucky Pour',items:['Bug fix: potion prizes on the slots now grow with your bet, like cash prizes do. Two potions pays 1 potion per bet level (1, 3 or 5) and three potions pays 2 per bet level (2, 6 or 10).']},
