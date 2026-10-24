@@ -275,7 +275,7 @@ const WATER_N={pond:'Dock Pond',lake:'Reed Lake',river:'Fork River',deep:'Deepwa
 let DCC=null,DCT=0;
 async function dcCfg(db){if(DCC&&Date.now()-DCT<60000)return DCC;try{const r=await db.prepare("SELECT k,v FROM cfg WHERE k LIKE 'dc:%'").all();DCC={};for(const x of r.results)DCC[x.k.slice(3)]=x.v}catch(e){DCC={}}DCT=Date.now();return DCC}
 async function dcPost(db,ch,body,wait){const c=await dcCfg(db),u=c[ch];if(!u||!DC_RE.test(u))return null;
-  try{const r=await fetch(u+(wait?'?wait=true':''),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({username:'Lantern Lake',allowed_mentions:{parse:[]}},body))});
+  try{const r=await fetch(u+(wait?'?wait=true':''),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({username:'Lantern Lake',avatar_url:c.site?c.site+'icon.png':undefined,allowed_mentions:{parse:[]}},body))});
     if(!wait||!r.ok)return r.ok?'ok':null;const j=await r.json();return j.id||null}catch(e){return null}}
 async function dcEdit(db,ch,id,body){const c=await dcCfg(db),u=c[ch];if(!u||!DC_RE.test(u)||!/^\d+$/.test(String(id)))return;
   try{await fetch(`${u}/messages/${id}`,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({allowed_mentions:{parse:[]}},body))})}catch(e){}}

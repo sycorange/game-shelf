@@ -925,6 +925,16 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .plq.open{background:rgba(255,255,255,.03);border-style:dashed;border-color:rgba(255,255,255,.18)}.plq.mine{border-color:#e8c25a;box-shadow:0 0 0 1px #e8c25a inset}
 .mcase{background:rgba(232,194,90,.08);border:1px solid rgba(232,194,90,.35);border-radius:12px;padding:10px 12px;margin:0 0 12px;display:grid;gap:8px}
 .mcase .mc-h{display:flex;justify-content:space-between;align-items:baseline}.mcase .mc-n{margin:0;color:var(--muted);font-size:.85rem}
+.mus-ln{font-size:.74rem;color:var(--muted)}.mus-ln.mine{color:#e8c25a;font-weight:700}
+.feed-mus{color:#e8c25a;font-weight:700;white-space:nowrap}
+.plq[data-plf]{cursor:pointer}.plq[data-plf]:hover{filter:brightness(1.12)}.plq[data-plf]:focus-visible{outline:2px solid #e8c25a;outline-offset:2px}
+.mus-top{margin-bottom:12px}.mus-top h3{margin:0 0 6px;font-size:1rem}.mus-top ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.mus-top li{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.04)}
+.mus-top li.me{background:rgba(232,194,90,.12)}.mus-top .mt-r{font-weight:800;color:#e8c25a;text-align:center}.mus-top li span:last-child{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.lk-mus{text-align:left;display:grid;grid-template-columns:30px minmax(0,1fr);gap:9px;align-items:center;background:rgba(30,24,8,.55);backdrop-filter:blur(8px);border-radius:14px;padding:8px 10px;color:#fff;margin-bottom:6px;font-size:.78rem}
+.lk-mus .ai{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(145deg,#e8c25a,#9a7414);font-size:1rem}
+.lk-mus b{display:block;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}.lk-mus span:not(.ai){display:block;font-weight:600;line-height:1.3}
+.lk-mus.alert{background:rgba(120,30,20,.6)}
 .fact-box{max-width:460px}
 .fact-box img.fc-pic{display:block;width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin:6px 0 10px;background:rgba(255,255,255,.05)}
 .fact-box .fc-sci{font-style:italic;color:var(--muted);margin:-4px 0 8px;font-size:.88rem}
@@ -2368,7 +2378,7 @@ function doCatch(){
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
   const t=S.tour; if(t&&t.phase==='live'&&S.water===t.water) t.me=scoreAdd(t,t.me,f,w);
   rollDay();S.today.n++;if(!S.today.best||w>S.today.best.w)S.today.best={id:f.id,w};if(S.today.n>S.st.best.n)S.st.best={n:S.today.n,day:S.day};
-  pushRecent({id:f.id,w,val,v:vr});
+  pushRecent({id:f.id,w,val,v:vr,mus:mKept||undefined});
   if(vr){celebrate({lbl:`${VAR[vr].n} ${f.n}!`,r:vr==='golden'?'L':'R',name:newVar?`New ${VAR[vr].n.toLowerCase()} variant for your logbook`:`${VAR[vr].n} variant`,sub:`${w} lb · worth $${money(val)}`,icon:fishSvg(vr==='giant'?RCOL[f.r]:VAR[vr].col)});burst(BOB.x,BOB.y-10,[VAR[vr].col,'#ffffff'],60)}
   else if(f.r==='R'||f.r==='L'){celebrate({lbl:`${RAR[f.r]} catch!`,r:f.r,name:f.n,sub:`${w} lb · worth $${money(val)}${isNew?' · New species':isRec?' · New record':''}`,icon:fishSvg(RCOL[f.r])});burst(BOB.x,BOB.y-10,[RCOL[f.r],'#ffffff','#ff7a3d'],f.r==='L'?70:35)}
   else sfx('splash'),showToast(`${w} lb ${f.n} · $${money(val)} to the cooler`,isNew?'New species!':isRec?'New record!':'');
@@ -2784,7 +2794,7 @@ function renderFeed(){
     else if(r.mat){const mt=MI(r.mat);if(!mt)continue;li.className=mt.r==='C'?'miss':'';li.innerHTML=`<span class="rar-${mt.r}">${mt.n}</span><span style="color:var(--muted)">material</span>`}
     else if(r.tape){const tp=TAPES[r.tape];if(!tp)continue;li.innerHTML=`<span class="rar-${tp.r}">VHS: ${tp.n}</span><span class="rar-${tp.r}">tape</span>`}
     else if(r.coll){const c=COLL.find(x=>x.id===r.coll);if(!c)continue;li.innerHTML=`<span class="rar-${c.r}">${c.n}</span><span class="rar-${c.r}">collectible</span>`}
-    else{const f=FI(r.id);if(!f)continue;li.innerHTML=`<span class="rar-${f.r}"${r.v?` style="color:${VAR[r.v].col}"`:''}>${r.v?VAR[r.v].n+' ':''}${f.n} · ${r.w} lb</span><span>$${money(r.val)}</span>`}
+    else{const f=FI(r.id);if(!f)continue;li.innerHTML=`<span class="rar-${f.r}"${r.v?` style="color:${VAR[r.v].col}"`:''}>${r.v?VAR[r.v].n+' ':''}${f.n} · ${r.w} lb</span>${r.mus?'<span class="feed-mus">🏛️ Museum Case</span>':`<span>$${money(r.val)}</span>`}`}
     ul.append(li)}
 }
 function renderTrophies(){
@@ -3244,9 +3254,12 @@ function renderLock(){
   {const q2=Q2();if(q2.step>0&&q2.step<7&&q2.seen!==q2.step)notes.push(['case','Casefile','New lead in the Emerald Wake case'])}
   if(MPV.mail.length)notes.push(['friends','Friends',`${MPV.mail.length} gift${MPV.mail.length>1?'s':''} waiting in your mailbox`]);else if(mpCommClaimable())notes.push(['friends','Friends','The community goal is done. Claim your reward!']);
   const ct=coolTotals();if(ct.n)notes.push(['help','Cooler',`${ct.n} fish worth $${money(ct.v)} waiting to be sold`]);
-  const np=radioLockCard();
-  $('lkNotes').innerHTML=np+notes.slice(0,np?2:3).map(([a,t,m])=>{const A=APPS.find(x=>x.id===a);return `<div class="lk-note" data-app="${a}" role="button" tabindex="0"><span class="ai" style="background:${A.bg}">${A.ic()}</span><div><b>${t}</b>${m}</div></div>`}).join('');
+  const np=radioLockCard()+musLockCard();
+  $('lkNotes').innerHTML=np+notes.slice(0,3-(np.match(/class="lk-np|class="lk-mus/g)||[]).length).map(([a,t,m])=>{const A=APPS.find(x=>x.id===a);return `<div class="lk-note" data-app="${a}" role="button" tabindex="0"><span class="ai" style="background:${A.bg}">${A.ic()}</span><div><b>${t}</b>${m}</div></div>`}).join('');
 }
+function musLockCard(){const n=musMine(),bt=(S.musBeat||[]);if(!n&&!bt.length)return '';
+  const msg=bt.length?esc(bt[bt.length-1]):`You hold ${n} museum plaque${n>1?'s':''}${MC().length?` · ${MC().length} in your case`:''}`;
+  return `<div class="lk-mus${bt.length?' alert':''}"><span class="ai">🏛️</span><div><b>${bt.length?'Plaque taken!':'Museum'}</b><span>${msg}</span></div></div>`}
 function radioLockCard(){if(!RADIO.ctl||(RADIO.paused&&!RADIO.started))return '';
   return `<div class="lk-np"><span class="ai" style="background:linear-gradient(145deg,#1ed760,#0d6b3a)">${radioIc}</span><div data-app="radio" role="button" tabindex="0"><b>${RADIO.paused?'Paused':'Now playing'}</b><span>${esc(RADIO.track||RADIO.plName||'Spotify')}</span></div><button id="lkRadioPP" aria-label="${RADIO.paused?'Play':'Pause'}">${RADIO.paused?rdPlaySvg:rdPauseSvg}</button></div>`}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#lkRadioPP');if(b){e.stopPropagation();radioToggle()}},true);
@@ -3558,7 +3571,8 @@ function renderRadio(){const b=$('radioBody'),r=RDS();if(!b)return;
 
 // ---------- Fish facts: real species pull a summary and photo from Wikipedia (free, no key, CC BY-SA);
 // the game's own made-up fish get field notes written for Lantern Lake. Unlocks once you've caught the fish.
-const logBtns=(f,L)=>L?`<div style="display:flex;gap:6px;flex-wrap:wrap">${L.big>0?`<button class="mini share" data-share="${f.id}">Share catch card</button>`:''}<button class="mini facts" data-facts="${f.id}">Fish facts</button></div>`:'';
+const musLine=f=>{if(!MUS.map||!mpS().id)return '';const r=musRec(f.id,'');return `<span class="mus-ln${r&&r.pid===mpS().id?' mine':''}">🏛️ ${r?`Museum: ${esc(r.name)} · ${r.w} lb`:'Museum plaque open'}</span>`};
+const logBtns=(f,L)=>musLine(f)+(L?`<div style="display:flex;gap:6px;flex-wrap:wrap">${L.big>0?`<button class="mini share" data-share="${f.id}">Share catch card</button>`:''}<button class="mini facts" data-facts="${f.id}">Fish facts</button></div>`:'');
 const WIKI={bluegill:'Bluegill',pumpkin:'Pumpkinseed',shiner:'Golden shiner',bullhead:'Brown bullhead',carp:'Common carp',warmouth:'Warmouth',lmb:'Largemouth bass',redear:'Redear sunfish',pickerel:'Chain pickerel',grasscarp:'Grass carp',eel:'American eel',koi:'Koi',tench:'Tench',perch:'Yellow perch',crappie:'Black crappie',rockbass:'Rock bass',sucker:'White sucker',walleye:'Walleye',pike:'Northern pike',smb:'Smallmouth bass',whitebass:'White bass',bowfin:'Bowfin',whitefish:'Lake whitefish',spotgar:'Spotted gar',tiger:'Tiger muskellunge',bluepike:'Blue walleye',rainbow:'Rainbow trout',chub:'Creek chub',channel:'Channel catfish',fallfish:'Fallfish',brown:'Brown trout',gar:'Longnose gar',sauger:'Sauger',brook:'Brook trout',flathead:'Flathead catfish',shovelnose:'Shovelnose sturgeon',steelhead:'Rainbow trout',golden:'Golden trout',alligar:'Alligator gar',laker:'Lake trout',cisco:'Coregonus artedi',roundwf:'Round whitefish',smelt:'Rainbow smelt',burbot:'Burbot',chinook:'Chinook salmon',coho:'Coho salmon',siscowet:'Lake trout',muskie:'Muskellunge',paddle:'American paddlefish',atlsalmon:'Atlantic salmon',sturgeon:'Lake sturgeon',aurora:'Aurora trout',croaker:'Atlantic croaker',spot:'Spot (fish)',scup:'Scup',weakfish:'Weakfish',striper:'Striped bass',bluefish:'Bluefish',fluke:'Summer flounder',reddrum:'Red drum',cobia:'Cobia',tarpon:'Atlantic tarpon',blackdrum:'Black drum',tuna:'Atlantic bluefin tuna',swordfish:'Swordfish',mudminnow:'Central mudminnow',orfe:'Ide (fish)',drum:'Freshwater drum',lamprey:'Silver lamprey',mooneye:'Mooneye',grayling:'Arctic grayling',kiyi:'Kiyi',sculpin:'Deepwater sculpin',mackerel:'Atlantic mackerel',cod:'Atlantic cod',marlin:'Atlantic blue marlin'};
 const WIKI_NOTE={koi:'The Ghost Koi is a real koi variety: a cross between koi and metallic carp. Here’s the koi family it comes from.',tench:'The Golden Tench is a golden color form of the tench, bred for ornamental ponds.',steelhead:'Steelhead are rainbow trout that spend part of their lives in big lakes or the ocean, then head back up rivers to spawn.',siscowet:'The siscowet is a deep-water, extra-fatty form of the lake trout found in Lake Superior.',bluepike:'The blue pike was a form of walleye from Lake Erie. It was declared extinct in 1983.',orfe:'The golden orfe is the golden pond form of the ide.'};
 const LORE={
@@ -3658,12 +3672,15 @@ function musCaseHTML(inHall){const c=MC();
     return `<div class="mc-it${ok?'':' stale'}">${fishSvg(col)}<div class="mc-t"><b>${x.v?VAR[x.v].n+' ':''}${esc(f.n)} · ${x.w} lb</b><small>${ok?(rec?`Beats ${esc(rec.name)}’s ${rec.w} lb plaque`:'No plaque yet. It’s yours to take'):`Someone donated a bigger one (${rec.w} lb)`}</small></div>
       <div class="mc-b">${inHall&&ok?`<button class="mc-don" data-mdon="${i}">Donate</button>`:''}<button class="mini" data-mcsell="${i}">Sell $${money(x.val)}</button></div></div>`}).join('')}
 function musGroupName(f){if(EVFISH.includes(f))return 'Halloween';const w=W(f.at);if(w)return w.n;const r=REALMS.find(r=>r.id===f.at);return r?r.n:'Elsewhere'}
-function openMuseum(){$('musModal').hidden=false;musFetch(true);renderMuseum();setTimeout(()=>{try{$('musClose').focus()}catch(e){}},50)}
+function openMuseum(){S.musBeat=[];$('musModal').hidden=false;musFetch(true);renderMuseum();setTimeout(()=>{try{$('musClose').focus()}catch(e){}},50)}
 function renderMuseum(){const b=$('musBody'),m=mpS(),map=MUS.map;
   if(!m.id){b.innerHTML='<p class="fr-muted">Pick an angler name in the Friends app first, then come back to donate.</p>';return}
   if(!map){b.innerHTML='<p class="fr-muted">Opening the doors…</p>';return}
   const mine=musMine(),c=MC(),v=MUS.tab==='main'?'':MUS.tab;
   let h=`<p class="mus-sub">${mine?`You hold <b>${mine}</b> plaque${mine>1?'s':''}. `:''}Donate a fish heavier than a plaque to put your name on it. Anyone can take it back with a bigger catch.</p>`;
+  {const cnt={};for(const x of Object.values(map)){const k=x.pid;cnt[k]=cnt[k]||{n:0,name:x.name};cnt[k].n++;cnt[k].name=x.name}
+    const top=Object.entries(cnt).sort((a,b)=>b[1].n-a[1].n).slice(0,5);
+    if(top.length)h+=`<div class="mus-top"><h3>Top curators</h3><ol>${top.map(([pid,o],i)=>`<li class="${pid===m.id?'me':''}"><span class="mt-r">${i+1}</span><b>${esc(o.name)}${pid===m.id?' (you)':''}</b><span>${o.n} plaque${o.n>1?'s':''}</span></li>`).join('')}</ol></div>`}
   h+=`<div class="mus-case"><h3>Your Museum Case <small>${c.length}/${MUSEUM_CASE}</small></h3>${c.length?musCaseHTML(true):'<p class="fr-muted">Empty for now. When you catch a fish heavier than its plaque, it’s saved here automatically instead of going to your cooler.</p>'}</div>`;
   h+=`<div class="fbar" role="group" aria-label="Museum wings">${[['main','Main hall'],['golden','Golden wing'],['albino','Albino wing'],['giant','Giant wing']].map(([k,n])=>`<button data-mtab="${k}" aria-pressed="${MUS.tab===k}">${n}</button>`).join('')}</div>`;
   h+=`<div class="fbar" role="group" aria-label="Show plaques">${[['all','All plaques'],['open','Empty'],['mine','Mine']].map(([k,n])=>`<button data-mf="${k}" aria-pressed="${MUS.filt===k}">${n}</button>`).join('')}</div>`;
@@ -3672,13 +3689,14 @@ function renderMuseum(){const b=$('musBody'),m=mpS(),map=MUS.map;
   const filled=list.filter(f=>map[musSlot(f.id,v)]).length;
   h+=`<p class="mus-count">${filled} of ${list.length} plaques taken${v?` in the ${VAR[v].n.toLowerCase()} wing`:''}</p>`;
   for(const [g,arr] of Object.entries(groups)){h+=`<h4 class="mus-g">${esc(g)}</h4><div class="plqs">${arr.map(([f,rec])=>{const known=rec||S.log[f.id],col=v&&v!=='giant'?VAR[v].col:RCOL[f.r];
-    return `<div class="plq${rec&&rec.pid===m.id?' mine':''}${rec?'':' open'}">${fishSvg(col)}<b>${known?`${v?VAR[v].n+' ':''}${esc(f.n)}`:'Unknown fish'}</b><small>${rec?`${esc(rec.name)} · <em>${rec.w} lb</em>`:'Empty plaque'}</small></div>`}).join('')}</div>`}
+    return `<div class="plq${rec&&rec.pid===m.id?' mine':''}${rec?'':' open'}"${known?` data-plf="${f.id}" role="button" tabindex="0" aria-label="Fish facts: ${esc(f.n)}"`:''}>${fishSvg(col)}<b>${known?`${v?VAR[v].n+' ':''}${esc(f.n)}`:'Unknown fish'}</b><small>${rec?`${esc(rec.name)} · <em>${rec.w} lb</em>`:'Empty plaque'}</small></div>`}).join('')}</div>`}
   if(!shown)h+=`<p class="fr-muted">${MUS.filt==='mine'?'You don’t hold any plaques here yet.':'Every plaque here is taken. Beat one!'}</p>`;
   b.innerHTML=h;
   b.querySelectorAll('[data-mtab]').forEach(x=>x.onclick=()=>{MUS.tab=x.dataset.mtab;sfx('click');renderMuseum()});
   b.querySelectorAll('[data-mf]').forEach(x=>x.onclick=()=>{MUS.filt=x.dataset.mf;sfx('click');renderMuseum()});
   b.querySelectorAll('[data-mcsell]').forEach(x=>x.onclick=()=>musSell(+x.dataset.mcsell));
-  b.querySelectorAll('[data-mdon]').forEach(x=>x.onclick=()=>musDonate(+x.dataset.mdon,x))}
+  b.querySelectorAll('[data-mdon]').forEach(x=>x.onclick=()=>musDonate(+x.dataset.mdon,x));
+  b.querySelectorAll('[data-plf]').forEach(x=>{x.onclick=()=>openFacts(x.dataset.plf);x.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openFacts(x.dataset.plf)}}})}
 async function musDonate(i,btn){const m=mpS(),x=MC()[i];if(!x||!m.id)return;const f=FI(x.f);if(btn){btn.disabled=true;btn.textContent='Donating…'}
   try{const r=await api('museum/donate',{id:m.id,key:m.key,fish:x.f,v:x.v,w:x.w,name:f.n});const k=MC().indexOf(x);if(k>=0)MC().splice(k,1);
     const rew=Math.round(MUS_REWARD[f.r]*(x.v?2:1));S.coins+=rew;S.st.mus=(S.st.mus||0)+1;
@@ -4954,6 +4972,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:59,n:'Curator’s Corner',items:['Logbook cards now show who holds each fish’s museum plaque, or that the plaque is still open.','Tap any plaque in the museum to see its fish facts.','Museum-worthy fish get a gold Museum Case tag in Recent catches.','New Top curators board in the museum: see who holds the most plaques.','Your phone’s lock screen now shows how many plaques you hold, and warns you when someone takes one.','Discord posts from the game now show the Lantern Lake fish icon.']},
  {v:58,n:'Hall of Fame',items:['The Lantern Lake Museum is open! Travel there from the Waters tab or the “Where to?” menu outside your home, and donate record-breaking fish to put your name on a plaque. There’s a plaque for every species.','New rare wing: separate plaques for golden, albino and giant fish of every species.','When you land a fish heavier than its plaque, you get a gold “Museum-worthy!” banner and it’s saved in your new Museum Case (in the Cooler tab) so it can’t be sold by accident. This works for fish caught while you’re away too.','Donating pays a reward based on rarity, and your plaque count shows on your contact card. If someone beats your plaque, you’ll get a notification so you can win it back.']},
  {v:57,n:'Fresh Faces',items:['The Community app now keeps its list of who’s online in Discord up to date. It refreshes when you open the app if the list is more than 3 minutes old, and there’s a Refresh button for an instant update.']},
  {v:56,n:'Tall Tales',items:['New: Fish facts! In your Logbook, tap Fish facts on any fish you’ve caught. Real fish show a photo and facts from Wikipedia. Lantern Lake’s own fish (the Moon, Ember Lake, Cloud Sea, storm and Halloween fish, and a certain beast) come with field notes from local anglers.','New Community app on your phone: see who’s online in the Lantern Lake Discord and tap Join to hop in. Plan raids, find tournament buddies and show off your catches.','Lantern Lake now posts to Discord: raid alerts, new lake records for Rare and Legendary fish, and patch notes.']},
@@ -6984,7 +7003,7 @@ const XKIND={
   yard:{name:it=>{const [c]=String(it).split('|');return `Best yard of the week: $${money(+c)}`},give:it=>{const [c]=String(it).split('|');S.coins+=+c||0;S.trophies.unshift({name:'Best Yard',water:'pond',type:'big',score:'Most liked',day:S.day});celebrate({lbl:'Best yard!',r:'L',name:'Your yard got the most likes',sub:`+$${money(+c)} and a trophy`,icon:cupSvg});return true}},
   chal:{name:it=>{const [k,c,o,f]=String(it).split('|');const fn=FI(f)?FI(f).n:f;return k==='win'?`Challenge won vs ${o} (${fn}): $${money(+c)}`:k==='tie'?`Challenge tie with ${o}: $${money(+c)} back`:`Challenge refund (${o}): $${money(+c)}`},give:it=>{const [k,c,o]=String(it).split('|');S.coins+=+c||0;if(k==='win')celebrate({lbl:'Challenge won!',r:'R',name:`You beat ${o}`,sub:`+$${money(+c)}`,icon:cupSvg});else showToast(`+$${money(+c)}`,k==='tie'?'Challenge tie':'Challenge refund');return true}}};
 function mpSyncExtras(body){const m=mpS(),h=S.hw;if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
-function mpSyncDone(body,r){const m=mpS();try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum')}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);
+function mpSyncDone(body,r){const m=mpS();try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);
   if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;
   if(r.chal){const prev=MPV.chal||[];MPV.chal=r.chal;const newIn=r.chal.filter(c=>c.mine==='b'&&c.st==='pend'&&!(m.chSeen||[]).includes(c.id));if(newIn.length){m.chSeen=(m.chSeen||[]).concat(newIn.map(c=>c.id)).slice(-40);phNotify('friends','Challenge!',`${newIn[0].other} challenges you: biggest ${FI(newIn[0].fish)?FI(newIn[0].fish).n:newIn[0].fish} for $${money(newIn[0].stake)}`)}
     const live=new Set(r.chal.filter(c=>c.st==='live').map(c=>String(c.id)));if(m.chw)for(const k of Object.keys(m.chw))if(!live.has(k))delete m.chw[k]}
@@ -7064,7 +7083,7 @@ function hwLogSection(p){const any=EVFISH.some(f=>S.log[f.id]);if(!hwOn()&&!any)
   const h=document.createElement('div');h.className='sec-h hw-sec';h.innerHTML=`<h3>🎃 Halloween 2026</h3><small>${hwOn()?`Limited time · ${hwDaysLeft()} day${hwDaysLeft()===1?'':'s'} left`:'Event over'}</small>`;p.append(h);
   const g=document.createElement('div');g.className='grid';
   for(const f of EVFISH){const L=S.log[f.id];if(!hwOn()&&!L)continue;const c=document.createElement('div');c.className='card fish'+(L?'':' unk');
-    c.innerHTML=`${fishSvg(f.col)}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]} · ${W(f.at).n}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+`<div class="chips">${f.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div>${L?`<button class="mini facts" data-facts="${f.id}">Fish facts</button>`:''}</div>`;g.append(c)}
+    c.innerHTML=`${fishSvg(f.col)}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]} · ${W(f.at).n}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+`<div class="chips">${f.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div>${musLine(f)}${L?`<button class="mini facts" data-facts="${f.id}">Fish facts</button>`:''}</div>`;g.append(c)}
   p.append(g)}
 document.querySelectorAll('#app-hw [data-home]').forEach(b=>b.onclick=()=>phShow('home'));
 $('kpSig').onclick=keeperSignal;$('kpCv').onclick=keeperSignal;$('kpClose').onclick=keeperClose;$('kpOk').onclick=()=>{KP.on=false;$('keeperModal').hidden=true;renderCase&&!$('slotsModal').hidden&&phView==='case'&&renderCase()};
