@@ -710,6 +710,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .rprog{height:12px;border-radius:6px;background:var(--bg);overflow:hidden}
 .rprog i{display:block;height:100%;background:linear-gradient(90deg,var(--buoy),var(--reed));width:30%}
 #reelBtn{padding:14px;font-size:1.05rem;touch-action:none;user-select:none;-webkit-user-select:none}
+.ttl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cloudbtn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:9px;font-size:.8rem;white-space:nowrap}.cloudbtn svg{width:17px;height:17px;flex:none}
+.cloudbtn.ok{color:var(--reed);border-color:var(--reed)}.cloudbtn.busy svg{animation:cbPulse 1s ease-in-out infinite}@keyframes cbPulse{50%{opacity:.35}}
+@media (max-width:520px){.cloudbtn #cloudLbl{display:none}.cloudbtn{padding:0 8px}}
 .sndbtn{display:inline-grid;place-items:center;width:34px;height:30px;padding:0;border-radius:9px;align-self:center}
 .sndbtn svg{width:18px;height:18px}
 .slider{display:grid;grid-template-columns:92px minmax(0,1fr) 38px;align-items:center;gap:10px;font-weight:600;font-size:.92rem}
@@ -1267,7 +1271,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 </div>
 <div class="wrap">
   <div class="head">
-    <h1>Lantern <span>Lake</span></h1>
+    <div class="ttl"><h1>Lantern <span>Lake</span></h1><button class="ghost cloudbtn" id="cloudBtn" hidden title="Your game already saves to the cloud on its own. Tap to save right now, for example before switching devices."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.4 9.1 4.5 4.5 0 0 0 7 18z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15.5v-5m-2.3 2.2L12 10.4l2.3 2.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="cloudLbl">Force Cloud Save</span></button></div>
     <div class="stats">
       <span class="coins">$<b id="coins">0</b></span>
       <span>Day <b id="day">1</b> · <b id="clock">6:00 AM</b> · <span id="phase">Dawn</span></span>
@@ -4518,6 +4522,21 @@ async function cloudPush(force,keep){if(SESS.paused||!cloudOn()||CSYNC.busy||!CS
     if(keep)fetch('/api/cloud/put',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:data.length<60000}).catch(()=>{});
     else{const r=await api('cloud/put',body);if(r.up){S.cbase=r.up;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}CSYNC.lastUp=Date.now()}
   catch(e){if(sessErr(e)){CSYNC.busy=false;return}if(e.message==='stale'){CSYNC.checked=false;CSYNC.busy=false;CSYNC.lastUp=Date.now();cloudCheck();return}}CSYNC.busy=false}
+// Force cloud save: the cloud button next to the title saves right now. Limited to once a minute.
+const FCS={last:0,t:0};
+function cloudBtnUI(){const b=$('cloudBtn');if(!b)return;const on=cloudOn()&&!SESS.paused;b.hidden=!on;if(!on)return;
+  const left=Math.ceil((FCS.last+60000-Date.now())/1000);if(b.classList.contains('busy'))return;
+  if(left>0){b.disabled=true;$('cloudLbl').textContent=b.classList.contains('ok')&&left>55?'Saved':`Saved · ${left}s`;b.title=`You can cloud save again in ${left} seconds`}
+  else{b.disabled=false;b.classList.remove('ok');$('cloudLbl').textContent='Force Cloud Save';b.title='Your game already saves to the cloud on its own. Tap to save right now, for example before switching devices.'}}
+async function forceCloud(){const b=$('cloudBtn');if(!cloudOn()||SESS.paused||Date.now()-FCS.last<60000||CSYNC.busy)return;
+  b.classList.add('busy');b.disabled=true;$('cloudLbl').textContent='Saving…';
+  try{if(!CSYNC.checked)await cloudCheck();if(CSYNC.offer){showToast('Your other device has newer progress. Pick which game to keep first.','Cloud save');return}
+    const before=CSYNC.lastUp,base0=S.cbase;await cloudPush(true);
+    const ok=CSYNC.lastUp!==before&&S.cbase&&S.cbase!==base0;
+    if(ok){FCS.last=Date.now();b.classList.add('ok');showToast('Your game is saved to the cloud','Cloud save')}
+    else if(!SESS.paused&&!CSYNC.offer)showToast('Couldn’t reach the cloud. Check your connection and try again.','Cloud save')}
+  finally{b.classList.remove('busy');cloudBtnUI()}}
+$('cloudBtn').onclick=forceCloud;setInterval(cloudBtnUI,1000);
 async function cloudCheck(){if(!cloudOn()||CSYNC.offer)return;const m=S.mp,mine=S.last;
   try{const r=await api('cloud/get',{id:m.id,key:m.key,meta:true});CSYNC.checked=true;
     if(r.none)return;
@@ -5078,6 +5097,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:68,n:'Save Point',items:['New Force Cloud Save button next to the Lantern Lake title. Your game still saves to the cloud on its own, so you never need to press it. It’s there for when you want to save right away, like before switching devices. It can be used once a minute.']},
  {v:67,n:'Keep the Lake Lit',items:['New ⚑ Admin badge on the contact card of whoever runs the lake. Badges now sit on their own row under your name so they never crowd it.','You can now support Lantern Lake with a donation from the Settings app or the top of these update notes. Any amount earns a ♥ Supporter badge on your contact card. Just put your angler name in the PayPal note.','The game stays free and nothing in it changes for supporters. The badge is a thank-you.']},
  {v:66,n:'Lucky Pour',items:['Bug fix: potion prizes on the slots now grow with your bet, like cash prizes do. Two potions pays 1 potion per bet level (1, 3 or 5) and three potions pays 2 per bet level (2, 6 or 10).']},
  {v:65,n:'Moving Day',items:['Beta Tester frame: everyone who played Lantern Lake before it moved to lanternlake.app gets a shimmering Beta Tester frame around their contact picture. It comes along when you move your game, and friends see it on your contact card.','Behind the scenes: the game now notes which address it’s played on, so we can tell when everyone has moved to lanternlake.app. Only a random device ID is used for players without an angler name.']},
