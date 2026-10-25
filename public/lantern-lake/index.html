@@ -1146,6 +1146,16 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .rd-grid button[aria-pressed="true"]{outline:2px solid #1ed760;outline-offset:1px}
 .rd-link{display:flex;gap:6px}.rd-link input{flex:1;min-width:0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;border-radius:10px;padding:8px 10px;font:inherit;font-size:.8rem}
 .rd-link button{border:0;border-radius:10px;background:#1ed760;color:#0b1210;font:inherit;font-weight:800;padding:0 12px}
+.fd-head b{display:block;font-size:1.1rem}.fd-head small{color:#6a6f7a;font-size:.76rem;line-height:1.35;display:block;margin-bottom:6px}
+.fd-key{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.68rem;color:#6a6f7a;margin-bottom:8px}.fd-key span.k-g,.fd-key span.k-y,.fd-key span.k-x{padding:2px 6px;border-radius:5px;color:#fff;font-weight:700}
+.fd-grid{display:grid;grid-template-columns:minmax(64px,1.1fr) repeat(var(--n),minmax(0,1fr));gap:3px;font-size:.62rem}.fd-hd{font-weight:700;color:#6a6f7a;text-align:center;font-size:.6rem;text-transform:uppercase;letter-spacing:.03em}.fd-hd:first-child{text-align:left}
+.fd-nm{font-weight:700;align-self:center;font-size:.7rem;line-height:1.1;overflow-wrap:anywhere}.fd-nm.e{color:#c0c4cc;font-weight:400}
+.fd-c{border-radius:6px;min-height:40px;font-size:.6rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2px;line-height:1.1;color:#fff;background:#d8dbe0;font-weight:600;overflow-wrap:anywhere}.fd-c i{font-style:normal;font-size:.9rem;font-weight:800}
+.fd-c.e{background:#eceef1}.k-g{background:#3aa85a}.k-y{background:#d8a828}.k-x{background:#5a6470}
+.fd-in{display:flex;gap:6px;margin-top:10px}.fd-in input{flex:1;min-width:0;padding:9px 10px;border-radius:10px;border:1px solid #c8ccd4;font:inherit;font-size:.9rem}.fd-msg{font-size:.76rem;color:#6a6f7a;margin:6px 0}
+.fd-end{display:flex;gap:10px;align-items:center;background:#eef0f3;border-radius:12px;padding:10px;margin-top:10px}.fd-end.won{background:#e2f5e7}.fd-end svg{width:56px;flex:none}.fd-end small{color:#6a6f7a;display:block}.fd-end b{display:block;font-size:1.05rem}.fd-end span{display:block;font-size:.76rem;color:#4a4f5a}.fd-pay{color:#2a8a4a!important;font-weight:700}
+.fd-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px;text-align:center}.fd-stats b{display:block;font-size:1.1rem}.fd-stats small{font-size:.66rem;color:#6a6f7a}
+.fd-dist{display:grid;gap:3px;margin-top:8px;font-size:.7rem}.fd-dist div{display:flex;align-items:center;gap:6px}.fd-dist span{width:10px}.fd-dist i{font-style:normal;background:#3aa85a;color:#fff;border-radius:4px;padding:1px 6px;text-align:right;font-weight:700}
 .rd-mob{background:rgba(30,215,96,.1);border:1px solid rgba(30,215,96,.35);border-radius:12px;padding:10px 12px;margin:8px 0;display:grid;gap:8px}.rd-mob p{margin:0;font-size:.82rem;line-height:1.45}.rd-mob small{font-size:.75rem;opacity:.7}
 .rd-mob .rd-alt{font-size:.78rem;opacity:.85;border-top:1px solid rgba(30,215,96,.25);padding-top:8px}
 .rd-app{justify-self:start;display:inline-flex;align-items:center;gap:6px;background:#1ed760;color:#06150b;font-weight:700;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:.88rem}
@@ -1481,6 +1491,10 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
       <section class="ph-view" id="app-discord" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Community</b><i></i></div>
         <div id="dcBody"></div>
+      </section>
+      <section class="ph-view" id="app-fishdle" hidden>
+        <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Fishdle</b><i></i></div>
+        <div id="fdBody"></div>
       </section>
       <section class="ph-view" id="app-radio" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Radio</b><i></i></div>
@@ -3099,6 +3113,7 @@ const APPS=[
   {id:'sports',n:'FinDuel',bg:'linear-gradient(145deg,#1e6aff,#0a2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="10" fill="#ff8a2a"/><path d="M6 17h20M16 7v20M9 10c4 4 4 10 0 14M23 10c-4 4-4 10 0 14" stroke="#3a1a00" stroke-width="1.6" fill="none"/><path d="M20 3c3 2 4 5 3 8-2-2-4-3-6-3 1-2 2-4 3-5z" fill="#7cf0ff"/></svg>`},
   {id:'discord',n:'Community',s:'Community',when:()=>!!DISCORD_ID||!!MPV.owner,bg:'linear-gradient(145deg,#6b74f0,#3b3fb0)',ic:()=>'<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 8.5h15a2.5 2.5 0 0 1 2.5 2.5v7a2.5 2.5 0 0 1-2.5 2.5h-8l-5 4v-4H5A2.5 2.5 0 0 1 2.5 18v-7A2.5 2.5 0 0 1 5 8.5z" fill="#fff"/><path d="M24.5 12.5H27a2.5 2.5 0 0 1 2.5 2.5v6.5a2.5 2.5 0 0 1-2.5 2.5h-1v3.5l-4.5-3.5h-5" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" opacity=".8"/><circle cx="8.5" cy="14.5" r="1.4" fill="#4a50c8"/><circle cx="12.5" cy="14.5" r="1.4" fill="#4a50c8"/><circle cx="16.5" cy="14.5" r="1.4" fill="#4a50c8"/></svg>'},
   {id:'radio',n:'Radio',s:'Radio',bg:'linear-gradient(145deg,#1ed760,#0d6b3a)',ic:()=>radioIc},
+  {id:'fishdle',n:'Fishdle',s:'Fishdle',bg:'linear-gradient(145deg,#2a6a4a,#123a28)',ic:()=>fdIc},
   {id:'weather',n:'Lake 7 Weather',s:'Weather',bg:'linear-gradient(145deg,#3a8aff,#0c2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="#ffd05a"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7" stroke="#ffd05a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 25.5a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6 3.8 3.8 0 0 1 .4 7.4z" fill="#fff"/><rect x="19" y="20" width="11" height="9" rx="2" fill="#d8312a"/><path d="M22 22.4h5l-2.6 4.8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
   {id:'crate',n:'Crate Expectations',s:'Crates',bg:'linear-gradient(145deg,#ff5ad8,#3a1a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11l12-6 12 6v12l-12 6-12-6z" fill="#b07a3a"/><path d="M4 11l12 6 12-6M16 17v12" stroke="#5a3814" stroke-width="1.6" fill="none"/><path d="M14 18l4-2v5l-4 2z" fill="#ffc23a"/><path d="M24 3l1 2.4 2.4 1-2.4 1L24 10l-1-2.6-2.4-1 2.4-1z" fill="#fff"/></svg>`},
   {id:'hw',n:'Spooky',bg:'linear-gradient(145deg,#ff8a2a,#5a1a6a)',ic:()=>pumpkinSvg,when:()=>hwOn()},
@@ -3110,7 +3125,7 @@ const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
   $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='discord'?'v-dc':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
-  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case')renderCase();if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
+  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case')renderCase();if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='fishdle')renderFishdle();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
   const sec=v==='lock'?$('phLock'):v==='home'?$('phApps'):$('app-'+v);if(sec)sec.scrollTop=0;
 }
 
@@ -4373,6 +4388,7 @@ function renderHelp(){
    ['Lake projects',`<p>Open the Shop app and tap <b>Projects</b>. Fund big builds in stages with money and materials. Each stage finishes the next morning and gives a permanent bonus: the Marina makes fish sell for more, the Fish Hatchery brings more Rare and Legendary bites, and the Salvage Barn turns up more materials.</p>`],
    ['Retiring',`<p>Once you have $5,000,000 you can retire from the Projects tab. You start over with a lean-to and a stick rod but keep your logbook, trophies, collectibles, tapes, decor, cases and projects, and every fish you sell is worth 10% more for good each time you retire.</p>`],
    ['Logbook sets',`<p>Catch every species in a water to claim a set reward and a Master trophy from the Logbook: $5,000 for Dock Pond up to $500,000 for Misty Bay.</p>`],
+   ['Fishdle',`<p>A daily puzzle in the Fishdle phone app: guess today’s mystery fish in 6 tries. Each guess shows whether its water, rarity, max size, bite times and weather match today’s fish (green), are close (yellow) or don’t (grey), with arrows pointing higher or lower. Everyone gets the same fish each day. Solving it pays 60 prize tickets for a first-try guess, down to 10 for a sixth. Tap Copy result to share your squares.</p>`],
    ['Lantern Pier Arcade',`<p>Visit the arcade from the Waters tab or when you leave your cabin. Play Bobber Toss, Whack-a-Gar and Pinball to win prize tickets (up to 600 a day), try the Claw Machine (30 tickets) for plushies, and take your 3 daily tries at Putt of the Day, the same hole for everyone. Spend tickets at the Prize Counter on crates, plushies, a neon sign and arcade-only boat paints. Tickets never cost cash and prices never change. Weekly high-score boards crown a champion for each cabinet with a trophy.</p>`],
    ['The Angler Who Isn’t There',`<p>A fourth case opens after you close the Keeper’s Light. Someone on Reed Lake is wearing your face. Follow the leads (a text from your own number, a figure on the far water at dusk, lies in your own records, mirror shards at night) and craft a Silvered Lantern. The finale is Mirror Match on a clear night at Reed Lake: your reflection flashes a row of arrows and you press the opposite of each one in order (◀ becomes ▶, ▲ stays ▲). Tap the buttons or use the arrow keys. Win five rounds before three mistakes. The lies are only on your screen: your real stats, plaques and what friends see never change.</p>`],
    ['The Keeper’s Light',`<p>A third case opens after you close the Emerald Wake. Its finale is a storm rescue: when the lighthouse beam crosses the lost rowboat, tap Signal (or press Space). Three good signals bring the keeper home.</p>`],
@@ -5194,6 +5210,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:77,n:'Fishdle',items:['New phone app: Fishdle! Guess the daily mystery fish in 6 tries. Each guess tells you if the water, rarity, max size, bite times and weather match, are close, or point higher or lower.','Everyone gets the same fish each day. Solving it pays up to 60 prize tickets (on top of the arcade’s daily limit), and keeps a streak going.','Tap Copy result to share your green and yellow squares in Discord or a text, without spoiling the answer.']},
  {v:76,n:'Counter Check',items:['Bug fix: arcade prizes (plushies and the Arcade Champ sign) no longer show up as free items in the crafting table’s “Ready now” list. They only come from the Prize Counter and the Claw Machine.']},
  {v:75,n:'Clearer Reflections',items:['Bug fix: in Mirror Match, your angler’s rod now points the way you pressed (it used to point the opposite way, which made it look like you’d answered wrong).','Bug fix: Mirror Match now blinks between arrows, so two of the same arrow in a row are easy to tell apart. Dots show how many arrows are in the round, and your answers appear as you enter them.','Clearer Mirror Match instructions: press the opposite of each arrow (◀ becomes ▶, ▲ stays ▲).']},
  {v:74,n:'Lantern Pier Arcade',items:['New place to visit: the Lantern Pier Arcade! Take the boat over from the Waters tab or when you leave your cabin, walk in, and tap any cabinet on the arcade floor to play.','Play Bobber Toss, Whack-a-Gar and Pinball for prize tickets (up to 600 a day), or spend 30 on the Claw Machine to win plushies.','Putt of the Day: one mini-golf hole, the same for everyone each day, with 3 tries. Hole-in-one pays 100 tickets.','The Prize Counter has fixed prices for everyone: ticket crates (150), plushies for your windowsill, an “Arcade Champ” neon sign and two arcade-only boat paints, 8-Bit and Pinball Neon. Crate Expectations can also open crates with tickets.','Weekly high-score boards for each cabinet, a daily board for the putt, and a trophy for each weekly champion.']},
@@ -6752,7 +6769,7 @@ function renderBounties(){
   S.bty.list.forEach(b=>p.append(card(b)));
   const h2=document.createElement('div');h2.className='shop-h';h2.innerHTML='<h3>This week</h3><small>Resets Monday</small>';p.append(h2);p.append(card(S.bty.weekly));
 }
-function badgeFor(id){let n=0;if(id==='friends')n=mpBadge();if(id==='texts')n=TX.unread+q4Unread();if(id==='news'&&newsUnread())n=1;if(id==='crate'&&crateFree())n=1;if(id==='bounty')n=readyBounties()+(S.streak.claimed?0:1);if(id==='case'&&((S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step)||(Q2().step>0&&Q2().step<7&&Q2().seen!==Q2().step)||(Q3().step>0&&Q3().step<7&&Q3().seen!==Q3().step)))n='!';return n?`<span class="badge">${n}</span>`:''}
+function badgeFor(id){let n=0;if(id==='friends')n=mpBadge();if(id==='texts')n=TX.unread+q4Unread();if(id==='fishdle')n=FD().done?0:1;if(id==='news'&&newsUnread())n=1;if(id==='crate'&&crateFree())n=1;if(id==='bounty')n=readyBounties()+(S.streak.claimed?0:1);if(id==='case'&&((S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step)||(Q2().step>0&&Q2().step<7&&Q2().seen!==Q2().step)||(Q3().step>0&&Q3().step<7&&Q3().seen!==Q3().step)))n='!';return n?`<span class="badge">${n}</span>`:''}
 // ---------- Lake Beast mystery ----------
 const magSvg=`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="13" cy="13" r="8" fill="#e8f4ff" stroke="#2a1a0a" stroke-width="3"/><path d="M19 19l8 8" stroke="#2a1a0a" stroke-width="4" stroke-linecap="round"/></svg>`;
 const photoSvg=`<svg viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-6 16 16)"><rect x="5" y="4" width="22" height="24" fill="#f4eedc"/><rect x="8" y="7" width="16" height="13" fill="#6a6050"/><path d="M10 17q4-5 7-1 2-2 5 0" stroke="#2a241c" stroke-width="1.5" fill="none"/></g><path d="M21 3l7 9" stroke="#14100c" stroke-width="3"/></svg>`;
@@ -7660,6 +7677,50 @@ putt:{tix:()=>0,
     agText(x,`Today’s hole: ${C.name}`,28,36,11,'rgba(255,255,255,.75)','left')}}
 };
 AGAMES.pin={tix:s=>Math.min(80,Math.floor(s/500))};
+
+// ==FISHDLE== a daily guess-the-fish puzzle. Everyone gets the same fish each day (by the UTC date). Six guesses; each guess
+// compares water, rarity, max size, time of day and weather with today's fish. Wins pay prize tickets (outside the arcade's
+// daily limit) and results can be copied as emoji squares to share.
+const FD_RAR=['C','U','R','L'],FD_PAY=[60,50,40,30,20,10];
+const fdPool=()=>FISH.filter(f=>!f.quest&&WATERS.some(w=>w.id===f.at)&&FD_RAR.includes(f.r)).sort((a,b)=>a.id<b.id?-1:1);
+function fdAnswer(day){let h=11;for(const c of 'fishdle'+day)h=(Math.imul(h,31)+c.charCodeAt(0))>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;const P=fdPool();return P[h%P.length]}
+function FD(){if(!S.fd||typeof S.fd!=='object')S.fd={};const f=S.fd,d=arcUTC();f.st=f.st||{played:0,wins:0,streak:0,best:0,dist:[0,0,0,0,0,0],last:''};if(f.d!==d){f.d=d;f.g=[];f.done=false;f.won=false;f.paid=0}return f}
+const fdWi=id=>WATERS.findIndex(w=>w.id===id);
+function fdCmp(g,a){const out={};
+  out.water=g.at===a.at?['g','']:['x',fdWi(a.at)>fdWi(g.at)?'↑':'↓'];
+  const ri=FD_RAR.indexOf(g.r),ra=FD_RAR.indexOf(a.r);out.rar=ri===ra?['g','']:['x',ra>ri?'↑':'↓'];
+  const gs=g.w[1],as=a.w[1];out.size=gs===as?['g','']:[Math.abs(gs-as)/as<=.25?'y':'x',as>gs?'↑':'↓'];
+  const gt=g.t.join(),at=a.t.join(),ov=g.t.filter(x=>a.t.includes(x)).length;out.time=gt===at?['g','']:[ov?'y':'x',''];
+  const gw=(g.wx||[]).join(),aw=(a.wx||[]).join(),wov=(g.wx||[]).filter(x=>(a.wx||[]).includes(x)).length;out.wx=gw===aw?['g','']:[wov?'y':'x',''];
+  return out}
+const FD_COLS=[['water','Water'],['rar','Rarity'],['size','Max size'],['time','Bites'],['wx','Weather']];
+const fdVal=(f,k)=>k==='water'?W(f.at).n.replace(/^The /,''):k==='rar'?({C:'Common',U:'Uncom.',R:'Rare',L:'Legend.'})[f.r]:k==='size'?`${f.w[1]} lb`:k==='time'?f.t.map(x=>PH[x]).join(', '):f.wx?f.wx.map(x=>WX[x].n).join(', '):'Any';
+function fdGuess(name){const f=FD(),a=fdAnswer(f.d),n=String(name||'').trim().toLowerCase(),g=fdPool().find(x=>x.n.toLowerCase()===n);const msg=$('fdMsg');
+  if(f.done)return;if(!g){if(msg)msg.textContent='That fish isn’t on today’s list. Pick a name from the suggestions.';return}
+  if(f.g.includes(g.id)){if(msg)msg.textContent='You already guessed that one.';return}
+  f.g.push(g.id);sfx('click');
+  if(g.id===a.id||f.g.length>=6){f.done=true;f.won=g.id===a.id;const st=f.st;st.played++;
+    const y=new Date(Date.now()-864e5).toISOString().slice(0,10);if(f.won){st.wins++;st.dist[f.g.length-1]++;st.streak=st.last===y?st.streak+1:1;st.best=Math.max(st.best,st.streak);f.paid=FD_PAY[f.g.length-1];arcGive(f.paid);sfx('fanfare');
+      celebrate({lbl:'Fishdle solved!',r:'R',name:`${a.n} in ${f.g.length}`,sub:`+${f.paid} prize tickets · streak ${st.streak}`,icon:fishSvg(RCOL[a.r])})}else{st.streak=0;sfx('miss')}st.last=f.won?f.d:st.last}
+  save();renderFishdle()}
+function fdShare(){const f=FD(),a=fdAnswer(f.d),sq={g:'🟩',y:'🟨',x:'⬛'};const rows=f.g.map(id=>{const c=fdCmp(FI(id),a);return FD_COLS.map(([k])=>sq[c[k][0]]).join('')});
+  const txt=`Lantern Lake Fishdle ${f.d} ${f.won?f.g.length:'X'}/6\n${rows.join('\n')}\nlanternlake.app`;
+  const ok=()=>showToast('Copied! Paste it in Discord or a text.','Fishdle');try{navigator.clipboard.writeText(txt).then(ok,()=>{prompt('Copy your result:',txt)})}catch(e){prompt('Copy your result:',txt)}}
+function renderFishdle(){const b=$('fdBody');if(!b)return;const f=FD(),a=fdAnswer(f.d),st=f.st;
+  const nxt=(()=>{const t=new Date();const m=Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate()+1)-t.getTime(),h=Math.floor(m/36e5),mm=Math.floor(m%36e5/6e4);return `${h}h ${mm}m`})();
+  let h=`<div class="fd-head"><b>Fishdle</b><small>Guess today’s mystery fish in 6 tries. Everyone gets the same fish. It lives in Lantern Lake’s own waters (no realms).</small></div>
+    <div class="fd-key"><span class="k-g">Match</span><span class="k-y">Close</span><span class="k-x">No</span><span>↑↓ higher / lower, or farther out / closer in</span></div>
+    <div class="fd-grid" style="--n:${FD_COLS.length}"><span class="fd-hd">Fish</span>${FD_COLS.map(([,n])=>`<span class="fd-hd">${n}</span>`).join('')}`;
+  for(const id of f.g){const g=FI(id),c=fdCmp(g,a);h+=`<span class="fd-nm">${esc(g.n)}</span>${FD_COLS.map(([k])=>`<span class="fd-c k-${c[k][0]}">${esc(fdVal(g,k))}${c[k][1]?`<i>${c[k][1]}</i>`:''}</span>`).join('')}`}
+  for(let i=f.g.length;i<6;i++)h+=`<span class="fd-nm e">${i+1}</span>${FD_COLS.map(()=>'<span class="fd-c e"></span>').join('')}`;
+  h+='</div>';
+  if(!f.done)h+=`<form class="fd-in" id="fdForm"><input id="fdQ" list="fdList" placeholder="Type a fish name…" autocomplete="off" aria-label="Guess a fish"><button class="jig">Guess</button></form><datalist id="fdList">${fdPool().filter(x=>!f.g.includes(x.id)).map(x=>`<option value="${esc(x.n)}">`).join('')}</datalist><p class="fd-msg" id="fdMsg" role="status">${6-f.g.length} guess${6-f.g.length===1?'':'es'} left</p>`;
+  else h+=`<div class="fd-end ${f.won?'won':''}">${fishSvg(RCOL[a.r])}<div><small>${f.won?`Solved in ${f.g.length}!`:'Out of guesses. Today’s fish was'}</small><b>${esc(a.n)}</b><span>${RAR[a.r]} · ${W(a.at).n} · up to ${a.w[1]} lb</span>${f.won?`<span class="fd-pay">+${f.paid} prize tickets</span>`:''}</div></div>
+      <div class="xf-row"><button class="jig" id="fdShare">Copy result</button></div><p class="fd-msg">Next Fishdle in ${nxt}</p>`;
+  const tot=Math.max(1,...st.dist);h+=`<div class="fd-stats"><div><b>${st.played}</b><small>Played</small></div><div><b>${st.played?Math.round(st.wins/st.played*100):0}%</b><small>Won</small></div><div><b>${st.streak}</b><small>Streak</small></div><div><b>${st.best}</b><small>Best streak</small></div></div>
+    <div class="fd-dist">${st.dist.map((n,i)=>`<div><span>${i+1}</span><i style="width:${Math.max(6,n/tot*100)}%">${n}</i></div>`).join('')}</div>`;
+  b.innerHTML=h;const fm=$('fdForm');if(fm)fm.onsubmit=e=>{e.preventDefault();fdGuess($('fdQ').value)};const sh=$('fdShare');if(sh)sh.onclick=fdShare}
+const fdIc='<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="5" width="7" height="7" rx="1.5" fill="#6ad86a"/><rect x="12.5" y="5" width="7" height="7" rx="1.5" fill="#ffd05a"/><rect x="21" y="5" width="7" height="7" rx="1.5" fill="#3a4a56"/><path d="M6 22c4-5 12-6 17-2l4-3v10l-4-3c-5 4-13 3-17-2z" fill="#fff"/><circle cx="10" cy="21.5" r="1.3" fill="#1a3a2a"/></svg>';
 
 // ==FRIENDS EXTRAS== lake monster, challenges, guestbooks and yard likes
 const GB_ST=['🎃','🐟','⭐','👻','🏆','🌲','❤️','🎣','🦆','🌙','🍂','🔥'];
