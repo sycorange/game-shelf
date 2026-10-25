@@ -2153,6 +2153,7 @@ I.mug=c=>`<rect x="10" y="6" width="12" height="22" rx="3" fill="${c}"/><rect x=
 // To test outside the dates, open the game with ?season=hw (or ?season=off, ?season=auto to clear).
 const HW_FROM=new Date(2026,9,20).getTime(),HW_TO=new Date(2026,10,2).getTime(),HW_ID='hw26';
 const SEASON_FORCE=(()=>{try{const q=new URL(location.href).searchParams.get('season');if(q==='auto')localStorage.removeItem('ll-season');else if(q)localStorage.setItem('ll-season',q);return localStorage.getItem('ll-season')||''}catch(e){return ''}})();
+const HWL=()=>hwOn()?'Halloween':'Halloween keepsake';
 const hwOn=()=>SEASON_FORCE==='hw'?true:SEASON_FORCE==='off'?false:(Date.now()>=HW_FROM&&Date.now()<HW_TO);
 const HW=()=>{if(!S.hw||typeof S.hw!=='object')S.hw={pk:0,candy:0,wear:null,gg:0,ggSent:0,fish:{}};return S.hw};
 I.pumpkin=c=>`<ellipse cx="16" cy="19" rx="12" ry="9" fill="${c}"/><path d="M16 10v18M10 11q-3 8 0 16M22 11q3 8 0 16" stroke="rgba(0,0,0,.18)" stroke-width="1.4" fill="none"/><path d="M15 10q1-5 4-6" stroke="#4a7a2a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
@@ -2187,9 +2188,11 @@ function hwCollect(p){if(p.got)return;p.got=true;const h=HW();h.pk++;sfx('pop');
 function hwReward(r){const h=HW();
   if(r.k==='gold'){const c=COLL.find(x=>x.id==='goldpumpkin');if(c&&!(S.coll[c.id]&&S.coll[c.id].n))addCollectible(c,true)}
   else if(r.k==='cash'){S.coins+=50000;celebrate({lbl:'Pumpkin reward!',r:'L',name:'$50,000 in candy money',sub:`${r.n} pumpkins found`,icon:pumpkinSvg})}
-  else{celebrate({lbl:'Costume unlocked!',r:'R',name:r.t,sub:'Wear it from the Spooky app on your phone',icon:pumpkinSvg});if(!h.wear)h.wear=r.k}}
+  else{celebrate({lbl:'Costume unlocked!',r:'R',name:r.t,sub:'Wear it from the Spooky app, or Settings any time',icon:pumpkinSvg});if(!h.wear)h.wear=r.k}}
 const hwHas=k=>{const r=HW_RW.find(x=>x.k===k);return !!r&&HW().pk>=r.n};
-const hwWear=()=>hwOn()&&S.hw&&S.hw.wear&&hwHas(S.hw.wear)?S.hw.wear:null;
+// Costumes from holiday events. Earned ones stay wearable after the event; pick None in Settings to take it off.
+const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')}];
+const hwWear=()=>{const w=S.hw&&S.hw.wear,c=w&&COSTUMES.find(x=>x.k===w);return c&&c.own()?w:null};
 function drawCostume(ax,ay,d,T,k){const sh=c=>rgb(mix(c.map(v=>v*.3),c,d*.8+.2));
   if(k==='witch'){ctx.fillStyle=sh([28,22,34]);ctx.beginPath();ctx.ellipse(ax,ay-33,11,2.6,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(ax-6.5,ay-34);ctx.lineTo(ax+6.5,ay-34);ctx.quadraticCurveTo(ax+2,ay-44,ax+7,ay-50);ctx.quadraticCurveTo(ax-2,ay-45,ax-6.5,ay-34);ctx.fill();
     ctx.fillStyle=sh([140,70,200]);ctx.fillRect(ax-6.4,ay-37,12.8,2.4);ctx.fillStyle=sh([255,208,90]);ctx.fillRect(ax-1.2,ay-37.4,2.4,3.2)}
@@ -2842,7 +2845,7 @@ function goHome(){if(TRV.on||S.sleep||(S.tour&&S.tour.phase==='live')){if(S.tour
 let shopFilter='all';
 function decorCard(it){
   const c=document.createElement('div');c.className='shop-card';
-  c.innerHTML=`${it.hw?`<span class="tag">Halloween · ${CAT[it.cat]}</span>`:`<span class="tag" style="color:#6a6f7a">${CAT[it.cat]}</span>`}<b>${it.n}</b><p>${it.d}</p>`;
+  c.innerHTML=`${it.hw?`<span class="tag">${HWL()} · ${CAT[it.cat]}</span>`:`<span class="tag" style="color:#6a6f7a">${CAT[it.cat]}</span>`}<b>${it.n}</b><p>${it.d}</p>`;
   const b=document.createElement('button');b.id='decor-'+it.id;
   const box=S.boxes.find(x=>x.id===it.id);
   if(owned(it.id)){const on=!S.off[it.id];b.className='sbtn own'+(on?'':' off');b.setAttribute('aria-pressed',on);
@@ -2855,7 +2858,7 @@ function decorCard(it){
 }
 function renderDecor(){
   const p=$('shopBody');if(!p)return;p.innerHTML='';
-  const F=[['all','All'],['sup','Supplies'],['proj','Projects'],['hw','Halloween'],['land','Yard'],['house','House'],['dock','Dock'],['own','Owned']];
+  const F=[['all','All'],['sup','Supplies'],['proj','Projects'],...(hwOn()||DECOR.some(x=>x.hw&&owned(x.id))?[['hw',hwOn()?'Halloween':'Keepsakes']]:[]),['land','Yard'],['house','House'],['dock','Dock'],['own','Owned']];
   const ch=document.createElement('div');ch.className='chips2';
   for(const [k,l] of F){const b=document.createElement('button');b.textContent=l;b.setAttribute('aria-pressed',shopFilter===k);b.onclick=()=>{shopFilter=k;renderDecor()};ch.append(b)}
   p.append(ch);
@@ -2866,7 +2869,8 @@ function renderDecor(){
   const n=document.createElement('div');n.className='shop-note';
   n.textContent=S.boxes.length?`${S.boxes.length} box${S.boxes.length>1?'es are':' is'} waiting in your yard. Tap a box in the lake view to unpack it.`:'Orders arrive by drone and get dropped in your yard. Tap the box to unpack it and put it on display.';
   p.append(n);
-  const groups=[['Halloween',DECOR.filter(x=>x.hw),true],...['land','house','dock'].map(c=>[CAT[c],DECOR.filter(x=>x.cat===c&&!x.hw),false])];
+  if(shopFilter==='hw'&&!hwOn()&&!DECOR.some(x=>x.hw&&owned(x.id)))shopFilter='all';
+  const groups=[[hwOn()?'Halloween':'Halloween keepsakes',DECOR.filter(x=>x.hw&&(hwOn()||owned(x.id))),true],...['land','house','dock'].map(c=>[CAT[c],DECOR.filter(x=>x.cat===c&&!x.hw),false])];
   for(const [title,all,hw] of groups){
     let items=all;if(shopFilter==='hw'&&!hw)continue;if(['land','house','dock'].includes(shopFilter)){if(hw||title!==CAT[shopFilter])continue}if(shopFilter==='own')items=all.filter(x=>owned(x.id));
     if(!items.length)continue;
@@ -2881,6 +2885,7 @@ function renderDecor(){
 const SPOTS=[[98,322],[122,336],[74,338],[146,314],[58,318],[104,354],[40,350]];
 const boxSpot=b=>SPOTS[b.spot%SPOTS.length].map((v,i)=>v+(i?0:Math.floor(b.spot/SPOTS.length)*8));
 function orderItem(it){guideMark('craft');
+  if(it.hw&&!hwOn())return;
   if(S.coins<it.c||owned(it.id)||S.boxes.some(b=>b.id===it.id))return;
   S.coins-=it.c;const used=new Set(S.boxes.map(b=>b.spot));let spot=0;while(used.has(spot))spot++;
   const box={id:it.id,spot};sfx('pop');S.boxes.push(box);if(!indoor())AMB.drones.push({id:it.id,box,t:0});
@@ -3963,6 +3968,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   b.innerHTML=`
   <div><h4>Appearance</h4><div class="grp">
     ${row('Dark mode',st.dark==='auto'?'Auto: follows your device':'Dark backgrounds for the phone’s apps',seg('dark',[['off','Off'],['on','On'],['auto','Auto']]))}
+    ${(()=>{const own=COSTUMES.filter(c=>c.own());if(!own.length)return row('Costume','Earn costumes in holiday events','<small class="fr-muted">None yet</small>');const cur=hwWear()||'';return row('Costume','From holiday events. Pick None to take it off',`<span class="seg" role="group">${[['','None'],...own.map(c=>[c.k,c.n])].map(([k,n])=>`<button data-cos="${k}" aria-pressed="${cur===k}">${n}</button>`).join('')}</span>`)})()}
   </div></div>
   <div><h4>Motion</h4><div class="grp">
     ${row('Travel cut scenes',st.cut==='auto'?(RM?'Auto: off, because your device asks for reduced motion':'Auto: on. Follows your device’s reduced motion setting'):st.cut==='always'?'Always show the boat rides':'Skip straight to where you’re going',seg('cut',[['auto','Auto'],['always','Always'],['off','Off']]))}
@@ -3998,6 +4004,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   </div></div>
   <div><h4>Support Lantern Lake</h4><div class="grp"><div class="row col"><span><small style="line-height:1.45">${donateNote()}</small></span><a class="set-donate" href="${DONATE_URL}" target="_blank" rel="noopener">♥ Donate with PayPal</a></div></div></div>
   <p class="set-foot">Lantern Lake · version ${ver}</p>`;
+  b.querySelectorAll('[data-cos]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.cos||null;sfx('click');save();renderSettings()});
   b.querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{let v=x.dataset.sv;if(v==='true')v=true;else if(v==='false')v=false;st[x.dataset.sk]=v;sfx('click');applyDock();applyPhTheme();applyTextSize();save();renderSettings();renderLock();renderVitals&&renderVitals()});
   b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();});
   {const pn=$('setPin');if(pn)pn.onclick=()=>{closePhone();openPin(false)};const mv=$('setMove');if(mv)mv.onclick=()=>{closePhone();openSaveModal()};const ow=$('setOwner');if(ow)ow.onclick=()=>{closePhone();openOwner()}}
@@ -5161,7 +5168,6 @@ function yardHits(){const G=shackGeo(),e=dockEnd(),P=(x,y,w,h,kind,data)=>HITS.p
     P(G.door-1,214,16,28,'ydoor')}
   const n=S.trophies.length;if(n){if(G.t===0)P(44,232,Math.min(n,6)*8+4,11,'ytro',n);else{const max=Math.floor((G.door-G.x-6)/8);P(G.x+2,229,Math.min(n,max)*8+4,11,'ytro',n)}}
   if(!YED.on)yardHitsPlaced(P);else if(yardCtx()==='home'){const L2=YLAND[yardLand()+1];if(L2)P(yardLeft()-98,258,36,44,'yland',yardLand()+1)}
-  D('tombstones',[5,348,46,22]);D('cauldron',[119,356,22,26]);D('scarecrow',[29,270,30,44]);D('jacks',[117,267,48,30]);
   D('lighthouse',[718,150,56,84]);D('barge',[624,234,54,18]);D('ghostship',[538,170,64,62]);D('floatjacks',[250,302,112,30]);
   D('decoys',[283,278,68,13]);D('kayak',[172,256,66,13]);D('hay',[155,250,36,21]);D('bench',[162,228,28,18]);D('crabs',[198,229,20,18]);
   D('cleaning',[230,228,20,18]);D('lifering',[187,227,14,20]);D('bollards',[157,238,9,9],[221,238,9,9],[e-7,238,9,9]);
@@ -5171,7 +5177,7 @@ function yardHits(){const G=shackGeo(),e=dockEnd(),P=(x,y,w,h,kind,data)=>HITS.p
 function yardTip(h){const fr=S.sleep&&S.sleep.at==='friend',who=fr&&VT?(VT.arcade?'The arcade’s':VT.museum?'The museum’s':esc(VT.name)+'’s'):'Your';
   if(h.kind==='yhouse'&&h.data===7)return '<b>Lantern Lake Museum</b><small>Tap the door to go inside and donate</small>';
   if(h.kind==='ytree')return yTreeTip(h);if(h.kind==='yplot')return yPlotTip(h);
-  if(h.kind==='ydeco'){const it=DECOR.find(x=>x.id===h.data);if(!it)return YUNIT[h.data]?`<b>${YUNIT[h.data].n}</b><small>Yard build</small>`:'';return `<b>${it.n}</b><small>${CAT[it.cat]} decor${it.hw?' · Halloween':''} · from the Shop</small><small class="yd">${it.d}</small>`}
+  if(h.kind==='ydeco'){const it=DECOR.find(x=>x.id===h.data);if(!it)return YUNIT[h.data]?`<b>${YUNIT[h.data].n}</b><small>Yard build</small>`:'';return `<b>${it.n}</b><small>${CAT[it.cat]} decor${it.hw?' · '+HWL():''} · from the Shop</small><small class="yd">${it.d}</small>`}
   if(h.kind==='yhouse'){const it=GEAR.shack.items[h.data];return `<b>${it?it.n:'Shack'}</b><small>${who} place</small>`}
   if(h.kind==='ydock')return `<b>Dock</b><small>${who} dock${(fr&&VT?VT.ext.shack:S.shack)>=4?', with lamp posts':''}</small>`;
   if(h.kind==='ytro')return `<b>${h.data} ${h.data===1?'trophy':'trophies'}</b><small>On the porch rail. ${fr?'Go inside to see the shelves.':'Pick which go on your shelves from the trophy drawer.'}</small>`;
@@ -5278,6 +5284,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:88,n:'Spooky All Year',items:['Halloween decorations you own stay after the event, as keepsakes you can keep showing. Once the event ends they leave the Shop, so they stay special to everyone who played during it.','Jack-o’-lanterns, the scarecrow, tombstones and the witch’s cauldron can now be moved anywhere in Decorate yard like your other yard decor.','Costumes you earn in holiday events stay wearable after the event ends. Change or take off your costume in Settings → Appearance.']},
  {v:87,n:'Tidy Welcome Back',items:['Bug fix: the “While you were away” summary no longer fills the whole screen after a long time away. It now shows a short summary, with rare variants and treasures in sections you can open.']},
  {v:86,n:'Yard of the Week',items:['A new Yard of the Week board in the Friends app shows this week’s most-liked yards, last week’s winner and past winners, with a Visit button for each.','Visit a random yard: one tap takes you to a random player’s place, so there are always new yards to discover and like.','Last week’s winner gets a gold ribbon on their name sign for the whole week, on top of the $25,000 and trophy.']},
  {v:85,n:'Home Sweet Home',items:['Arrange your cabin: tap Arrange to drag wall decor and furniture anywhere in the room, flip pieces, or put them away. You can hang as many wall pieces as you like.','New furniture at the crafting table: Floor Cushion, Side Table, Potted Palm, Bookshelf, Reading Armchair, Record Player and Wood Stove.','Wallpaper and floors: 8 wallpaper patterns and 6 floor styles in Decorate, all using your own colors.','Themes: set your colors, wallpaper and floor in one tap with themes like Nautical, Woodland and Midnight Lake.','Your old wall spots, fern and plushies stay right where they were.']},
@@ -5740,7 +5747,8 @@ const YI={
   hammock:{ox:128,oy:346,w:54,h:30,def:[[128,346]]},
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
-  birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]}};
+  birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
+  jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]}};
 const YIDS=Object.keys(YI),yQty=id=>YI[id].unit?yInv(id):YI[id].def.length;
 const YLAND=[{n:'Home Lot',x:-40,c:0},{n:'Side Meadow',x:-200,c:2500,d:'A sunny strip of grass next to your lot.'},{n:'Birch Glade',x:-360,c:15000,d:'Soft ground under the birches. Room for a lot more.'},
   {n:'Pine Woods',x:-520,c:60000,d:'A quiet stand of pines further inland.'},{n:'Hilltop',x:-700,c:200000,d:'The far end of the property, with a view back over the lake.'}];
@@ -5786,6 +5794,7 @@ function yDraw(id,d,T,night,ph){
     for(const [px,py] of [[76,359],[95,361],[109,358]]){ctx.fillStyle=rgb(mix([60,30,10],[240,130,40],d));ctx.beginPath();ctx.ellipse(px,py,5,3.6,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([20,30,10],[70,110,40],d));ctx.fillRect(px-.6,py-5.5,1.4,2.5)}}
   else if(id==='fence'){ctx.fillStyle=rgb(mix([60,62,66],[244,242,234],d));ctx.fillRect(0,385,128,2);ctx.fillRect(0,391,128,2);for(let x=2;x<126;x+=8){ctx.fillRect(x,383,4,14);ctx.beginPath();ctx.moveTo(x,383);ctx.lineTo(x+2,380);ctx.lineTo(x+4,383);ctx.fill()}}
   else if(id==='birch')birchOne(d,T,ph);
+  else if(id==='jacks'||id==='scarecrow'||id==='tombstones'||id==='cauldron')hwLandOne(id,d,T);
   else if(YI[id]&&YI[id].fruit)treeDraw(YI[id].fruit,d,T,YCUR);
   else if(id==='plot')plotDraw(d,T,YCUR);
   else if(YI[id]&&YI[id].unit)yUnitDraw(id,d,T,ph)}
@@ -7477,7 +7486,7 @@ function drawAngler(ax,ay,d,T,ov){
   if(id==='clear'&&d>.7){ctx.fillStyle='#141414';ctx.fillRect(ax+.5,ay-30,6,2.2)}
   if(id==='windy'){ctx.fillStyle=sh([220,60,60]);ctx.fillRect(ax-6,ay-23,12,3);const f=Math.sin(T*11);ctx.beginPath();ctx.moveTo(ax-6,ay-23);ctx.lineTo(ax-19,ay-25+f*3);ctx.lineTo(ax-18,ay-21+f*3);ctx.lineTo(ax-6,ay-20);ctx.fill()}
   if(id==='fog'){ctx.fillStyle='#333';ctx.fillRect(ax-11.5,ay-15,1,5);ctx.fillRect(ax-14,ay-11,6,1.4);ctx.fillStyle='#ffd88a';ctx.fillRect(ax-13.5,ay-9.5,5,6);glow(ax-11,ay-7,24,.5)}
-  {const ck=LIVE.drawing?(hwOn()?LIVE.drawWear:null):hwWear();if(ck&&id!=='pj')drawCostume(ax,ay,d,T,ck)}if(!LIVE.drawing&&id!=='pj'&&S.water==='moon'&&!S.sleep)drawHelmet(ax,ay);
+  {const ck=LIVE.drawing?LIVE.drawWear:hwWear();if(ck&&id!=='pj')drawCostume(ax,ay,d,T,ck)}if(!LIVE.drawing&&id!=='pj'&&S.water==='moon'&&!S.sleep)drawHelmet(ax,ay);
   if(id==='drizzle'||id==='rain'){const c=id==='rain'?[60,110,200]:[220,60,60];ctx.save();ctx.translate(ax-9,ay-12);ctx.rotate(Math.sin(T*1.3)*.05-AMB.wind/900);
     ctx.strokeStyle=rgb(mix([20,20,20],[60,50,40],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,-34);ctx.moveTo(0,0);ctx.quadraticCurveTo(0,3,3,2);ctx.stroke();
     ctx.fillStyle=sh(c);ctx.beginPath();ctx.moveTo(-19,-30);ctx.quadraticCurveTo(0,-52,19,-30);ctx.quadraticCurveTo(13,-33.5,6.5,-30);ctx.quadraticCurveTo(0,-33.5,-6.5,-30);ctx.quadraticCurveTo(-13,-33.5,-19,-30);ctx.fill();
@@ -7492,17 +7501,19 @@ function jack(x,y,s,d,T){
   ctx.beginPath();ctx.moveTo(x-3.4*s,y+1*s);ctx.lineTo(x+3.4*s,y+1*s);ctx.lineTo(x+2*s,y+2.6*s);ctx.lineTo(x,y+1.8*s);ctx.lineTo(x-2*s,y+2.6*s);ctx.fill();
   if(on)glow(x,y,15*s,.35*(1-d));
 }
-function hwLand(d,T){
-  if(has('jacks')){jack(126,278,1,d,T);jack(141,285,.8,d,T);jack(156,292,1.1,d,T)}
-  if(has('scarecrow')){const sw=Math.sin(T*1.5)*(.02+AMB.wind/1500);ctx.save();ctx.translate(44,312);ctx.rotate(sw);
+function hwLand(d,T){}
+// Spooky yard pieces: drawn one at a time at their classic spot; the yard layer moves them into place.
+function hwLandOne(id,d,T){
+  if(id==='jacks'){jack(126,278,1,d,T);jack(141,285,.8,d,T);jack(156,292,1.1,d,T)}
+  if(id==='scarecrow'){const sw=Math.sin(T*1.5)*(.02+AMB.wind/1500);ctx.save();ctx.translate(44,312);ctx.rotate(sw);
     ctx.fillStyle=rgb(mix([30,22,16],[110,80,50],d));ctx.fillRect(-1.2,-30,2.5,30);ctx.fillRect(-13,-22,26,2.5);
     ctx.fillStyle=rgb(mix([40,14,14],[190,50,40],d));ctx.fillRect(-7,-24,14,13);ctx.fillStyle=rgb(mix([20,10,10],[110,30,25],d));ctx.fillRect(-7,-20,14,1);ctx.fillRect(-7,-15,14,1);ctx.fillRect(-3,-24,1,13);ctx.fillRect(2,-24,1,13);
     ctx.fillStyle=rgb(mix([40,36,20],[230,200,90],d));for(const sx of [-14,13])for(let i=0;i<3;i++)ctx.fillRect(sx,-22+i,1.5,4);
     ctx.fillStyle=rgb(mix([50,40,26],[200,170,120],d));ctx.beginPath();ctx.arc(0,-29,5,0,7);ctx.fill();ctx.fillStyle='#222';ctx.fillRect(-2.5,-30,1.4,1.4);ctx.fillRect(1.2,-30,1.4,1.4);
     ctx.fillStyle=rgb(mix([20,14,10],[90,60,36],d));ctx.fillRect(-7,-34,14,2);ctx.fillRect(-4,-40,8,6);ctx.restore()}
-  if(has('tombstones'))for(const [x,y] of [[12,364],[28,368],[44,362]]){ctx.fillStyle=rgb(mix([30,32,36],[150,152,156],d));ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x-5,y-8);ctx.arc(x,y-8,5,Math.PI,0);ctx.lineTo(x+5,y);ctx.fill();
+  if(id==='tombstones')for(const [x,y] of [[12,364],[28,368],[44,362]]){ctx.fillStyle=rgb(mix([30,32,36],[150,152,156],d));ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x-5,y-8);ctx.arc(x,y-8,5,Math.PI,0);ctx.lineTo(x+5,y);ctx.fill();
     ctx.fillStyle=rgb(mix([14,14,16],[80,80,86],d));ctx.fillRect(x-.6,y-11,1.2,6);ctx.fillRect(x-2.5,y-9.5,5,1.2);ctx.fillStyle=rgb(mix([20,30,18],[70,100,50],d));ctx.fillRect(x-6,y-1,12,1.5)}
-  if(has('cauldron')){const cx=130,cy=372;flame(cx-3,cy+7,.7,T);flame(cx+3,cy+7,.6,T+2);ctx.fillStyle='#141414';ctx.beginPath();ctx.ellipse(cx,cy,9,7,0,0,7);ctx.fill();ctx.fillRect(cx-8,cy+4,2,4);ctx.fillRect(cx+6,cy+4,2,4);
+  if(id==='cauldron'){const cx=130,cy=372;flame(cx-3,cy+7,.7,T);flame(cx+3,cy+7,.6,T+2);ctx.fillStyle='#141414';ctx.beginPath();ctx.ellipse(cx,cy,9,7,0,0,7);ctx.fill();ctx.fillRect(cx-8,cy+4,2,4);ctx.fillRect(cx+6,cy+4,2,4);
     ctx.fillStyle='#222';ctx.beginPath();ctx.ellipse(cx,cy-5,9.5,2.6,0,0,7);ctx.fill();ctx.fillStyle='#62e85a';ctx.beginPath();ctx.ellipse(cx,cy-5,7.6,1.8,0,0,7);ctx.fill();
     for(let i=0;i<3;i++){const p=(T*.6+i/3)%1;ctx.fillStyle=`rgba(140,255,120,${.8*(1-p)})`;ctx.beginPath();ctx.arc(cx-4+i*4,cy-6-p*14,1.2+p*1.5,0,7);ctx.fill()}
     if(lit(d))glow(cx,cy-6,26,.4*(1-d),'120,255,110')}
@@ -8183,7 +8194,7 @@ function tvSportsParts(){const b=sbInit(),season=b.season,d=sbLDay(),done=sbDone
 // --- Lake Shopping Channel: one deal a day
 function tvDeal(){const d=arcUTC(),R=tvSeed('shop'+d),kind=R()<1/7?'paint':['decor','pots','mats'][Math.floor(R()*3)];
   if(kind==='paint'&&!PNT().own.testpat)return {kind,id:'testpat',n:'Test Pattern boat paint',d:'Color bars and a little “PLEASE STAND BY” on your hull. Only on Shop 8.',c:Math.max(5000,rwCoins(300))};
-  if(kind==='decor'||kind==='paint'){const opts=DECOR.filter(x=>!owned(x.id)&&!S.boxes.some(b=>b.id===x.id)&&x.c>0);if(opts.length){const it=opts[Math.floor(R()*opts.length)];return {kind:'decor',id:it.id,n:it.n,d:it.d,was:it.c,c:Math.round(it.c*.7/10)*10}}}
+  if(kind==='decor'||kind==='paint'){const opts=DECOR.filter(x=>!owned(x.id)&&!S.boxes.some(b=>b.id===x.id)&&x.c>0&&(!x.hw||hwOn()));if(opts.length){const it=opts[Math.floor(R()*opts.length)];return {kind:'decor',id:it.id,n:it.n,d:it.d,was:it.c,c:Math.round(it.c*.7/10)*10}}}
   if(kind==='mats')return {kind:'mats',n:'Tackle-box bundle',d:'8 Old Rope, 5 Brass Fittings and 3 Sea Glass, boxed and shipped.',m:{rope:8,brass:5,glass:3},c:rwCoins(30)};
   const ps=[];for(let i=0;i<5;i++)ps.push(PKEYS[Math.floor(R()*PKEYS.length)]);return {kind:'pots',n:'Potion party pack',d:'Five potions, picked by our host: '+ps.map(k=>POT[k].n).join(', ')+'.',ps,c:rwCoins(25)}}
 function tvBuy(){const t=TVS(),d=arcUTC(),it=tvDeal();if(t.shop===d||S.coins<it.c)return;S.coins-=it.c;t.shop=d;sfx('coin');
