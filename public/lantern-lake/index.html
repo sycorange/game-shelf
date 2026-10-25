@@ -452,6 +452,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .fr-list .fdot{width:10px;height:10px;border-radius:50%}
 .fr-eyebrow{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#2a5ad0}
 .fr-card.cup{background:linear-gradient(180deg,#fff8e6,#fff)}
+.yw-sub{font-size:.76rem!important;color:#6a6f7a!important}.yw-champ{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#ffe9a8,#fff6d8);border-radius:10px;padding:7px 9px}.yw-champ>span{font-size:1.3rem}.yw-champ>div{flex:1;min-width:0;display:grid}.yw-champ b{font-size:.9rem}
+.yw-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}.yw-list li{display:flex;align-items:center;gap:8px;background:#f4f5f8;border-radius:8px;padding:5px 8px;font-size:.84rem}.yw-list li b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.yw-r{width:18px;font-weight:800;color:#b0882a;text-align:center}.yw-hall{font-size:.76rem!important}
 .fr-bar{height:10px;border-radius:99px;background:#e2e4ea;overflow:hidden}.fr-bar i{display:block;height:100%;background:linear-gradient(90deg,#4aa86a,#2a8a3a);border-radius:99px}
 .mini.share{justify-self:start;margin-top:2px;font-size:.72rem;padding:3px 9px}
 .updbox{max-width:560px;width:100%;max-height:calc(100vh - 40px);overflow-y:auto}
@@ -1355,7 +1357,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
     <div class="stip" id="stip" hidden></div>
     <div class="ynav" id="ynav" hidden><button data-yf="house">House</button><button data-yf="yard">Yard</button><button data-yf="dock">Dock</button><button class="yz" id="yZoom">Zoom out</button></div>
     <div class="leave" id="visitBar" hidden><div><span id="visitTxt"></span><span class="vbtns" id="visitBtns"></span></div></div>
-    <div class="leave" id="leaveBar" hidden><div><span id="leaveTxt">Up and rested. Ready to head back out?</span><button class="ghost" id="yardBtn">Step outside</button><button class="ghost" id="decoBtn">Decorate</button><button class="jig" id="leaveBtn">Head back out</button></div></div>
+    <div class="leave" id="leaveBar" hidden><div><span id="leaveTxt">Up and rested. Ready to head back out?</span><button class="ghost" id="yardBtn">Step outside</button><button class="ghost" id="decoBtn">Decorate</button><button class="ghost" id="arrBtn">Arrange</button><button class="jig" id="leaveBtn">Head back out</button></div></div>
     <div class="toast"><div id="toast" style="opacity:0">Casting…</div></div>
   </div>
 
@@ -4556,6 +4558,7 @@ function showTip(h,e){
   tip.style.left=x+'px';tip.style.top=y+'px';
 }
 $('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(h&&h.kind==='peer'&&h.data&&h.data.q4){q4TapReflect();return}if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
+  if(indoor()&&CED.on){if(CED.skip){CED.skip=false;return}const [rx,ry]=[x/RK,y/RK];CED.sel=cedPick(rx,ry);renderCed();return}
   if(indoor()){if(!h){hideTip();return}
   if(h.kind==='tv')openTV();else if(h.kind==='drawer'){hideTip();openTapes()}else if(h.kind==='trodrawer'){openTroDrawer()}else if(h.kind==='colldrawer'){openCollDrawer()}else if(h.kind==='craft'){openCraft()}else if(h.kind==='coll'){hideTip();openItem(h.data)}
   else if(h.kind==='stairs'){if(S.sleep.ph==='awake')goRoom('basement');else showTip(h,e)}else if(h.kind==='up')goRoom('cabin');else if(h.kind==='cswitch'){if(S.sleep.ph==='awake'){S.cLight=S.cLight===false;tone(1400,.03,{type:'square',vol:.03});hideTip();save()}else showTip(h,e)}else if(h.kind==='bplate')bAct('fish');else if(h.kind==='bfridge')bAct('beer');else if(h.kind==='pinball')pbOpen();else if(h.kind==='bswitch'){S.bLight=S.bLight===false;tone(1400,.03,{type:'square',vol:.03});hideTip();save()}else if(h.kind==='btank')showTip(h,e);else if(h.kind==='door'){if(totInsideGive()){hideTip();return}if(S.sleep.ph==='awake'){hideTip();stepOutside()}else showTip(h,e)}else if(h.kind==='bstore'){hideTip();openTab('storage');$('pane-storage').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
@@ -4569,7 +4572,7 @@ $('scene').onmouseleave=hideTip;
 $('leaveBtn').onclick=e=>{e.stopPropagation();leaveHouse()};
 $('cardClose').onclick=()=>$('cardModal').hidden=true;$('cardModal').onclick=e=>{if(e.target.id==='cardModal')$('cardModal').hidden=true};
 $('pane-log').addEventListener('click',e=>{const b=e.target.closest('[data-share]');if(b){e.stopPropagation();openCatchCard(b.dataset.share)}const fb=e.target.closest('[data-facts]');if(fb){e.stopPropagation();openFacts(fb.dataset.facts)}});
-$('decoBtn').onclick=e=>{e.stopPropagation();openDeco()};
+$('decoBtn').onclick=e=>{e.stopPropagation();openDeco()};$('arrBtn').onclick=e=>{e.stopPropagation();cedEnter()};
 $('decoClose').onclick=()=>$('decoModal').hidden=true;
 $('decoModal').onclick=e=>{if(e.target.id==='decoModal')$('decoModal').hidden=true};
 $('tvClose').onclick=closeTV;
@@ -5065,13 +5068,13 @@ async function visitCabin(id){const me=mpS();if(isRealm(S.water)){showToast('Com
   if(S.sleep&&!['awake','yard'].includes(S.sleep.ph)){showToast('Wait until you’re up and about');return}
   try{const r=await api('cabin',{id:me.id,key:me.key,target:id});const c=JSON.parse(r.cabin),ext=c.ext||{};
     if(VT||TRV.on||(S.sleep&&!['awake','yard'].includes(S.sleep.ph)))return;
-    VT={id,name:r.name,c,ext:{shack:Math.max(0,Math.min(GEAR.shack.items.length-1,ext.shack??1)),decor:Object.fromEntries((Array.isArray(ext.decor)?ext.decor:[]).filter(k=>DECOR.some(x=>x.id===k)).map(k=>[k,1])),off:{},boxes:[],trophies:Array.isArray(c.trophies)?c.trophies:[],yard:yardParse(ext.yard),native:FRUITS[ext.native]?ext.native:null}};
+    VT={id,name:r.name,c,ext:{shack:Math.max(0,Math.min(GEAR.shack.items.length-1,ext.shack??1)),decor:Object.fromEntries((Array.isArray(ext.decor)?ext.decor:[]).filter(k=>DECOR.some(x=>x.id===k)).map(k=>[k,1])),off:{},boxes:[],trophies:Array.isArray(c.trophies)?c.trophies:[],yard:yardParse(ext.yard),native:FRUITS[ext.native]?ext.native:null},champ:!!r.champ,wins:r.wins|0};
     closePhone();hideTip();showToast(`Heading to ${r.name}’s place`,'By boat');
     if(S.sleep&&S.sleep.ph==='yard'){VT.go=true;yardOut()}else if(S.sleep&&S.sleep.ph==='awake'){VT.go=true;leaveHouse()}else boatTrip(S.water,'friend',friendArrive)}
   catch(e){showToast(e.message==='no-cabin'?'That angler hasn’t opened the game since this update.':e.message==='private'?'That cabin is private.':'Couldn’t load that cabin.')}}
 function friendArrive(){S.sleep={ph:'boatIn',t:0,at:'friend',visit:true};save()}
 function enterFriend(){if(!VT||!S.sleep||S.sleep.ph!=='door')return;if(VT.arcade){sfx('click');hideTip();openArcade();return}if(VT.museum){sfx('click');hideTip();openMuseum();return}const c=VT.c;
-  const cab=Object.assign(cabDef(),c.cab||{});cab.col=cab.col||{};cab.own=cab.own||{};cab.wall=Array.isArray(cab.wall)?cab.wall.slice(0,3):[null,null,null];cab.ex=cab.ex||{};
+  const cab=Object.assign(cabDef(),c.cab||{});cab.col=cab.col||{};cab.own=cab.own||{};cab.wall=Array.isArray(cab.wall)?cab.wall.slice(0,3):[null,null,null];cab.ex=cab.ex||{};cabClean(cab);
   const coll=Object.fromEntries((c.coll||[]).map(k=>[k,{n:1,day:0}]));
   VISIT={name:VT.name,room:ROOM,S:Object.assign({},S,{cab,trophies:Array.isArray(c.trophies)?c.trophies.slice(0,TRO_CAP):[],cLight:true,troShow:null,troN:null,collSeen:null,coll,collShow:Array.isArray(c.collShow)?c.collShow.filter(k=>coll[k]).slice(0,COLL_CAP):null,
     log:Object.fromEntries((c.top||[]).filter(o=>FI(o.id)).map(o=>[o.id,{n:1,big:+o.w}])),sleep:{ph:'enter',t:0,visit:true},mats:{},tvInput:c.tv==='vhs'?'vhs':'tv',tape:TAPES[c.tape]?c.tape:null,coins:0})};
@@ -5106,7 +5109,7 @@ function renderVisitBar(){const sl=S.sleep,fr=sl&&sl.at==='friend',bar=$('visitB
   if(!fr||!VT){bar.hidden=true;return}const nm=esc(VT.name);let txt='',btns='';
   if(sl.ph==='door'&&VT.arcade){txt='At the Lantern Pier Arcade. Play the cabinets for prize tickets and spend them at the Prize Counter.';btns='<button class="jig" id="vbEnter">Enter the arcade</button><button class="ghost" id="vbLeave">Leave</button>'}
   else if(sl.ph==='door'&&VT.museum){txt='At the Lantern Lake Museum. Donate record fish and see who holds every plaque.';btns='<button class="jig" id="vbEnter">Enter the museum</button><button class="ghost" id="vbLeave">Leave</button>'}
-  else if(sl.ph==='door'){txt=`At ${nm}’s place. Drag to look around.`+(VT.ext.native?` Their native fruit is ${FRUITS[VT.ext.native].n.toLowerCase()}: tap a ripe tree to pick some.`:'');btns=`<button class="jig" id="vbEnter">Enter ${nm}’s house</button>${S.mp&&S.mp.id?`<button class="ghost" id="vbSign">Sign guestbook</button><button class="ghost" id="vbLike"${VT.liked?' disabled':''}>${VT.liked?'❤ Liked':'❤ Like yard'}</button>`:''}<button class="ghost" id="vbLeave">Leave</button>`}
+  else if(sl.ph==='door'){txt=(VT.champ?'🏆 Yard of the Week! ':'')+`At ${nm}’s place. Drag to look around.`+(VT.ext.native?` Their native fruit is ${FRUITS[VT.ext.native].n.toLowerCase()}: tap a ripe tree to pick some.`:'');btns=`<button class="jig" id="vbEnter">Enter ${nm}’s house</button>${S.mp&&S.mp.id?`<button class="ghost" id="vbSign">Sign guestbook</button><button class="ghost" id="vbLike"${VT.liked?' disabled':''}>${VT.liked?'❤ Liked':'❤ Like yard'}</button>`:''}<button class="ghost" id="vbLeave">Leave</button>`}
   else if(sl.ph==='inside'&&VISIT&&VISIT.S.sleep.ph==='awake'){txt=`Visiting ${nm}’s cabin. Look around, but you can’t change anything.`;btns='<button class="jig" id="vbOut">Head out</button>'}
   else if(sl.ph==='pick'){txt='Back on the boat.';btns='<button class="jig" id="vbPick">Choose where to go</button>'}
   else{bar.hidden=true;return}
@@ -5114,7 +5117,9 @@ function renderVisitBar(){const sl=S.sleep,fr=sl&&sl.at==='friend',bar=$('visitB
   const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum&&!VT.arcade)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker)}
 function drawNameSign(d){if(VT&&VT.arcade)return;const x=VT&&VT.museum?200:176,y=244,nm=VT?VT.name:'';ctx.fillStyle=rgb(mix([30,22,16],[110,78,48],d));ctx.fillRect(x-1.5,y-26,3,26);
   ctx.font='bold 9px sans-serif';const w=Math.max(38,ctx.measureText(nm).width+12);ctx.fillStyle=rgb(mix([40,30,20],[196,160,110],d));ctx.fillRect(x-w/2,y-38,w,14);
-  ctx.strokeStyle=rgb(mix([20,14,10],[90,62,36],d));ctx.lineWidth=1;ctx.strokeRect(x-w/2,y-38,w,14);ctx.fillStyle=rgb(mix([10,8,6],[50,30,16],d));ctx.textAlign='center';ctx.fillText(nm,x,y-28);ctx.textAlign='left'}
+  ctx.strokeStyle=rgb(mix([20,14,10],[90,62,36],d));ctx.lineWidth=1;ctx.strokeRect(x-w/2,y-38,w,14);ctx.fillStyle=rgb(mix([10,8,6],[50,30,16],d));ctx.textAlign='center';ctx.fillText(nm,x,y-28);ctx.textAlign='left';
+  if(VT&&VT.champ){const rx=x+w/2+2,ry=y-38;ctx.fillStyle=rgb(mix([60,20,20],[200,50,50],d));ctx.beginPath();ctx.moveTo(rx-3,ry+4);ctx.lineTo(rx-5,ry+14);ctx.lineTo(rx-2,ry+12);ctx.lineTo(rx,ry+15);ctx.lineTo(rx,ry+4);ctx.fill();ctx.beginPath();ctx.moveTo(rx+1,ry+4);ctx.lineTo(rx+1,ry+15);ctx.lineTo(rx+3,ry+12);ctx.lineTo(rx+6,ry+14);ctx.lineTo(rx+4,ry+4);ctx.fill();
+    ctx.fillStyle=rgb(mix([70,56,20],[255,206,70],d));ctx.beginPath();ctx.arc(rx,ry+3,5.5,0,7);ctx.fill();ctx.fillStyle=rgb(mix([50,40,14],[200,150,40],d));ctx.beginPath();ctx.arc(rx,ry+3,3.4,0,7);ctx.fill();ctx.fillStyle=rgb(mix([80,70,30],[255,240,170],d));ctx.font='bold 5px sans-serif';ctx.textAlign='center';ctx.fillText('★',rx,ry+4.8);ctx.textAlign='left';if(lit(d))glow(rx,ry+3,14,.3*(1-d),'255,210,90')}}
 // ==YARD CAM==
 const YZ=2.1,YFOC={house:[96,190],yard:[86,318],dock:[236,250]},YDEF=[172,214];
 const CAM={z:1,cx:YDEF[0],cy:YDEF[1],tx:YDEF[0],ty:YDEF[1],user:null,ctx:'',lt:0,drag:null,moved:false};
@@ -5180,14 +5185,16 @@ function yardGo(dest){$('tripModal').hidden=true;if(!S.sleep||S.sleep.ph!=='yard
   if(S.water!==dest){S.water=dest;cast.el=0;cast.dur=castDur();try{renderAll()}catch(e){}}sfx('click');yardOut()}
 function yardOut(){if(!S.sleep||S.sleep.ph!=='yard')return;S.cLight=false;S.sleep={ph:'walkOut',t:0,visit:true};hideTip();save()}
 (()=>{const sc=$('scene');
-  sc.addEventListener('pointerdown',e=>{CAM.moved=false;if(e.button>0||CAMT.z<1.3||!yardCtx()||e.target.closest('button,.leave,.ynav,.stip,.yedbar'))return;
+  sc.addEventListener('pointerdown',e=>{CAM.moved=false;
+    if(CED.on&&indoor()&&!VISIT&&ROOM==='cabin'&&e.button===0&&!e.target.closest('button,.leave,.stip')){const [x,y]=roomPt(e),p=cedPick(x,y);if(p){const a=(p.k==='w'?CAB().wd:CAB().fp)[p.i];CED.sel=p;CED.drag={id:e.pointerId,dx:a[1]-x,dy:a[2]-y,sx:e.clientX,sy:e.clientY,moved:false};CED.skip=true;renderCed();hideTip();try{sc.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault()}return}
+   if(e.button>0||CAMT.z<1.3||!yardCtx()||e.target.closest('button,.leave,.ynav,.stip,.yedbar'))return;
     if(YED.on&&yardCtx()==='home'&&YED.tab==='paths'&&YED.brush&&YED.brush!=='pan'){const [x,y]=scenePt(e);YED.paint={id:e.pointerId};YED.skip=true;paintAt(x,y);hideTip();try{sc.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault();return}
     if(YED.on&&yardCtx()==='home'&&YED.tab!=='house'&&YED.tab!=='paths'){const [x,y]=scenePt(e),i=yardPick(x,y);if(i>=0){const a=yardList()[i];YED.sel=i;YED.drag={id:e.pointerId,dx:a[1]-x,dy:a[2]-y,moved:false,sx:e.clientX,sy:e.clientY};YED.skip=true;renderYed();hideTip();try{sc.setPointerCapture(e.pointerId)}catch(_){}e.preventDefault();return}}
    CAM.drag={x:e.clientX,y:e.clientY,cx:CAM.tx,cy:CAM.ty,id:e.pointerId}});
-  addEventListener('pointermove',e=>{if(YED.paint&&e.pointerId===YED.paint.id){const [x,y]=scenePt(e);paintAt(x,y);return}const g=YED.drag;if(g&&e.pointerId===g.id){const a=yardList()[YED.sel];if(!a){YED.drag=null;return}if(!g.moved&&Math.hypot(e.clientX-g.sx,e.clientY-g.sy)>4)g.moved=true;if(g.moved){const [x,y]=scenePt(e),[cx,cy]=ySnap(YED.sel,a[0],...yardClamp(a[0],x+g.dx,y+g.dy));a[1]=cx;a[2]=cy;const r=cv.getBoundingClientRect(),ex=(e.clientX-r.left)/r.width;YED.edge=ex<.07?-1:ex>.93?1:0;YED.last=e}return}
+  addEventListener('pointermove',e=>{{const g=CED.drag;if(g&&e.pointerId===g.id){const s=CED.sel,a=s&&(s.k==='w'?CAB().wd:CAB().fp)[s.i];if(!a){CED.drag=null;return}if(!g.moved&&Math.hypot(e.clientX-g.sx,e.clientY-g.sy)>4)g.moved=true;if(g.moved){const [x,y]=roomPt(e),[cx,cy]=cedClamp(s.k,a[0],x+g.dx,y+g.dy);a[1]=cx;a[2]=cy}return}}if(YED.paint&&e.pointerId===YED.paint.id){const [x,y]=scenePt(e);paintAt(x,y);return}const g=YED.drag;if(g&&e.pointerId===g.id){const a=yardList()[YED.sel];if(!a){YED.drag=null;return}if(!g.moved&&Math.hypot(e.clientX-g.sx,e.clientY-g.sy)>4)g.moved=true;if(g.moved){const [x,y]=scenePt(e),[cx,cy]=ySnap(YED.sel,a[0],...yardClamp(a[0],x+g.dx,y+g.dy));a[1]=cx;a[2]=cy;const r=cv.getBoundingClientRect(),ex=(e.clientX-r.left)/r.width;YED.edge=ex<.07?-1:ex>.93?1:0;YED.last=e}return}
     const d=CAM.drag;if(!d||e.pointerId!==d.id)return;const r=cv.getBoundingClientRect(),f=800/r.width,dx=(e.clientX-d.x)*f,dy=(e.clientY-d.y)*f;
     if(!CAM.moved&&Math.hypot(dx,dy)>6){CAM.moved=true;hideTip()}if(CAM.moved){CAM.user='in';CAM.tx=d.cx-dx/CAM.z;CAM.ty=d.cy-dy/CAM.z;camClamp()}});
-  const end=e=>{if(YED.paint&&e.pointerId===YED.paint.id){YED.paint=null;YED.capT=0;save()}if(YED.drag&&e.pointerId===YED.drag.id){if(YED.drag.moved){sfx('click');save()}YED.drag=null;YED.edge=0}if(CAM.drag&&e.pointerId===CAM.drag.id)CAM.drag=null};addEventListener('pointerup',end);addEventListener('pointercancel',end);
+  const end=e=>{if(CED.drag&&e.pointerId===CED.drag.id){if(CED.drag.moved){sfx('click');save()}CED.drag=null}if(YED.paint&&e.pointerId===YED.paint.id){YED.paint=null;YED.capT=0;save()}if(YED.drag&&e.pointerId===YED.drag.id){if(YED.drag.moved){sfx('click');save()}YED.drag=null;YED.edge=0}if(CAM.drag&&e.pointerId===CAM.drag.id)CAM.drag=null};addEventListener('pointerup',end);addEventListener('pointercancel',end);
   $('ynav').querySelectorAll('[data-yf]').forEach(b=>b.onclick=e=>{e.stopPropagation();camFocus(b.dataset.yf)});
   $('yZoom').onclick=e=>{e.stopPropagation();camToggle()};
   $('yardBtn').onclick=e=>{e.stopPropagation();stepOutside()}})();
@@ -5263,6 +5270,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:86,n:'Yard of the Week',items:['A new Yard of the Week board in the Friends app shows this week’s most-liked yards, last week’s winner and past winners, with a Visit button for each.','Visit a random yard: one tap takes you to a random player’s place, so there are always new yards to discover and like.','Last week’s winner gets a gold ribbon on their name sign for the whole week, on top of the $25,000 and trophy.']},
+ {v:85,n:'Home Sweet Home',items:['Arrange your cabin: tap Arrange to drag wall decor and furniture anywhere in the room, flip pieces, or put them away. You can hang as many wall pieces as you like.','New furniture at the crafting table: Floor Cushion, Side Table, Potted Palm, Bookshelf, Reading Armchair, Record Player and Wood Stove.','Wallpaper and floors: 8 wallpaper patterns and 6 floor styles in Decorate, all using your own colors.','Themes: set your colors, wallpaper and floor in one tap with themes like Nautical, Woodland and Midnight Lake.','Your old wall spots, fern and plushies stay right where they were.']},
  {v:84,n:'Orchard Days',items:['Every yard now has a native fruit: apples, cherries, peaches, pears, plums or lemons. You start with two of your own trees, which fruit every 4 hours.','Visit friends to pick fruit you can’t grow yet. Each friend’s tree can be picked once a day, and it doesn’t take anything from them.','Fruit from other yards sells for 5 times as much as your own. Plant one to grow that tree in your yard, and collect all six for a bonus.','Garden plots ($800, under Fences & hedges): plant carrots, tomatoes, corn, sunflowers or pumpkins. They keep growing while you’re away.','A new Pantry in Storage holds your fruit and crops. Eat them for hunger or sell them.','Bug fix: prices in the yard editor and on the For Sale sign now show the $ sign.']},
  {v:83,n:'Curb Appeal',items:['Paths: paint dirt paths, gravel, stepping stones, brick, boardwalk and flower beds across your yard (Decorate yard → Paths).','Fences & hedges: buy hedges, fence sections, stone walls and lamp posts piece by piece. They snap together end to end.','House paint: recolor your walls, roof, trim and door for free. Your colors carry over when you upgrade your home.','Friends see your paths, fences and paint when they visit.']},
  {v:82,n:'Room to Grow',items:['Decorate your yard: step outside and tap Decorate yard to drag your yard decor anywhere on your lot. Flip things or put them away for later.','Your yard now stretches inland. Pan left to see it, and buy more land from the For Sale sign (starts at $2,500).','Fish off the dock: while you’re in the yard, cast from your dock into the Dock Pond.','Friends now see your yard laid out the way you arranged it.']},
@@ -6289,16 +6298,23 @@ const COS=[
  CZ('neon','Neon Bobber Sign','wall',40000,{glass:6,brass:4,paint:3},'Buzzes softly and glows after dark.'),
  CZ('lights','String Lights','extra',7000,{glass:4,scrap:3},'Little bulbs along the ceiling beam.'),
  CZ('fern','Potted Fern','extra',1500,{drift:2,paint:1},'Somehow thriving on the windowsill.'),
+ CZ('cushion','Floor Cushion','free',3000,{fabric:6},'A big squishy pouf for the floor.'),
+ CZ('sidetable','Side Table','free',4000,{drift:6},'With a steaming mug and a little plant.'),
+ CZ('palm','Potted Palm','free',6000,{drift:2,paint:2},'Tall, leafy, and a long way from home.'),
+ CZ('bookshelf','Bookshelf','free',9000,{drift:12,paint:2},'Paperbacks, field guides and one lucky rock.'),
+ CZ('armchair','Reading Armchair','free',12000,{fabric:10,drift:6},'Matches your bedding. Perfect for long winter nights.'),
+ CZ('record','Record Player','free',15000,{scrap:6,glass:2,brass:2},'Spins an old lake-country album.'),
+ CZ('stove','Wood Stove','free',25000,{scrap:14,brass:3},'Cast iron, always crackling.'),
  {...CZ('plushbass','Bass Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushduck','Duck Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushbeast','Lake Beast Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},
  {...CZ('arcneon','“Arcade Champ” Neon','wall',0,{},'From the Lantern Pier Arcade.'),arc:true},
 ];
 const CZI=id=>COS.find(c=>c.id===id);
-const COSK={bed:'Bed',rug:'Rug',lamp:'Lamp',wall:'Wall decor',extra:'Extra'};
+const COSK={bed:'Bed',rug:'Rug',lamp:'Lamp',wall:'Wall decor',extra:'Extra',free:'Furniture'};
 const DEFAULT_NAMES={cot:'Simple Cot',round:'Round Rug'};
 const canCraftCos=id=>{const z=CZI(id);return !!z&&!z.arc&&!CAB().own[id]&&S.coins>=z.c&&Object.keys(z.m).every(k=>(S.mats[k]||0)>=z.m[k])};
 function craftCos(id){if(!canCraftCos(id))return;const z=CZI(id),cb=CAB();S.coins-=z.c;for(const k in z.m)S.mats[k]-=z.m[k];cb.own[id]=1;
- if(z.k==='bed')cb.bed=id;else if(z.k==='rug')cb.rug=id;else if(z.k==='lamp')cb.lamp=id;else if(z.k==='extra')cb.ex[id]=1;else{const i=cb.wall.indexOf(null);if(i>=0)cb.wall[i]=id}
- sfx('craft');celebrate({lbl:'Crafted for the cabin!',r:'R',name:z.n,sub:z.k==='wall'&&!cb.wall.includes(id)?'Your wall spots are full. Swap it in with Decorate.':'Placed in your cabin. Change it any time with Decorate.',icon:svgI('lantern','#ffd05a')});
+ if(z.k==='bed')cb.bed=id;else if(z.k==='rug')cb.rug=id;else if(z.k==='lamp')cb.lamp=id;else if(z.k==='extra')cb.ex[id]=1;else if(z.k==='wall'){const i=cb.wall.indexOf(null);if(i>=0)cb.wall[i]=id}
+ sfx('craft');celebrate({lbl:'Crafted for the cabin!',r:'R',name:z.n,sub:'Placed in your cabin. Move it any time with Arrange.',icon:svgI('lantern','#ffd05a')});
  storeDirty=true;renderCraft();renderAll();save()}
 
 // ---------- Decorate panel ----------
@@ -6312,15 +6328,109 @@ function renderDeco(){const cb=CAB(),b=$('decoBody');let h='<h3 class="dh">Color
  h+=chips('Bed','bed',[['cot',DEFAULT_NAMES.cot],...ob],cb.bed,ob.length?'':'Craft new beds at the crafting table.');
  h+=chips('Rug','rug',[['round',DEFAULT_NAMES.round],...or],cb.rug,or.length?'':'Craft new rugs at the crafting table.');
  h+=chips('Lamp','lamp',[[null,'None'],...ol],cb.lamp,ol.length?'':'Craft a lamp at the crafting table.');
- ['Wall spot by the door','Wall spot by the window','Wall spot by the stairs'].forEach((lbl,i)=>{h+=chips(lbl,'wall'+i,[[null,'Empty'],...ow],cb.wall[i],i===0&&!ow.length?'Craft wall decor at the crafting table.':'')});
+ h+=`<div class="dgrp"><b>Wall decor and furniture</b><small class="dnote">${ow.length||COS.some(z=>isFree(z.id)&&cb.own[z.id])?'Hang, move and put away pieces anywhere in the room.':'Craft wall decor and furniture at the crafting table, then arrange them here.'}</small><div class="dchips"><button id="decoArr" class="jig">Arrange room</button></div></div>`;
+ {const oe2=oe.filter(([id])=>!isFree(id));oe.length=0;oe.push(...oe2)}
+ h+=`<h3 class="dh">Wallpaper and floor <small>Free. Patterns use your wall and floor colors.</small></h3>`+chips('Wallpaper','pw',WPAT,cb.pat&&cb.pat.w||'plain')+chips('Floor','pf',FPAT,cb.pat&&cb.pat.f||'planks');
+ h+=`<h3 class="dh">Themes <small>Sets colors, wallpaper and floor in one tap.</small></h3><div class="dgrp"><div class="dchips">${CTHEMES.map(t=>`<button data-th="${t.id}">${t.n}</button>`).join('')}</div></div>`;
  if(oe.length)h+=`<div class="dgrp" id="dg-extra"><b>Extras</b><div class="dchips">${oe.map(([id,n])=>`<button data-x="${id}" aria-pressed="${!!cb.ex[id]}">${n}</button>`).join('')}</div></div>`;
  b.innerHTML=h;
  b.querySelectorAll('.swatch').forEach(s=>s.onclick=()=>{cb.col[s.dataset.g]=+s.dataset.i;sfx('click');save();renderDeco()});
  b.querySelectorAll('[data-k]').forEach(s=>s.onclick=()=>{const k=s.dataset.k,v=s.dataset.v||null;
+  if(k==='pw'||k==='pf'){cb.pat=cb.pat||{};cb.pat[k==='pw'?'w':'f']=v;sfx('click');save();renderDeco();return}
   if(k.startsWith('wall')){const i=+k.slice(4);if(v){const j=cb.wall.indexOf(v);if(j>=0&&j!==i)cb.wall[j]=cb.wall[i]}cb.wall[i]=v}else cb[k]=v;sfx('click');save();renderDeco()});
  b.querySelectorAll('[data-x]').forEach(s=>s.onclick=()=>{const id=s.dataset.x;cb.ex[id]=!cb.ex[id];sfx('click');save();renderDeco()});
+ b.querySelectorAll('[data-th]').forEach(s=>s.onclick=()=>{const t=CTHEMES.find(x=>x.id===s.dataset.th);if(!t)return;Object.assign(cb.col,t.col);cb.pat=Object.assign(cb.pat||{},{w:t.w,f:t.f});sfx('chime','R');showToast(t.n,'Theme applied');save();renderDeco()});
+ {const ar=$('decoArr');if(ar)ar.onclick=()=>cedEnter()}
 }
 
+// ---------- Phase 3: free-placed cabin decor, wallpaper, floors, themes ----------
+const CAB_SLOTS=[[58,108],[353,120],[946,128]];
+const FREE_SZ={fern:[30,50],plushbass:[36,32],plushduck:[36,32],plushbeast:[36,32],armchair:[92,92],bookshelf:[84,156],sidetable:[52,72],stove:[70,124],record:[70,74],cushion:[72,24],palm:[46,96]};
+const isFree=id=>!!FREE_SZ[id];
+const WPAT=[['plain','Plain'],['boards','Pine boards'],['stripes','Stripes'],['pin','Pinstripe'],['plaid','Plaid'],['fish','Fish print'],['stars','Starry'],['wains','Wainscot']];
+const FPAT=[['planks','Planks'],['wide','Wide boards'],['herring','Herringbone'],['checker','Checker tile'],['stone','Stone'],['carpet','Carpet']];
+const CTHEMES=[
+  {id:'cozy',n:'Cozy Cabin',col:{walls:0,floor:0,bed:2,curt:0,rug:0,furn:1},w:'boards',f:'planks'},
+  {id:'naut',n:'Nautical',col:{walls:4,floor:6,bed:0,curt:3,rug:2,furn:4},w:'stripes',f:'wide'},
+  {id:'modern',n:'Lakeside Modern',col:{walls:6,floor:3,bed:6,curt:4,rug:7,furn:3},w:'plain',f:'wide'},
+  {id:'wood',n:'Woodland',col:{walls:3,floor:1,bed:1,curt:2,rug:1,furn:6},w:'plaid',f:'herring'},
+  {id:'sunny',n:'Sunny Cottage',col:{walls:1,floor:2,bed:3,curt:1,rug:3,furn:4},w:'wains',f:'checker'},
+  {id:'fisher',n:'Fisherman’s Den',col:{walls:2,floor:4,bed:5,curt:5,rug:4,furn:2},w:'fish',f:'planks'},
+  {id:'night',n:'Midnight Lake',col:{walls:7,floor:5,bed:4,curt:6,rug:5,furn:3},w:'stars',f:'carpet'}];
+// Moves the old three wall spots and the fern/plush toggles into free placements, once.
+function cabSync(cb){cb=cb||CAB();
+  if(!Array.isArray(cb.wd)){cb.wd=[];(cb.wall||[]).forEach((id,i)=>{if(id&&cb.own[id]&&CAB_SLOTS[i])cb.wd.push([id,CAB_SLOTS[i][0],CAB_SLOTS[i][1]])})}
+  if(!Array.isArray(cb.fp)){cb.fp=[];if(cb.ex&&cb.ex.fern&&cb.own.fern)cb.fp.push(['fern',270,184,0]);let x=172;const y=S.shack>=5?204:184;for(const id of ['plushbass','plushduck','plushbeast'])if(cb.ex&&cb.ex[id]&&cb.own[id]){cb.fp.push([id,x,y,0]);x+=36}}
+  if(!cb.pat||typeof cb.pat!=='object')cb.pat={};
+  if(!cb.gotP||typeof cb.gotP!=='object'){cb.gotP={};for(const z of COS)if(cb.own[z.id]&&(z.k==='wall'||isFree(z.id)))cb.gotP[z.id]=1}
+  for(const z of COS){if(!cb.own[z.id]||cb.gotP[z.id])continue;if(z.k==='wall'){cb.gotP[z.id]=1;const n=cb.wd.length;cb.wd.push([z.id,[500,700,230,820,600][n%5],[150,120,170,200,250][n%5]])}else if(isFree(z.id)){cb.gotP[z.id]=1;const n=cb.fp.length;cb.fp.push([z.id,150+((n*110)%700),470,0])}}
+  return cb}
+function cabClean(cb){// for visited cabins
+  const okW=a=>Array.isArray(a)&&CZI(a[0])&&CZI(a[0]).k==='wall'&&isFinite(a[1])&&isFinite(a[2]),okF=a=>Array.isArray(a)&&isFree(a[0])&&isFinite(a[1])&&isFinite(a[2]);
+  if(Array.isArray(cb.wd))cb.wd=cb.wd.filter(okW).slice(0,12).map(a=>[a[0],Math.max(20,Math.min(980,+a[1])),Math.max(30,Math.min(370,+a[2]))]);
+  if(Array.isArray(cb.fp))cb.fp=cb.fp.filter(okF).slice(0,16).map(a=>[a[0],Math.max(10,Math.min(990,+a[1])),Math.max(150,Math.min(494,+a[2])),a[3]?1:0]);
+  const p=cb.pat&&typeof cb.pat==='object'?cb.pat:{};cb.pat={w:WPAT.some(x=>x[0]===p.w)?p.w:undefined,f:FPAT.some(x=>x[0]===p.f)?p.f:undefined};return cab_sync_visit(cb)}
+function cab_sync_visit(cb){if(!Array.isArray(cb.wd)){cb.wd=[];(cb.wall||[]).forEach((id,i)=>{if(id&&cb.own[id]&&CAB_SLOTS[i])cb.wd.push([id,CAB_SLOTS[i][0],CAB_SLOTS[i][1]])})}
+  if(!Array.isArray(cb.fp)){cb.fp=[];if(cb.ex&&cb.ex.fern&&cb.own.fern)cb.fp.push(['fern',270,184,0])}return cb}
+function wallPattern(W){const p=CAB().pat&&CAB().pat.w;if(!p||p==='plain')return false;
+  if(p==='boards'){ctx.fillStyle=shd(W,-.18);for(let x=0;x<1000;x+=34)ctx.fillRect(x,0,2,400);ctx.fillStyle=shd(W,-.3);for(let i=0;i<28;i++){const x=((i*137)%990)+12,y=((i*71)%360)+20;ctx.beginPath();ctx.ellipse(x,y,3,4.5,0,0,7);ctx.fill()}}
+  else if(p==='stripes'){ctx.fillStyle=shd(W,.14);for(let x=0;x<1000;x+=56)ctx.fillRect(x,0,28,400)}
+  else if(p==='pin'){ctx.fillStyle=shd(W,.2);for(let x=0;x<1000;x+=22)ctx.fillRect(x,0,2,400)}
+  else if(p==='plaid'){ctx.fillStyle=shd(W,-.14);for(let x=0;x<1000;x+=60)ctx.fillRect(x,0,18,400);for(let y=0;y<400;y+=60)ctx.fillRect(0,y,1000,18);ctx.fillStyle=shd(W,.18);for(let x=30;x<1000;x+=60)ctx.fillRect(x,0,2,400);for(let y=30;y<400;y+=60)ctx.fillRect(0,y,1000,2)}
+  else if(p==='fish'){ctx.fillStyle=shd(W,.16);for(let r=0;r<8;r++)for(let c=0;c<12;c++){const x=c*86+(r%2)*43+20,y=r*52+26;ctx.beginPath();ctx.ellipse(x,y,12,5,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(x+10,y);ctx.lineTo(x+18,y-6);ctx.lineTo(x+18,y+6);ctx.closePath();ctx.fill()}}
+  else if(p==='stars'){ctx.fillStyle=shd(W,.3);for(let i=0;i<70;i++){const x=(i*173)%1000,y=(i*97)%380+8,s=i%3?1.6:2.8;ctx.beginPath();ctx.arc(x,y,s,0,7);ctx.fill()}ctx.fillStyle=shd(W,.22);ctx.beginPath();ctx.arc(820,70,22,0,7);ctx.fill();ctx.fillStyle=W;ctx.beginPath();ctx.arc(830,62,20,0,7);ctx.fill()}
+  else if(p==='wains'){ctx.fillStyle=shd(W,-.22);ctx.fillRect(0,250,1000,142);ctx.fillStyle=shd(W,.12);ctx.fillRect(0,244,1000,8);ctx.fillStyle=shd(W,-.34);for(let x=10;x<1000;x+=80)ctx.fillRect(x,266,64,2),ctx.fillRect(x,266,2,110),ctx.fillRect(x+62,266,2,110),ctx.fillRect(x,374,64,2)}
+  return true}
+function floorPattern(FL){const p=CAB().pat&&CAB().pat.f;ctx.fillStyle=FL;ctx.fillRect(0,392,1000,108);const dk=shd(FL,-.16),lt=shd(FL,.1);
+  if(!p||p==='planks'){ctx.fillStyle=dk;for(let y=410;y<500;y+=18)ctx.fillRect(0,y,1000,2);for(let r=0;r<5;r++)for(let x=(r%2)*70;x<1000;x+=140)ctx.fillRect(x,394+r*18,2,16)}
+  else if(p==='wide'){ctx.fillStyle=dk;for(let y=422;y<500;y+=30)ctx.fillRect(0,y,1000,2);for(let r=0;r<4;r++)for(let x=(r%2)*120;x<1000;x+=240)ctx.fillRect(x,392+r*30,2,30)}
+  else if(p==='herring'){ctx.save();ctx.beginPath();ctx.rect(0,392,1000,108);ctx.clip();ctx.strokeStyle=dk;ctx.lineWidth=1.6;for(let x=-120;x<1100;x+=24){for(let y=392;y<500;y+=24){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+12,y+12);ctx.lineTo(x+24,y);ctx.stroke()}}ctx.restore()}
+  else if(p==='checker'){ctx.fillStyle=shd(FL,.3);for(let r=0;r<5;r++)for(let c=0;c<26;c++)if((r+c)%2)ctx.fillRect(c*40,392+r*22,40,22)}
+  else if(p==='stone'){for(let r=0;r<4;r++)for(let c=0;c<14;c++){const x=c*76+(r%2)*38-20,y=394+r*27;ctx.fillStyle=(r*3+c)%3?lt:shd(FL,-.06);rrect(x+2,y+1,72,24,6);ctx.fill()}}
+  else if(p==='carpet'){ctx.fillStyle=lt;for(let i=0;i<300;i++){ctx.fillRect((i*37)%1000,392+((i*53)%106),2,1.4)}}}
+function drawFreeItem(id,d,T){const F=CC('furn'),B=CC('bed'),dark=d<.4;
+  if(id==='fern'){ctx.fillStyle='#b8643a';ctx.beginPath();ctx.moveTo(-11,-18);ctx.lineTo(11,-18);ctx.lineTo(8,0);ctx.lineTo(-8,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#4a8a3a';ctx.lineWidth=2.4;for(let k=0;k<7;k++){const a=-Math.PI/2+(k-3)*.38+Math.sin(T*.8+k)*.04;ctx.beginPath();ctx.moveTo(0,-18);ctx.quadraticCurveTo(Math.cos(a)*14,-18+Math.sin(a)*22,Math.cos(a)*26,-18+Math.sin(a)*30+10);ctx.stroke()}}
+  else if(id.startsWith('plush'))AGAMES.claw.plush(ctx,id,0,-12,1.1);
+  else if(id==='armchair'){ctx.fillStyle=shd(F,-.3);ctx.fillRect(-36,-10,6,10);ctx.fillRect(30,-10,6,10);ctx.fillStyle=shd(B,-.2);rrect(-34,-88,68,62,14);ctx.fill();ctx.fillStyle=B;rrect(-42,-50,84,40,10);ctx.fill();ctx.fillStyle=shd(B,.12);rrect(-30,-52,60,16,6);ctx.fill();ctx.fillStyle=shd(B,-.1);rrect(-46,-60,16,50,7);ctx.fill();rrect(30,-60,16,50,7);ctx.fill()}
+  else if(id==='bookshelf'){ctx.fillStyle=shd(F,-.1);ctx.fillRect(-40,-156,80,156);ctx.fillStyle=shd(F,-.45);ctx.fillRect(-34,-150,68,144);const cols=['#a8463a','#3a6aa8','#d8a830','#3a7a4a','#6a3a7a','#e0d4b4','#2e7a78'];
+    for(let s=0;s<4;s++){const y=-150+s*36;ctx.fillStyle=shd(F,.05);ctx.fillRect(-36,y+32,72,4);let x=-32;for(let k=0;x<28;k++){const w=5+((s*7+k*3)%5),h=20+((s+k)*5)%10;ctx.fillStyle=cols[(s*3+k)%7];ctx.fillRect(x,y+32-h,w,h);x+=w+1;if(s===2&&k===3){ctx.fillStyle='#c8c0b0';ctx.beginPath();ctx.arc(x+6,y+26,6,0,7);ctx.fill();x+=14}}}}
+  else if(id==='sidetable'){ctx.fillStyle=shd(F,.15);ctx.fillRect(-24,-46,48,6);ctx.fillStyle=shd(F,-.25);ctx.fillRect(-20,-40,4,40);ctx.fillRect(16,-40,4,40);ctx.fillRect(-20,-16,40,3);
+    ctx.fillStyle='#e8e0d0';ctx.fillRect(4,-56,10,10);ctx.strokeStyle='#e8e0d0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(15,-51,3,-1.4,1.4);ctx.stroke();ctx.fillStyle='#b8643a';ctx.fillRect(-16,-58,12,12);ctx.fillStyle='#5a9a4a';for(let k=0;k<4;k++){ctx.beginPath();ctx.ellipse(-10+(k-1.5)*3,-62-k%2*3,3,6,(k-1.5)*.4,0,7);ctx.fill()}
+    if(Math.sin(T*.9)>0){ctx.fillStyle='rgba(240,240,240,.25)';ctx.beginPath();ctx.arc(9+Math.sin(T*2)*2,-62-(T*8%10),2.4,0,7);ctx.fill()}}
+  else if(id==='stove'){ctx.fillStyle='#2a2a2e';ctx.fillRect(-6,-124,12,58);ctx.fillRect(-30,-70,60,58);ctx.fillRect(-34,-74,68,6);ctx.fillRect(-28,-12,6,12);ctx.fillRect(22,-12,6,12);const fl=.75+Math.sin(T*7)*.12+Math.random()*.06;
+    ctx.fillStyle=`rgba(255,${130+Math.round(fl*40)},50,${fl})`;rrect(-16,-56,32,28,4);ctx.fill();ctx.fillStyle='#2a2a2e';ctx.fillRect(-1,-56,2,28);glow(0,-42,dark?110:60,(dark?.3:.14)*fl,'255,150,70')}
+  else if(id==='record'){ctx.fillStyle=F;ctx.fillRect(-32,-46,64,46);ctx.fillStyle=shd(F,-.3);ctx.fillRect(-28,-40,26,34);ctx.fillRect(2,-40,26,34);ctx.fillStyle=shd(F,.2);ctx.fillRect(-34,-50,68,6);
+    ctx.fillStyle='#1a1a1e';ctx.beginPath();ctx.ellipse(-4,-54,22,5,0,0,7);ctx.fill();ctx.fillStyle='#c84a3a';ctx.beginPath();ctx.ellipse(-4,-54,6,1.5,0,0,7);ctx.fill();ctx.strokeStyle='#c8c0b0';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(24,-56);ctx.lineTo(10,-54);ctx.stroke();
+    const p=(T*.5)%1;ctx.fillStyle=`rgba(255,240,200,${.7*(1-p)})`;ctx.font='bold 14px sans-serif';ctx.fillText('♪',8+Math.sin(p*6)*6,-66-p*40)}
+  else if(id==='cushion'){ctx.fillStyle=shd(B,-.15);ctx.beginPath();ctx.ellipse(0,-9,34,11,0,0,7);ctx.fill();ctx.fillStyle=B;ctx.beginPath();ctx.ellipse(0,-13,30,9,0,0,7);ctx.fill();ctx.fillStyle=shd(B,-.25);ctx.beginPath();ctx.arc(0,-13,2.4,0,7);ctx.fill()}
+  else if(id==='palm'){ctx.fillStyle='#d8d0c0';ctx.beginPath();ctx.moveTo(-16,-30);ctx.lineTo(16,-30);ctx.lineTo(12,0);ctx.lineTo(-12,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#4a7a3a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-30);ctx.lineTo(0,-70);ctx.stroke();
+    ctx.fillStyle='#5a9a4a';for(let k=0;k<6;k++){const a=-Math.PI/2+(k-2.5)*.55+Math.sin(T*.7+k)*.04;ctx.save();ctx.translate(0,-70);ctx.rotate(a+Math.PI/2);ctx.beginPath();ctx.ellipse(0,-14,5,16,0,0,7);ctx.fill();ctx.restore()}}}
+function drawFreeLayer(d,T,front){const cb=VISIT?VISIT.S.cab:CAB();if(!Array.isArray(cb.fp))return;const own=k=>cb.own[k];
+  const L=cb.fp.map((a,i)=>[a,i]).filter(([a])=>(a[2]>=396)===front&&own(a[0])).sort((p,q)=>p[0][2]-q[0][2]);
+  for(const [a,i] of L){const [id,x,y,f]=a,[w,h]=FREE_SZ[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);try{drawFreeItem(id,d,T)}finally{ctx.restore()}
+    if(CED.on&&!VISIT){const s=CED.sel&&CED.sel.k==='f'&&CED.sel.i===i;ctx.save();ctx.setLineDash(s?[6,4]:[4,5]);ctx.lineWidth=s?2.4:1.2;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.6)';ctx.strokeRect(x-w/2-3,y-h-3,w+6,h+6);ctx.restore()}
+    else RH(x-w/2,y-h,w,h,'deco','free')}}
+function drawWallLayer(d,T){const cb=VISIT?VISIT.S.cab:CAB();if(!Array.isArray(cb.wd))return;cb.wd.forEach((a,i)=>{const [id,x,y]=a;if(!cb.own[id])return;drawWallDeco(id,x,y,-1,d,T);
+  if(CED.on&&!VISIT){const s=CED.sel&&CED.sel.k==='w'&&CED.sel.i===i;ctx.save();ctx.setLineDash(s?[6,4]:[4,5]);ctx.lineWidth=s?2.4:1.2;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.6)';ctx.strokeRect(x-48,y-38,96,76);ctx.restore()}})}
+// ---- arrange mode ----
+const CED={on:false,sel:null,drag:null,skip:false};
+const roomPt=e=>{const [x,y]=scenePt(e);return [x/RK,y/RK]};
+function cedPick(x,y){const cb=CAB();let best=null;
+  cb.fp.forEach((a,i)=>{if(!cb.own[a[0]])return;const [w,h]=FREE_SZ[a[0]];if(x>=a[1]-w/2-4&&x<=a[1]+w/2+4&&y>=a[2]-h-4&&y<=a[2]+4&&(!best||best.k!=='f'||a[2]>=cb.fp[best.i][2]))best={k:'f',i}});
+  if(best)return best;cb.wd.forEach((a,i)=>{if(x>=a[1]-48&&x<=a[1]+48&&y>=a[2]-38&&y<=a[2]+38)best={k:'w',i}});return best}
+function cedClamp(k,id,x,y){if(k==='w')return [Math.max(50,Math.min(950,Math.round(x/2)*2)),Math.max(42,Math.min(352,Math.round(y/2)*2))];const [w]=FREE_SZ[id];return [Math.max(w/2+4,Math.min(996-w/2,Math.round(x/2)*2)),Math.max(150,Math.min(494,Math.round(y/2)*2))]}
+function cedEnter(){if(!S.sleep||S.sleep.ph!=='awake'||VISIT||!indoor()||S.shack===0)return;if(ROOM!=='cabin')goRoom('cabin');cabSync();CED.on=true;CED.sel=null;$('decoModal').hidden=true;hideTip();renderCed();sfx('click')}
+function cedExit(){if(!CED.on)return;CED.on=false;CED.sel=null;CED.drag=null;$('yedBar').hidden=true;save()}
+function cedStore(){const cb=CAB(),w=COS.filter(z=>z.k==='wall'&&cb.own[z.id]&&!cb.wd.some(a=>a[0]===z.id)),f=COS.filter(z=>isFree(z.id)&&cb.own[z.id]&&!cb.fp.some(a=>a[0]===z.id));return {w,f}}
+function cedPlace(k,id){const cb=CAB();if(k==='w'){const [x,y]=cedClamp('w',id,500,150);cb.wd.push([id,x,y]);CED.sel={k:'w',i:cb.wd.length-1}}else{const [x,y]=cedClamp('f',id,500,460);cb.fp.push([id,x,y,0]);CED.sel={k:'f',i:cb.fp.length-1}}sfx('pop');renderCed();save()}
+function renderCed(){const b=$('yedBar');if(!CED.on){b.hidden=true;return}const cb=CAB(),st=cedStore(),sel=CED.sel,a=sel?(sel.k==='w'?cb.wd:cb.fp)[sel.i]:null,nm=id=>{const z=CZI(id);return z?z.n:id};
+  let h=`<div class="yed-top"><div class="yed-tabs"><b style="padding:4px 6px">Arranging your cabin</b></div><button class="jig" id="cedDone">Done</button></div>`;
+  h+=`<div class="yed-sel">${a?`<i>${esc(nm(a[0]))}</i>${sel.k==='f'?'<button class="ghost" id="cedFlip">Flip</button>':''}<button class="ghost" id="cedAway">Put away</button>`:'<span>Drag wall decor and furniture anywhere. Tap one to select it.</span>'}</div>`;
+  const items=[...st.w.map(z=>`<button class="yed-it" data-cw="${z.id}">${esc(z.n)} <small>wall</small></button>`),...st.f.map(z=>`<button class="yed-it" data-cf="${z.id}">${esc(z.n)}</button>`)];
+  h+=`<div class="yed-tray">${items.length?items.join(''):'<span class="yed-none">Everything is out. Craft more wall decor and furniture at the crafting table.</span>'}</div>`;b.innerHTML=h;b.hidden=false;
+  $('cedDone').onclick=e=>{e.stopPropagation();cedExit()};
+  if(a){if($('cedFlip'))$('cedFlip').onclick=e=>{e.stopPropagation();a[3]=a[3]?0:1;save()};$('cedAway').onclick=e=>{e.stopPropagation();(sel.k==='w'?cb.wd:cb.fp).splice(sel.i,1);CED.sel=null;renderCed();save()}}
+  b.querySelectorAll('[data-cw]').forEach(x=>x.onclick=e=>{e.stopPropagation();cedPlace('w',x.dataset.cw)});b.querySelectorAll('[data-cf]').forEach(x=>x.onclick=e=>{e.stopPropagation();cedPlace('f',x.dataset.cf)})}
 // ---------- Cabin interior (room space 1000×500, drawn at 80%) ----------
 const RK=.8;let ROOM='cabin',roomFade=0;
 function RH(x,y,w,h,kind,data){HITS.push({x:x*RK,y:y*RK,w:w*RK,h:h*RK,kind,data})}
@@ -6454,7 +6564,7 @@ function drawStairsDoor(T){const x=900,y=244,w=92,h=148;
 // The wall color still comes from the player's chosen paint.
 function drawRoomWalls(W,t){
   ctx.fillStyle=W;ctx.fillRect(0,0,1000,400);
-  if(t===2||t===4){for(let y=18;y<390;y+=30){ctx.fillStyle=shd(W,.08);ctx.fillRect(0,y+3,1000,9);ctx.fillStyle=shd(W,-.22);ctx.fillRect(0,y+26,1000,4)}
+  if(wallPattern(W)){}else if(t===2||t===4){for(let y=18;y<390;y+=30){ctx.fillStyle=shd(W,.08);ctx.fillRect(0,y+3,1000,9);ctx.fillStyle=shd(W,-.22);ctx.fillRect(0,y+26,1000,4)}
     if(t===4){ctx.fillStyle=shd(W,-.5);for(const bx of [80,330,580,830])ctx.fillRect(bx,0,26,22);ctx.fillRect(0,18,1000,8)}}
   else if(t===3||t===6){ctx.fillStyle=shd(W,.1);ctx.fillRect(0,250,1000,140);ctx.fillStyle=shd(W,-.18);for(let x=10;x<1000;x+=60)ctx.fillRect(x,262,46,2),ctx.fillRect(x,262,2,112),ctx.fillRect(x+44,262,2,112),ctx.fillRect(x,372,46,2);
     ctx.fillStyle=shd(W,.2);ctx.fillRect(0,246,1000,6);
@@ -6497,15 +6607,14 @@ function drawTent(d,T,top,bot){const ph=S.sleep.ph,t=S.sleep.t,can=[196,172,124]
   if(ph==='sleep')for(let i=0;i<3;i++){const p=((T*.45)+i/3)%1;ctx.fillStyle=`rgba(240,244,255,${(1-p)*.95})`;ctx.font=`bold ${15+p*14}px "Sniglet",sans-serif`;ctx.fillText('Z',196+p*34+Math.sin(p*7)*4,top0-30-p*70)}}
 function drawCabin(d,T,top,bot){
   if(S.shack===0)return drawTent(d,T,top,bot);
-  const ph=S.sleep.ph,t=S.sleep.t,cb=CAB(),W=CC('walls'),FL=CC('floor'),FU=CC('furn');
+  const ph=S.sleep.ph,t=S.sleep.t,cb=VISIT?cab_sync_visit(CAB()):cabSync(),W=CC('walls'),FL=CC('floor'),FU=CC('furn');
   drawRoomWalls(W,S.shack);
-  ctx.fillStyle=FL;ctx.fillRect(0,392,1000,108);ctx.fillStyle=shd(FL,-.16);for(let y=410;y<500;y+=18)ctx.fillRect(0,y,1000,2);for(let r=0;r<5;r++)for(let x=(r%2)*70;x<1000;x+=140)ctx.fillRect(x,394+r*18,2,16);
+  floorPattern(FL);
   ctx.fillStyle=shd(W,-.55);ctx.fillRect(0,386,1000,9);
   drawRug();
   if(S.shack>=5){drawRoomWindow(140,44,170,160,d,T,top,bot);ctx.fillStyle=shd(W,-.45);for(let i=0;i<3;i++)ctx.fillRect(140,44+i*4,170,1.5)}else{drawRoomWindow(150,66,140,118,d,T,top,bot);drawCurtains(150,66,140,118)}
-  if(cb.ex.fern&&cb.own.fern)drawFern(T);drawPlushies(T);
+  drawFreeLayer(d,T,false);
   const open=(ph==='enter'&&t<.6)||(ph==='exit'&&t>.75);drawDoor(open,top,bot);RH(14,174,88,218,'door');
-  const slots=[[58,108],[353,120],[946,128]];cb.wall.forEach((id,i)=>{if(id&&cb.own[id])drawWallDeco(id,slots[i][0],slots[i][1],i,d,T)});
   drawStairsDoor(T);
   // trophy shelves above the crafting table
   ctx.fillStyle=shd(FU,.1);for(const sy of [190,262]){ctx.fillRect(394,sy,172,7);ctx.fillStyle=shd(FU,-.25);ctx.fillRect(402,sy+7,5,10);ctx.fillRect(553,sy+7,5,10);ctx.fillStyle=shd(FU,.1)}
@@ -6520,6 +6629,7 @@ function drawCabin(d,T,top,bot){
     for(let i=0;i<cols;i++){const c=shownC[r*cols+i];const x=cx0+i*slot+1,y=cy0+r*38+10,e=!!c;
       if(e){const im=svgImg('c_'+c.id,svgI(c.ic,c.col));if(im)ctx.drawImage(im,x,y,23,23);RH(x,y,23,24,'coll',c)}else{ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(x+6,y+10,12,13)}}}
   ctx.fillStyle='rgba(232,216,176,.6)';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(`Collection · ${shownC.length} on display`,cx0+cols*slot/2,cy0+rows*38+20);ctx.textAlign='left';
+  drawWallLayer(d,T);
   // TV unit: stand with tape drawers
   ctx.fillStyle=shd(FU,.15);ctx.fillRect(584,296,162,8);ctx.fillStyle=FU;ctx.fillRect(588,304,154,88);
   [['trodrawer',594],['drawer',644],['colldrawer',694]].forEach(([k,x])=>{ctx.fillStyle=shd(FU,-.3);ctx.fillRect(x,314,44,64);ctx.fillStyle='#e0b060';ctx.fillRect(x+16,350,12,3);drawDrawerIcon(k,x+22,334);RH(x,314,44,64,k)})
@@ -6542,6 +6652,7 @@ function drawCabin(d,T,top,bot){
   if(pose&&lying)drawPerson(pose.x,pose.y,pose.rot,pose.face,pose.walk,T,2.9);
   drawBlanket(st,lying,T,ph);
   RH(110,st==='canopy'?124:240,236,152,'deco','bed');
+  drawFreeLayer(d,T,true);
   if(pose&&!lying)drawPerson(pose.x,pose.y,pose.rot,pose.face,pose.walk,T,2.9);
   if(cb.ex.lights&&cb.own.lights)drawStringLights(T,!lightsOff);
   // lighting
@@ -7736,7 +7847,7 @@ const ARC_ITEMS=[
 const arcOwns=it=>it.k==='paint'?!!PNT().own[it.id]:!!CAB().own[it.id];
 function arcGrant(id){const it=ARC_ITEMS.find(x=>x.id===id);if(!it)return;if(it.k==='paint'){const P=PNT();P.own[id]=(P.own[id]||0)+1}else{const cb=CAB();cb.own[id]=1;if(it.k==='plush')cb.ex[id]=1;else{const i=cb.wall.indexOf(null);if(i>=0)cb.wall[i]=id}}storeDirty=true}
 function arcBuy(id){const it=ARC_ITEMS.find(x=>x.id===id),a=ARC();if(!it||arcOwns(it)||a.t<it.c)return;a.t-=it.c;arcGrant(id);sfx('craft');
-  celebrate({lbl:'Prize Counter',r:'E',name:it.n,sub:it.k==='paint'?'Find it in Crate Expectations, Locker':it.k==='wall'&&!CAB().wall.includes(id)?'Your wall spots are full. Swap it in with Decorate.':'Placed in your cabin. Change it any time with Decorate.',icon:svgI('crown','#ff3ad8')});save();renderArcade();try{renderAll()}catch(e){}}
+  celebrate({lbl:'Prize Counter',r:'E',name:it.n,sub:it.k==='paint'?'Find it in Crate Expectations, Locker':'Placed in your cabin. Move it any time with Arrange.',icon:svgI('crown','#ff3ad8')});save();renderArcade();try{renderAll()}catch(e){}}
 // --- the hall
 const ARC_GAMES=[
   {id:'toss',n:'Bobber Toss',ic:'🎯',d:'Pull back and let go to roll bobbers up the ramp into the rings. 9 bobbers.',pay:'up to 60'},
@@ -8106,8 +8217,17 @@ function togetherHTML(){const M=MPV.mon,C=MPV.chal||[],G=MPV.gb;let h='';
   for(const c of live)h+=`<div class="ch-row live"><div><b>vs ${esc(c.other)} · biggest ${fn(c.fish)}</b><small>You ${c.me?(+c.me).toFixed(2)+' lb':'nothing yet'} · them ${c.them?(+c.them).toFixed(2)+' lb':'nothing yet'} · $${money(c.stake*2)} pot · ${tLeft(c.ends-Date.now())}</small></div></div>`;
   for(const c of done)h+=`<div class="ch-row old"><div><b>${c.st==='done'?(c.me>c.them?'Won':c.me<c.them?'Lost':'Tied'):c.st==='decl'?'Passed':'Expired'} vs ${esc(c.other)}</b><small>${fn(c.fish)}${c.st==='done'?` · ${(+c.me).toFixed(2)} vs ${(+c.them).toFixed(2)} lb`:''}</small></div></div>`;
   h+='</div>';
-  h+=`<div class="fr-card"><b>Your guestbook</b><p>Friends who visit your place can leave a note and like your yard. The most-liked yard each week wins $25,000.</p><div id="gbList"><p class="fr-muted">Loading…</p></div></div>`;return h}
-async function bindTogether(p){const m=mpS();
+  h+=`<div class="fr-card cup yotw"><b>🏆 Yard of the Week</b><p>Visit yards and tap ❤ Like yard. The most-liked yard each week wins $25,000, a trophy, and a gold ribbon on their sign for the next week.</p><div id="yotwList"><p class="fr-muted">Loading…</p></div><div class="fr-row"><button class="fr-btn" id="yotwRand">🎲 Visit a random yard</button></div></div>`;
+  h+=`<div class="fr-card"><b>Your guestbook</b><p>Friends who visit your place can leave a note and like your yard.</p><div id="gbList"><p class="fr-muted">Loading…</p></div></div>`;return h}
+async function loadYotw(){const m=mpS(),el=$('yotwList');if(!el||!m.id)return;
+  const rb=$('yotwRand');if(rb)rb.onclick=async()=>{rb.disabled=true;try{const r=await api('yard/random',{id:m.id,key:m.key});showToast(`Heading to ${r.name}’s place`,'Random yard');visitCabin(r.id)}catch(e){showToast('No yards to visit right now')}rb.disabled=false};
+  try{const r=await api('yard/top',{id:m.id,key:m.key});if(!$('yotwList'))return;const last=(r.hall||[]).find(x=>x.week===r.lw);
+    let h=`<p class="yw-sub">You have ❤ ${r.mine} this week · voting: ${tLeft(r.ends-Date.now())}</p>`;
+    if(last)h+=`<div class="yw-champ"><span>🏅</span><div><b>${esc(last.name||'?')}</b><small>Last week’s winner · ${last.n} like${last.n===1?'':'s'}</small></div>${last.id!==m.id?`<button class="fr-mini" data-yv="${esc(last.id)}">Visit</button>`:'<small>You!</small>'}</div>`;
+    h+=r.top&&r.top.length?`<ol class="yw-list">${r.top.map((x,i)=>`<li><span class="yw-r">${i+1}</span><b>${esc(x.name)}</b><small>❤ ${x.n}</small>${x.id!==m.id?`<button class="fr-mini" data-yv="${esc(x.id)}">Visit</button>`:'<small>You</small>'}</li>`).join('')}</ol>`:'<p class="fr-muted">No likes yet this week. Be the first to visit and like a yard!</p>';
+    const hall=(r.hall||[]).filter(x=>x.week!==r.lw&&x.name).slice(0,6);if(hall.length)h+=`<p class="yw-hall"><b>Past winners:</b> ${hall.map(x=>esc(x.name)).join(' · ')}</p>`;
+    el.innerHTML=h;el.querySelectorAll('[data-yv]').forEach(b=>b.onclick=()=>visitCabin(b.dataset.yv))}catch(e){el.innerHTML='<p class="fr-muted">Couldn’t load the standings.</p>'}}
+async function bindTogether(p){const m=mpS();loadYotw();
   p.querySelectorAll('[data-cha]').forEach(b=>b.onclick=async()=>{const st=+b.dataset.stake;if(S.coins<st){showToast(`You need $${money(st)} to accept`);return}b.disabled=true;try{const r=await api('chal/answer',{id:m.id,key:m.key,cid:+b.dataset.cha,accept:true});S.coins-=r.stake;save();showToast('Challenge on! 24 hours, biggest fish wins.','Challenge');await mpSync(true);renderFriends()}catch(e){showToast('That challenge isn’t open any more');b.disabled=false}});
   p.querySelectorAll('[data-chd]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await api('chal/answer',{id:m.id,key:m.key,cid:+b.dataset.chd,accept:false});await mpSync(true);renderFriends()}catch(e){b.disabled=false}});
   try{const r=await api('guest/list',{id:m.id,key:m.key});const el=$('gbList');if(!el)return;
@@ -8482,8 +8602,8 @@ function tick(now){if(SESS.paused)return;
     const ph=PH[phaseOf(S.min)];if($('phase').textContent!==ph){$('phase').textContent=ph;renderWaters();renderLog()}
     $('castFill').style.width=(cast.el/cast.dur*100)+'%';
     renderVitals();if(coolDirty)updateCooler();
-    if(YED.on&&!(S.sleep&&!S.sleep.at&&S.sleep.ph==='yard'))yedExit();
-    $('scene').classList.toggle('in',indoor()||!!VISIT);$('leaveBar').hidden=!(S.sleep&&S.sleep.ph==='awake')||!!VISIT;renderVisitBar();if(S.sleep&&S.sleep.ph==='awake')$('leaveTxt').textContent=ROOM==='basement'?'Down in the basement. Tap the stairs to go up.':S.sleep.visit?(S.shack===0?'In your tent. Craft or rest, then head back out.':'At home. Craft, decorate, then head back out.'):'Up and rested. Decorate, or head back out?';$('decoBtn').hidden=(ROOM==='basement')||S.shack===0;$('yardBtn').hidden=ROOM==='basement';renderYNav();if(gearDirty){gearDirty=false;refreshGear()}{const fr=S.sleep&&S.sleep.at==='friend',lb=TRV.on?['On the move',TRV.to==='friend'?placeName('friend'):TRV.to==='pond'&&TRV.label?'Home':placeName(TRV.to)]:VISIT?['Visiting',VISIT.name+'’s home']:fr?['At',placeName('friend')]:S.sleep?['At home',ROOM==='basement'?'Basement':indoor()?GEAR.shack.items[S.shack].n:'Dock Pond']:['Fishing',W(S.water).n],k=lb.join('|');if($('waterName').dataset.k!==k){$('waterName').dataset.k=k;$('locLbl').textContent=lb[0];$('waterName').textContent=lb[1]}}
+    if(YED.on&&!(S.sleep&&!S.sleep.at&&S.sleep.ph==='yard'))yedExit();if(CED.on&&!(S.sleep&&S.sleep.ph==='awake'&&indoor()&&ROOM==='cabin'&&!VISIT))cedExit();
+    $('scene').classList.toggle('in',indoor()||!!VISIT);$('leaveBar').hidden=!(S.sleep&&S.sleep.ph==='awake')||!!VISIT||CED.on;renderVisitBar();if(S.sleep&&S.sleep.ph==='awake')$('leaveTxt').textContent=ROOM==='basement'?'Down in the basement. Tap the stairs to go up.':S.sleep.visit?(S.shack===0?'In your tent. Craft or rest, then head back out.':'At home. Craft, decorate, then head back out.'):'Up and rested. Decorate, or head back out?';$('decoBtn').hidden=(ROOM==='basement')||S.shack===0;$('arrBtn').hidden=(ROOM==='basement')||S.shack===0;$('yardBtn').hidden=ROOM==='basement';renderYNav();if(gearDirty){gearDirty=false;refreshGear()}{const fr=S.sleep&&S.sleep.at==='friend',lb=TRV.on?['On the move',TRV.to==='friend'?placeName('friend'):TRV.to==='pond'&&TRV.label?'Home':placeName(TRV.to)]:VISIT?['Visiting',VISIT.name+'’s home']:fr?['At',placeName('friend')]:S.sleep?['At home',ROOM==='basement'?'Basement':indoor()?GEAR.shack.items[S.shack].n:'Dock Pond']:['Fishing',W(S.water).n],k=lb.join('|');if($('waterName').dataset.k!==k){$('waterName').dataset.k=k;$('locLbl').textContent=lb[0];$('waterName').textContent=lb[1]}}
     $('hint').hidden=yardStill();$('hint').textContent=VISIT?'Hover the shelves, trophies and tank':indoor()?(ROOM==='basement'?'Tap the fish sticks, fridge, aquarium, pinball or light switch':(S.shack===0?'Tap the bed or crafting table':'Tap the TV, tank, drawers, bed or crafting table')):S.sleep?$('stamTxt').textContent:'Tap the water to jig';
     $('castLabel').textContent=TRV.on?'On the move…':S.sleep?dockFishing()?(cast.el/cast.dur>.85?'Something’s biting…':'Fishing off the dock'):(S.sleep.at?(VT&&VT.arcade?'At the arcade…':VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
     refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();

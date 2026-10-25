@@ -238,6 +238,15 @@ async function extraRoutes(p,db,me,b,now,url){
   if(p==='guest/like'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);const wk=weekKey();
     await db.prepare('INSERT OR IGNORE INTO likes(week,to_pid,from_pid) VALUES(?,?,?)').bind(wk,to,me.id).run();
     const n=await db.prepare('SELECT COUNT(*) AS c FROM likes WHERE week=? AND to_pid=?').bind(wk,to).first();return json({ok:true,n:n.c|0})}
+  if(p==='yard/top'){const wk=weekKey();
+    const data=await cached(db,'yotw:'+wk,5*MIN,async()=>{const [top,hall]=await Promise.all([
+      db.prepare('SELECT l.to_pid AS id,p.name,COUNT(*) AS n FROM likes l JOIN players p ON p.id=l.to_pid WHERE l.week=? AND COALESCE(p.pub,1)=1 GROUP BY l.to_pid ORDER BY n DESC LIMIT 10').bind(wk).all(),
+      db.prepare('SELECT y.week,y.pid AS id,y.n,p.name FROM yardwin y LEFT JOIN players p ON p.id=y.pid ORDER BY CAST(y.week AS INTEGER) DESC LIMIT 8').all()]);
+      return {top:top.results||[],hall:hall.results||[]}});
+    const mine=await db.prepare('SELECT COUNT(*) AS c FROM likes WHERE week=? AND to_pid=?').bind(wk,me.id).first();
+    return json({top:data.top,hall:data.hall,lw:String(+wk-1),mine:mine.c|0,ends:((+wk+1)*7-3)*864e5})}
+  if(p==='yard/random'){const r=await db.prepare('SELECT id,name FROM players WHERE COALESCE(pub,1)=1 AND cabin IS NOT NULL AND id<>? AND seen>? ORDER BY RANDOM() LIMIT 1').bind(me.id,now-7*864e5).first();
+    if(!r)return json({error:'none'},404);return json({id:r.id,name:r.name})}
   if(p==='guest/list'){const wk=weekKey(),lw=String(+wk-1);
     const [rows,likes,win]=await Promise.all([db.prepare('SELECT id,from_pid,from_name,st,note,ts FROM guest WHERE to_pid=? ORDER BY id DESC LIMIT 40').bind(me.id).all(),db.prepare('SELECT COUNT(*) AS c FROM likes WHERE week=? AND to_pid=?').bind(wk,me.id).first(),
       db.prepare('SELECT y.pid,y.n,p.name FROM yardwin y LEFT JOIN players p ON p.id=y.pid WHERE y.week=?').bind(lw).first()]);
@@ -580,7 +589,8 @@ async function route(req,env,url,ctx){
     const t=await db.prepare('SELECT id,name,cabin,COALESCE(pub,1) AS pub FROM players WHERE id=?').bind(String(b.target||'')).first();
     if(!t||!t.cabin)return json({error:'no-cabin'},404);
     if(!t.pub&&t.id!==me.id&&!(await sharesLake(db,me.id,t.id)))return json({error:'private'},403);
-    return json({name:t.name,cabin:t.cabin});
+    const yw=await db.prepare('SELECT (SELECT pid FROM yardwin WHERE week=?) AS champ,(SELECT COUNT(*) FROM yardwin WHERE pid=?) AS wins').bind(String(+weekKey()-1),t.id).first();
+    return json({name:t.name,cabin:t.cabin,champ:!!(yw&&yw.champ===t.id),wins:yw?yw.wins|0:0});
   }
   if(p==='mail'){
     if(!['pot','mat'].includes(b.kind))return json({error:'bad-kind'},400);
