@@ -751,8 +751,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 #reelBtn{padding:14px;font-size:1.05rem;touch-action:none;user-select:none;-webkit-user-select:none}
 .ttl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .cloudbtn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:9px;font-size:.8rem;white-space:nowrap}.cloudbtn svg{width:17px;height:17px;flex:none}
+.photo-mode .scene>:not(canvas):not(.photo-bar){display:none!important}.photo-mode .pdock,.photo-mode .ach-wrap{display:none!important}.photo-mode .scene{cursor:grab}
+.photo-bar{position:absolute;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:6;padding:5px;border-radius:999px;background:rgba(10,22,28,.75);transition:opacity .4s}.photo-bar.fade{opacity:0}.photo-bar button{padding:5px 12px;font-size:.82rem}
 .cloudbtn.ok{color:var(--reed);border-color:var(--reed)}.cloudbtn.busy svg{animation:cbPulse 1s ease-in-out infinite}@keyframes cbPulse{50%{opacity:.35}}
-@media (max-width:520px){.cloudbtn #cloudLbl{display:none}.cloudbtn{padding:0 8px}}
+@media (max-width:520px){.cloudbtn #cloudLbl,.cloudbtn .pbl{display:none}.cloudbtn{padding:0 8px}}
 .sndbtn{display:inline-grid;place-items:center;width:34px;height:30px;padding:0;border-radius:9px;align-self:center}
 .sndbtn svg{width:18px;height:18px}
 .slider{display:grid;grid-template-columns:92px minmax(0,1fr) 38px;align-items:center;gap:10px;font-weight:600;font-size:.92rem}
@@ -1340,7 +1342,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 </div>
 <div class="wrap">
   <div class="head">
-    <div class="ttl"><h1>Lantern <span>Lake</span></h1><button class="ghost cloudbtn" id="cloudBtn" hidden title="Your game already saves to the cloud on its own. Tap to save right now, for example before switching devices."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.4 9.1 4.5 4.5 0 0 0 7 18z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15.5v-5m-2.3 2.2L12 10.4l2.3 2.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="cloudLbl">Force Cloud Save</span></button></div>
+    <div class="ttl"><h1>Lantern <span>Lake</span></h1><button class="ghost cloudbtn" id="photoBtn" title="Hide the buttons and labels so you can take a clean picture of the scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.6-2h6.8L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span class="pbl">Photo mode</span></button><button class="ghost cloudbtn" id="cloudBtn" hidden title="Your game already saves to the cloud on its own. Tap to save right now, for example before switching devices."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.4 9.1 4.5 4.5 0 0 0 7 18z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15.5v-5m-2.3 2.2L12 10.4l2.3 2.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="cloudLbl">Force Cloud Save</span></button></div>
     <div class="stats">
       <span class="coins">$<b id="coins">0</b></span>
       <span>Day <b id="day">1</b> · <b id="clock">6:00 AM</b> · <span id="phase">Dawn</span></span>
@@ -1350,6 +1352,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 
   <div class="scene" id="scene" title="Tap to jig the line">
     <canvas id="cv" aria-label="Lake scene with your home, dock, boat and bobber"></canvas>
+    <div class="photo-bar" id="photoBar" hidden><button class="jig" id="photoSave">📸 Save picture</button><button class="ghost" id="photoDone">Done</button></div>
     <div class="ovl ovl-wx" id="ovlWx" role="button" tabindex="0" aria-label="Open Lake 7 Weather" title="Tap for the forecast"><span id="wxIcon"></span><b id="wxName">Clear</b></div>
     <div class="ovl ovl-loc"><span id="locLbl">Fishing</span> <b id="waterName">Dock Pond</b></div>
     <div class="ovl ovl-live" id="liveChip" hidden></div>
@@ -3855,6 +3858,14 @@ function openFacts(id){const f=FI(id);if(!f)return;$('fcH').textContent=f.n;$('f
     .catch(()=>show(null))}
 $('fcClose').onclick=()=>{$('factModal').hidden=true};$('factModal').onclick=e=>{if(e.target.id==='factModal')$('factModal').hidden=true};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('factModal').hidden)$('factModal').hidden=true});
+// Photo mode: hides everything over the scene for clean screenshots; the little bar fades out and comes back on a tap or mouse move.
+const PHOTO={on:false,t:null};
+function photoWake(){if(!PHOTO.on)return;const b=$('photoBar');b.classList.remove('fade');clearTimeout(PHOTO.t);PHOTO.t=setTimeout(()=>b.classList.add('fade'),2500)}
+function photoMode(on){PHOTO.on=on;document.body.classList.toggle('photo-mode',on);$('photoBar').hidden=!on;hideTip();if(on){try{closePhone()}catch(e){}photoWake();showToast&&0}else clearTimeout(PHOTO.t);sfx('click')}
+$('photoBtn').onclick=()=>photoMode(!PHOTO.on);$('photoDone').onclick=e=>{e.stopPropagation();photoMode(false)};
+$('photoSave').onclick=e=>{e.stopPropagation();try{$('cv').toBlob(bl=>{if(!bl)return;const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=`lantern-lake-${new Date().toISOString().slice(0,10)}.png`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)},'image/png')}catch(_){}};
+['pointermove','pointerdown'].forEach(ev=>$('scene').addEventListener(ev,photoWake));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&PHOTO.on)photoMode(false)});
 
 // ---------- Community app: Lantern Lake's Discord server, through Discord's official server widget.
 // Set DISCORD_ID to the server's ID (Server Settings → Widget → Enable Server Widget). Until then only the site owner sees the app.
@@ -5284,6 +5295,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:89,n:'Say Cheese',items:['Photo mode: tap the camera button next to Lantern Lake at the top to hide every button and label over the scene, so you can take a clean screenshot to share. You can still drag to look around your yard.','In photo mode, Save picture downloads the scene as an image, and Done (or Esc) brings everything back.']},
  {v:88,n:'Spooky All Year',items:['Halloween decorations you own stay after the event, as keepsakes you can keep showing. Once the event ends they leave the Shop, so they stay special to everyone who played during it.','Jack-o’-lanterns, the scarecrow, tombstones and the witch’s cauldron can now be moved anywhere in Decorate yard like your other yard decor.','Costumes you earn in holiday events stay wearable after the event ends. Change or take off your costume in Settings → Appearance.']},
  {v:87,n:'Tidy Welcome Back',items:['Bug fix: the “While you were away” summary no longer fills the whole screen after a long time away. It now shows a short summary, with rare variants and treasures in sections you can open.']},
  {v:86,n:'Yard of the Week',items:['A new Yard of the Week board in the Friends app shows this week’s most-liked yards, last week’s winner and past winners, with a Visit button for each.','Visit a random yard: one tap takes you to a random player’s place, so there are always new yards to discover and like.','Last week’s winner gets a gold ribbon on their name sign for the whole week, on top of the $25,000 and trophy.']},
