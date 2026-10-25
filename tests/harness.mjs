@@ -1,0 +1,56 @@
+// Local stand-in for Cloudflare (assets + D1 + live-lake Durable Object): serves ../public and runs ../src/worker.js
+// against an in-memory SQLite database. Used by smoke.mjs; nothing here touches the real site or database.
+import {DatabaseSync} from 'node:sqlite';
+import http from 'node:http';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath,pathToFileURL} from 'node:url';
+const HERE=path.dirname(fileURLToPath(import.meta.url)),ROOT=path.resolve(HERE,'../public');
+import crypto from 'node:crypto';
+// --- Durable Object + WebSocket stand-ins for the live lake ---
+const _Resp=globalThis.Response;
+globalThis.Response=class extends _Resp{constructor(b,init){if(init&&init.status===101){super(null,{status:200});this._ws=init.webSocket;this._101=true}else super(b,init)}};
+class SrvWS{constructor(){this.att=null;this.open=true;this.q=[];this.room=null}
+  send(t){if(!this.open)return;if(this._write)this._write(t);else this.q.push(t)}
+  close(code){if(!this.open)return;this.open=false;if(this.room)this.room.socks.delete(this);this._end&&this._end(code||1000)}
+  serializeAttachment(a){this.att=JSON.parse(JSON.stringify(a))}deserializeAttachment(){return this.att}
+  _recv(t){if(t==='ping'){this.send('pong');return}Promise.resolve(this.room.inst.webSocketMessage(this,t)).catch(e=>console.error('wsmsg',e))}
+  _closed(code){if(!this.open)return;this.open=false;this.room.socks.delete(this);Promise.resolve(this.room.inst.webSocketClose(this,code)).catch(e=>console.error('wsclose',e))}
+  _bind(){for(const t of this.q)this._write(t);this.q=[]}}
+globalThis.WebSocketPair=function(){const s=new SrvWS(),c={server:s};return {0:c,1:s}};
+globalThis.WebSocketRequestResponsePair=function(a,b){this.a=a;this.b=b};
+const ROOMS=new Map();
+function roomFor(name,Cls,env){let r=ROOMS.get(name);if(r)return r;const store=new Map();r={socks:new Set(),alarm:null,timer:null};
+  const ctx={getWebSockets:()=>[...r.socks].filter(s=>s.open),acceptWebSocket:s=>{s.room=r;r.socks.add(s)},setWebSocketAutoResponse(){},
+    storage:{async get(k){return store.has(k)?JSON.parse(JSON.stringify(store.get(k))):undefined},async put(k,v){store.set(k,JSON.parse(JSON.stringify(v)))},async delete(k){store.delete(k)},
+      async getAlarm(){return r.alarm},async setAlarm(t){r.alarm=t;clearTimeout(r.timer);r.timer=setTimeout(()=>{r.alarm=null;r.inst.alarm()},Math.max(0,t-Date.now()))},async deleteAlarm(){r.alarm=null;clearTimeout(r.timer)}}};
+  r.store=store;r.inst=new Cls(ctx,env);ROOMS.set(name,r);return r}
+if(process.env.DCMOCK){const of=globalThis.fetch;globalThis.fetch=async(u,o)=>{const s=String(u);if(s.includes('discord.com/api/webhooks')){fs.appendFileSync(process.env.DCMOCK,JSON.stringify({u:s,m:(o&&o.method)||'GET',b:o&&o.body?JSON.parse(o.body):null})+'\n');return new Response(JSON.stringify({id:'1234567890'}),{headers:{'content-type':'application/json'}})}return of(u,o)}}
+const WMOD=await import(pathToFileURL(path.resolve(HERE,'../src/worker.js')).href+'?'+Date.now());const worker=WMOD.default;
+globalThis.__ROOMS=ROOMS;
+const sq=new DatabaseSync(':memory:');
+class Stmt{constructor(sql){this.sql=sql;this.args=[]}bind(...a){const s=new Stmt(this.sql);s.args=a;return s}
+  _p(){return sq.prepare(this.sql)}
+  async first(){const r=this._p().get(...this.args);return r?{...r}:null}
+  async all(){return {results:this._p().all(...this.args).map(r=>({...r}))}}
+  async run(){const r=this._p().run(...this.args);return {meta:{changes:Number(r.changes)}}}}
+const DB={prepare:sql=>new Stmt(sql),async batch(list){sq.exec('BEGIN');try{const out=[];for(const s of list)out.push(await s.run());sq.exec('COMMIT');return out}catch(e){sq.exec('ROLLBACK');throw e}}};
+const types={'.html':'text/html; charset=utf-8','.js':'text/javascript','.png':'image/png','.json':'application/json'};
+const ASSETS={async fetch(req){const u=new URL(req.url);let p=decodeURIComponent(u.pathname);if(p.endsWith('/'))p+='index.html';const f=path.join(ROOT,p);
+  if(!f.startsWith(ROOT)||!fs.existsSync(f)||p.includes('_worker'))return new Response('not found',{status:404});let buf=fs.readFileSync(f);if(process.env.EXPOSE&&/lantern-lake(-ui)?\/index.html$/.test(p)){buf=Buffer.from(buf.toString().replace('try{window.claude?.hot?.snapshot',"Object.assign(window,{YED,yardList,cabSync,orderItem,CED,cedEnter,cedExit,cedPlace,openDeco,craftCos,setVT:v=>{VT=v},treeTap,openPlot,pantryAct,nativeOf,renderStorage,openTab,renderYed,yardParse,paintAt,housePaintMap,yardGo,mpCabin,yardStore,yardSync,yedEnter,yedExit,yedPlace,dockFishToggle,dockFishing,openLand,yardClamp,yardPick,getCAM:()=>CAM,getCAMT:()=>CAMT,getCast:()=>cast,TVP,renderTV,openTV,tvFlip,TVS,tvDeal,tvQuizQs,tvAnswer,tvBuy,FD,fdAnswer,fdGuess,fdPool,openCraft,ARCV,renderArcade,pbClose,CAB,AG,AGAMES,ARC,visitArcade,openArcade,arcPlay,arcBuy,crateOpen,enterFriend,getVT:()=>VT,wxAt,wxOfBlock,wxBlock,ensureFc,wxSync,renderWeatherApp,renderAll,closePhone,getHits:()=>HITS,getBase:()=>[BASE,CAMT],Q4,q4Advance,q4Item,q4Lie,q4TapReflect,Q4R,MM,mmOpen,mmInput,craftLantern,renderCase,q4Roll,renderTexts,TX,renderNews,renderMuseum,phaseOf,PNT,AFK,afk,payout,potWin,sessPause,musDonate,musMine,musFetch,offline,MUS,MC,musRec,musKeep,visitMuseum,openMuseum,coolTotals,mpStats,DEV,nvCheck,NV,itemThumb,ITEM_BY,ROD_SKINS,BOB_SKINS,CRATES,rodFx,RFX,itemRoll,startCatchAnim,achQ,celebrate,renderLiveUI,renderSettings,openUpdates,UPDATES,openBeast,PKEYS,renderHot,renderStorage,HBE,openHotEdit,POT,showToast,SKINS,SKIN_BY,PNT,crateOpen,renderCrate,CR,drawPaint,skinRoll,skinThumb,openYardPicker,yardGo,wxTempAt,renderWeatherApp,ensureSched,tourFromSpec,phShow,MPV,renderFriends,mpSync,wkSpecies,mpCatch,mpS,FI,openTab,api,mpPlayers,visitCabin,TX,txPoll,openPhone,closePhone,makePolaroid,noteDayBest,txOpenThread,photosToday,phNotify,renderTexts,openCraft,goHome,openCook,leaveHouse,sleepInBed,bedBtnClick,openTroDrawer,openCollDrawer,tripFrom,enterFriend,exitFriend,travelTo,goRoom,bAct,pbOpen,pbClose,portraitURL,sbInit,renderSports,sbStandings,sbPlayoffs,sbFeatured,sbLDay,Q2,q2Item,startGhost,ghostResolve,openTV,renderCase,questAdvance,q2Advance,stepOutside,yardIn,yardOut,camFocus,camToggle,CAM,encSave,encSave2,decSave,cloudPush,cloudCheck,CSYNC,xfLoadCode,openSaveModal,hwOn,HW,hwCollect,LIVE,liveClose,liveEmote,EMO,liveOnCatch,castDur,usePotion,renderGear,rollPull,mods,bigCost,rodPerk,travelTo,buildGate,buyRGear,UPD,updraftScoop,REALMS,RS,doCatch,beastWin,q3Solve,caseReplayMult,caseRestart,setBF:v=>{BF=v},rwCoins,HWP,SCN,SCN_EV,TOT,totGive,keeperOpen,KP,keeperSignal,Q3,q3Advance,q3Item,q3Start,projFund,PROJ,retireNow,setClaim,guideMark,renderHW,BASE,openOwner,openBug,togetherHTML,scnCtx,EVFISH,mpSync,renderLog,q3OnCatch,appVis,APPS,shopFilterSet:v=>{shopFilter=v},sellBonus,FI,FISH,craftOil,renderFriends,MPV,openGuestbook,renderVisitBar,giveItem,itemName,applyTextSize,SETS,openTab,renderDecor,stepOutside,setVT:v=>{VT=v}});Object.defineProperty(window,'BF',{get:()=>BF,configurable:true});Object.defineProperty(window,'HITS',{get:()=>HITS,configurable:true});Object.defineProperty(window,'CAMT',{get:()=>CAMT,configurable:true});Object.defineProperty(window,'S',{get:()=>S,configurable:true});Object.defineProperty(window,'VT',{get:()=>VT,configurable:true});Object.defineProperty(window,'TRV',{get:()=>TRV,configurable:true});Object.defineProperty(window,'ROOM',{get:()=>ROOM,configurable:true});Object.defineProperty(window,'PB',{get:()=>PB,configurable:true});Object.defineProperty(window,'BS',{get:()=>BS,configurable:true});Object.defineProperty(window,'SBV',{get:()=>SBV,configurable:true});Object.defineProperty(window,'phView',{get:()=>phView,configurable:true});Object.defineProperty(window,'VISIT',{get:()=>VISIT,configurable:true});try{window.claude?.hot?.snapshot"))}return new Response(buf,{headers:{'content-type':types[path.extname(f)]||'application/octet-stream'}})}};
+const env={DB:process.env.NODB?undefined:DB,ASSETS};
+if(!process.env.NOLIVE&&WMOD.LakeRoom)env.LAKE={idFromName:n=>n,get:id=>({fetch:req=>roomFor(id,WMOD.LakeRoom,env).inst.fetch(req)})};
+const SRV=http.createServer(async(req,res)=>{if(req.url.startsWith('/__alarm')){const n=new URL(req.url,'http://x').searchParams.get('room');const r=ROOMS.get(n);if(r){r.alarm=null;clearTimeout(r.timer);await r.inst.alarm()}res.end(JSON.stringify({ok:!!r,rooms:[...ROOMS.keys()]}));return}
+  if(req.url.startsWith('/__raidend')){const n=new URL(req.url,'http://x').searchParams.get('room');const r=ROOMS.get(n);if(r){const R=r.store.get('raid');if(R){R.ends=Date.now()-1;r.store.set('raid',R)}await r.inst.alarm()}res.end('ok');return}
+  const chunks=[];for await(const c of req)chunks.push(c);const body=chunks.length?Buffer.concat(chunks):undefined;
+  const r=await worker.fetch(new Request('http://'+(req.headers['x-test-host']||'127.0.0.1:'+PORT)+req.url,{method:req.method,headers:req.headers,body:req.method==='GET'||req.method==='HEAD'?undefined:body}),env,{waitUntil:p=>Promise.resolve(p).catch(()=>{})});
+  res.writeHead(r.status,Object.fromEntries(r.headers));res.end(Buffer.from(await r.arrayBuffer()))}).listen(+process.env.PORT||8790);
+SRV.on('upgrade',async(req,socket)=>{try{const r=await worker.fetch(new Request('http://127.0.0.1:'+PORT+req.url,{headers:req.headers}),env);
+  if(!r._101){socket.write(`HTTP/1.1 ${r.status} No\r\nContent-Length: 0\r\n\r\n`);socket.destroy();return}
+  const srv=r._ws.server,acc=crypto.createHash('sha1').update(req.headers['sec-websocket-key']+'258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
+  socket.write('HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: '+acc+'\r\n\r\n');
+  srv._write=t=>{const p=Buffer.from(t);let h;if(p.length<126)h=Buffer.from([0x81,p.length]);else if(p.length<65536){h=Buffer.alloc(4);h[0]=0x81;h[1]=126;h.writeUInt16BE(p.length,2)}else{h=Buffer.alloc(10);h[0]=0x81;h[1]=127;h.writeBigUInt64BE(BigInt(p.length),2)}try{socket.write(Buffer.concat([h,p]))}catch(e){}};
+  srv._end=code=>{const b=Buffer.alloc(4);b[0]=0x88;b[1]=2;b.writeUInt16BE(code,2);try{socket.write(b);socket.end()}catch(e){}};
+  let buf=Buffer.alloc(0);socket.on('data',d=>{buf=Buffer.concat([buf,d]);for(;;){if(buf.length<2)return;const op=buf[0]&15,masked=buf[1]&128;let len=buf[1]&127,off=2;
+    if(len===126){if(buf.length<4)return;len=buf.readUInt16BE(2);off=4}else if(len===127){if(buf.length<10)return;len=Number(buf.readBigUInt64BE(2));off=10}
+    const mk=masked?buf.slice(off,off+4):null;if(masked)off+=4;if(buf.length<off+len)return;let pl=Buffer.from(buf.slice(off,off+len));if(mk)for(let i=0;i<pl.length;i++)pl[i]^=mk[i%4];buf=buf.slice(off+len);
+    if(op===1)srv._recv(pl.toString());else if(op===8){srv._closed(pl.length>=2?pl.readUInt16BE(0):1005);try{socket.end()}catch(e){}}else if(op===9){try{socket.write(Buffer.concat([Buffer.from([0x8a,pl.length]),pl]))}catch(e){}}}});
+  socket.on('close',()=>srv._closed(1006));socket.on('error',()=>{});srv._bind()}catch(e){console.error('upgrade',e);try{socket.destroy()}catch(_){}}});
+const PORT=+process.env.PORT||8790;console.log('harness on',PORT);

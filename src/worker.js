@@ -237,6 +237,7 @@ async function extraRoutes(p,db,me,b,now,url){
     if(Math.random()<.05)await db.prepare('DELETE FROM guest WHERE ts<?').bind(now-60*864e5).run();return json({ok:true})}
   if(p==='guest/like'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);const wk=weekKey();
     await db.prepare('INSERT OR IGNORE INTO likes(week,to_pid,from_pid) VALUES(?,?,?)').bind(wk,to,me.id).run();
+    if(Math.random()<.03)await db.prepare('DELETE FROM likes WHERE CAST(week AS INTEGER)<?').bind(+wk-8).run();
     const n=await db.prepare('SELECT COUNT(*) AS c FROM likes WHERE week=? AND to_pid=?').bind(wk,to).first();return json({ok:true,n:n.c|0})}
   if(p==='yard/top'){const wk=weekKey();
     const data=await cached(db,'yotw:'+wk,5*MIN,async()=>{const [top,hall]=await Promise.all([
