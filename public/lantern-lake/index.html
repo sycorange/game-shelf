@@ -5194,6 +5194,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:76,n:'Counter Check',items:['Bug fix: arcade prizes (plushies and the Arcade Champ sign) no longer show up as free items in the crafting table’s “Ready now” list. They only come from the Prize Counter and the Claw Machine.']},
  {v:75,n:'Clearer Reflections',items:['Bug fix: in Mirror Match, your angler’s rod now points the way you pressed (it used to point the opposite way, which made it look like you’d answered wrong).','Bug fix: Mirror Match now blinks between arrows, so two of the same arrow in a row are easy to tell apart. Dots show how many arrows are in the round, and your answers appear as you enter them.','Clearer Mirror Match instructions: press the opposite of each arrow (◀ becomes ▶, ▲ stays ▲).']},
  {v:74,n:'Lantern Pier Arcade',items:['New place to visit: the Lantern Pier Arcade! Take the boat over from the Waters tab or when you leave your cabin, walk in, and tap any cabinet on the arcade floor to play.','Play Bobber Toss, Whack-a-Gar and Pinball for prize tickets (up to 600 a day), or spend 30 on the Claw Machine to win plushies.','Putt of the Day: one mini-golf hole, the same for everyone each day, with 3 tries. Hole-in-one pays 100 tickets.','The Prize Counter has fixed prices for everyone: ticket crates (150), plushies for your windowsill, an “Arcade Champ” neon sign and two arcade-only boat paints, 8-Bit and Pinball Neon. Crate Expectations can also open crates with tickets.','Weekly high-score boards for each cabinet, a daily board for the putt, and a trophy for each weekly champion.']},
  {v:73,n:'Same Sky',items:['Weather is now shared: every angler on Lantern Lake gets the same weather at the same moment, so when a storm rolls in, it rolls in for everyone. Tell your friends!','Weather changes twice per game day (every 12 real minutes) instead of at random, and the Lake 7 Weather app is now exact. A new Coming up list shows the next four weather changes with times on your clock, and the 7-day forecast shows days that change weather partway through.','Sleeping no longer skips past bad weather, and weather while you’re away follows what really happened on the lake.']},
@@ -5996,7 +5997,7 @@ const COS=[
 const CZI=id=>COS.find(c=>c.id===id);
 const COSK={bed:'Bed',rug:'Rug',lamp:'Lamp',wall:'Wall decor',extra:'Extra'};
 const DEFAULT_NAMES={cot:'Simple Cot',round:'Round Rug'};
-const canCraftCos=id=>{const z=CZI(id);return !!z&&!CAB().own[id]&&S.coins>=z.c&&Object.keys(z.m).every(k=>(S.mats[k]||0)>=z.m[k])};
+const canCraftCos=id=>{const z=CZI(id);return !!z&&!z.arc&&!CAB().own[id]&&S.coins>=z.c&&Object.keys(z.m).every(k=>(S.mats[k]||0)>=z.m[k])};
 function craftCos(id){if(!canCraftCos(id))return;const z=CZI(id),cb=CAB();S.coins-=z.c;for(const k in z.m)S.mats[k]-=z.m[k];cb.own[id]=1;
  if(z.k==='bed')cb.bed=id;else if(z.k==='rug')cb.rug=id;else if(z.k==='lamp')cb.lamp=id;else if(z.k==='extra')cb.ex[id]=1;else{const i=cb.wall.indexOf(null);if(i>=0)cb.wall[i]=id}
  sfx('craft');celebrate({lbl:'Crafted for the cabin!',r:'R',name:z.n,sub:z.k==='wall'&&!cb.wall.includes(id)?'Your wall spots are full. Swap it in with Decorate.':'Placed in your cabin. Change it any time with Decorate.',icon:svgI('lantern','#ffd05a')});
