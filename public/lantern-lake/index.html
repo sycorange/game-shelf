@@ -478,7 +478,10 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .tv{position:relative;width:min(620px,100%);background:linear-gradient(160deg,#7a5232,#4a2e1a);border-radius:26px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.6),inset 0 2px 0 rgba(255,255,255,.12);display:grid;grid-template-columns:minmax(0,1fr) 66px;gap:14px;max-height:calc(100vh - 40px);overflow-y:auto}
 .tv-screen{position:relative;border-radius:22px;overflow:hidden;background:#0b1a3e;border:8px solid #141010;box-shadow:inset 0 0 50px rgba(0,0,0,.8);min-width:0}
 .tv-screen::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.5));pointer-events:none}
-.tv-inner{padding:12px 14px 0;color:#fff;font-size:.82rem;display:grid;gap:8px;animation:tvflick 5s infinite}
+.tv-inner{padding:12px 14px 0;color:#fff;font-size:.82rem;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:8px;animation:tvflick 5s infinite;height:100%;box-sizing:border-box}
+.tvwrap .tv-screen{height:370px}@media (max-width:520px){.tvwrap .tv-screen{height:430px}}
+.tv-pages{position:relative;min-height:0;overflow:hidden}.tv-page{position:absolute;inset:0;display:grid;gap:8px;align-content:start;opacity:0;transform:translateX(18px);transition:opacity .5s,transform .5s;pointer-events:none;overflow:hidden}.tv-page.on{opacity:1;transform:none;pointer-events:auto}
+.tv-dots{display:flex;justify-content:center;gap:5px;padding-bottom:2px}.tv-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25)}.tv-dots i.on{background:#ffd05a}.tv-now{margin:0;font-size:.8rem;opacity:.9}
 @keyframes tvflick{0%,46%,49%,71%,74%,100%{opacity:1}47%{opacity:.78}72%{opacity:.9}}
 .tv-top{display:flex;align-items:center;gap:8px}
 .tv-logo{background:#d02a2a;font-family:var(--font-display);font-weight:800;padding:2px 8px;border-radius:4px;letter-spacing:.04em}
@@ -521,7 +524,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .s8-deal{background:linear-gradient(160deg,#ff3ad8,#7a1aa0);border-radius:12px;padding:12px;display:grid;gap:4px;text-align:center}.s8-deal small{font:800 .62rem/1 monospace;letter-spacing:.14em;color:#fff6a0}.s8-deal b{font-size:1.05rem}.s8-deal span{font-size:.74rem;opacity:.9}.s8-price s{opacity:.7}.s8-price b{font-size:1.4rem;color:#fff6a0}
 .tv-input{border:0;background:#2a1a10;color:#ffd05a;font-weight:800;border-radius:8px;padding:6px 8px;font-size:.66rem;letter-spacing:.06em;line-height:1.3;box-shadow:inset 0 -2px 0 rgba(0,0,0,.4)}
 .tv-input b{display:block;color:#fff;font-size:.8rem}
-.con-wrap{background:#000;line-height:0}
+.con-wrap{background:#000;line-height:0}.tvwrap .con-wrap{height:100%;display:flex;align-items:center;justify-content:center}.tvwrap .con-wrap canvas{max-height:100%;max-width:100%;object-fit:contain}.tvwrap .nosig{position:absolute;inset:0;min-height:0}
 #vhsCv{width:100%;max-width:100%;aspect-ratio:4/3;display:block}
 .vcr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 14px;align-items:center;background:linear-gradient(#2e2e34,#141418);border-radius:12px;padding:12px 16px;box-shadow:0 8px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);margin:0 6px 8px;color:#ddd}
 .vcr-brand{font-family:var(--font-display);font-weight:800;color:#c8ccd4;font-size:.8rem;letter-spacing:.05em;line-height:1.1}
@@ -5222,6 +5225,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:80,n:'Steady Screen',items:['Bug fix: the cabin TV stays the same size on every channel. Channels with more to show now flip through pages on their own every few seconds, with dots showing which page you’re on.']},
  {v:79,n:'Prime Time',items:['The cabin TV has channels now! Flip with CH ▲▼.','Channel 4, LLNN: headlines from around the lake: contest leaders, the community goal, new museum plaques, records and arcade leaders.','Channel 5, Fish or Fake?: a daily quiz show. Is each fish real, or made up for Lantern Lake? 5 prize tickets per right answer, plus a bonus for a perfect show.','Channel 6, LLBA Tonight: live scores when games are on, last night’s results, the play of the night and standings from the basketball league.','Channel 8, the Lake Shopping Channel: one deal a day (decor at 30% off, potion and material bundles) and now and then a TV-exclusive boat paint, Test Pattern.']},
  {v:78,n:'Clear Picture',items:['Bug fix: the cabin TV now fits the screen, so you no longer have to scroll sideways to see the power and input buttons.']},
  {v:77,n:'Fishdle',items:['New phone app: Fishdle! Guess the daily mystery fish in 6 tries. Each guess tells you if the water, rarity, max size, bite times and weather match, are close, or point higher or lower.','Everyone gets the same fish each day. Solving it pays up to 60 prize tickets (on top of the arcade’s daily limit), and keeps a streak going.','Tap Copy result to share your green and yellow squares in Discord or a text, without spoiling the answer.']},
@@ -6705,8 +6709,16 @@ function tapeWrestle(x,t){
 // ---------- TV news ----------
 const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 function openTV(){ensureFc();ensureSched();renderTV();setTimeout(tvBug,50);hideTip();$('tvModal').hidden=false;applyInput();$('tvInput').focus()}
-function renderTV(){const ch=TVCH[TVS().ch];$('tvCh').textContent=`CH ${ch.n}`;$('tvChName').textContent=ch.nm;
-  if(ch.id!=='lake7'){$('tvInner').innerHTML=ch.id==='news'?tvNewsHTML():ch.id==='quiz'?tvQuizHTML():ch.id==='sports'?tvSportsHTML():tvShopHTML();tvBind();return}
+// The TV screen has a fixed size. Channels with more to show split it into pages that rotate every few seconds.
+const TVP={i:0,t:null,n:1};
+function renderTV(keep){const ch=TVCH[TVS().ch];$('tvCh').textContent=`CH ${ch.n}`;$('tvChName').textContent=ch.nm;
+  const P=ch.id==='news'?tvNewsParts():ch.id==='quiz'?tvQuizParts():ch.id==='sports'?tvSportsParts():ch.id==='shop'?tvShopParts():tvLake7Parts();
+  const pages=P.pages.filter(Boolean);if(!keep||TVP.ch!==ch.id)TVP.i=0;TVP.ch=ch.id;TVP.n=pages.length;if(TVP.i>=pages.length)TVP.i=0;
+  $('tvInner').innerHTML=`${P.head}<div class="tv-pages">${pages.map((h,i)=>`<div class="tv-page${i===TVP.i?' on':''}">${h}</div>`).join('')}</div>${pages.length>1?`<div class="tv-dots">${pages.map((_,i)=>`<i class="${i===TVP.i?'on':''}"></i>`).join('')}</div>`:''}${P.foot||''}`;
+  tvBind();clearInterval(TVP.t);if(pages.length>1)TVP.t=setInterval(tvNextPage,7000)}
+function tvNextPage(){if($('tvModal').hidden||S.tvInput==='vhs'){clearInterval(TVP.t);return}const ps=document.querySelectorAll('#tvInner .tv-page'),ds=document.querySelectorAll('#tvInner .tv-dots i');if(ps.length<2)return;
+  ps[TVP.i].classList.remove('on');if(ds[TVP.i])ds[TVP.i].classList.remove('on');TVP.i=(TVP.i+1)%ps.length;ps[TVP.i].classList.add('on');if(ds[TVP.i])ds[TVP.i].classList.add('on')}
+function tvLake7Parts(){
   const days=[1,2,3,4,5].map(i=>S.day+i);
   const fc=days.map(dd=>{const f=S.fc[dd];return `<div class="fc"><b>${WD[dd%7]}</b>${wxSvg(f.wx)}<span>${WX[f.wx].n}</span><small>${f.hi}° / ${f.lo}°</small></div>`}).join('');
   const now=S.day*1440+S.min,list=S.sched.filter(sp=>sp.day*1440+sp.min>=now&&sp.day<=S.day+5).slice(0,5);
@@ -6715,10 +6727,7 @@ function renderTV(){const ch=TVCH[TVS().ch];$('tvCh').textContent=`CH ${ch.n}`;$
   const tf=topFish(),today=S.fc[S.day];
   const tick=[`Right now: ${WX[S.wx.id].n}${today?`, high of ${today.hi}°`:''}`,tf[0]?`Local angler's record: a ${tf[0].w.toFixed(2)} lb ${tf[0].f.n}`:'Bait shop reports bluegill biting off the dock',`${COLL.filter(c=>S.coll[c.id]).length} curios pulled from the water so far`,`${S.trophies.length} tournament trophies on the shelf`,'Residents report strange green lights off Misty Bay','Reminder: grilled fish taste best taken off the heat at the right moment'];
   const run=tick.join(' &nbsp;•&nbsp; ');
-  $('tvInner').innerHTML=`<div class="tv-top"><span class="tv-logo">LAKE<b>7</b></span><span class="tv-live">LIVE</span><span class="tv-clock">${WD[S.day%7]} · Day ${S.day} · ${fmtClock(S.min)}</span></div>
-    <div class="tv-h">5-day forecast</div><div class="fcrow">${fc}</div>
-    <div class="tv-h">Tournament schedule</div><ul class="tvlist">${tl}</ul>
-    <div class="ticker"><span class="tk-tag">NEWS</span><div class="tk-track"><div class="tk-run">${run} &nbsp;•&nbsp; ${run} &nbsp;•&nbsp;</div></div></div>`;
+  return {head:`<div class="tv-top"><span class="tv-logo">LAKE<b>7</b></span><span class="tv-live">LIVE</span><span class="tv-clock">${WD[S.day%7]} · Day ${S.day} · ${fmtClock(S.min)}</span></div>`,pages:[`<div class="tv-h">5-day forecast</div><div class="fcrow">${fc}</div><div class="tv-h">Right now</div><p class="tv-now">${WX[S.wx.id].n}${today?` · high of ${today.hi}°, low of ${today.lo}°`:''}. Every angler on the lake shares this sky.</p>`,`<div class="tv-h">Tournament schedule</div><ul class="tvlist">${tl}</ul>`],foot:`<div class="ticker"><span class="tk-tag">NEWS</span><div class="tk-track"><div class="tk-run">${run} &nbsp;•&nbsp; ${run} &nbsp;•&nbsp;</div></div></div>`};
 }
 
 // ---------- Variants ----------
@@ -7761,32 +7770,33 @@ function tvNews(){const L=[],m=mpS();
   return L}
 const TVN={champ:null,t:0};
 async function tvNewsFetch(){const m=mpS();if(!m.id||Date.now()-TVN.t<120000)return;TVN.t=Date.now();try{const r=await api('arcade/top',{id:m.id,key:m.key,g:'toss'});if(r.top&&r.top[0])TVN.champ=`${r.top[0].name} leads Bobber Toss this week with ${Number(r.top[0].s).toLocaleString()} points`;if(TVS().ch===1&&!$('tvModal').hidden)renderTV()}catch(e){}}
-function tvNewsHTML(){const L=tvNews(),lead=L[0];tvNewsFetch();
-  return tvTop('LL<b>NN</b>','<span class="tv-live">LIVE</span>')+`<div class="tv-news-lead"><small>${lead[0]}</small><b>${esc(lead[1])}</b></div><ul class="tvlist">${L.slice(1,7).map(([t,s])=>`<li><span>${t}</span><b>${esc(s)}</b></li>`).join('')}</ul>`+
-    `<div class="ticker"><span class="tk-tag">LLNN</span><div class="tk-track"><div class="tk-run">${L.map(x=>esc(x[1])).join(' &nbsp;•&nbsp; ')} &nbsp;•&nbsp; </div></div></div>`}
+function tvNewsParts(){const L=tvNews(),lead=L[0];tvNewsFetch();const it=([t,s])=>`<li><span>${t}</span><b>${esc(s)}</b></li>`,rest=L.slice(1);
+  return {head:tvTop('LL<b>NN</b>','<span class="tv-live">LIVE</span>'),pages:[`<div class="tv-news-lead"><small>${lead[0]}</small><b>${esc(lead[1])}</b></div><ul class="tvlist">${rest.slice(0,2).map(it).join('')}</ul>`,rest.length>2?`<ul class="tvlist">${rest.slice(2,5).map(it).join('')}</ul>`:'',rest.length>5?`<ul class="tvlist">${rest.slice(5,8).map(it).join('')}</ul>`:''],foot:
+    `<div class="ticker"><span class="tk-tag">LLNN</span><div class="tk-track"><div class="tk-run">${L.map(x=>esc(x[1])).join(' &nbsp;•&nbsp; ')} &nbsp;•&nbsp; </div></div></div>`}}
 // --- Fish or Fake? 5 fish a day: is it a real species, or one invented for Lantern Lake?
 function tvQuizQs(day){const R=tvSeed('fof'+day),real=FISH.filter(f=>!f.quest&&WATERS.some(w=>w.id===f.at)&&WIKI[f.id]&&!WIKI_NOTE[f.id]),fake=FISH.filter(f=>!f.quest&&WATERS.some(w=>w.id===f.at)&&LORE[f.id]),out=[],used=new Set();
   const nf=2+Math.floor(R()*2);for(let i=0;i<5;i++){const isF=i<nf,pool=isF?fake:real;let f;do{f=pool[Math.floor(R()*pool.length)]}while(used.has(f.id));used.add(f.id);out.push({id:f.id,fake:isF})}
   for(let i=out.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[out[i],out[j]]=[out[j],out[i]]}return out}
 function tvQuiz(){const t=TVS(),d=arcUTC();if(!t.q||t.q.d!==d)t.q={d,a:[],paid:0};return t.q}
 function tvAnswer(fake){const q=tvQuiz(),Q=tvQuizQs(q.d);if(q.a.length>=5)return;const cur=Q[q.a.length];q.a.push(fake===cur.fake?1:0);sfx(fake===cur.fake?'chime':'miss');
-  if(q.a.length>=5){const n=q.a.reduce((a,b)=>a+b,0),pay=n*5+(n===5?5:0);q.paid=pay;if(pay){arcGive(pay);showToast(`+${pay} prize tickets`,'Fish or Fake?')}}save();renderTV()}
-function tvQuizHTML(){const q=tvQuiz(),Q=tvQuizQs(q.d),i=q.a.length;let h=tvTop('FISH <b>OR</b> FAKE?',`<span class="tv-live">Q ${Math.min(5,i+1)}/5</span>`);
+  if(q.a.length>=5){const n=q.a.reduce((a,b)=>a+b,0),pay=n*5+(n===5?5:0);q.paid=pay;if(pay){arcGive(pay);showToast(`+${pay} prize tickets`,'Fish or Fake?')}}save();renderTV(true)}
+function tvQuizParts(){const q=tvQuiz(),Q=tvQuizQs(q.d),i=q.a.length;const head=tvTop('FISH <b>OR</b> FAKE?',`<span class="tv-live">Q ${Math.min(5,i+1)}/5</span>`);let h='';
   if(i>0){const p=Q[i-1],f=FI(p.id),ok=q.a[i-1];h+=`<div class="fof-rev ${ok?'ok':'no'}"><b>${ok?'Correct!':'Not quite!'} ${esc(f.n)} is ${p.fake?'made up for Lantern Lake':'a real fish'}.</b><span>${p.fake?esc(LORE[p.id]||''):'You’ll find its real Wikipedia facts under Fish facts in your Logbook once you catch one.'}</span></div>`}
   if(i<5){const f=FI(Q[i].id);h+=`<div class="fof-q"><div class="fof-host">🎤 <i>Gil Finnegan:</i> “Real fish, or a fishy fib?”</div><div class="fof-fish">${fishSvg(RCOL[f.r])}<b>${esc(f.n)}</b><small>${RAR[f.r]} · ${W(f.at).n}</small></div><div class="fof-btns"><button class="jig" data-fof="0">🐟 Real fish</button><button class="jig" data-fof="1">🎭 Fake fish</button></div><p class="fof-note">5 questions a day · 5 tickets each, 5 bonus for a perfect show</p></div>`}
   else{const n=q.a.reduce((a,b)=>a+b,0);h+=`<div class="fof-end"><b>${n}/5 ${n===5?'· PERFECT SHOW!':''}</b><span>${q.paid?`+${q.paid} prize tickets`:'No tickets today'} · New show in ${tvUntil()}</span><div class="fof-dots">${q.a.map(x=>x?'🟩':'⬛').join('')}</div></div>`}
-  return h}
+  return {head,pages:[h]}}
 // --- LLBA Tonight: highlights from the shared basketball league
-function tvSportsHTML(){const b=sbInit(),season=b.season,d=sbLDay(),done=sbDoneDays();let h=tvTop('LLBA <b>TONIGHT</b>','<span class="tv-live">SPORTS</span>');
+function tvSportsParts(){const b=sbInit(),season=b.season,d=sbLDay(),done=sbDoneDays();const head=tvTop('LLBA <b>TONIGHT</b>','<span class="tv-live">SPORTS</span>'),pg=[];let h='';
   const row=(g,r,live)=>{const hw=r.hs>r.as;return `<li class="sp-g"><span>${live?(live.state==='live'?`${live.q} ${live.clock}`:'7:00 PM'):(r.ot?'Final/OT':'Final')}</span><b>${tBadge(g.h)} ${LT[g.h].nick} <em>${live?live.hs:r.hs}</em></b><b>${tBadge(g.a)} ${LT[g.a].nick} <em>${live?live.as:r.as}</em></b></li>`};
-  if(S.min>=SB_OPEN&&S.min<SB_END){const gs=sbFeatured(season,d);h+=`<div class="tv-h">Live now</div><ul class="tvlist sp">${gs.map(g=>{const r=sbGame(season,d,g.h,g.a);return row(g,r,sbLive(r,S.min))}).join('')}</ul>`}
-  else if(S.min<SB_OPEN&&d<=sbSeasonLen(season)){const gs=sbFeatured(season,d);h+=`<div class="tv-h">Tonight · tip-off 7:00 PM</div><ul class="tvlist sp">${gs.map(g=>{const r=sbGame(season,d,g.h,g.a);return row(g,r,{state:'pre',hs:'',as:''})}).join('')}</ul>`}
+  if(S.min>=SB_OPEN&&S.min<SB_END){const gs=sbFeatured(season,d);h=`<div class="tv-h">Live now</div><ul class="tvlist sp">${gs.map(g=>{const r=sbGame(season,d,g.h,g.a);return row(g,r,sbLive(r,S.min))}).join('')}</ul>`}
+  else if(S.min<SB_OPEN&&d<=sbSeasonLen(season)){const gs=sbFeatured(season,d);h=`<div class="tv-h">Tonight · tip-off 7:00 PM</div><ul class="tvlist sp">${gs.map(g=>{const r=sbGame(season,d,g.h,g.a);return row(g,r,{state:'pre',hs:'',as:''})}).join('')}</ul>`}
   if(done>=1){const gs=sbDayGames(season,done).map(g=>({g,r:sbGame(season,done,g.h,g.a)}));if(gs.length){const pt=[...gs].sort((x,y)=>(y.r.ot-x.r.ot)||(Math.abs(x.r.hs-x.r.as)-Math.abs(y.r.hs-y.r.as)))[0],w=pt.r.hs>pt.r.as?pt.g.h:pt.g.a,l=w===pt.g.h?pt.g.a:pt.g.h;
-    h+=`<div class="tv-news-lead sp"><small>PLAY OF THE NIGHT</small><b>${LT[w].city} ${LT[w].nick} edge the ${LT[l].nick} ${Math.max(pt.r.hs,pt.r.as)}-${Math.min(pt.r.hs,pt.r.as)}${pt.r.ot?' in overtime':''}!</b></div>
-      <div class="tv-h">Last night’s scores${done>SB_REG?' · Playoffs':''}</div><ul class="tvlist sp">${gs.slice(0,4).map(x=>row(x.g,x.r)).join('')}</ul>`}}
-  else if(b.champs.length){const c=b.champs[0];h+=`<div class="tv-news-lead sp"><small>CHAMPIONS</small><b>The ${tName(c.champ)} won season ${c.season}! A new season tips off tonight.</b></div>`}
-  if(done>=1&&done<=SB_REG){const st=sbStandings(season,done),top=c=>sbSort(st.filter(r=>r.t.conf===c),season).slice(0,3);h+=`<div class="tv-h">Standings</div><div class="sp-st">${['East','West'].map(c=>`<div><small>${c}</small>${top(c).map((r,i)=>`<span>${i+1}. ${tBadge(r.t.i)} ${LT[r.t.i].nick} <em>${r.w}-${r.l}</em></span>`).join('')}</div>`).join('')}</div>`}
-  return h+`<p class="fof-note">Bet on tonight’s games in the FinDuel app on your phone.</p>`}
+    if(h)pg.push(h+'<p class="fof-note">Bet on tonight’s games in the FinDuel app.</p>');h='';pg.push(`<div class="tv-news-lead sp"><small>PLAY OF THE NIGHT</small><b>${LT[w].city} ${LT[w].nick} edge the ${LT[l].nick} ${Math.max(pt.r.hs,pt.r.as)}-${Math.min(pt.r.hs,pt.r.as)}${pt.r.ot?' in overtime':''}!</b></div>
+      <div class="tv-h">Last night’s scores${done>SB_REG?' · Playoffs':''}</div><ul class="tvlist sp">${gs.slice(0,3).map(x=>row(x.g,x.r)).join('')}</ul>`)}}
+  else if(b.champs.length){const c=b.champs[0];pg.push(`<div class="tv-news-lead sp"><small>CHAMPIONS</small><b>The ${tName(c.champ)} won season ${c.season}! A new season tips off tonight.</b></div>`)}
+  if(h)pg.unshift(h+'<p class="fof-note">Bet on tonight’s games in the FinDuel app.</p>');
+  if(done>=1&&done<=SB_REG){const st=sbStandings(season,done),top=c=>sbSort(st.filter(r=>r.t.conf===c),season).slice(0,3);pg.push(`<div class="tv-h">Standings</div><div class="sp-st">${['East','West'].map(c=>`<div><small>${c}</small>${top(c).map((r,i)=>`<span>${i+1}. ${tBadge(r.t.i)} ${LT[r.t.i].nick} <em>${r.w}-${r.l}</em></span>`).join('')}</div>`).join('')}</div>`)}
+  if(!pg.length)pg.push('<p class="tv-now">No games today. Check back tonight.</p>');return {head,pages:pg}}
 // --- Lake Shopping Channel: one deal a day
 function tvDeal(){const d=arcUTC(),R=tvSeed('shop'+d),kind=R()<1/7?'paint':['decor','pots','mats'][Math.floor(R()*3)];
   if(kind==='paint'&&!PNT().own.testpat)return {kind,id:'testpat',n:'Test Pattern boat paint',d:'Color bars and a little “PLEASE STAND BY” on your hull. Only on Shop 8.',c:Math.max(5000,rwCoins(300))};
@@ -7799,12 +7809,12 @@ function tvBuy(){const t=TVS(),d=arcUTC(),it=tvDeal();if(t.shop===d||S.coins<it.
   else if(it.kind==='mats'){for(const [k,n] of Object.entries(it.m))S.mats[k]=(S.mats[k]||0)+n;storeDirty=true;showToast('Your bundle is in Storage','Shop 8')}
   else{for(const k of it.ps)givePotion(k,1);showToast('Five potions added','Shop 8')}
   save();renderTV();try{renderAll()}catch(e){}}
-function tvShopHTML(){const t=TVS(),it=tvDeal(),bought=t.shop===arcUTC();
-  return tvTop('SHOP <b>8</b>','<span class="tv-live">CALL NOW</span>')+`<div class="shop8"><div class="s8-host">📞 <i>Bonnie Bargain:</i> “${bought?'Thanks for shopping! See you tomorrow, sweetie!':'Operators are standing by!'}”</div>
+function tvShopParts(){const t=TVS(),it=tvDeal(),bought=t.shop===arcUTC();
+  return {head:tvTop('SHOP <b>8</b>','<span class="tv-live">CALL NOW</span>'),pages:[`<div class="shop8"><div class="s8-host">📞 <i>Bonnie Bargain:</i> “${bought?'Thanks for shopping! See you tomorrow, sweetie!':'Operators are standing by!'}”</div>
     <div class="s8-deal"><small>TODAY ONLY · ${it.kind==='paint'?'TV EXCLUSIVE':it.kind==='decor'?'30% OFF':'BUNDLE'}</small><b>${esc(it.n)}</b><span>${esc(it.d)}</span>
     <div class="s8-price">${it.was?`<s>$${money(it.was)}</s> `:''}<b>$${money(it.c)}</b></div>
     <button class="jig" id="s8Buy" ${bought||S.coins<it.c?'disabled':''}>${bought?'Sold to you!':S.coins<it.c?'Not enough cash':'Buy now'}</button></div>
-    <p class="fof-note">One deal a day · next deal in ${tvUntil()}</p></div>`}
+    <p class="fof-note">One deal a day · next deal in ${tvUntil()}</p></div>`]}}
 function tvBind(){document.querySelectorAll('[data-fof]').forEach(b=>b.onclick=()=>tvAnswer(b.dataset.fof==='1'));const sb=$('s8Buy');if(sb)sb.onclick=tvBuy}
 
 // ==FRIENDS EXTRAS== lake monster, challenges, guestbooks and yard likes
