@@ -145,6 +145,11 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .away.over-title{z-index:70}
 .away{position:fixed;inset:0;background:rgba(5,12,16,.7);display:grid;place-items:center;padding:20px;z-index:20}
 .away .box{max-width:380px;width:100%;display:grid;gap:10px}
+.away .box.awaybox{max-height:86vh;overflow:auto;overscroll-behavior:contain}.awaybox #awayOk{position:sticky;bottom:0;box-shadow:0 -10px 14px var(--panel)}
+#awayBody{display:grid;gap:8px;min-width:0}.aw-sub{margin:0;color:var(--muted)}.aw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px}
+.aw-st{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:grid;gap:1px}.aw-st span{font-size:1rem}.aw-st b{font-variant-numeric:tabular-nums;font-size:1rem}.aw-st small{color:var(--muted);font-size:.74rem}
+.aw-new{margin:0;font-size:.88rem}.aw-d{border:1px solid var(--line);border-radius:10px;padding:6px 9px;background:rgba(255,255,255,.03)}.aw-d summary{cursor:pointer;font-weight:700;font-size:.88rem}.aw-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;max-height:180px;overflow:auto}
+.aw-chip{font-size:.76rem;background:rgba(255,255,255,.07);border-radius:999px;padding:2px 8px}.aw-chip b{color:var(--gold)}.aw-notes{margin:0;padding-left:18px;font-size:.82rem;color:var(--muted);display:grid;gap:2px}
 .away p{margin:0;color:var(--muted)}
 .away .box.xfer{max-width:440px;gap:12px}
 .xf-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.xf-h h2{margin:2px 0 0}
@@ -1423,10 +1428,10 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 </div>
 
 <div class="away" id="away" hidden>
-  <div class="box">
+  <div class="box awaybox">
     <span class="eyebrow">While you were away</span>
     <h2 id="awayTitle">Welcome back</h2>
-    <p id="awayBody"></p>
+    <div id="awayBody"></div>
     <button class="jig" id="awayOk">Back to the water</button>
   </div>
 </div>
@@ -2597,14 +2602,17 @@ function offline(sec){
   const slept=sec>1200;if(slept){S.stamina=100;S.sleep=null}S.hunger=Math.max(0,S.hunger-Math.min(60,sec/60*.5));
   const hrs=sec/3600, capped=sec>cap;
   $('awayTitle').textContent=`You landed ${n.toLocaleString()} fish`;
-  $('awayBody').textContent=`Gone ${hrs>=1?hrs.toFixed(1)+' hours':Math.round(sec/60)+' minutes'}. Your cooler took in $${money(earned)} worth of fish.`+(slept?' You slept at home and woke up rested.':'')+
-    (news.length?` New to the logbook: ${[...new Set(news)].join(', ')}.`:'')+
-    (junkN?` ${junkN} pieces of junk went to storage.`:'')+(tossed?` ${tossed} more were tossed back because storage was full.`:'')+
-    (vars.length?` Rare variants: ${vars.join(', ')}!`:'')+(musKept?` ${musKept} museum-worthy fish went to your Museum Case!`:'')+
-    (matsN?` ${matsN} crafting materials went to storage.`:'')+
-    (cols.length?` Also found: ${cols.join(', ')}!`:'')+
-    (capped?` Your ${GEAR.shack.items[S.shack].n} only covers ${SHACK_HRS[S.shack]}h away. Upgrade your home to fish longer.`:'')+
-    (S.tour&&S.tour.phase!=='done'?' Your tournament was paused while you were gone.':'');
+  {const grp=a=>{const m=new Map();for(const x of a)m.set(x,(m.get(x)||0)+1);return [...m].sort((p,q)=>q[1]-p[1]).map(([k,c])=>`<span class="aw-chip">${esc(k)}${c>1?` <b>×${c}</b>`:''}</span>`).join('')};
+    const nw=[...new Set(news)],stat=(ic,v,l)=>`<div class="aw-st"><span>${ic}</span><b>${v}</b><small>${l}</small></div>`;
+    let h=`<p class="aw-sub">Gone ${hrs>=1?hrs.toFixed(1)+' hours':Math.round(sec/60)+' minutes'}.${slept?' You slept at home and woke up rested.':''}</p><div class="aw-grid">`+stat('💰','$'+money(earned),'in your cooler')+stat('🐟',n.toLocaleString(),'fish landed')+
+      (vars.length?stat('✨',vars.length.toLocaleString(),'rare variants'):'')+(musKept?stat('🏛️',musKept,'for the museum'):'')+(matsN?stat('🧰',matsN.toLocaleString(),'materials'):'')+(junkN?stat('🗑️',junkN.toLocaleString(),'junk stored'):'')+(cols.length?stat('🐚',cols.length,'treasures'):'')+'</div>';
+    if(nw.length)h+=nw.length<=4?`<p class="aw-new">📖 New to the logbook: <b>${nw.map(esc).join(', ')}</b></p>`:`<details class="aw-d"><summary>📖 New to the logbook (${nw.length})</summary><div class="aw-chips">${grp(nw)}</div></details>`;
+    if(vars.length)h+=`<details class="aw-d"><summary>✨ Rare variants (${vars.length})</summary><div class="aw-chips">${grp(vars)}</div></details>`;
+    if(cols.length)h+=`<details class="aw-d"><summary>🐚 Treasures found (${cols.length})</summary><div class="aw-chips">${grp(cols)}</div></details>`;
+    const notes=[];if(musKept)notes.push(`${musKept} museum-worthy fish went to your Museum Case.`);if(tossed)notes.push(`${tossed.toLocaleString()} pieces of junk were tossed back because storage was full.`);
+    if(capped)notes.push(`Your ${GEAR.shack.items[S.shack].n} only covers ${SHACK_HRS[S.shack]}h away. Upgrade your home to fish longer.`);if(S.tour&&S.tour.phase!=='done')notes.push('Your tournament was paused while you were gone.');
+    if(notes.length)h+=`<ul class="aw-notes">${notes.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+    $('awayBody').innerHTML=h}
   $('away').hidden=false;
 }
 
@@ -5270,6 +5278,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:87,n:'Tidy Welcome Back',items:['Bug fix: the “While you were away” summary no longer fills the whole screen after a long time away. It now shows a short summary, with rare variants and treasures in sections you can open.']},
  {v:86,n:'Yard of the Week',items:['A new Yard of the Week board in the Friends app shows this week’s most-liked yards, last week’s winner and past winners, with a Visit button for each.','Visit a random yard: one tap takes you to a random player’s place, so there are always new yards to discover and like.','Last week’s winner gets a gold ribbon on their name sign for the whole week, on top of the $25,000 and trophy.']},
  {v:85,n:'Home Sweet Home',items:['Arrange your cabin: tap Arrange to drag wall decor and furniture anywhere in the room, flip pieces, or put them away. You can hang as many wall pieces as you like.','New furniture at the crafting table: Floor Cushion, Side Table, Potted Palm, Bookshelf, Reading Armchair, Record Player and Wood Stove.','Wallpaper and floors: 8 wallpaper patterns and 6 floor styles in Decorate, all using your own colors.','Themes: set your colors, wallpaper and floor in one tap with themes like Nautical, Woodland and Midnight Lake.','Your old wall spots, fern and plushies stay right where they were.']},
  {v:84,n:'Orchard Days',items:['Every yard now has a native fruit: apples, cherries, peaches, pears, plums or lemons. You start with two of your own trees, which fruit every 4 hours.','Visit friends to pick fruit you can’t grow yet. Each friend’s tree can be picked once a day, and it doesn’t take anything from them.','Fruit from other yards sells for 5 times as much as your own. Plant one to grow that tree in your yard, and collect all six for a bonus.','Garden plots ($800, under Fences & hedges): plant carrots, tomatoes, corn, sunflowers or pumpkins. They keep growing while you’re away.','A new Pantry in Storage holds your fruit and crops. Eat them for hunger or sell them.','Bug fix: prices in the yard editor and on the For Sale sign now show the $ sign.']},
