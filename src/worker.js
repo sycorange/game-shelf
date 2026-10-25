@@ -63,6 +63,8 @@ async function init(db){
   try{await db.prepare('CREATE TABLE IF NOT EXISTS pinfail(k TEXT PRIMARY KEY,n INTEGER,ts INTEGER)').run()}catch(e){}
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS arc(k TEXT,g TEXT,pid TEXT,name TEXT,s REAL,ts INTEGER,PRIMARY KEY(k,g,pid))`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS arc_s ON arc(k,g,s)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS hostping(dev TEXT PRIMARY KEY,host TEXT,ts INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS sess(pid TEXT PRIMARY KEY,sid TEXT,kind TEXT,ts INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS grec(fish TEXT PRIMARY KEY,pid TEXT,w REAL,ts INTEGER)`),
@@ -446,6 +448,23 @@ async function route(req,env,url,ctx){
     await db.batch(st);
     if(ctx)ctx.waitUntil((async()=>{const c=await dcCfg(db);await dcPost(db,'catches',{embeds:[{color:0xc9a227,title:`🏛️ New museum plaque by ${me.name}`,description:`**${v?VAR_N[v]+' ':''}${fname}**: ${w.toFixed(2)} lb${prev?` (beat ${prev.name}'s ${(+prev.w).toFixed(2)} lb)`:' (first one!)'}`+dcLink(c)}]})})());
     return json({ok:true,prev:prev?{name:prev.name,w:prev.w,mine:prev.pid===me.id}:null})}
+  // Arcade high scores: weekly boards for Bobber Toss, Whack-a-Gar and Pinball (higher is better) and a daily board for
+  // Putt of the Day (fewest strokes, everyone plays the same hole). Last week's #1 on each board earns a trophy in their game.
+  if(p.startsWith('arcade/')){const G={toss:[1,1000],gar:[1,300],pin:[1,5e6],putt:[1,7]},utc=new Date(now).toISOString().slice(0,10),keyOf=g=>g==='putt'?'d:'+utc:weekKey();
+    const topOf=async(k,g)=>(await db.prepare(`SELECT pid,name,s FROM arc WHERE k=? AND g=? ORDER BY s ${g==='putt'?'ASC':'DESC'},ts ASC LIMIT 10`).bind(k,g).all()).results;
+    if(p==='arcade/score'){const g=String(b.g||''),lim=G[g],sc=Math.round(+b.s);if(!lim||!(sc>=lim[0]&&sc<=lim[1]))return json({error:'bad-score'},400);const k=keyOf(g);
+      const prev=(await topOf(k,g))[0];
+      await db.prepare(`INSERT INTO arc(k,g,pid,name,s,ts) VALUES(?,?,?,?,?,?) ON CONFLICT(k,g,pid) DO UPDATE SET s=excluded.s,ts=excluded.ts,name=excluded.name WHERE excluded.s${g==='putt'?'<':'>'}arc.s`).bind(k,g,me.id,me.name,sc,now).run();
+      const better=g==='putt'?'<':'>',rank=1+((await db.prepare(`SELECT COUNT(*) AS c FROM arc WHERE k=? AND g=? AND s${better}?`).bind(k,g,sc).first()).c|0);
+      const record=g!=='putt'&&rank===1&&(!prev||(prev.pid!==me.id&&sc>prev.s));
+      if(record&&ctx)ctx.waitUntil((async()=>{const c=await dcCfg(db),nm={toss:'Bobber Toss',gar:'Whack-a-Gar',pin:'Pinball'}[g];await dcPost(db,'catches',{embeds:[{color:0xff3ad8,title:`🕹️ New ${nm} record by ${me.name}`,description:`**${sc.toLocaleString('en-US')}** points at the Lantern Pier Arcade${prev?` (beat ${prev.name}'s ${Number(prev.s).toLocaleString('en-US')})`:''}`+dcLink(c)}]})})());
+      return json({ok:true,rank,record})}
+    if(p==='arcade/top'){const g=String(b.g||'');if(!G[g])return json({error:'bad-game'},400);const k=keyOf(g),top=await topOf(k,g);
+      const mine=await db.prepare('SELECT s FROM arc WHERE k=? AND g=? AND pid=?').bind(k,g,me.id).first();let rank=null;
+      if(mine)rank=1+((await db.prepare(`SELECT COUNT(*) AS c FROM arc WHERE k=? AND g=? AND s${g==='putt'?'<':'>'}?`).bind(k,g,mine.s).first()).c|0);
+      return json({top,me:mine?{s:mine.s,rank}:null,key:k})}
+    if(p==='arcade/champs'){const lw=String(+weekKey()-1),out={};for(const g of ['toss','gar','pin']){const t=(await topOf(lw,g))[0];if(t)out[g]={pid:t.pid,name:t.name,s:t.s,wk:lw}}return json({champs:out})}
+    return json({error:'not-found'},404)}
   {const xr=await extraRoutes(p,db,me,b,now,url);if(xr)return xr}
   // One session at a time: pressing Play claims the session; saves and syncs from any older session are refused with 'taken'.
   if(p==='sess/claim'){const sid=clean(b.sid,16);if(sid.length<6)return json({error:'bad-request'},400);

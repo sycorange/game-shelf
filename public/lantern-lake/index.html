@@ -180,7 +180,16 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .set-claim{margin-left:4px}.set-done{color:var(--reed);font-weight:700}.set-rw{color:var(--muted)}
 ol.sig{margin:6px 0;padding-left:20px;display:grid;gap:2px;font-size:.84rem}ol.sig li.got{color:#2a7a2a}ol.sig li.cur{font-weight:800}ol.sig small{color:#6a6050}
 .away .box.kp{max-width:440px;gap:8px}#kpCv{aspect-ratio:3/2;border-radius:10px;cursor:pointer;touch-action:manipulation}.kp-msg{font-weight:700;color:var(--fg)!important;min-height:1.3em}
-.away .box.mm{max-width:460px}#mmCv{aspect-ratio:3/2;border-radius:10px;width:100%}
+.away .box.mm{max-width:460px}
+.away .box.ag-box{max-width:400px;gap:6px}#agCv{width:100%;aspect-ratio:3/4;border-radius:12px;touch-action:none;cursor:crosshair;max-height:62vh;object-fit:contain}
+.ag-ctl{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px}.ag-ctl .jig{padding:12px 4px;font-size:1.05rem;touch-action:manipulation;user-select:none}.ag-rank{display:block;font-weight:700;margin-top:4px}
+.away .box.arc-box{max-width:760px}.arc-box>*,#arcBody{min-width:0}#arcBody{overflow:hidden}.arc-roomw{max-width:100%;margin-top:8px;border-radius:12px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin}#arcRoom{width:100%;aspect-ratio:12/7;display:block;touch-action:pan-x}.arc-swipe{display:none}
+@media (max-width:620px){#arcRoom{width:640px;max-width:none}.arc-swipe{display:inline}}
+.arc-box{background:linear-gradient(170deg,#24123c,#140a24)!important}.arc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.arc-tix b{font-size:1.4rem;display:block;color:#ffd05a}.arc-tix small{color:var(--muted)}
+.arc-grid,.arc-prz{display:grid;gap:8px;margin-top:8px}.arc-cab,.arc-pi{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,120,220,.25)}
+.arc-cab .ac-ic,.arc-pi .ap-ic{font-size:1.9rem;text-align:center}.arc-cab p,.arc-pi p{margin:2px 0;font-size:.8rem;color:var(--muted);line-height:1.35}.arc-cab small{font-size:.74rem;color:#ffb8e8}.arc-pi.own{opacity:.6}
+.arc-bd{list-style:none;margin:8px 0;padding:0;display:grid;gap:4px}.arc-bd li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.05)}.arc-bd li.me{background:rgba(255,208,90,.15)}
+@media (max-width:520px){.arc-cab,.arc-pi{grid-template-columns:38px minmax(0,1fr);}.arc-cab .jig,.arc-pi .jig{grid-column:1/-1}}#mmCv{aspect-ratio:3/2;border-radius:10px;width:100%}
 .mm-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mm-pad .jig{padding:12px 4px;font-size:1rem}.mm-pad .jig:disabled{opacity:.45}
 .q4fake{outline:1px dashed rgba(160,210,240,.7);outline-offset:-3px;cursor:pointer;animation:q4wob 3.2s ease-in-out infinite}.q4fake svg{transform:scaleX(-1)}
 @keyframes q4wob{50%{filter:hue-rotate(12deg) brightness(1.06)}}.q4ink{display:block;color:#8ac4e0;font-style:italic;margin-top:2px}
@@ -1164,6 +1173,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .l7-hours{display:grid;grid-auto-flow:column;grid-auto-columns:46px;gap:2px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.l7-hours::-webkit-scrollbar{display:none}
 .l7-hours div{display:grid;justify-items:center;gap:3px;font-size:.72rem}.l7-hours small{color:#a8bcdc;font-size:.68rem}.l7-hours b{font-size:.84rem}.l7-hours svg{width:26px;height:26px}.l7-hours .now small{color:#fff;font-weight:800}
 .l7-days{list-style:none;margin:0;padding:0;display:grid}
+.l7-up{list-style:none;margin:0;padding:0;display:grid;gap:2px}.l7-up li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;grid-template-rows:auto auto;column-gap:8px;align-items:center;padding:5px 0;border-top:1px solid rgba(255,255,255,.08);font-size:.8rem}.l7-up li:first-child{border-top:0}
+.l7-up svg{width:24px;height:24px;grid-row:span 2}.l7-up b{font-size:.84rem}.l7-up span{color:#cfdcf2;font-size:.74rem;grid-column:2}.l7-up small{grid-column:3;grid-row:1/3;color:#a8bcdc;font-size:.72rem}
+.l7-note{margin:6px 0 0;font-size:.7rem;color:#a8bcdc}.l7-split{display:flex;align-items:center;gap:2px}.l7-split svg{width:22px!important;height:22px!important}.l7-split i{font-style:normal;opacity:.6;font-size:.7rem}.l7-days .nm small{opacity:.7;font-size:.66rem}
 .l7-days li{display:grid;grid-template-columns:44px 28px minmax(0,1fr) 32px 70px 32px;gap:6px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,255,255,.08);font-size:.8rem}
 .l7-days li:first-child{border-top:0}.l7-days li b{font-size:.82rem}.l7-days svg{width:26px;height:26px}.l7-days .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#cfdcf2;font-size:.74rem}
 .l7-days .lo{color:#9fb0cc;text-align:right}.l7-days .hi{font-weight:800}
@@ -1641,6 +1653,17 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
     <p id="kpMsg" class="kp-msg"></p><p id="kpHud" class="xf-sub"></p>
     <div class="xf-row"><button class="jig" id="kpSig">Signal!</button><button class="ghost" id="kpClose">Give up</button></div>
     <div id="kpRes" class="kp-res" hidden><b id="kpResT"></b><p id="kpResP"></p><button class="jig" id="kpOk">Done</button></div>
+  </div>
+</div>
+<div class="away" id="arcModal" hidden>
+  <div class="box mus-box arc-box" role="dialog" aria-modal="true" aria-labelledby="arcH"><div class="xf-h"><div><span class="eyebrow">Lantern Pier</span><h2 id="arcH">The Arcade</h2></div><button class="x" id="arcClose" aria-label="Close">×</button></div><div id="arcBody"></div></div>
+</div>
+<div class="away" id="agModal" hidden>
+  <div class="box kp ag-box"><span class="eyebrow">Lantern Pier Arcade</span><h2 id="agTitle">Game</h2>
+    <canvas id="agCv" width="720" height="960" aria-label="Arcade game"></canvas>
+    <p id="agHud" class="kp-msg" role="status"></p><div id="agCtl"></div>
+    <div class="xf-row"><button class="ghost" id="agClose">Quit</button></div>
+    <div id="agRes" class="kp-res" hidden><b id="agResT"></b><p id="agResP"></p><div class="xf-row"><button class="jig" id="agAgain">Play again</button><button class="ghost" id="agOk">Back to the arcade</button></div></div>
   </div>
 </div>
 <div class="away" id="mmModal" hidden>
@@ -2434,9 +2457,23 @@ function nextAch(){
   setTimeout(()=>{el.classList.add('out');setTimeout(()=>{el.remove();nextAch()},RM?0:350)},3800);
 }
 let catchAcc=0,earnAcc=0,rateT=0,storeDirty=false,collDirty=false;
+// ==SHARED WEATHER== everyone on Lantern Lake has the same weather at the same moment. It comes from the real clock in
+// 12-minute blocks (half a game day) through a fixed recipe, so every game works it out by itself: no server needed.
+// Day and night stay personal (each player has their own game clock), so forecasts are shown in the player's own time.
+const WXB_MS=720000,WXT={t:0},WX_SHORT={clear:'Clear',overcast:'Cloudy',windy:'Windy',fog:'Fog',drizzle:'Drizzle',rain:'Rain',storm:'Storm',snow:'Snow'};
+const wxBlock=t=>Math.floor((t==null?Date.now():t)/WXB_MS);
+function wxHash(k,salt){let h=(Math.imul(k|0,2654435761)^Math.imul((salt|0)+1,40503)^0x9e3779b9)>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;return (h>>>0)/4294967296}
+function wxRaw(k,salt){const keys=Object.keys(WX);let t=0;for(const id of keys)t+=WX[id].w;let x=wxHash(k,salt)*t;for(const id of keys){x-=WX[id].w;if(x<=0)return id}return 'clear'}
+const wxOfBlock=k=>{const a=wxRaw(k,0);return a===wxRaw(k-1,0)?wxRaw(k,1):a};
+const wxAt=t=>wxOfBlock(wxBlock(t));
+const wxTempOf=k=>{const [a,b]=TEMP[wxOfBlock(k)];return Math.round(a+(b-a)*wxHash(k,7))};
+// game time (minutes, can run past midnight) at a real moment, using the player's clock right now
+const wxGameMin=t=>S.min+(t-Date.now())/1000;
+function wxSync(live){const now=Date.now(),id=wxAt(now),left=Math.max(1,((wxBlock(now)+1)*WXB_MS-now)/1000);
+  if(isRealm(S.water)){S.realmWx={id,left};return}
+  const changed=!S.wx||S.wx.id!==id;S.wx={id,left};if(changed&&live)newWeather(true)}
 function newWeather(live){
-  const opts=Object.keys(WX).filter(k=>k!==S.wx.id).map(k=>({k,w:WX[k].w}));
-  ensureFc();const fcd=S.fc[S.day];const k=(fcd&&fcd.wx!==S.wx.id&&Math.random()<.55)?fcd.wx:pickW(opts).k,X=WX[k];S.wx={id:k,left:rnd(X.min,X.max)*60};
+  const k=wxAt(),X=WX[k],now=Date.now();if(!isRealm(S.water))S.wx={id:k,left:Math.max(1,((wxBlock(now)+1)*WXB_MS-now)/1000)};
   if(live){const fr=cast.el/cast.dur;cast.dur=castDur();cast.el=fr*cast.dur;showToast(`Weather: ${X.n}`);if(phView==='weather'&&phOpen())renderWeatherApp();renderWaters();renderLog();renderSetup();renderWx()}
 }
 function renderWx(){
@@ -2479,9 +2516,9 @@ function pushRecent(r){S.recent.unshift(r);S.recent.length=Math.min(S.recent.len
 
 function offline(sec){
   const cap=SHACK_HRS[S.shack]*3600, e=Math.min(sec,cap);
-  let musKept=0,t=0,n=0,earned=0,news=[],junkN=0,tossed=0,cols=[],vars=[],matsN=0;
+  let musKept=0,t=0,n=0,earned=0,news=[],junkN=0,tossed=0,cols=[],vars=[],matsN=0;const T0=Date.now()-sec*1000;
   while(true){const d=castDurFor(S.water); if(t+d>e)break; t+=d; advanceClock(d);
-    S.wx.left-=d;if(S.wx.left<=0)newWeather(false);
+    {const wid=wxAt(T0+t*1000);if(wid!==S.wx.id)S.wx={id:wid,left:60}}
     const r=rollPull({wx:S.wx.id,offline:true},S.water,S.min); if(!r)continue;
     if(r.junk){if(addJunk(r.junk,false))junkN++;else tossed++;continue}
     if(r.col){addCollectible(r.col,false);cols.push(r.col.n);continue}
@@ -2497,7 +2534,7 @@ function offline(sec){
     const L=S.log[c.f.id]||(S.log[c.f.id]={n:0,big:0}); if(L.n===0)news.push(c.f.n);
     L.n++; if(c.w>L.big)L.big=c.w; if(vr){L.v=L.v||{};L.v[vr]=(L.v[vr]||0)+1;vars.push(VAR[vr].n+' '+c.f.n)}
     const v=Math.round(saleValue(c.f,c.w)*(vr?VAR[vr].mult:1)); if(musKeep(c.f,c.w,vr,v,false))musKept++;else{addCooler(c.f,c.w,v); earned+=v} n++; S.total++; S.st.earn+=v;mpCatch(c.f,c.w,vr,false,true);bountyEvent('catch',{f:c.f,w:c.w,water:S.water,ph:phaseOf(S.min)})}
-  advanceClock(sec-t);
+  advanceClock(sec-t);wxSync(false);
   if(sec<60)return;
   const slept=sec>1200;if(slept){S.stamina=100;S.sleep=null}S.hunger=Math.max(0,S.hunger-Math.min(60,sec/60*.5));
   const hrs=sec/3600, capped=sec>cap;
@@ -2542,7 +2579,13 @@ function genSpecs(day){
 function ensureSched(){S.sched=S.sched||[];S.schedDays=S.schedDays||{};for(let d=S.day;d<=S.day+5;d++)if(!S.schedDays[d]){S.schedDays[d]=1;S.sched.push(...genSpecs(d))}
   for(const k in S.schedDays)if(+k<S.day-1)delete S.schedDays[k];S.sched.sort((a,b)=>(a.day*1440+a.min)-(b.day*1440+b.min))}
 const TEMP={clear:[62,76],overcast:[54,64],windy:[50,62],fog:[46,56],drizzle:[50,60],rain:[48,58],storm:[56,70],snow:[22,33]};
-function ensureFc(){S.fc=S.fc||{};for(let d=S.day;d<=S.day+6;d++)if(!S.fc[d]){const wx=pickW(Object.keys(WX).map(k=>({k,w:WX[k].w}))).k,hi=Math.round(rnd(...TEMP[wx]));S.fc[d]={wx,hi,lo:hi-Math.round(rnd(8,16))}}for(const k in S.fc)if(+k<S.day-1)delete S.fc[k]}
+// The forecast for each game day is read off the shared weather blocks that fall inside it (on the player's current clock).
+function wxDayParts(d){const now=Date.now(),start=now+((d-S.day)*1440-S.min)*1000,end=start+1440000,out=[];
+  for(let k=wxBlock(start);k*WXB_MS<end;k++){const id=wxOfBlock(k),from=Math.max(0,Math.round((k*WXB_MS-start)/1000));if(out.length&&out[out.length-1].id===id)continue;out.push({id,k,from})}return out}
+function ensureFc(){const fc={};for(let d=S.day-1;d<=S.day+6;d++){const P=wxDayParts(d),now=Date.now(),noonK=wxBlock(now+((d-S.day)*1440+720-S.min)*1000);
+    const ks=[];const start=now+((d-S.day)*1440-S.min)*1000;for(let k=wxBlock(start);k*WXB_MS<start+1440000;k++)ks.push(k);
+    const hi=Math.max(...ks.map(wxTempOf));fc[d]={wx:wxOfBlock(noonK),hi,lo:hi-Math.round(8+8*wxHash(noonK,9)),parts:P}}
+  S.fc=fc}
 function tourFromSpec(sp){
   const pool=[...RIVALS].sort(()=>Math.random()-.5).slice(0,3);
   return {phase:'invite',water:sp.water,type:sp.type,target:sp.target,dur:sp.dur,left:60,prize:sp.prize,fee:Math.round(sp.prize*.1),name:sp.name,me:0,
@@ -2695,7 +2738,7 @@ function renderCraft(){
   $('craftNav').innerHTML=CRAFT_CATS.map(([id,n])=>{let tag='';
     if(id==='ready')tag=ready.length?`<span class="rdy">${ready.length}</span>`:'<small>0</small>';
     else if(id==='gear'){const r=GEAR_KEYS.filter(canCraft).length;tag=r?`<span class="rdy">${r} ready</span>`:`<small>${GEAR_KEYS.filter(k=>GEAR[k].items[S[k]+1]).length} to go</small>`}
-    else{const zs=COS.filter(z=>z.k===id),r=zs.filter(z=>canCraftCos(z.id)).length;tag=r?`<span class="rdy">${r} ready</span>`:`<small>${zs.filter(z=>own[z.id]).length}/${zs.length}</small>`}
+    else{const zs=COS.filter(z=>z.k===id&&!z.arc),r=zs.filter(z=>canCraftCos(z.id)).length;tag=r?`<span class="rdy">${r} ready</span>`:`<small>${zs.filter(z=>own[z.id]).length}/${zs.length}</small>`}
     return `<button data-cc="${id}" aria-current="${CRAFT_CAT===id}">${n}${tag}</button>`}).join('');
   $('craftNav').querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{CRAFT_CAT=b.dataset.cc;renderCraft();$('craftPane').scrollTop=0});
   const pane=$('craftPane');pane.innerHTML='';
@@ -2714,7 +2757,7 @@ function renderCraft(){
   if(CRAFT_CAT==='gear'){head('Gear upgrades','Each upgrade costs money plus materials you pull up while fishing. Materials live in your Storage tab.');
     const left=GEAR_KEYS.filter(k=>GEAR[k].items[S[k]+1]);for(const k of left)grid.append(gearCard(k));if(left.length)pane.append(grid);
     done('Fully upgraded',GEAR_KEYS.filter(k=>!GEAR[k].items[S[k]+1]).map(k=>[GEAR[k].label,GEAR[k].items[S[k]].n]));bindPins(pane);return}
-  const zs=COS.filter(z=>z.k===CRAFT_CAT);head(CRAFT_CATS.find(c=>c[0]===CRAFT_CAT)[1],'Cosmetic only. Once crafted, place and recolor them with Decorate. Fabric Scraps and Old Paint turn up while fishing.');
+  const zs=COS.filter(z=>z.k===CRAFT_CAT&&!z.arc);head(CRAFT_CATS.find(c=>c[0]===CRAFT_CAT)[1],'Cosmetic only. Once crafted, place and recolor them with Decorate. Fabric Scraps and Old Paint turn up while fishing.');
   const todo=zs.filter(z=>!own[z.id]).sort((a,b)=>canCraftCos(b.id)-canCraftCos(a.id)||a.c-b.c);
   for(const z of todo)grid.append(cosCard(z));
   if(todo.length)pane.append(grid);else{const e=document.createElement('div');e.className='cempty';e.textContent='You’ve crafted everything here.';pane.append(e)}
@@ -2802,6 +2845,8 @@ function renderWaters(){
   if(mpS().id){const c=document.createElement('div');c.className='card water';const mine=musMine(),n=MC().length;
     c.innerHTML=`<span class="eyebrow">${mine?`You hold ${mine} plaque${mine>1?'s':''}`:'Plaques for every species'}</span><h3>🏛️ The Museum</h3><p>Donate record-breaking fish to put your name on a plaque. There’s a rare wing for golden, albino and giant fish too.</p><p>${n?`<b>${n} fish waiting in your Museum Case.</b>`:'Record-worthy catches are saved in your Museum Case automatically.'}</p>`;
     const b=document.createElement('button');b.className='go';b.textContent=VT&&VT.museum?'You’re here':'Visit';b.disabled=TRV.on||!!VT||isRealm(S.water);b.onclick=()=>{visitMuseum();$('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})};c.append(b);p.append(c)}
+  {const c=document.createElement('div');c.className='card water arc-card';const a=ARC();c.innerHTML=`<span class="eyebrow">${tix(a.t)} · ${a.got}/${ARC_CAP} earned today</span><h3>🕹️ Lantern Pier Arcade</h3><p>Cabinets, a claw machine and Putt of the Day. Win prize tickets by playing well, then trade them at the Prize Counter. No cash needed.</p>`;
+    const b=document.createElement('button');b.className='go';b.textContent=VT&&VT.arcade?'You’re here':'Visit';b.disabled=TRV.on||(!!VT&&!VT.arcade)||isRealm(S.water);b.onclick=()=>{if(VT&&VT.arcade){openArcade();return}visitArcade();$('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})};c.append(b);p.append(c)}
   p.insertAdjacentHTML('beforeend',realmWatersHTML());bindRealmWaters(p);
 }
 const fishSvg=c=>`<svg viewBox="0 0 44 22" aria-hidden="true"><path d="M4 11c6-8 18-9 27-3l7-5v16l-7-5c-9 6-21 5-27-3z" fill="${c}"/><circle cx="10" cy="9.5" r="1.6" fill="#0f2026"/></svg>`;
@@ -3069,9 +3114,8 @@ function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unl
   const sec=v==='lock'?$('phLock'):v==='home'?$('phApps'):$('app-'+v);if(sec)sec.scrollTop=0;
 }
 
-// ==LAKE 7 WEATHER== phone app. It reads the same forecast as the cabin TV (S.fc). The current
-// weather only follows the forecast loosely (newWeather leans toward it 55% of the time), so the
-// app speaks in "likely" and "expected", like a real forecast.
+// ==LAKE 7 WEATHER== phone app. Weather is shared by everyone and comes in 12-minute blocks (half a game day), so the
+// forecast is exact. Times are shown on the player's own game clock (sleeping moves it ahead, so the times update).
 const WX_TIPS={clear:'Plain fishing. A good day to run errands on the water.',overcast:'Rare fish bite more often under the clouds.',windy:'Junk washes up twice as often. Casts are slower.',fog:'Collectibles turn up twice as often. Misty Bay gets strange at night.',
   drizzle:'Fish feed in the drizzle and casts are quicker.',rain:'Fish run heavier, but more get off the hook.',storm:'Legendary odds double. Hang on tight: many fish get away.',snow:'Fish sell for 30% more. Casts are slower.'};
 // Coldest at 5 AM, warmest at 3 PM. Nights blend into the next day's low so midnight doesn't jump.
@@ -3088,7 +3132,9 @@ function wxHeroBg(id,ph){const night=ph==='night',dusk=ph==='dusk'||ph==='dawn';
 function renderWeatherApp(){const b=$('wxBody');if(!b)return;ensureFc();
   const realm=isRealm(S.water)?REALMS_BY[S.water]:null,id=realm?(S.realmWx||S.wx).id:S.wx.id,X=WX[id],today=S.fc[S.day],ph=phaseOf(S.min);
   const tNow=wxTempAt(S.day,S.min),hrsLeft=realm?null:Math.max(1,Math.round(S.wx.left/60));
-  let nxt='';if(!realm){const fw=today&&today.wx!==id?today.wx:null;nxt=fw?`${X.n} for about ${hrsLeft} more hour${hrsLeft>1?'s':''}, then ${WX[fw].n.toLowerCase()} is likely.`:`${X.n} for about ${hrsLeft} more hour${hrsLeft>1?'s':''} before the next change.`}
+  const nowT=Date.now(),kNow=wxBlock(nowT),endT=(kNow+1)*WXB_MS,clk=t=>fmtClock(((Math.round(wxGameMin(t))%1440)+1440)%1440);
+  let nxt='';if(!realm){const nid=wxOfBlock(kNow+1);nxt=`${X.n} until ${clk(endT)}, then ${WX[nid].n.toLowerCase()}. Same weather for every angler on the lake.`}
+  const up=realm?'':[1,2,3,4].map(i=>{const k=kNow+i,a=k*WXB_MS,mins=Math.round((a-nowT)/60000);return `<li>${wxIc(wxOfBlock(k),((Math.round(wxGameMin(a+WXB_MS/2))%1440)+1440)%1440)}<b>${WX[wxOfBlock(k)].n}</b><span>${clk(a)} – ${clk(a+WXB_MS)}</span><small>in ${mins} min</small></li>`}).join('');
   const hero=realm?`<div class="l7-hero" style="background:linear-gradient(160deg,#2a1a40,#0c1f3a)"><div class="loc">📍 ${realm.n}</div><div><div class="tmp">--°</div><div class="cond">${realm.wx[0]} ${realm.wx[1]}</div><div class="hl">Out of Lake 7 range</div></div><div class="ic" style="font-size:3rem">${realm.wx[0]}</div>
       <div class="nxt">Our towers can't reach you through the gate. Here's what's waiting back home at Lantern Lake: ${WX[id].n.toLowerCase()}, high of ${today.hi}°.</div></div>`
     :`<div class="l7-hero" style="background:${wxHeroBg(id,ph)}"><div class="loc">📍 Lantern Lake · ${W(S.water).n}</div><div><div class="tmp">${tNow}°</div><div class="cond">${X.n}</div><div class="hl">H ${today.hi}° · L ${today.lo}°</div></div><div class="ic">${wxIc(id,S.min)}</div><div class="nxt">${nxt}</div></div>`;
@@ -3098,22 +3144,23 @@ function renderWeatherApp(){const b=$('wxBody');if(!b)return;ensureFc();
   if(!realm&&id==='snow')al.push(['❄️','Winter weather advisory','Snow on the water. Fish sell for 30% more until it clears.','info']);
   else if(!realm&&id==='fog'&&(ph==='night'||ph==='dusk'))al.push(['🌫️','Dense fog advisory','Visibility near zero on Misty Bay tonight. Boaters report green lights.','info']);
   // hourly: current conditions until they're expected to change, then today's forecast
-  const hrs=[];for(let i=0;i<12;i++){const m=S.min+i*60,d=S.day+Math.floor(m/1440),mm=m%1440,w=realm?id:(i===0||i*60<S.wx.left?id:(S.fc[d]||today).wx);
+  const hrs=[];for(let i=0;i<12;i++){const m=S.min+i*60,d=S.day+Math.floor(m/1440),mm=m%1440,w=realm?id:wxAt(Date.now()+i*60000);
     const hh=Math.floor(mm/60),lab=i===0?'Now':`${hh%12||12}${hh<12?'a':'p'}`;hrs.push(`<div class="${i===0?'now':''}"><small>${lab}</small>${wxIc(w,mm)}<b>${realm?'--':wxTempAt(d,mm)}°</b></div>`)}
   // 7 days with a temperature range bar
   const days=[0,1,2,3,4,5,6].map(i=>S.day+i).filter(d=>S.fc[d]),lo=Math.min(...days.map(d=>S.fc[d].lo)),hi=Math.max(...days.map(d=>S.fc[d].hi)),span=Math.max(1,hi-lo);
   const rows=days.map((d,i)=>{const f=S.fc[d],a=(f.lo-lo)/span*100,w=(f.hi-f.lo)/span*100;
-    return `<li><b>${i===0?'Today':WD[d%7]}</b>${wxSvg(f.wx)}<span class="nm">${WX[f.wx].n}</span><span class="lo">${f.lo}°</span><span class="l7-bar"><i style="left:${a}%;width:${w}%"></i>${i===0&&!realm?`<em style="left:${(tNow-lo)/span*100}%"></em>`:''}</span><span class="hi">${f.hi}°</span></li>`}).join('');
+    const pp=(f.parts||[]).slice(0,3);return `<li><b>${i===0?'Today':WD[d%7]}</b>${wxSvg(pp.length>1?pp[0].id:f.wx)}<span class="nm"${pp.length>1?` title="${pp.map(q=>WX[q.id].n).join(', then ')}"`:''}>${pp.length>1?`<span class="l7-split">${pp.slice(1).map(q=>`<i>→</i>${wxSvg(q.id)}`).join('')}</span>`:WX[f.wx].n}</span><span class="lo">${f.lo}°</span><span class="l7-bar"><i style="left:${a}%;width:${w}%"></i>${i===0&&!realm?`<em style="left:${(tNow-lo)/span*100}%"></em>`:''}</span><span class="hi">${f.hi}°</span></li>`}).join('');
   const bite={dawn:'Dawn bite is on until 7 AM.',day:'Daytime fish are active until 6 PM.',dusk:'Dusk bite is on until 8 PM.',night:'Night fish are out until 5 AM.'}[ph];
   const best=days.slice(1).find(d=>S.fc[d].wx==='storm')||days.slice(1).find(d=>S.fc[d].wx==='overcast'||S.fc[d].wx==='rain');
   b.innerHTML=`<div class="l7-brand"><span class="l7-logo">LAKE<b>7</b></span>WEATHER</div>${hero}
     ${al.map(([ic,t,m,c])=>`<div class="l7-alert ${c}"><span class="ai">${ic}</span><div><b>${t}</b>${m}</div></div>`).join('')}
+    ${realm?'':`<div class="l7-card"><div class="l7-h"><span>Coming up</span><span>Shared by everyone</span></div><ul class="l7-up">${up}</ul><p class="l7-note">Times are on your clock. Sleeping moves your clock ahead, so these update when you wake up.</p></div>`}
     <div class="l7-card"><div class="l7-h"><span>Next 12 hours</span></div>${realm?'<p style="margin:0;font-size:.8rem;color:#a8bcdc">📡 No signal past the gate. Hourly conditions are back when you return to Lantern Lake.</p>':`<div class="l7-hours">${hrs.join('')}</div>`}</div>
     <div class="l7-card l7-fish"><div class="l7-h"><span>🎣 Angler's report</span></div>${realm?`<p><b>${realm.wx[1]}:</b> ${realm.d}</p>`:id==='clear'?'':`<p><b>${X.n}:</b> ${X.fx}</p>`}<p>${realm?'':WX_TIPS[id]+' '}${bite}</p>
       ${best?`<div class="row"><span>Best day ahead</span><b>${WD[best%7]} · ${WX[S.fc[best].wx].n}</b></div>`:''}</div>
     <div class="l7-card"><div class="l7-h"><span>7-day forecast</span><span>${lo}° to ${hi}°</span></div><ul class="l7-days">${rows}</ul></div>
     <div class="l7-sun"><div>Sunrise<b>5:00 AM</b>Dawn bite 5 to 7 AM</div><div>Sunset<b>8:00 PM</b>Dusk bite 6 to 8 PM</div></div>
-    <div class="l7-foot">Lake 7 Weather · Updated ${fmtClock(S.min)} · Forecasts are our best guess, the lake has its own ideas.</div>`}
+    <div class="l7-foot">Lake 7 Weather · Updated ${fmtClock(S.min)} · Every angler on Lantern Lake shares this sky.</div>`}
 
 // ==CRATE EXPECTATIONS== a crate-opening app that pays out boat paint jobs. Every paint is drawn inside
 // the hull outline, so it fits any boat from the rowboat up. Odds are fixed per tier and shown in the app.
@@ -3138,7 +3185,7 @@ const SKINS=[
   SK('frost','Frostbite','E','#bfe6ff','ice','#ffffff','#6ab8f0','sparkle'),
   SK('gold','Solid Gold','L','#d8a828','gold','#fff2b0','#8a6410','sparkle'),SK('prism','Prismatic','L','#ff3a3a','prism','#ffffff','#ffffff','sparkle')];
 // Case rewards: never in crates, shown in the Locker once owned
-const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true}];
+const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true},{...SK('bit8','8-Bit','E','#2a2a6a','pixel','#ff3a6a','#3affb0'),quest:true},{...SK('pinneon','Pinball Neon','E','#140c24','pinball','#ff3ad8','#ffd23a','glow'),quest:true}];
 const SKIN_BY=Object.fromEntries([...SKINS,...QSKINS].map(s=>[s.id,s]));
 const PNT=()=>{if(!S.paint||typeof S.paint!=='object')S.paint={own:{},eq:null,eqR:null,eqB:null,free:'',opened:0,log:[]};const p=S.paint;p.own=p.own||{};p.log=p.log||[];if(p.eq&&!SKIN_BY[p.eq])p.eq=null;if(p.eqR&&!(typeof ITEM_BY!=='undefined'&&ITEM_BY[p.eqR]))p.eqR=null;if(p.eqB&&!(typeof ITEM_BY!=='undefined'&&ITEM_BY[p.eqB]))p.eqB=null;return p};
 const crateCost=()=>Math.max(500,Math.round(rwCoins(20)/50)*50);
@@ -3176,6 +3223,8 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
   else if(p==='ice'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#eaf8ff');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     c.fillStyle='rgba(255,255,255,.45)';for(let i=0;i<L/10;i++){const sx=x+R()*L,sy=top+R()*H;c.beginPath();c.moveTo(sx,sy-3);c.lineTo(sx+3,sy+1);c.lineTo(sx-2,sy+3);c.fill()}}
   else if(p==='gold'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#fff2b0');g.addColorStop(.35,sk.base);g.addColorStop(.7,'#a87c18');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4)}
+  else if(p==='pixel'){const cols=[sk.c2,sk.c3,'#ffd23a','#3a9aff'];for(let i=0;i*5<L+8;i++)for(let j=0;j*5<H+6;j++){const r=R();if(r<.42){c.fillStyle=cols[Math.floor(r*9.5)%4];c.fillRect(x+i*5,top+j*5,5,5)}}}
+  else if(p==='pinball'){c.fillStyle='rgba(255,255,255,.08)';c.fillRect(x-4,y+6,L+8,2);const n=Math.max(6,Math.round(L/14));for(let i=0;i<n;i++){const on=(Math.floor(T*5)+i)%3===0;c.fillStyle=on?(i%2?sk.c3:sk.c2):'rgba(255,255,255,.15)';c.beginPath();c.arc(x+8+i*(L-12)/(n-1),y+5,1.8,0,7);c.fill();if(on){c.globalAlpha=.35;c.beginPath();c.arc(x+8+i*(L-12)/(n-1),y+5,4,0,7);c.fill();c.globalAlpha=1}}}
   else if(p==='mirror'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#f4f8fc');g.addColorStop(.45,sk.base);g.addColorStop(.55,'#9aaebe');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=.8;c.beginPath();c.moveTo(x,y+7);c.lineTo(x+L,y+7-(b>=3?3:0));c.stroke()}
   else if(p==='prism'){const g=c.createLinearGradient(x,0,x+L,0);for(let i=0;i<=6;i++)g.addColorStop(i/6,`hsl(${(i*60+T*60)%360},90%,60%)`);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
@@ -3280,7 +3329,7 @@ function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crate
   if(CR.tab==='open'){const eqId=p[K.eq],eq=eqId&&ITEM_BY[eqId];
     body=`${kinds(CR.kind,'crk')}<div class="cr-stage${CR.last?' has-res':''}"><div class="cr-crate" aria-hidden="true"${CR.last?' hidden':''}>${crateSvg}</div><div class="cr-reel" id="crReel" hidden><div class="cr-track" id="crTrack"></div><i class="cr-mark"></i></div>
       <div class="cr-res" id="crRes"${CR.last?'':' hidden'}>${CR.last?crateResHTML():''}</div></div>
-      <div class="cr-btns"><button class="jig cr-open" id="crFree"${free?'':' hidden'}>Open free daily ${K.n.toLowerCase()} crate</button><button class="jig cr-open" id="crBuy"${S.coins<cost?' disabled':''}>Open ${K.n.toLowerCase()} crate · $${money(cost)}</button></div>
+      <div class="cr-btns"><button class="jig cr-open" id="crFree"${free?'':' hidden'}>Open free daily ${K.n.toLowerCase()} crate</button><button class="jig cr-open" id="crBuy"${S.coins<cost?' disabled':''}>Open ${K.n.toLowerCase()} crate · $${money(cost)}</button><button class="ghost cr-open cr-tix" id="crTix"${ARC().t<ARC_CRATE?' disabled':''}>Open with ${tix(ARC_CRATE)} <small>(you have ${ARC().t.toLocaleString()})</small></button></div>
       <p class="cr-note">${K.n} crates hold one ${K.noun} from ${K.items.length}.${CR.kind==='rod'?' Rare and better finishes add an effect when you land a fish.':CR.kind==='paint'?' Paint fits every boat.':''} Duplicates sell back for cash. ${free?'Your free crate for today is ready, any type.':'Next free crate tomorrow.'}</p>
       ${eq?`<div class="cr-eq"><img alt="" src="${itemThumb(eq.id,96,44)}"><div><small>${K.on}</small><b style="color:${SK_TIERS[eq.t].col}">${eq.n}</b></div></div>`:''}`}
   else if(CR.tab==='locker'){const L=CRATES[CR.lk],eqId=p[L.eq];
@@ -3292,13 +3341,13 @@ function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crate
   b.querySelectorAll('[data-crt]').forEach(x=>x.onclick=()=>{if(CR.spin)return;CR.tab=x.dataset.crt;sfx('click');renderCrate()});
   b.querySelectorAll('[data-crk]').forEach(x=>x.onclick=()=>{if(CR.spin)return;CR.kind=x.dataset.crk;CR.last=null;sfx('click');renderCrate()});
   b.querySelectorAll('[data-crl]').forEach(x=>x.onclick=()=>{CR.lk=x.dataset.crl;sfx('click');renderCrate()});
-  const on=(id,f)=>{const e=$(id);if(e)e.onclick=f};on('crFree',()=>crateOpen(true));on('crBuy',()=>crateOpen(false));
+  const on=(id,f)=>{const e=$(id);if(e)e.onclick=f};on('crFree',()=>crateOpen(true));on('crBuy',()=>crateOpen(false));on('crTix',()=>crateOpen(false,true));
   if(CR.tab==='open'&&CR.last){const e=$('crEquip');if(e)e.onclick=()=>{const it=CR.last.win;p[CRATES[it.kind].eq]=it.id;save();liveLastStReset();sfx('click');showToast(`${it.n}: ${CRATES[it.kind].on.toLowerCase()}`,'Equipped');renderCrate()};const a=$('crAgain');if(a)a.onclick=()=>{CR.last=null;renderCrate()};crPrevLoop()}
   b.querySelectorAll('[data-skin]').forEach(x=>x.onclick=()=>{const id=x.dataset.skin,f=CRATES[kindOf(id)].eq;p[f]=p[f]===id?null:id;sfx('click');save();renderCrate();liveLastStReset()})}
 const crateSvg='<svg viewBox="0 0 64 56"><path d="M6 18l26-12 26 12v24L32 54 6 42z" fill="#8a5a2a"/><path d="M6 18l26 12 26-12M32 30v24" stroke="#5a3814" stroke-width="2" fill="none"/><path d="M6 18l26-12 26 12-26 12z" fill="#b07a3a"/><path d="M14 22l26-12M24 26l26-12" stroke="#5a3814" stroke-width="1.5"/><path d="M28 31l8-4v9l-8 4z" fill="#ffc23a"/><circle cx="32" cy="34" r="1.6" fill="#5a3814"/></svg>';
 function liveLastStReset(){try{LIVE.lastSt=''}catch(e){}}
-function crateOpen(free){if(CR.spin)return;const p=PNT(),cost=crateCost(),kind=CR.kind;if(free){if(!crateFree())return}else{if(S.coins<cost){showToast('Not enough cash for a crate');return}S.coins-=cost}
-  CR.last=null;if(free)p.free=localDay();p.opened++;const base=itemRoll(kind),win={...ITEM_BY[base.id]},dup=!!p.own[win.id];p.own[win.id]=(p.own[win.id]||0)+1;const refund=dup?Math.round(cost*SK_REFUND[win.t]):0;if(refund)S.coins+=refund;
+function crateOpen(free,tk){if(CR.spin)return;const p=PNT(),cost=crateCost(),kind=CR.kind;if(tk){const a=ARC();if(a.t<ARC_CRATE){showToast('Not enough prize tickets');return}a.t-=ARC_CRATE}else if(free){if(!crateFree())return}else{if(S.coins<cost){showToast('Not enough cash for a crate');return}S.coins-=cost}
+  CR.last=null;if(free)p.free=localDay();p.opened++;const base=itemRoll(kind),win={...ITEM_BY[base.id]},dup=!!p.own[win.id];p.own[win.id]=(p.own[win.id]||0)+1;const refund=dup?(tk?Math.min(300,Math.round(ARC_CRATE*SK_REFUND[win.t])):Math.round(cost*SK_REFUND[win.t])):0;if(refund){if(tk)ARC().t+=refund;else S.coins+=refund}CR.tk=!!tk;
   p.log.unshift({id:win.id,d:S.day});p.log=p.log.slice(0,20);save();
   const N=46,W0=40,items=[];for(let i=0;i<N;i++)items.push(i===W0?win:itemRoll(kind));
   document.querySelector('.cr-stage').classList.remove('has-res');const tr=$('crTrack'),rl=$('crReel');$('crRes').hidden=true;document.querySelector('.cr-crate').hidden=true;rl.hidden=false;
@@ -3310,7 +3359,7 @@ function crateOpen(free){if(CR.spin)return;const p=PNT(),cost=crateCost(),kind=C
     if(k<1)CR.raf=requestAnimationFrame(step);else crateLand()};CR.raf=requestAnimationFrame(step)}
 function crateResHTML(){const {win,dup,refund}=CR.last,T0=SK_TIERS[win.t],p=PNT(),K=CRATES[win.kind];
   return `<div class="cr-card" style="--tc:${T0.col}"><small>${T0.n} ${K.noun}${dup?' · duplicate':' · new!'}</small><canvas id="crPrev" width="440" height="180" data-pv="${win.id}"></canvas><b>${win.n}</b>
-    <span>${dup?`You already have this one. Sold back for $${money(refund)}.`:win.kind==='rod'&&win.fx?'Added to your locker. Land a fish to see its effect.':'Added to your locker.'}</span><div class="cr-btns">${p[K.eq]===win.id?`<button class="ghost" disabled>${K.on}</button>`:`<button class="jig" id="crEquip">${K.verb}</button>`}<button class="ghost" id="crAgain">Done</button></div></div>`}
+    <span>${dup?`You already have this one. Sold back for ${CR.tk?tix(refund):'$'+money(refund)}.`:win.kind==='rod'&&win.fx?'Added to your locker. Land a fish to see its effect.':'Added to your locker.'}</span><div class="cr-btns">${p[K.eq]===win.id?`<button class="ghost" disabled>${K.on}</button>`:`<button class="jig" id="crEquip">${K.verb}</button>`}<button class="ghost" id="crAgain">Done</button></div></div>`}
 function crateLand(){const {win}=CR.spin,T0=SK_TIERS[win.t];CR.last=CR.spin;CR.spin=null;if(phView==='crate')renderCrate();
   if(win.t==='L'){sfx('fanfare');celebrate({lbl:`Legendary ${CRATES[win.kind].noun}!`,r:'L',name:win.n,sub:'One of the rarest finds in the crates',icon:svgI('crown','#ffc23a')});burst(400,200,['#ffd05a','#ffffff','#ff8a3a'],90)}
   else if(win.t==='E'){sfx('chime','L');burst(400,220,[T0.col,'#ffffff'],50)}else if(win.t==='R')sfx('chime','R');else sfx('pop')}
@@ -3910,7 +3959,7 @@ const PB_LANE=[110,170,230,290];
 const PB_FL={L:{p:[130,650],rest:.52,up:-.5,len:55},R:{p:[270,650],rest:Math.PI-.52,up:Math.PI+.5,len:55}};
 function pbReset(full){if(full){PB.balls=3;PB.score=0;PB.mult=1;PB.lanes=[0,0,0,0];PB.targets=[1,1,1];PB.over=false;PB.grav=1;PB.sent=false}PB.ball={x:364,y:700-PBR,vx:0,vy:0,inLane:true};PB.pull=0;PB.save=0;PB.sau.hold=0}
 function pbOpen(){if(!PB.ball||PB.over)pbReset(true);$('pbBoard').hidden=true;pbDailyRender();pbFetch();$('pinModal').hidden=false;PB.on=true;PB.paused=false;PB.last=performance.now();pbHud();cancelAnimationFrame(PB.raf);PB.raf=requestAnimationFrame(pbLoop);hideTip();sfx('click')}
-function pbClose(){PB.on=false;$('pinModal').hidden=true;cancelAnimationFrame(PB.raf);PB.flL.up=PB.flR.up=false;PB.pulling=false;save()}
+function pbClose(){const fromArc=PB.arc||PB.fromArc;PB.arc=false;PB.fromArc=false;if(fromArc&&arcHere())setTimeout(openArcade,200);PB.on=false;$('pinModal').hidden=true;cancelAnimationFrame(PB.raf);PB.flL.up=PB.flR.up=false;PB.pulling=false;save()}
 function pbDailyRender(){const el=$('pbDaily');if(!el)return;const m=mpS(),D=PB.daily;
   if(!m.id||MPV.online===false||MPV.online==='nodb'){el.innerHTML='<b>Daily challenge</b><span>Pick an angler name in the Friends app on your Lantern Lake website to compete for a daily prize.</span>';return}
   if(!D){el.innerHTML=`<b>Daily challenge</b><span>${PB.dErr?'Couldn’t load today’s board.':'Loading today’s board…'}</span>`;return}
@@ -3922,7 +3971,7 @@ function pbBoardRender(){const D=PB.daily,o=$('pbBoard');if(!D){o.innerHTML='<p>
     (D.champ?`<p>Last winner: <b>${esc(D.champ.name)}</b> with ${D.champ.score.toLocaleString()}${D.champ.me?' (that’s you! Check your Friends mail)':''}</p>`:'')+`<p class="pbb-n">The day ends at midnight Eastern. The top score wins 1,000 Casino Coins and 2 random potions, sent to the Friends mailbox.</p>`;
   $('pbBoardX').onclick=()=>o.hidden=true}
 async function pbFetch(){const m=mpS();if(!m.id||MPV.online===false||MPV.online==='nodb'){pbDailyRender();return}try{PB.daily=await api('pin/board',{id:m.id,key:m.key});PB.dErr=''}catch(e){PB.dErr=e.message}pbDailyRender();if(!$('pbBoard').hidden)pbBoardRender()}
-async function pbSubmit(){const m=mpS();if(PB.sent||!m.id||!PB.score)return;PB.sent=true;try{const before=PB.daily&&PB.daily.me?PB.daily.me.score:0;PB.daily=await api('pin/submit',{id:m.id,key:m.key,score:PB.score});pbDailyRender();if(!$('pbBoard').hidden)pbBoardRender();
+async function pbSubmit(){try{arcPinOver(PB.score)}catch(e){}const m=mpS();if(PB.sent||!m.id||!PB.score)return;PB.sent=true;try{const before=PB.daily&&PB.daily.me?PB.daily.me.score:0;PB.daily=await api('pin/submit',{id:m.id,key:m.key,score:PB.score});pbDailyRender();if(!$('pbBoard').hidden)pbBoardRender();
   if(PB.daily.me&&PB.score>before){pbSay(PB.daily.me.rank===1?'You lead today’s challenge!':`Daily rank #${PB.daily.me.rank}`)}}catch(e){}}
 function pbHud(){$('pbScore').textContent=PB.score.toLocaleString();$('pbBall').textContent=PB.over?'–':`${Math.min(3,4-PB.balls)} of 3`;$('pbBest').textContent=(S.pinHi||0).toLocaleString();$('pbMult').textContent='×'+PB.mult}
 function pbAdd(n,tag){const before=PB.score;PB.score+=n*PB.mult;if(tag){PB.flash[tag]=.25}if(Math.floor(PB.score/15000)>Math.floor(before/15000)&&PB.grav<1.45){PB.grav+=.07;pbSay('The current is rising!')}pbHud()}
@@ -4123,7 +4172,7 @@ function contactHTML(p,mine){const st=p.stats||{},L=lookOf(st.look),db=st.today&
     <div><dt>FinDuel record</dt><dd>${st.bet&&(st.bet.w||st.bet.l)?`${st.bet.w}-${st.bet.l} · <span class="${st.bet.net>=0?'ct-up':'ct-down'}">${st.bet.net>=0?'+':'−'}$${money(Math.abs(st.bet.net))}</span>`:'No bets yet'}</dd></div>
     <div><dt>Biggest fish ever</dt><dd>${big?`${big.w} lb ${FI(big.fish).n}`:'None yet'}</dd></div>
     <div><dt>Species caught</dt><dd>${st.species||0}</dd></div>
-    <div><dt>Museum plaques</dt><dd>${st.mus||0}</dd></div></dl></div>`}
+    <div><dt>Museum plaques</dt><dd>${st.mus||0}</dd></div>${st.arc&&(st.arc.toss||st.arc.gar||st.arc.pin)?`<div><dt>Arcade bests</dt><dd>${[['toss','Toss'],['gar','Whack'],['pin','Pinball']].filter(([k])=>st.arc[k]).map(([k,n])=>`${n} ${Number(st.arc[k]).toLocaleString()}`).join(' · ')}</dd></div>`:''}</dl></div>`}
 // Beta Tester frame: thick shimmering border, lantern corner ornaments, twinkling sparkles and a ribbon banner.
 const BETA_CORNER=`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M4 22V8a4 4 0 0 1 4-4h14" fill="none" stroke="#1b1530" stroke-width="5" stroke-linecap="round"/><path d="M4 22V8a4 4 0 0 1 4-4h14" fill="none" stroke="#ffd05a" stroke-width="2.4" stroke-linecap="round"/><circle cx="8" cy="8" r="6.5" fill="#1b1530"/><path d="M8 2.6l1.5 3.6 3.9.3-3 2.5.9 3.8L8 10.7 4.7 12.8l.9-3.8-3-2.5 3.9-.3z" fill="#ffd05a"/><circle cx="22" cy="4" r="2" fill="#7cc7dc"/><circle cx="4" cy="22" r="2" fill="#c9a0f2"/></svg>`;
 function betaFrame(pic){const sp=[[8,30],[92,24],[6,72],[94,66],[30,6],[70,94],[50,4],[22,95]].map(([x,y],i)=>`<i class="ctb-sp" style="left:${x}%;top:${y}%;animation-delay:${(i*.55).toFixed(2)}s">✦</i>`).join('');
@@ -4324,6 +4373,7 @@ function renderHelp(){
    ['Lake projects',`<p>Open the Shop app and tap <b>Projects</b>. Fund big builds in stages with money and materials. Each stage finishes the next morning and gives a permanent bonus: the Marina makes fish sell for more, the Fish Hatchery brings more Rare and Legendary bites, and the Salvage Barn turns up more materials.</p>`],
    ['Retiring',`<p>Once you have $5,000,000 you can retire from the Projects tab. You start over with a lean-to and a stick rod but keep your logbook, trophies, collectibles, tapes, decor, cases and projects, and every fish you sell is worth 10% more for good each time you retire.</p>`],
    ['Logbook sets',`<p>Catch every species in a water to claim a set reward and a Master trophy from the Logbook: $5,000 for Dock Pond up to $500,000 for Misty Bay.</p>`],
+   ['Lantern Pier Arcade',`<p>Visit the arcade from the Waters tab or when you leave your cabin. Play Bobber Toss, Whack-a-Gar and Pinball to win prize tickets (up to 600 a day), try the Claw Machine (30 tickets) for plushies, and take your 3 daily tries at Putt of the Day, the same hole for everyone. Spend tickets at the Prize Counter on crates, plushies, a neon sign and arcade-only boat paints. Tickets never cost cash and prices never change. Weekly high-score boards crown a champion for each cabinet with a trophy.</p>`],
    ['The Angler Who Isn’t There',`<p>A fourth case opens after you close the Keeper’s Light. Someone on Reed Lake is wearing your face. Follow the leads (a text from your own number, a figure on the far water at dusk, lies in your own records, mirror shards at night) and craft a Silvered Lantern. The finale is Mirror Match on a clear night at Reed Lake: your reflection shows a pattern of casts and you answer with the mirror image (its left is your right). Tap the buttons or use the arrow keys. Win five rounds before three mistakes. The lies are only on your screen: your real stats, plaques and what friends see never change.</p>`],
    ['The Keeper’s Light',`<p>A third case opens after you close the Emerald Wake. Its finale is a storm rescue: when the lighthouse beam crosses the lost rowboat, tap Signal (or press Space). Three good signals bring the keeper home.</p>`],
    ['Lake monster, challenges and guestbooks',`<p>Open the <b>Together</b> tab in the Friends app. Every week a lake monster appears and every pound anyone lands hits it; beat it together for a $20,000 bounty each. Challenge a friend from their contact card: biggest fish of one kind in 24 hours, winner takes both stakes. When you visit a friend you can sign their guestbook and like their yard; the most-liked yard each week wins $25,000.</p>`],
@@ -4800,7 +4850,7 @@ async function api(path,body){const r=await fetch('/api/'+path,body?{method:'POS
   let j=null;try{j=await r.json()}catch(e){throw new Error('offline')}if(!r.ok||j.error){const er=new Error(j.error||('HTTP '+r.status));er.j=j;throw er}return j}
 async function mpCheck(){if(MPV.online!==null)return MPV.online;try{await api('ping');MPV.online=true}catch(e){MPV.online=e.message==='no-db'?'nodb':false}return MPV.online}
 function mpStats(){const _mus=musMine();let big=null;for(const [id,L] of Object.entries(S.log))if(L&&L.big>0&&FI(id)&&(!big||L.big>big.w))big={fish:id,w:+L.big.toFixed(2)};
-  return {mir:S.q4&&S.q4.everSolved?1:0,beta:S.beta?1:0,sup:S.sup?1:0,adm:MPV.owner?1:0,mus:_mus,day:S.day,coins:Math.floor(S.coins),total:S.total,species:Object.keys(S.log).filter(k=>S.log[k].n>0).length,coll:COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,trophies:S.trophies.length,variants:varN(),big,look:lookOf(S.look),pin:S.pinHi||0,bet:S.sb&&S.sb.rec?{w:S.sb.rec.w,l:S.sb.rec.l,net:S.sb.rec.net}:null,today:(()=>{const d=dayBest();return d?{f:d.f,w:d.w,v:d.v,d:d.d}:null})()}}
+  return {arc:S.arc&&S.arc.best?{toss:S.arc.best.toss||0,gar:S.arc.best.gar||0,pin:S.arc.best.pin||0}:null,mir:S.q4&&S.q4.everSolved?1:0,beta:S.beta?1:0,sup:S.sup?1:0,adm:MPV.owner?1:0,mus:_mus,day:S.day,coins:Math.floor(S.coins),total:S.total,species:Object.keys(S.log).filter(k=>S.log[k].n>0).length,coll:COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,trophies:S.trophies.length,variants:varN(),big,look:lookOf(S.look),pin:S.pinHi||0,bet:S.sb&&S.sb.rec?{w:S.sb.rec.w,l:S.sb.rec.l,net:S.sb.rec.net}:null,today:(()=>{const d=dayBest();return d?{f:d.f,w:d.w,v:d.v,d:d.d}:null})()}}
 function mpCabin(){return {cab:CAB(),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,decor:Object.keys(S.decor).filter(has)},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
 async function mpSync(force){const m=mpS();if(SESS.paused||!m.id||MPV.busy)return;if(!SESS.claimed&&!titleOn)await sessClaim();if(SESS.paused)return;if(!force&&Date.now()-MPV.last<(afk()?600000:110000))return;if(MPV.online===false&&!force)return;
   MPV.busy=true;
@@ -4941,7 +4991,7 @@ let VISIT=null;
 // ----- Boat trips: home, back out, and visiting a friend's place -----
 var VT=null,TRV_AF=null,TRV_END=false;
 const WL=id=>id==='friend'?'pond':id;
-function placeName(id){return id==='friend'?(VT&&VT.museum?'the Museum':VT?`${VT.name}’s place`:'a friend’s place'):id==='pond'?'Dock Pond':(W(id)||{n:'the lake'}).n}
+function placeName(id){return id==='friend'?(VT&&VT.arcade?'the Arcade':VT&&VT.museum?'the Museum':VT?`${VT.name}’s place`:'a friend’s place'):id==='pond'?'Dock Pond':(W(id)||{n:'the lake'}).n}
 function boatTrip(from,to,after,label){if(!cutOn()){if(after)after();return}
   Object.assign(TRV,{on:true,t0:performance.now()/1000,from,to,dx:0,...trvDirs(from,to),cur:trvDirs(from,to).dOut,moving:true,after:after||null,label:label||null});sfx('click');renderAll()}
 const friendScene=()=>{if(!VT||!VT.ext)return false;if(S.sleep&&S.sleep.at==='friend')return true;if(TRV.on){const t=performance.now()/1000-TRV.t0;return (TRV.from==='friend'&&t<1.6)||(TRV.to==='friend'&&t>=3.5)}return false};
@@ -4957,7 +5007,7 @@ async function visitCabin(id){const me=mpS();if(isRealm(S.water)){showToast('Com
     if(S.sleep&&S.sleep.ph==='yard'){VT.go=true;yardOut()}else if(S.sleep&&S.sleep.ph==='awake'){VT.go=true;leaveHouse()}else boatTrip(S.water,'friend',friendArrive)}
   catch(e){showToast(e.message==='no-cabin'?'That angler hasn’t opened the game since this update.':e.message==='private'?'That cabin is private.':'Couldn’t load that cabin.')}}
 function friendArrive(){S.sleep={ph:'boatIn',t:0,at:'friend',visit:true};save()}
-function enterFriend(){if(!VT||!S.sleep||S.sleep.ph!=='door')return;if(VT.museum){sfx('click');hideTip();openMuseum();return}const c=VT.c;
+function enterFriend(){if(!VT||!S.sleep||S.sleep.ph!=='door')return;if(VT.arcade){sfx('click');hideTip();openArcade();return}if(VT.museum){sfx('click');hideTip();openMuseum();return}const c=VT.c;
   const cab=Object.assign(cabDef(),c.cab||{});cab.col=cab.col||{};cab.own=cab.own||{};cab.wall=Array.isArray(cab.wall)?cab.wall.slice(0,3):[null,null,null];cab.ex=cab.ex||{};
   const coll=Object.fromEntries((c.coll||[]).map(k=>[k,{n:1,day:0}]));
   VISIT={name:VT.name,room:ROOM,S:Object.assign({},S,{cab,trophies:Array.isArray(c.trophies)?c.trophies.slice(0,TRO_CAP):[],cLight:true,troShow:null,troN:null,collSeen:null,coll,collShow:Array.isArray(c.collShow)?c.collShow.filter(k=>coll[k]).slice(0,COLL_CAP):null,
@@ -4977,7 +5027,7 @@ function openPicker(){const L=$('tripList'),prev=S.water;
   const opts=[['home','Home','Your cabin and Dock Pond. Rest in your bed.']].concat(WATERS.filter(w=>S.boat>=w.boat).map(w=>[w.id,w.n,(w.id===prev?'Where you were fishing. ':'')+w.d]));
   L.innerHTML=opts.map(([id,n,d])=>`<button class="tripopt${id===prev?' prev':''}" data-to="${id}"><b>${n}</b><span>${d}</span></button>`).join('');
   L.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>tripFrom(b.dataset.to));
-  $('tripTitle').textContent=VT&&VT.museum?'Leaving the Museum':VT?`Leaving ${VT.name}’s place`:'Back on the boat';$('tripModal').hidden=false;setTimeout(()=>{const f=L.querySelector('.prev')||L.querySelector('button');if(f)f.focus()},50)}
+  $('tripTitle').textContent=VT&&VT.arcade?'Leaving the Arcade':VT&&VT.museum?'Leaving the Museum':VT?`Leaving ${VT.name}’s place`:'Back on the boat';$('tripModal').hidden=false;setTimeout(()=>{const f=L.querySelector('.prev')||L.querySelector('button');if(f)f.focus()},50)}
 function tripFrom(dest){if(!S.sleep||S.sleep.at!=='friend')return;$('tripModal').hidden=true;
   if(S.sleep.ph!=='pick'){if(VT)VT.dest=dest;if(S.sleep.ph==='inside')exitFriend();else if(S.sleep.ph==='door')leaveFriendDoor();return}
   S.sleep=null;cast.el=0;
@@ -4990,14 +5040,15 @@ function renderVisitBar(){const sl=S.sleep,fr=sl&&sl.at==='friend',bar=$('visitB
   if(yd){$('visitTxt').innerHTML='Standing outside your cabin. Take a look around, then pick where to fish next.';$('visitBtns').innerHTML='<button class="jig" id="vbGo">Where to?</button><button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;
     $('vbIn').onclick=e=>{e.stopPropagation();yardIn()};$('vbGo').onclick=e=>{e.stopPropagation();openYardPicker()};return}
   if(!fr||!VT){bar.hidden=true;return}const nm=esc(VT.name);let txt='',btns='';
-  if(sl.ph==='door'&&VT.museum){txt='At the Lantern Lake Museum. Donate record fish and see who holds every plaque.';btns='<button class="jig" id="vbEnter">Enter the museum</button><button class="ghost" id="vbLeave">Leave</button>'}
+  if(sl.ph==='door'&&VT.arcade){txt='At the Lantern Pier Arcade. Play the cabinets for prize tickets and spend them at the Prize Counter.';btns='<button class="jig" id="vbEnter">Enter the arcade</button><button class="ghost" id="vbLeave">Leave</button>'}
+  else if(sl.ph==='door'&&VT.museum){txt='At the Lantern Lake Museum. Donate record fish and see who holds every plaque.';btns='<button class="jig" id="vbEnter">Enter the museum</button><button class="ghost" id="vbLeave">Leave</button>'}
   else if(sl.ph==='door'){txt=`At ${nm}’s place. Drag to look around.`;btns=`<button class="jig" id="vbEnter">Enter ${nm}’s house</button>${S.mp&&S.mp.id?`<button class="ghost" id="vbSign">Sign guestbook</button><button class="ghost" id="vbLike"${VT.liked?' disabled':''}>${VT.liked?'❤ Liked':'❤ Like yard'}</button>`:''}<button class="ghost" id="vbLeave">Leave</button>`}
   else if(sl.ph==='inside'&&VISIT&&VISIT.S.sleep.ph==='awake'){txt=`Visiting ${nm}’s cabin. Look around, but you can’t change anything.`;btns='<button class="jig" id="vbOut">Head out</button>'}
   else if(sl.ph==='pick'){txt='Back on the boat.';btns='<button class="jig" id="vbPick">Choose where to go</button>'}
   else{bar.hidden=true;return}
   $('visitTxt').textContent='';$('visitTxt').innerHTML=txt;$('visitBtns').innerHTML=btns;bar.hidden=false;
-  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker)}
-function drawNameSign(d){const x=VT&&VT.museum?200:176,y=244,nm=VT?VT.name:'';ctx.fillStyle=rgb(mix([30,22,16],[110,78,48],d));ctx.fillRect(x-1.5,y-26,3,26);
+  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum&&!VT.arcade)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker)}
+function drawNameSign(d){if(VT&&VT.arcade)return;const x=VT&&VT.museum?200:176,y=244,nm=VT?VT.name:'';ctx.fillStyle=rgb(mix([30,22,16],[110,78,48],d));ctx.fillRect(x-1.5,y-26,3,26);
   ctx.font='bold 9px sans-serif';const w=Math.max(38,ctx.measureText(nm).width+12);ctx.fillStyle=rgb(mix([40,30,20],[196,160,110],d));ctx.fillRect(x-w/2,y-38,w,14);
   ctx.strokeStyle=rgb(mix([20,14,10],[90,62,36],d));ctx.lineWidth=1;ctx.strokeRect(x-w/2,y-38,w,14);ctx.fillStyle=rgb(mix([10,8,6],[50,30,16],d));ctx.textAlign='center';ctx.fillText(nm,x,y-28);ctx.textAlign='left'}
 // ==YARD CAM==
@@ -5040,8 +5091,8 @@ function yardHits(){const G=shackGeo(),e=dockEnd(),P=(x,y,w,h,kind,data)=>HITS.p
   D('cleaning',[230,228,20,18]);D('lifering',[187,227,14,20]);D('bollards',[157,238,9,9],[221,238,9,9],[e-7,238,9,9]);
   D('docklights',[139,218,8,28],[e-7,218,8,28]);D('skeleton',[177,225,14,32]);D('rocker',[142,225,18,23]);
   {const py=has('bollards')?240:246;D('pelican',[211,py-21,31,22])}
-  if(fr)P(VT&&VT.museum?174:150,203,52,42,'ysign')}
-function yardTip(h){const fr=S.sleep&&S.sleep.at==='friend',who=fr&&VT?(VT.museum?'The museum’s':esc(VT.name)+'’s'):'Your';
+  if(fr&&!(VT&&VT.arcade))P(VT&&VT.museum?174:150,203,52,42,'ysign')}
+function yardTip(h){const fr=S.sleep&&S.sleep.at==='friend',who=fr&&VT?(VT.arcade?'The arcade’s':VT.museum?'The museum’s':esc(VT.name)+'’s'):'Your';
   if(h.kind==='yhouse'&&h.data===7)return '<b>Lantern Lake Museum</b><small>Tap the door to go inside and donate</small>';
   if(h.kind==='ydeco'){const it=DECOR.find(x=>x.id===h.data);if(!it)return '';return `<b>${it.n}</b><small>${CAT[it.cat]} decor${it.hw?' · Halloween':''} · from the Shop</small><small class="yd">${it.d}</small>`}
   if(h.kind==='yhouse'){const it=GEAR.shack.items[h.data];return `<b>${it?it.n:'Shack'}</b><small>${who} place</small>`}
@@ -5057,8 +5108,8 @@ function yardIn(){if(!S.sleep||S.sleep.ph!=='yard')return;S.sleep={ph:'enter',t:
 // Standing in the yard after leaving the cabin: pick a spot, then walk to the boat and row there.
 function openYardPicker(){if(!S.sleep||S.sleep.ph!=='yard')return;const L=$('tripList'),prev=isRealm(S.water)?null:S.water;
   const opts=WATERS.filter(w=>S.boat>=w.boat).map(w=>[w.id,w.n,(w.id===prev?'Where you were fishing. ':'')+w.d]);
-  L.innerHTML=opts.map(([id,n,d])=>`<button class="tripopt${id===prev?' prev':''}" data-to="${id}"><b>${n}</b><span>${d}</span></button>`).join('')+(mpS().id?`<button class="tripopt" data-mus="1"><b>🏛️ The Museum</b><span>Donate record fish and see the plaques.${MC().length?` ${MC().length} fish waiting in your Museum Case.`:''}</span></button>`:'');
-  L.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>yardGo(b.dataset.to));{const mb=L.querySelector('[data-mus]');if(mb)mb.onclick=visitMuseum}
+  L.innerHTML=opts.map(([id,n,d])=>`<button class="tripopt${id===prev?' prev':''}" data-to="${id}"><b>${n}</b><span>${d}</span></button>`).join('')+`<button class="tripopt" data-arc="1"><b>🕹️ The Arcade</b><span>Play for prize tickets. You have ${tix(ARC().t)}.</span></button>`+(mpS().id?`<button class="tripopt" data-mus="1"><b>🏛️ The Museum</b><span>Donate record fish and see the plaques.${MC().length?` ${MC().length} fish waiting in your Museum Case.`:''}</span></button>`:'');
+  L.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>yardGo(b.dataset.to));{const mb=L.querySelector('[data-mus]');if(mb)mb.onclick=visitMuseum;const ab=L.querySelector('[data-arc]');if(ab)ab.onclick=visitArcade}
   $('tripTitle').textContent='Leaving the cabin';$('tripModal').hidden=false;setTimeout(()=>{const f=L.querySelector('.prev')||L.querySelector('button');if(f)f.focus()},50)}
 function yardGo(dest){$('tripModal').hidden=true;if(!S.sleep||S.sleep.ph!=='yard')return;const w=W(dest);if(!w||S.boat<w.boat)return;
   if(S.water!==dest){S.water=dest;cast.el=0;cast.dur=castDur();try{renderAll()}catch(e){}}sfx('click');yardOut()}
@@ -5143,6 +5194,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:74,n:'Lantern Pier Arcade',items:['New place to visit: the Lantern Pier Arcade! Take the boat over from the Waters tab or when you leave your cabin, walk in, and tap any cabinet on the arcade floor to play.','Play Bobber Toss, Whack-a-Gar and Pinball for prize tickets (up to 600 a day), or spend 30 on the Claw Machine to win plushies.','Putt of the Day: one mini-golf hole, the same for everyone each day, with 3 tries. Hole-in-one pays 100 tickets.','The Prize Counter has fixed prices for everyone: ticket crates (150), plushies for your windowsill, an “Arcade Champ” neon sign and two arcade-only boat paints, 8-Bit and Pinball Neon. Crate Expectations can also open crates with tickets.','Weekly high-score boards for each cabinet, a daily board for the putt, and a trophy for each weekly champion.']},
+ {v:73,n:'Same Sky',items:['Weather is now shared: every angler on Lantern Lake gets the same weather at the same moment, so when a storm rolls in, it rolls in for everyone. Tell your friends!','Weather changes twice per game day (every 12 real minutes) instead of at random, and the Lake 7 Weather app is now exact. A new Coming up list shows the next four weather changes with times on your clock, and the 7-day forecast shows days that change weather partway through.','Sleeping no longer skips past bad weather, and weather while you’re away follows what really happened on the lake.']},
  {v:72,n:'The Angler Who Isn’t There',items:['A fourth mystery for the Casefile app, unlocked by closing the Keeper’s Light: someone is fishing Reed Lake wearing your face.','Follow texts from your own number, a figure on the far water at dusk, lies hiding in your own records and mirror shards that surface at night.','The finale is Mirror Match, a memory duel with your reflection in an upside-down world. Win a trophy, $250,000 and the Reflection boat paint, which leaves a ghostly copy of your boat under the water.','Bug fix: finding the keeper’s key or a letter in a bottle while you were away no longer interrupts your away catch summary.']},
  {v:71,n:'Quick Replies',items:['Texts are checked every 45 seconds again, even when you’ve stepped away from the game, so new messages still show up quickly.']},
  {v:70,n:'Quiet Hours',items:['Behind the scenes: when you leave the game running without touching it for 5 minutes, it checks in with the server less often (every 10 minutes instead of every 2). Fishing and earnings carry on exactly the same, and everything catches up the moment you move the mouse or tap. This lets many more anglers share the lake.']},
@@ -5430,10 +5483,10 @@ const BOB={x:600,y:300};
 const dockEnd=()=>S.shack>=4?320:260;
 // ==HOME LADDER== a tarp, then a fishing shack that grows into a real house. Each tier keeps the same anchor points
 // (x, y, w, roof peak px/py, door, ground-floor windows at y=212) so yard decorations still sit in the right places.
-const HOME_W=[0,72,96,108,118,128,136,150],HOME_H=[0,42,50,56,86,78,96,78],HOME_P=[0,16,26,28,32,22,30,24]; // tier 7 is the Museum (only drawn when visiting it)
-function shackGeo(){const t=S.shack,w=HOME_W[t]||0,ht=HOME_H[t]||0,x=24,y=242-ht;return {t,x,y,w,ht,px:x+w/2,py:y-(HOME_P[t]||28),door:t===7?x+w/2-8:x+w-26}}
+const HOME_W=[0,72,96,108,118,128,136,150,160],HOME_H=[0,42,50,56,86,78,96,78,70],HOME_P=[0,16,26,28,32,22,30,24,30]; // tier 7 is the Museum, tier 8 the Arcade (only drawn when visiting them)
+function shackGeo(){const t=S.shack,w=HOME_W[t]||0,ht=HOME_H[t]||0,x=24,y=242-ht;return {t,x,y,w,ht,px:x+w/2,py:y-(HOME_P[t]||28),door:t>=7?x+w/2-8:x+w-26}}
 const HCol=(dy,d,k)=>rgb(mix(dy.map(v=>v*(k||.28)),dy,d*.8+.2));
-function homeWins(G){const {t,x,y,w}=G;if(t===7)return [];const g=[[x+10,212]];if(t>=2)g.push([x+34,212]);if(t>=3&&t!==5)g.push([x+58,212].slice(0,2));
+function homeWins(G){const {t,x,y,w}=G;if(t>=7)return [];const g=[[x+10,212]];if(t>=2)g.push([x+34,212]);if(t>=3&&t!==5)g.push([x+58,212].slice(0,2));
   if(t===4||t===6)g.push([x+12,y+14],[x+40,y+14],[x+w-34,y+14]);return g.filter(([wx,wy])=>wy!==212||wx+14<G.door-2||wx>G.door+16)}
 function gable(G,col,ov){const {x,y,w}=G,o=ov??8;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x-o,y+2);ctx.lineTo(G.px,G.py);ctx.lineTo(x+w+o,y+2);ctx.fill()}
 function drawHomeBody(G,d,T){const {t,x,y,w,ht}=G,glass=lit(d)?`rgba(255,200,110,${.95-d*.6})`:HCol([168,206,216],d),wins=homeWins(G);
@@ -5475,6 +5528,27 @@ function drawHomeBody(G,d,T){const {t,x,y,w,ht}=G,glass=lit(d)?`rgba(255,200,110
     ctx.fillStyle=HCol([62,66,74],d);ctx.beginPath();ctx.moveTo(gx,y+8);ctx.lineTo(G.px,G.py+10);ctx.lineTo(gx+gw,y+8);ctx.fill();ctx.fillStyle=glass;ctx.beginPath();ctx.moveTo(gx+6,y+6);ctx.lineTo(G.px,G.py+14);ctx.lineTo(gx+gw-6,y+6);ctx.fill();
     for(const [wx,wy] of wins.filter(v=>v[0]<gx-10))winFrame(wx,wy,14,12,HCol([40,42,48],d));ctx.fillStyle=HCol([40,42,48],d);ctx.fillRect(G.door,214,14,28);
     ctx.fillStyle=HCol([170,126,84],d);ctx.fillRect(x-4,236,w+16,6);ctx.fillStyle=HCol([40,42,48],d);for(let px=x;px<x+w+10;px+=12)ctx.fillRect(px,226,1.5,10);ctx.fillRect(x-4,226,w+16,1.5);return wins}
+  if(t===8){// Lantern Pier Arcade: purple boardwalk hall, glowing cabinet windows, striped awning and a chasing-bulb ARCADE marquee
+    const wall=HCol([74,52,120],d),trim=HCol([40,26,70],d),teal=HCol([40,190,190],d),on=lit(d)||true;
+    ctx.fillStyle=wall;ctx.fillRect(x,y,w,ht);ctx.fillStyle=HCol([62,42,104],d);for(let yy=y+6;yy<242;yy+=7)ctx.fillRect(x,yy,w,1);
+    ctx.fillStyle=teal;ctx.fillRect(x,y+18,w,4);ctx.fillStyle=trim;ctx.fillRect(x-6,y-4,w+12,6);
+    // cabinet windows: little arcade screens flicker in colors
+    for(const [wx,ww] of [[x+10,44],[x+w-54,44]]){ctx.fillStyle=trim;ctx.fillRect(wx-2,y+28,ww+4,30);ctx.fillStyle=lit(d)?'rgba(30,20,50,.95)':HCol([60,80,110],d);ctx.fillRect(wx,y+30,ww,26);
+      for(let i=0;i<3;i++){const cx=wx+5+i*14,hue=(T*40+i*90+wx)%360;ctx.fillStyle=HCol([20,16,30],d);ctx.fillRect(cx,y+36,10,20);ctx.fillStyle=`hsl(${hue},85%,${lit(d)?62:48}%)`;ctx.fillRect(cx+1.5,y+38,7,6)}
+      if(lit(d))glow(wx+ww/2,y+44,30,.4*(1-d),'200,120,255')}
+    // double glass doors under a striped awning
+    ctx.fillStyle=trim;ctx.fillRect(G.door-6,y+30,28,40);ctx.fillStyle=lit(d)?'rgba(255,190,240,.85)':HCol([150,190,210],d);ctx.fillRect(G.door-4,y+32,11,38);ctx.fillRect(G.door+9,y+32,11,38);ctx.fillStyle=trim;ctx.fillRect(G.door+7,y+32,2,38);
+    for(let i=0;i<7;i++){ctx.fillStyle=i%2?HCol([250,250,250],d):HCol([240,70,150],d);ctx.beginPath();ctx.moveTo(G.door-10+i*6,y+24);ctx.lineTo(G.door-4+i*6,y+24);ctx.lineTo(G.door-4+i*6,y+30);ctx.arc(G.door-7+i*6,y+30,3,0,Math.PI);ctx.fill()}
+    // marquee sign on the roof with chasing bulbs
+    const mx=x+18,mw=w-36,my=G.py-4,mh=y-my-4;ctx.fillStyle=trim;ctx.fillRect(mx+10,y-8,4,8);ctx.fillRect(mx+mw-14,y-8,4,8);ctx.fillStyle=HCol([24,14,40],d);rrect(mx,my,mw,mh,4);ctx.fill();
+    const bulbs=26;for(let i=0;i<bulbs;i++){const p=i/bulbs,per=2*(mw+mh);let L=p*per,bx,by;if(L<mw){bx=mx+L;by=my}else if(L<mw+mh){bx=mx+mw;by=my+L-mw}else if(L<2*mw+mh){bx=mx+mw-(L-mw-mh);by=my+mh}else{bx=mx;by=my+mh-(L-2*mw-mh)}
+      const lit2=(Math.floor(T*6)+i)%3===0;ctx.fillStyle=lit2?'#fff2a0':'#7a6a40';ctx.beginPath();ctx.arc(bx,by,1.6,0,7);ctx.fill()}
+    {const hue=(T*30)%360,txt='ARCADE';ctx.font='bold 15px "Sniglet",sans-serif';ctx.textAlign='center';ctx.shadowColor=`hsl(${hue},100%,60%)`;ctx.shadowBlur=lit(d)?12:5;ctx.fillStyle=`hsl(${hue},100%,${lit(d)?72:58}%)`;ctx.fillText(txt,mx+mw/2,my+mh/2+5);ctx.shadowBlur=0;ctx.textAlign='left';
+      if(lit(d))glow(mx+mw/2,my+mh/2,60,.35*(1-d),'255,120,220')}
+    // boardwalk planks in front, with a ticket sign
+    ctx.fillStyle=HCol([150,110,70],d);ctx.fillRect(x-8,238,w+16,4);ctx.fillStyle=HCol([110,78,48],d);for(let px=x-6;px<x+w+8;px+=9)ctx.fillRect(px,238,1,4);
+    ctx.fillStyle=HCol([240,200,60],d);rrect(x+w-20,y+22,16,10,2);ctx.fill();ctx.fillStyle=HCol([120,60,10],d);ctx.font='bold 6px sans-serif';ctx.fillText('🎟',x+w-17,y+30);
+    return []}
   if(t===7){// Lantern Lake Museum: pale stone, columns, pediment with a lantern, wide steps, red banners
     const stone=HCol([226,218,198],d),shade=HCol([182,172,152],d),dark=HCol([116,106,92],d),colc=HCol([242,236,222],d);
     ctx.fillStyle=stone;ctx.fillRect(x,y,w,ht);ctx.fillStyle=shade;for(let yy=y+10;yy<240;yy+=8)ctx.fillRect(x,yy,w,1);
@@ -5516,7 +5590,7 @@ function drawShack(d,h,T){
     ctx.fillStyle=HCol([150,60,50],d);ctx.fillRect(48,236,40,5);ctx.fillStyle=HCol([230,220,200],d);ctx.fillRect(48,236,9,5);
     ctx.fillStyle=HCol([90,90,92],d);for(let i=0;i<5;i++){ctx.beginPath();ctx.arc(98+i*3,241,1.8,0,7);ctx.fill()}flame(104,238,.55,T);if(lit(d))glow(104,236,30,.5*(1-d),'255,170,80');drawTrophies(G);return}
   const wins=drawHomeBody(G,d,T);
-  if(AMB.snowAcc>0){ctx.fillStyle=`rgba(240,244,250,${.9*AMB.snowAcc})`;ctx.beginPath();ctx.moveTo(x-8,y+2);ctx.lineTo(G.px,G.py);ctx.lineTo(x+w+8,y+2);ctx.lineTo(x+w+3,y+2);ctx.lineTo(G.px,G.py+5);ctx.lineTo(x-3,y+2);ctx.fill()}
+  if(AMB.snowAcc>0&&t<7){ctx.fillStyle=`rgba(240,244,250,${.9*AMB.snowAcc})`;ctx.beginPath();ctx.moveTo(x-8,y+2);ctx.lineTo(G.px,G.py);ctx.lineTo(x+w+8,y+2);ctx.lineTo(x+w+3,y+2);ctx.lineTo(G.px,G.py+5);ctx.lineTo(x-3,y+2);ctx.fill()}
   if(has('solar')){ctx.fillStyle=rgb(mix([14,20,40],[40,70,130],d));for(const [p1,p2] of [[.2,.45],[.52,.77]]){const L=p=>[x-8+(G.px-x+8)*p,y+2+(G.py-y-2)*p];const a=L(p1),b=L(p2);ctx.beginPath();ctx.moveTo(a[0],a[1]+2);ctx.lineTo(b[0],b[1]+2);ctx.lineTo(b[0],b[1]+10);ctx.lineTo(a[0],a[1]+10);ctx.fill()}
     ctx.strokeStyle=rgb(mix([40,50,70],[150,180,220],d),.6);ctx.lineWidth=.6;for(const p of [.32,.64]){const xx=x-8+(G.px-x+8)*p,yy=y+2+(G.py-y-2)*p;ctx.beginPath();ctx.moveTo(xx,yy+2);ctx.lineTo(xx,yy+10);ctx.stroke()}}
   if(has('flowerbox')){for(const [wx,wy] of wins){const by=wy+(wy===212?12:10);ctx.fillStyle=rgb(mix([40,26,20],[110,60,40],d));ctx.fillRect(wx-1,by,16,3.5);
@@ -5915,6 +5989,8 @@ const COS=[
  CZ('neon','Neon Bobber Sign','wall',40000,{glass:6,brass:4,paint:3},'Buzzes softly and glows after dark.'),
  CZ('lights','String Lights','extra',7000,{glass:4,scrap:3},'Little bulbs along the ceiling beam.'),
  CZ('fern','Potted Fern','extra',1500,{drift:2,paint:1},'Somehow thriving on the windowsill.'),
+ {...CZ('plushbass','Bass Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushduck','Duck Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushbeast','Lake Beast Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},
+ {...CZ('arcneon','“Arcade Champ” Neon','wall',0,{},'From the Lantern Pier Arcade.'),arc:true},
 ];
 const CZI=id=>COS.find(c=>c.id===id);
 const COSK={bed:'Bed',rug:'Rug',lamp:'Lamp',wall:'Wall decor',extra:'Extra'};
@@ -6047,6 +6123,9 @@ function drawWallDeco(id,cx,cy,i,d,T){const dark=d<.4;
    ctx.fillStyle='#4a7a3a';ctx.beginPath();ctx.ellipse(-4,0,26,11,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(18,0);ctx.lineTo(34,-11);ctx.lineTo(34,11);ctx.closePath();ctx.fill();ctx.fillStyle='#d8e0a0';ctx.beginPath();ctx.ellipse(-6,4,18,5,0,0,7);ctx.fill();ctx.fillStyle='#2a0f0f';ctx.beginPath();ctx.moveTo(-30,-1);ctx.lineTo(-20,2);ctx.lineTo(-30,5);ctx.fill();ctx.fillStyle='#111';ctx.beginPath();ctx.arc(-20,-3,2,0,7);ctx.fill()}
   else if(id==='anchor'){ctx.strokeStyle='#4a4e54';ctx.lineWidth=6;ctx.beginPath();ctx.arc(0,-28,6,0,7);ctx.moveTo(0,-22);ctx.lineTo(0,28);ctx.moveTo(-14,-12);ctx.lineTo(14,-12);ctx.stroke();ctx.beginPath();ctx.arc(0,8,24,.3,Math.PI-.3);ctx.stroke();ctx.fillStyle='#4a4e54';for(const s of [-1,1]){ctx.beginPath();ctx.moveTo(s*24,10);ctx.lineTo(s*30,2);ctx.lineTo(s*18,6);ctx.fill()}}
   else if(id==='painting'){const g=ctx.createLinearGradient(0,-26,0,26);g.addColorStop(0,'#f2a868');g.addColorStop(.55,'#e87a5a');g.addColorStop(.56,'#3a5a7a');g.addColorStop(1,'#1e3448');ctx.fillStyle=g;ctx.fillRect(-40,-28,80,56);ctx.fillStyle='#ffe0a0';ctx.beginPath();ctx.arc(12,0,9,Math.PI,0);ctx.fill();ctx.fillStyle='#24382c';ctx.beginPath();ctx.moveTo(-40,4);ctx.quadraticCurveTo(-20,-10,0,2);ctx.lineTo(-40,3);ctx.fill();ctx.strokeStyle='#c8a050';ctx.lineWidth=6;ctx.strokeRect(-43,-31,86,62)}
+  else if(id==='arcneon'){const on=!(Math.sin(T*11+1)>.97),a=on?1:.35;ctx.fillStyle='#160c22';rrect(-46,-28,92,56,8);ctx.fill();ctx.lineWidth=2;ctx.shadowBlur=dark?18:10;
+   ctx.shadowColor=`rgba(255,80,220,${a})`;ctx.fillStyle=`rgba(255,140,230,${a})`;ctx.font='bold 13px "Sniglet",sans-serif';ctx.textAlign='center';ctx.fillText('ARCADE',0,-4);ctx.shadowColor=`rgba(80,220,255,${a})`;ctx.fillStyle=`rgba(150,235,255,${a})`;ctx.fillText('CHAMP',0,14);ctx.textAlign='left';
+   ctx.strokeStyle=`rgba(255,210,90,${a})`;ctx.shadowColor=`rgba(255,210,90,${a})`;ctx.beginPath();ctx.moveTo(-38,-20);ctx.lineTo(-32,-14);ctx.moveTo(38,-20);ctx.lineTo(32,-14);ctx.stroke();ctx.shadowBlur=0;ctx.restore();if(dark)glow(cx,cy,90,.18*a,'255,120,230');RH(cx-46,cy-34,92,68,'deco','wall');return}
   else if(id==='neon'){const on=!(Math.sin(T*13)>.97),a=on?1:.35;ctx.fillStyle='#1a1a1e';rrect(-44,-30,88,60,8);ctx.fill();ctx.lineWidth=3.5;ctx.shadowBlur=dark?18:10;
    ctx.shadowColor=`rgba(255,80,80,${a})`;ctx.strokeStyle=`rgba(255,110,110,${a})`;ctx.beginPath();ctx.arc(-14,-2,15,Math.PI,0);ctx.stroke();ctx.shadowColor=`rgba(255,255,255,${a})`;ctx.strokeStyle=`rgba(255,255,255,${a})`;ctx.beginPath();ctx.arc(-14,-2,15,0,Math.PI);ctx.stroke();
    ctx.shadowColor=`rgba(110,220,255,${a})`;ctx.fillStyle=`rgba(150,230,255,${a})`;ctx.font='bold 15px sans-serif';ctx.fillText('BAIT',6,4);ctx.shadowBlur=0;ctx.restore();if(dark)glow(cx,cy,90,.18*a,'255,120,140');RH(cx-46,cy-34,92,68,'deco','wall');return}
@@ -6054,6 +6133,7 @@ function drawWallDeco(id,cx,cy,i,d,T){const dark=d<.4;
 function drawStringLights(T,lightsOn){ctx.strokeStyle='#2a2a2a';ctx.lineWidth=1.5;ctx.beginPath();for(let s=0;s<5;s++){const x0=s*200,x1=x0+200;ctx.moveTo(x0,20);ctx.quadraticCurveTo((x0+x1)/2,58,x1,20)}ctx.stroke();
   const cols=['255,200,90','255,120,120','140,220,255','170,255,170'];for(let s=0;s<5;s++)for(let k=1;k<8;k++){const u=k/8,x=s*200+u*200,y=20+(1-(2*u-1)**2)*19;const c=cols[(s*7+k)%4],tw=lightsOn?.75+.25*Math.sin(T*2+k*1.7+s):.35;
    ctx.fillStyle=`rgba(${c},${tw})`;ctx.beginPath();ctx.arc(x,y+4,3.6,0,7);ctx.fill();if(lightsOn)glow(x,y+4,16,.25*tw,c)}}
+function drawPlushies(T){const cb=CAB(),y=S.shack>=5?204:184;let x=172;for(const id of ['plushbass','plushduck','plushbeast']){if(!(cb.own[id]&&cb.ex[id]))continue;AGAMES.claw.plush(ctx,id,x,y-12,1.1);RH(x-18,y-30,36,32,'deco','extra');x+=36}}
 function drawFern(T){const x=270,y=184;ctx.fillStyle='#b8643a';ctx.beginPath();ctx.moveTo(x-11,y-18);ctx.lineTo(x+11,y-18);ctx.lineTo(x+8,y);ctx.lineTo(x-8,y);ctx.closePath();ctx.fill();
   ctx.strokeStyle='#4a8a3a';ctx.lineWidth=2.4;for(let k=0;k<7;k++){const a=-Math.PI/2+(k-3)*.38+Math.sin(T*.8+k)*.04;ctx.beginPath();ctx.moveTo(x,y-18);ctx.quadraticCurveTo(x+Math.cos(a)*14,y-18+Math.sin(a)*22,x+Math.cos(a)*26,y-18+Math.sin(a)*30+10);ctx.stroke()}RH(x-14,y-48,28,48,'deco','extra')}
 function drawStairsDoor(T){const x=900,y=244,w=92,h=148;
@@ -6123,7 +6203,7 @@ function drawCabin(d,T,top,bot){
   ctx.fillStyle=shd(W,-.55);ctx.fillRect(0,386,1000,9);
   drawRug();
   if(S.shack>=5){drawRoomWindow(140,44,170,160,d,T,top,bot);ctx.fillStyle=shd(W,-.45);for(let i=0;i<3;i++)ctx.fillRect(140,44+i*4,170,1.5)}else{drawRoomWindow(150,66,140,118,d,T,top,bot);drawCurtains(150,66,140,118)}
-  if(cb.ex.fern&&cb.own.fern)drawFern(T);
+  if(cb.ex.fern&&cb.own.fern)drawFern(T);drawPlushies(T);
   const open=(ph==='enter'&&t<.6)||(ph==='exit'&&t>.75);drawDoor(open,top,bot);RH(14,174,88,218,'door');
   const slots=[[58,108],[353,120],[946,128]];cb.wall.forEach((id,i)=>{if(id&&cb.own[id])drawWallDeco(id,slots[i][0],slots[i][1],i,d,T)});
   drawStairsDoor(T);
@@ -7317,6 +7397,267 @@ function mmLoop(now){if(!MM.on)return;const dt=Math.min(.05,(now-MM.last)/1000);
   $('mmMsg').textContent=MM.msg;$('mmHud').textContent=`Round ${Math.min(MM.round+1,MM_LEN.length)}/${MM_LEN.length} · Mistakes ${MM.miss}/3`;
   requestAnimationFrame(mmLoop)}
 
+// ==ARCADE== Lantern Pier Arcade: a boat trip away. Cabinets pay prize tickets for skill (never cash, never bought), up to
+// 600 a day. Tickets spend at the Prize Counter at fixed prices, so a new angler and a rich one pay the same. Putt of the
+// Day is one mini-golf hole, the same for everyone each day, with 3 tries. High scores go to weekly/daily boards.
+const ARC_CAP=600,ARC_CRATE=150,ARC_CLAW=30;
+function ARC(){if(!S.arc||typeof S.arc!=='object')S.arc={t:0};const a=S.arc;a.t=a.t||0;a.best=a.best||{};a.tr=a.tr||{};if(!a.putt||typeof a.putt!=='object')a.putt={};if(a.day!==localDay()){a.day=localDay();a.got=0}a.got=a.got||0;return a}
+const arcUTC=()=>new Date().toISOString().slice(0,10);
+function arcPutt(){const a=ARC(),d=arcUTC();if(a.putt.d!==d)a.putt={d,tries:0,best:0,paid:0};return a.putt}
+// pay tickets from a game, respecting the daily limit. Returns what was actually paid.
+function arcEarn(n){const a=ARC(),g=Math.max(0,Math.min(ARC_CAP-a.got,Math.round(n)));a.got+=g;a.t+=g;save();return g}
+function arcGive(n){const a=ARC();a.t+=Math.max(0,Math.round(n));save()}
+const tix=n=>`🎟️ ${Number(n).toLocaleString()}`;
+// --- visiting: same boat trip as the Museum ('friend' is an island stop: the boat leaves and arrives over open water)
+const arcHere=()=>!!(VT&&VT.arcade);
+function visitArcade(){if(isRealm(S.water)){showToast('Come back to Lantern Lake first to visit the arcade');return}
+  if(VT||VISIT){showToast('You’re already out visiting');return}if(TRV.on){showToast('Wait until the boat stops');return}
+  if(S.tour&&S.tour.phase==='live'){showToast('Finish or leave your tournament first');return}
+  if(S.sleep&&!['awake','yard'].includes(S.sleep.ph)){showToast('Wait until you’re up and about');return}
+  VT={arcade:true,id:'arcade',name:'Arcade',c:null,ext:{shack:8,decor:{},off:{},boxes:[],trophies:[]}};
+  $('tripModal').hidden=true;closePhone();hideTip();showToast('Heading to the Lantern Pier Arcade','By boat');
+  if(S.sleep&&S.sleep.ph==='yard'){VT.go=true;yardOut()}else if(S.sleep&&S.sleep.ph==='awake'){VT.go=true;leaveHouse()}else boatTrip(S.water,'friend',friendArrive)}
+// --- prizes
+const ARC_ITEMS=[
+  {id:'plushbass',n:'Bass Plush',c:300,k:'plush',d:'A squishy largemouth for your windowsill.'},
+  {id:'plushduck',n:'Duck Plush',c:500,k:'plush',d:'A fuzzy yellow duck. Quacks when squeezed (it doesn’t).'},
+  {id:'plushbeast',n:'Lake Beast Plush',c:1200,k:'plush',d:'The legend, but huggable. Also hides in the Claw Machine.'},
+  {id:'arcneon',n:'“Arcade Champ” Neon Sign',c:2000,k:'wall',d:'Pink and blue neon for your cabin wall. Buzzes after dark.'},
+  {id:'bit8',n:'8-Bit Boat Paint',c:1500,k:'paint',d:'Chunky pixel blocks straight off an old cabinet screen.'},
+  {id:'pinneon',n:'Pinball Neon Boat Paint',c:1500,k:'paint',d:'Bumper lights chase along your hull.'}];
+const arcOwns=it=>it.k==='paint'?!!PNT().own[it.id]:!!CAB().own[it.id];
+function arcGrant(id){const it=ARC_ITEMS.find(x=>x.id===id);if(!it)return;if(it.k==='paint'){const P=PNT();P.own[id]=(P.own[id]||0)+1}else{const cb=CAB();cb.own[id]=1;if(it.k==='plush')cb.ex[id]=1;else{const i=cb.wall.indexOf(null);if(i>=0)cb.wall[i]=id}}storeDirty=true}
+function arcBuy(id){const it=ARC_ITEMS.find(x=>x.id===id),a=ARC();if(!it||arcOwns(it)||a.t<it.c)return;a.t-=it.c;arcGrant(id);sfx('craft');
+  celebrate({lbl:'Prize Counter',r:'E',name:it.n,sub:it.k==='paint'?'Find it in Crate Expectations, Locker':it.k==='wall'&&!CAB().wall.includes(id)?'Your wall spots are full. Swap it in with Decorate.':'Placed in your cabin. Change it any time with Decorate.',icon:svgI('crown','#ff3ad8')});save();renderArcade();try{renderAll()}catch(e){}}
+// --- the hall
+const ARC_GAMES=[
+  {id:'toss',n:'Bobber Toss',ic:'🎯',d:'Pull back and let go to roll bobbers up the ramp into the rings. 9 bobbers.',pay:'up to 60'},
+  {id:'gar',n:'Whack-a-Gar',ic:'🔨',d:'Bonk gars as they pop up. Golden gars are worth 3. Don’t hit the ducks! 45 seconds.',pay:'up to 60'},
+  {id:'pin',n:'Pinball',ic:'🪩',d:'The Big Catch table from your basement, now paying tickets.',pay:'up to 80'},
+  {id:'claw',n:'Claw Machine',ic:'🧸',d:'Steer the claw and drop it. Win plushies or ticket bags.',pay:`${ARC_CLAW} tickets a try`},
+  {id:'putt',n:'Putt of the Day',ic:'⛳',d:'One mini-golf hole, the same for everyone today. 3 tries, your best counts.',pay:'hole-in-one 100'}];
+const ARCV={tab:'room',board:'toss'};
+function openArcade(){ARC();if(ARCV.tab==='games')ARCV.tab='room';$('arcModal').hidden=false;renderArcade();arcChamps()}
+function renderArcade(){const b=$('arcBody');if(!b||$('arcModal').hidden)return;const a=ARC(),pu=arcPutt();
+  let h=`<div class="arc-top"><div class="arc-tix"><b>${tix(a.t)}</b><small>Earned today: ${a.got}/${ARC_CAP}${a.got>=ARC_CAP?' · daily limit reached, games still count for high scores':''}</small></div></div>
+    <div class="fbar" role="tablist">${[['room','Arcade floor'],['games','Game list'],['prizes','Prize Counter'],['boards','High scores']].map(([k,n])=>`<button data-atab="${k}" aria-pressed="${ARCV.tab===k}">${n}</button>`).join('')}</div>`;
+  if(ARCV.tab==='room')h+=`<div class="arc-roomw"><canvas id="arcRoom" width="1440" height="840" aria-label="Inside the arcade. Tap a cabinet to play, or the Prize Counter and the scoreboard."></canvas></div><p class="own-note">Tap a cabinet to play<span class="arc-swipe">, swipe to look around</span>. Prefer a list? Use Game list above.</p>`;
+  else if(ARCV.tab==='games')h+=`<div class="arc-grid">${ARC_GAMES.map(g=>{const best=a.best[g.id],extra=g.id==='putt'?`Tries today: ${pu.tries}/3${pu.best?` · best ${pu.best===1?'hole-in-one!':pu.best+' strokes'}`:''}`:g.id==='claw'?`You have ${tix(a.t)}`:best?`Your best: ${Number(best).toLocaleString()}`:'No score yet';
+      const dis=(g.id==='putt'&&pu.tries>=3)||(g.id==='claw'&&a.t<ARC_CLAW);return `<div class="arc-cab c-${g.id}"><div class="ac-ic">${g.ic}</div><div class="ac-mid"><b>${g.n}</b><p>${g.d}</p><small>🎟️ ${g.pay} · ${extra}</small></div><button class="jig" data-aplay="${g.id}" ${dis?'disabled':''}>${g.id==='putt'&&pu.tries>=3?'Back tomorrow':'Play'}</button></div>`}).join('')}</div>`;
+  else if(ARCV.tab==='prizes')h+=`<div class="arc-prz"><div class="arc-pi"><div class="ap-ic">📦</div><div><b>Ticket crate</b><p>A paint, rod or bobber crate, same items and odds as cash crates. Opens in Crate Expectations.</p></div><button class="jig" id="arcCrate" ${a.t<ARC_CRATE?'disabled':''}>${tix(ARC_CRATE)}</button></div>
+      ${ARC_ITEMS.map(it=>{const own=arcOwns(it);return `<div class="arc-pi${own?' own':''}"><div class="ap-ic">${{plush:'🧸',wall:'💡',paint:'🎨'}[it.k]}</div><div><b>${it.n}</b><p>${it.d}</p></div><button class="jig" data-abuy="${it.id}" ${own||a.t<it.c?'disabled':''}>${own?'Owned':tix(it.c)}</button></div>`}).join('')}</div>`;
+  else h+=`<div class="fbar" role="group">${[['toss','Bobber Toss'],['gar','Whack-a-Gar'],['pin','Pinball'],['putt','Putt (today)']].map(([k,n])=>`<button data-abd="${k}" aria-pressed="${ARCV.board===k}">${n}</button>`).join('')}</div><div id="arcBoard"><p class="fr-muted">${mpS().id?'Loading…':'Pick an angler name in the Friends app to join the high-score boards.'}</p></div><p class="own-note">Weekly boards reset every Monday. The #1 player on each weekly board gets a trophy.</p>`;
+  b.innerHTML=h;
+  b.querySelectorAll('[data-atab]').forEach(x=>x.onclick=()=>{ARCV.tab=x.dataset.atab;sfx('click');renderArcade()});
+  b.querySelectorAll('[data-aplay]').forEach(x=>x.onclick=()=>arcPlay(x.dataset.aplay));
+  b.querySelectorAll('[data-abuy]').forEach(x=>x.onclick=()=>arcBuy(x.dataset.abuy));
+  b.querySelectorAll('[data-abd]').forEach(x=>x.onclick=()=>{ARCV.board=x.dataset.abd;sfx('click');renderArcade()});
+  const cr=$('arcCrate');if(cr)cr.onclick=()=>{$('arcModal').hidden=true;openPhone();CR.tab='open';CR.last=null;phShow('crate')};
+  if(ARCV.tab==='boards'&&mpS().id)arcBoard();if(ARCV.tab==='room')arcRoomStart()}
+async function arcBoard(){const m=mpS(),g=ARCV.board,el=$('arcBoard');let r;try{r=await api('arcade/top',{id:m.id,key:m.key,g})}catch(e){if(el)el.innerHTML='<p class="fr-muted">Couldn’t load the board.</p>';return}
+  if(!el||ARCV.board!==g)return;const fmt=v=>g==='putt'?(v===1?'Hole-in-one':`${v} strokes`):Number(v).toLocaleString();
+  el.innerHTML=r.top.length?`<ol class="arc-bd">${r.top.map((x,i)=>`<li class="${x.pid===m.id?'me':''}"><span class="mt-r">${i+1}</span><b>${esc(x.name)}${x.pid===m.id?' (you)':''}</b><span>${fmt(x.s)}</span></li>`).join('')}</ol>${r.me&&r.me.rank>10?`<p class="own-note">You: #${r.me.rank} · ${fmt(r.me.s)}</p>`:''}`:'<p class="fr-muted">No scores yet. Be the first!</p>'}
+async function arcSubmit(g,s){const m=mpS();if(!m.id||!(s>0))return null;try{return await api('arcade/score',{id:m.id,key:m.key,g,s:Math.round(s)})}catch(e){return null}}
+async function arcChamps(){const m=mpS();if(!m.id)return;let r;try{r=await api('arcade/champs',{id:m.id,key:m.key})}catch(e){return}const a=ARC();
+  for(const [g,c] of Object.entries(r.champs||{})){const k=c.wk+':'+g;if(c.pid===m.id&&!a.tr[k]){a.tr[k]=1;const nm={toss:'Bobber Toss',gar:'Whack-a-Gar',pin:'Pinball'}[g];S.trophies.unshift({name:`${nm} Champion`,water:'pond',type:'big',score:Number(c.s).toLocaleString()+' points',day:S.day});
+    celebrate({lbl:'Arcade champion!',r:'L',name:`#1 in ${nm} last week`,sub:'A trophy is waiting on your shelf',icon:svgI('crown','#ffd05a')})}}save()}
+// Inside the arcade: a room you can look around. Tap a cabinet to play it, the Prize Counter to shop, or the scoreboard.
+const AROOM={raf:0,hov:null,hits:[]};
+function arcRoomStart(){cancelAnimationFrame(AROOM.raf);const c=$('arcRoom');if(!c)return;
+  const pt=e=>{const r=c.getBoundingClientRect();return [(e.clientX-r.left)/r.width*720,(e.clientY-r.top)/r.height*420]};
+  const hit=(x,y)=>AROOM.hits.find(h=>x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h)||null;
+  c.onpointermove=e=>{const h=hit(...pt(e));AROOM.hov=h&&h.id;c.style.cursor=h?'pointer':'default'};c.onpointerleave=()=>{AROOM.hov=null};
+  c.onclick=e=>{const h=hit(...pt(e));if(!h)return;sfx('click');if(h.id==='prizes'||h.id==='boards'){ARCV.tab=h.id;renderArcade()}else arcPlay(h.id)};
+  const loop=now=>{if($('arcModal').hidden||!$('arcRoom')){return}arcRoomDraw(now/1000);AROOM.raf=requestAnimationFrame(loop)};AROOM.raf=requestAnimationFrame(loop)}
+function arcRoomDraw(T){const c=$('arcRoom'),x=c.getContext('2d');x.setTransform(c.width/720,0,0,c.height/420,0,0);const H=[],hv=AROOM.hov,a=ARC(),pu=arcPutt();
+  // walls, neon stripes, carpet
+  let g=x.createLinearGradient(0,0,0,260);g.addColorStop(0,'#1e0f38');g.addColorStop(1,'#2e1652');x.fillStyle=g;x.fillRect(0,0,720,260);
+  for(const [yy,col] of [[34,'#ff3ad8'],[40,'#3af0ff']]){x.strokeStyle=col;x.shadowColor=col;x.shadowBlur=10;x.lineWidth=2.5;x.beginPath();x.moveTo(0,yy);x.lineTo(720,yy);x.stroke()}x.shadowBlur=0;
+  x.fillStyle='#120826';x.fillRect(0,252,720,10);g=x.createLinearGradient(0,262,0,420);g.addColorStop(0,'#1a1040');g.addColorStop(1,'#0c0820');x.fillStyle=g;x.fillRect(0,262,720,158);
+  const shapes=['#ff3ad8','#3af0ff','#ffd23a','#7aff6a'];for(let i=0;i<60;i++){const sx=(i*97)%720,sy=270+((i*53)%140),k=i%4;x.fillStyle=shapes[k];x.globalAlpha=.32;if(k===0){x.beginPath();x.arc(sx,sy,4,0,7);x.fill()}else if(k===1){x.fillRect(sx-3,sy-3,6,6)}else if(k===2){x.beginPath();x.moveTo(sx,sy-5);x.lineTo(sx+5,sy+4);x.lineTo(sx-5,sy+4);x.fill()}else{x.fillRect(sx-5,sy-1,10,2);x.fillRect(sx-1,sy-5,2,10)}}x.globalAlpha=1;
+  // ceiling lights
+  for(let i=0;i<6;i++){const lx=60+i*120;x.fillStyle='#3a2a5a';x.fillRect(lx-14,0,28,6);x.fillStyle='rgba(255,230,255,.07)';x.beginPath();x.moveTo(lx-14,6);x.lineTo(lx+40,250);x.lineTo(lx-68,250);x.fill()}
+  const lab=(id,t,X,Y)=>{if(hv!==id)return;x.font='bold 13px "Sniglet",sans-serif';const w=x.measureText(t).width+18;x.fillStyle='rgba(10,6,20,.9)';rr2(x,X-w/2,Y-18,w,22,10);x.fill();x.fillStyle='#fff';x.textAlign='center';x.fillText(t,X,Y-3);x.textAlign='left'};
+  const glowBox=(id,bx,by,bw,bh)=>{H.push({id,x:bx,y:by,w:bw,h:bh});if(hv===id){x.save();x.strokeStyle='#fff6a0';x.shadowColor='#ffd23a';x.shadowBlur=18;x.lineWidth=3;x.strokeRect(bx-3,by-3,bw+6,bh+6);x.restore()}};
+  const cab=(cx,col,title,scr)=>{x.fillStyle='#0a0614';x.beginPath();x.ellipse(cx,384,46,8,0,0,7);x.fill();x.fillStyle=col;x.beginPath();x.moveTo(cx-38,380);x.lineTo(cx-38,170);x.lineTo(cx-30,150);x.lineTo(cx+30,150);x.lineTo(cx+38,170);x.lineTo(cx+38,380);x.fill();
+    x.fillStyle='rgba(0,0,0,.25)';x.fillRect(cx+26,170,12,210);x.fillStyle='#120a20';x.fillRect(cx-32,154,64,18);x.font='bold 9px "Sniglet",sans-serif';x.textAlign='center';x.fillStyle='#fff6a0';x.shadowColor='#ffd23a';x.shadowBlur=6;x.fillText(title,cx,167);x.shadowBlur=0;x.textAlign='left';
+    x.fillStyle='#08040e';x.fillRect(cx-28,180,56,58);scr(cx-26,182,52,54);x.fillStyle='#2a1a3a';x.beginPath();x.moveTo(cx-38,250);x.lineTo(cx+38,250);x.lineTo(cx+44,272);x.lineTo(cx-44,272);x.fill();
+    x.fillStyle='#e03a3a';x.beginPath();x.arc(cx-14,260,4,0,7);x.fill();x.fillStyle='#3a8aff';x.beginPath();x.arc(cx+4,261,4,0,7);x.fill();x.fillStyle='#ffd23a';x.beginPath();x.arc(cx+16,259,4,0,7);x.fill();x.fillStyle='#ddd';x.fillRect(cx-26,256,3,10);x.fillStyle='#e03a3a';x.beginPath();x.arc(cx-24.5,256,3,0,7);x.fill();
+    x.fillStyle='rgba(255,255,255,.08)';x.fillRect(cx-22,300,44,6);x.fillStyle='#ffd23a';x.fillRect(cx-6,330,12,3)};
+  // 1. Bobber Toss: a long ramp lane
+  {const bx=26,by=150;x.fillStyle='#0a0614';x.beginPath();x.ellipse(bx+56,388,62,8,0,0,7);x.fill();x.fillStyle='#5a3418';x.beginPath();x.moveTo(bx,380);x.lineTo(bx+20,170);x.lineTo(bx+92,170);x.lineTo(bx+112,380);x.fill();x.fillStyle='#e0aa70';x.beginPath();x.moveTo(bx+10,372);x.lineTo(bx+26,190);x.lineTo(bx+86,190);x.lineTo(bx+102,372);x.fill();
+    for(const [r,col] of [[22,'#3a6ad0'],[16,'#3ac08a'],[10,'#f0c030'],[5,'#e0303a']]){x.fillStyle=col;x.beginPath();x.ellipse(bx+56,214,r,r*.55,0,0,7);x.fill()}x.fillStyle='#120a20';x.fillRect(bx+18,150,76,20);x.font='bold 10px "Sniglet",sans-serif';x.textAlign='center';x.fillStyle='#ff9ae8';x.shadowColor='#ff3ad8';x.shadowBlur=8;x.fillText('BOBBER TOSS',bx+56,164);x.shadowBlur=0;x.textAlign='left';
+    const by2=340-((T*60)%140);x.fillStyle='#e03a2a';x.beginPath();x.arc(bx+56,by2,4,Math.PI,0);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(bx+56,by2,4,0,Math.PI);x.fill();glowBox('toss',bx,150,112,236);lab('toss','Bobber Toss',bx+56,146)}
+  // 2. Whack-a-Gar cabinet
+  cab(208,'#2e7a3a','WHACK-A-GAR',(sx,sy,sw,sh)=>{x.fillStyle='#1e4a22';x.fillRect(sx,sy,sw,sh);for(let i=0;i<6;i++){const hx=sx+9+(i%3)*17,hy=sy+18+Math.floor(i/3)*20;x.fillStyle='#0a1a0c';x.beginPath();x.ellipse(hx,hy,6,2.5,0,0,7);x.fill();if((Math.floor(T*2)+i)%4===0){x.fillStyle='#8aaa5a';x.fillRect(hx-2,hy-9,4,9)}}});glowBox('gar',170,150,76,236);lab('gar','Whack-a-Gar',208,146);
+  // 3. Pinball table
+  {const px=278;x.fillStyle='#0a0614';x.beginPath();x.ellipse(px+52,388,60,8,0,0,7);x.fill();x.fillStyle='#16101e';x.fillRect(px+8,330,6,54);x.fillRect(px+90,330,6,54);x.fillStyle='#2a1458';x.fillRect(px+2,150,100,70);x.fillStyle='#08040e';x.fillRect(px+8,156,88,58);
+    x.font='bold 10px "Sniglet",sans-serif';x.textAlign='center';x.fillStyle=`hsl(${(T*80)%360},90%,70%)`;x.fillText('BIG CATCH',px+52,176);x.fillStyle='#ffd23a';x.fillText((a.best.pin||S.pinHi||0).toLocaleString(),px+52,196);x.textAlign='left';
+    x.fillStyle='#3a1a7a';x.beginPath();x.moveTo(px,226);x.lineTo(px+104,226);x.lineTo(px+112,336);x.lineTo(px-8,336);x.fill();x.fillStyle='#5a2aaa';x.beginPath();x.moveTo(px+8,232);x.lineTo(px+96,232);x.lineTo(px+102,328);x.lineTo(px+2,328);x.fill();
+    for(const [bx2,by2] of [[px+30,256],[px+70,256],[px+50,280]]){x.fillStyle=(Math.floor(T*4)%2)?'#ff3ad8':'#ffd23a';x.beginPath();x.arc(bx2,by2,7,0,7);x.fill()}x.fillStyle='#ddd';x.save();x.translate(px+36,318);x.rotate(.35);x.fillRect(-12,-2,14,4);x.restore();x.save();x.translate(px+68,318);x.rotate(-.35);x.fillRect(-2,-2,14,4);x.restore();
+    x.fillStyle='#fff';x.beginPath();x.arc(px+52+Math.sin(T*1.7)*30,300-Math.abs(Math.sin(T*2.3))*50,3,0,7);x.fill();glowBox('pin',px-8,150,120,236);lab('pin','Pinball',px+52,146)}
+  // 4. Claw machine
+  {const cx=426;x.fillStyle='#0a0614';x.beginPath();x.ellipse(cx+46,388,54,8,0,0,7);x.fill();x.fillStyle='#ff8fb8';x.fillRect(cx,150,92,236);x.fillStyle='#1a0e2a';x.fillRect(cx+8,176,76,124);x.fillStyle='rgba(150,210,255,.15)';x.fillRect(cx+8,176,76,124);
+    x.font='bold 9px "Sniglet",sans-serif';x.textAlign='center';x.fillStyle='#fff';x.fillText('CLAW',cx+46,168);x.textAlign='left';const kx=cx+46+Math.sin(T*.8)*24;x.strokeStyle='#bbb';x.lineWidth=1.5;x.beginPath();x.moveTo(kx,178);x.lineTo(kx,200);x.stroke();x.strokeStyle='#ddd';x.beginPath();x.moveTo(kx-6,206);x.lineTo(kx,200);x.lineTo(kx+6,206);x.stroke();
+    ['plushbass','plushduck','plushbeast','tix50','plushduck'].forEach((k,i)=>AGAMES.claw.plush(x,k,cx+18+i*14,288-(i%2)*6,.55));x.fillStyle='#d8c0f0';x.fillRect(cx+8,304,76,30);x.fillStyle='#2a1a3a';x.fillRect(cx+12,340,22,26);x.fillStyle='#ffd23a';x.fillRect(cx+58,314,18,10);glowBox('claw',cx,150,92,236);lab('claw',`Claw Machine · ${ARC_CLAW} tickets`,cx+46,146)}
+  // 5. Putt of the Day: a little green through an archway
+  {const gx=532;x.fillStyle='#0a0614';x.beginPath();x.ellipse(gx+44,388,52,8,0,0,7);x.fill();x.fillStyle='#1a3a24';x.fillRect(gx,150,88,236);x.fillStyle='#3aa85a';x.beginPath();x.moveTo(gx+6,384);x.lineTo(gx+18,200);x.lineTo(gx+70,200);x.lineTo(gx+82,384);x.fill();x.fillStyle='rgba(255,255,255,.06)';for(let i=0;i<6;i++)x.fillRect(gx+10,210+i*30,68,12);
+    x.fillStyle='#0a1a0e';x.beginPath();x.ellipse(gx+44,226,5,2.5,0,0,7);x.fill();x.strokeStyle='#ddd';x.lineWidth=1.2;x.beginPath();x.moveTo(gx+44,226);x.lineTo(gx+44,204);x.stroke();x.fillStyle='#e03a2a';x.beginPath();x.moveTo(gx+44,204);x.lineTo(gx+56,208);x.lineTo(gx+44,212);x.fill();
+    x.fillStyle='#fff';x.beginPath();x.arc(gx+44,350-((T*40)%120),3,0,7);x.fill();x.fillStyle='#120a20';x.fillRect(gx+4,152,80,22);x.font='bold 9px "Sniglet",sans-serif';x.textAlign='center';x.fillStyle='#9fffb0';x.shadowColor='#3aff6a';x.shadowBlur=6;x.fillText('PUTT OF THE DAY',gx+44,167);x.shadowBlur=0;
+    x.fillStyle='#fff';x.font='bold 9px sans-serif';x.fillText(pu.tries>=3?'Back tomorrow':`${3-pu.tries} tries left`,gx+44,192);x.textAlign='left';glowBox('putt',gx,150,88,236);lab('putt',`Putt of the Day · ${pu.tries>=3?'back tomorrow':`${3-pu.tries} tries left`}`,gx+44,146)}
+  // 6. Prize Counter
+  {const qx=632;x.fillStyle='#3a1a5a';x.fillRect(qx,120,84,140);x.fillStyle='#5a2a8a';for(const sy of [150,190,230]){x.fillRect(qx+4,sy,76,4)}
+    ['plushbass','plushduck','plushbeast'].forEach((k,i)=>AGAMES.claw.plush(x,k,qx+18+i*24,144,.6));x.font='14px sans-serif';x.fillText('🎨',qx+10,186);x.fillText('📦',qx+34,186);x.fillText('💡',qx+58,186);x.fillText('🧸',qx+22,226);x.fillText('🎟️',qx+48,226);
+    x.fillStyle='#e8c050';x.fillRect(qx-6,262,92,10);x.fillStyle='#8a3aaa';x.fillRect(qx-6,272,92,110);x.fillStyle='#120a20';x.fillRect(qx+2,96,76,20);x.font='bold 10px "Sniglet",sans-serif';x.textAlign='center';x.fillStyle='#ffd23a';x.shadowColor='#ffd23a';x.shadowBlur=8;x.fillText('PRIZES',qx+40,110);x.shadowBlur=0;
+    x.fillStyle='#fff';x.font='bold 11px sans-serif';x.fillText(`🎟️ ${a.t.toLocaleString()}`,qx+40,300);x.textAlign='left';glowBox('prizes',qx-6,96,92,290);lab('prizes','Prize Counter',qx+40,92)}
+  // scoreboard on the back wall
+  {const sx=250,sy=56;x.fillStyle='#0a0614';rr2(x,sx,sy,220,70,8);x.fill();x.strokeStyle='#3af0ff';x.shadowColor='#3af0ff';x.shadowBlur=8;x.lineWidth=2;rr2(x,sx,sy,220,70,8);x.stroke();x.shadowBlur=0;
+    x.font='bold 12px "Sniglet",sans-serif';x.textAlign='center';x.fillStyle='#3af0ff';x.fillText('HIGH SCORES',sx+110,sy+18);x.font='bold 10px monospace';x.fillStyle='#ffd23a';
+    const rows=[['TOSS',a.best.toss],['WHACK',a.best.gar],['PINBALL',a.best.pin||S.pinHi]];rows.forEach(([n,v],i)=>{x.textAlign='left';x.fillText(n,sx+30,sy+36+i*12);x.textAlign='right';x.fillText(v?Number(v).toLocaleString():'---',sx+190,sy+36+i*12)});x.textAlign='left';glowBox('boards',sx,sy,220,70);lab('boards','Weekly high scores',sx+110,sy+92)}
+  if(!hv){x.font='bold 12px "Sniglet",sans-serif';x.fillStyle='rgba(255,255,255,.75)';x.textAlign='center';x.fillText('Tap a game to play',360,412);x.textAlign='left'}
+  AROOM.hits=H}
+function rr2(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath()}
+// --- the game runner: one canvas (360×480), each game provides init/tick/draw and pointer handlers
+const AG={on:false};
+function arcPlay(id){const a=ARC();if(id==='pin'){$('arcModal').hidden=true;PB.arc=true;PB.fromArc=true;pbReset(true);pbOpen();return}
+  if(id==='claw'){if(a.t<ARC_CLAW){showToast('You need '+ARC_CLAW+' tickets for the Claw Machine');return}a.t-=ARC_CLAW;save()}
+  if(id==='putt'){const pu=arcPutt();if(pu.tries>=3)return;pu.tries++;save()}
+  const G=AGAMES[id];Object.assign(AG,{on:true,id,g:G,st:G.init(),last:performance.now(),done:false});$('agTitle').textContent=ARC_GAMES.find(x=>x.id===id).n;$('agRes').hidden=true;$('agCtl').innerHTML=G.ctl?G.ctl():'';
+  if(G.bind)G.bind(AG.st);$('arcModal').hidden=true;$('agModal').hidden=false;sfx('click');requestAnimationFrame(agLoop)}
+function agPt(e){const c=$('agCv'),r=c.getBoundingClientRect();return [(e.clientX-r.left)/r.width*360,(e.clientY-r.top)/r.height*480]}
+function agLoop(now){if(!AG.on)return;const dt=Math.min(.04,(now-AG.last)/1000);AG.last=now;const st=AG.st;if(!AG.done){AG.g.tick(st,dt);if(st.over)agFinish()}
+  const c=$('agCv'),x=c.getContext('2d');x.setTransform(c.width/360,0,0,c.height/480,0,0);AG.g.draw(st,x,now/1000);$('agHud').textContent=AG.g.hud(st);requestAnimationFrame(agLoop)}
+async function agFinish(){if(AG.done)return;AG.done=true;const st=AG.st,G=AG.g,id=AG.id,a=ARC(),sc=st.score||0;let pay=0,note='';
+  if(id==='putt'){const pu=arcPutt(),strokes=st.sunk?st.strokes:0;if(strokes&&(!pu.best||strokes<pu.best))pu.best=strokes;const want=pu.best===1?100:pu.best===2?50:pu.best?20:0;pay=Math.max(0,want-(pu.paid||0));pu.paid=(pu.paid||0)+pay;arcGive(pay);
+    note=st.sunk?(strokes===1?'HOLE-IN-ONE!':`Sunk in ${strokes} strokes.`):'Out of strokes on this try.';if(pu.best)arcSubmit('putt',pu.best)}
+  else if(id==='claw'){note=st.prizeMsg||'The claw came up empty.';pay=st.prizePay||0}
+  else{pay=arcEarn(G.tix(sc));if(sc>(a.best[id]||0)){a.best[id]=sc;note='New personal best! '}note+=`Score: ${sc.toLocaleString()}`;if(G.tix(sc)>pay)note+=` · daily ticket limit reached`;arcSubmit(id,sc).then(r=>{if(r&&r.rank){const el=$('agResR');if(el)el.textContent=r.record?'🏆 New #1 on this week’s board!':`#${r.rank} on this week’s board`}})}
+  save();setTimeout(()=>{$('agRes').hidden=false;$('agResT').textContent=note;$('agResP').innerHTML=`${pay?`+${tix(pay)}`:'No tickets this time'} · You have ${tix(a.t)}<span id="agResR" class="ag-rank"></span>`;sfx(pay?'coin':'miss')},500)}
+function agClose(){AG.on=false;$('agModal').hidden=true;if(!AG.done&&AG.id==='putt')showToast('That try still counts. Come back for your next one.','Putt of the Day');openArcade()}
+function arcPinOver(score){if(!PB.arc)return;PB.arc=false;const a=ARC(),pay=arcEarn(AGAMES.pin.tix(score));if(score>(a.best.pin||0))a.best.pin=score;arcSubmit('pin',score);save();setTimeout(()=>showToast(`${pay?'+'+tix(pay):'Daily ticket limit reached'} · ${score.toLocaleString()} points`,'Arcade pinball'),600)}
+// --- shared drawing helpers
+function agBg(x,top,bot){const g=x.createLinearGradient(0,0,0,480);g.addColorStop(0,top);g.addColorStop(1,bot);x.fillStyle=g;x.fillRect(0,0,360,480)}
+function agText(x,t,X,Y,sz,col,al){x.font=`bold ${sz}px "Sniglet",sans-serif`;x.textAlign=al||'center';x.fillStyle=col;x.fillText(t,X,Y);x.textAlign='left'}
+const AGAMES={
+// Bobber Toss: skee-ball. Drag back from the launcher and let go; the bobber rolls up and settles in a ring.
+toss:{tix:s=>Math.min(60,Math.round(s/8)),
+  init:()=>({left:9,score:0,ball:null,aim:null,pops:[],over:false,wait:0}),
+  hud:st=>`Score ${st.score} · Bobbers ${st.left}`,
+  down(st,x,y){if(!st.ball&&st.left>0&&y>260)st.aim={x0:x,y0:y,x,y}},move(st,x,y){if(st.aim){st.aim.x=x;st.aim.y=y}},
+  up(st){const A=st.aim;st.aim=null;if(!A)return;const dx=A.x0-A.x,dy=A.y0-A.y,L=Math.hypot(dx,dy);if(L<12)return;const p=Math.min(1,L/160),sp=260+p*640,ang=Math.atan2(dy,dx);
+    if(dy>-8)return;st.ball={x:180,y:440,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:9};st.left--;sfx('whoosh')},
+  ring(x,y){for(const [px,py] of [[72,74],[288,74]])if(Math.hypot(x-px,y-py)<14)return 100;const d=Math.hypot(x-180,y-130);return d<14?50:d<30?40:d<46?30:d<62?20:d<80?10:0},
+  tick(st,dt){const b=st.ball;st.pops=st.pops.filter(p=>(p.t+=dt)<1.2);
+    if(b){const k=Math.exp(-1.35*dt);b.vx*=k;b.vy*=k;b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.x<40+b.r){b.x=40+b.r;b.vx=-b.vx*.6}if(b.x>320-b.r){b.x=320-b.r;b.vx=-b.vx*.6}if(b.y<40+b.r){b.y=40+b.r;b.vy=-b.vy*.45}if(b.y>470){b.vy=-Math.abs(b.vy)*.3}
+      if(Math.hypot(b.vx,b.vy)<22){const pts=AGAMES.toss.ring(b.x,b.y);st.score+=pts;st.pops.push({x:b.x,y:b.y,t:0,txt:pts?'+'+pts:'Gutter'});sfx(pts>=50?'chime':pts?'pop':'thunk');st.ball=null;if(st.left<=0)st.wait=.9}}
+    if(st.wait>0&&(st.wait-=dt)<=0)st.over=true},
+  draw(st,x,T){agBg(x,'#2a1a4a','#120a24');x.fillStyle='#4a2e18';x.fillRect(30,30,300,450);const g=x.createLinearGradient(0,40,0,470);g.addColorStop(0,'#c8925a');g.addColorStop(1,'#e8b880');x.fillStyle=g;x.fillRect(40,40,280,430);
+    x.strokeStyle='rgba(120,70,30,.35)';for(let i=50;i<470;i+=22){x.beginPath();x.moveTo(40,i);x.lineTo(320,i);x.stroke()}
+    const rings=[[80,'#3a6ad0',10],[62,'#3ac08a',20],[46,'#f0c030',30],[30,'#f07a2a',40],[14,'#e0303a',50]];for(const [r,c,p] of rings){x.fillStyle=c;x.beginPath();x.arc(180,130,r,0,7);x.fill();x.strokeStyle='rgba(0,0,0,.25)';x.stroke()}
+    for(const [r,c,p] of rings)agText(x,String(p),180,130-r+11,9,'#fff');for(const [px,py] of [[72,74],[288,74]]){x.fillStyle='#ff3ad8';x.beginPath();x.arc(px,py,14,0,7);x.fill();agText(x,'100',px,py+4,9,'#fff')}
+    x.fillStyle='rgba(0,0,0,.25)';x.fillRect(150,430,60,30);
+    if(st.aim){const A=st.aim,dx=A.x0-A.x,dy=A.y0-A.y,L=Math.min(160,Math.hypot(dx,dy)),ang=Math.atan2(dy,dx);x.strokeStyle='rgba(255,255,255,.8)';x.setLineDash([6,6]);x.lineWidth=2;x.beginPath();x.moveTo(180,440);x.lineTo(180+Math.cos(ang)*L*1.4,440+Math.sin(ang)*L*1.4);x.stroke();x.setLineDash([]);
+      x.fillStyle='rgba(255,255,255,.2)';x.fillRect(330,470-L*2.4,14,L*2.4);x.strokeStyle='#fff';x.strokeRect(330,86,14,384)}
+    const drawB=(bx,by,r)=>{x.fillStyle='#e03a2a';x.beginPath();x.arc(bx,by,r,Math.PI,0);x.fill();x.fillStyle='#f4f4ee';x.beginPath();x.arc(bx,by,r,0,Math.PI);x.fill();x.strokeStyle='#222';x.lineWidth=1;x.beginPath();x.arc(bx,by,r,0,7);x.stroke()};
+    if(st.ball)drawB(st.ball.x,st.ball.y,9);else if(st.left>0)drawB(180,440,9);
+    for(const p of st.pops){x.globalAlpha=1-p.t/1.2;agText(x,p.txt,p.x,p.y-p.t*30,16,'#fff');x.globalAlpha=1}
+    if(!st.ball&&!st.aim&&st.left===9)agText(x,'Drag down from the bobber, then let go',180,400,12,'rgba(255,255,255,.85)')}},
+// Whack-a-Gar: 3×3 holes for 45 seconds. Gar +1, golden gar +3, duck −2.
+gar:{tix:s=>Math.min(60,s),
+  init:()=>({t:45,score:0,holes:Array.from({length:9},()=>null),spawn:.6,pops:[],over:false,hits:0}),
+  hud:st=>`Score ${st.score} · ${Math.ceil(st.t)}s`,
+  pos:i=>[70+(i%3)*110,170+Math.floor(i/3)*110],
+  hit(st,i){const h=st.holes[i];if(!h||h.up<.35||h.hit)return;h.hit=true;h.life=Math.min(h.life,.18);const v=h.k==='duck'?-2:h.k==='gold'?3:1;st.score=Math.max(0,st.score+v);const [px,py]=AGAMES.gar.pos(i);st.pops.push({x:px,y:py-40,t:0,txt:(v>0?'+':'')+v,c:v<0?'#ff6a6a':h.k==='gold'?'#ffd05a':'#fff'});sfx(v<0?'buzz':'pop')},
+  down(st,x,y){for(let i=0;i<9;i++){const [px,py]=AGAMES.gar.pos(i);if(Math.abs(x-px)<48&&y>py-70&&y<py+30){AGAMES.gar.hit(st,i);return}}},
+  key(st,k){const m='qweasdzxc'.indexOf(k);const n='789456123'.indexOf(k);const i=m>=0?m:n;if(i>=0)AGAMES.gar.hit(st,i)},
+  tick(st,dt){st.t-=dt;st.pops=st.pops.filter(p=>(p.t+=dt)<.8);const f=1-st.t/45;
+    for(let i=0;i<9;i++){const h=st.holes[i];if(!h)continue;h.age+=dt;h.up=h.age<.12?h.age/.12:h.age>h.life-.12?Math.max(0,(h.life-h.age)/.12):1;if(h.age>=h.life)st.holes[i]=null}
+    if(st.t>0&&(st.spawn-=dt)<=0){st.spawn=.62-f*.3+Math.random()*.15;const free=[];for(let i=0;i<9;i++)if(!st.holes[i])free.push(i);if(free.length){const i=free[Math.floor(Math.random()*free.length)],r=Math.random();st.holes[i]={k:r<.1?'gold':r<.24?'duck':'gar',age:0,up:0,life:1.05-f*.4+Math.random()*.2}}}
+    if(st.t<=0&&st.holes.every(h=>!h))st.over=true},
+  draw(st,x,T){agBg(x,'#2e6a3a','#173a1e');agText(x,'WHACK-A-GAR',180,60,26,'#ffd05a');agText(x,'Tap the gars · golden = 3 · ducks lose 2',180,86,11,'rgba(255,255,255,.8)');
+    for(let i=0;i<9;i++){const [px,py]=AGAMES.gar.pos(i),h=st.holes[i];x.fillStyle='#0e2412';x.beginPath();x.ellipse(px,py,42,14,0,0,7);x.fill();
+      if(h){x.save();x.beginPath();x.rect(px-50,py-90,100,90);x.clip();const yy=py+10-h.up*56;
+        if(h.k==='duck'){x.fillStyle='#ffd23a';x.beginPath();x.ellipse(px,yy,20,17,0,0,7);x.fill();x.beginPath();x.arc(px+6,yy-16,11,0,7);x.fill();x.fillStyle='#f08a2a';x.beginPath();x.moveTo(px+15,yy-18);x.lineTo(px+26,yy-15);x.lineTo(px+15,yy-12);x.fill();x.fillStyle='#222';x.beginPath();x.arc(px+9,yy-19,1.8,0,7);x.fill()}
+        else{const col=h.k==='gold'?'#ffd05a':'#7a9a5a';x.fillStyle=col;x.beginPath();x.ellipse(px,yy+6,13,26,0,0,7);x.fill();x.beginPath();x.moveTo(px-6,yy-16);x.lineTo(px,yy-44);x.lineTo(px+6,yy-16);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(px-5,yy-10,3.5,0,7);x.arc(px+5,yy-10,3.5,0,7);x.fill();x.fillStyle='#111';x.beginPath();x.arc(px-5,yy-10,1.6,0,7);x.arc(px+5,yy-10,1.6,0,7);x.fill();
+          if(h.k==='gold'){x.fillStyle='rgba(255,255,255,.8)';x.beginPath();x.arc(px+8,yy-30,2,0,7);x.fill()}if(h.hit){x.fillStyle='rgba(255,255,255,.7)';agText(x,'✶',px+16,yy-26,16,'#fff')}}
+        x.restore()}
+      x.fillStyle='#2a4a22';x.beginPath();x.ellipse(px,py+2,46,8,0,0,Math.PI);x.fill()}
+    for(const p of st.pops){x.globalAlpha=1-p.t/.8;agText(x,p.txt,p.x,p.y-p.t*30,20,p.c);x.globalAlpha=1}
+    if(st.t<=0)agText(x,'Time!',180,470,22,'#fff')}},
+// Claw Machine: steer for 20 seconds (or until you drop). Grab odds are printed on the glass.
+claw:{ctl:()=>'<div class="ag-ctl"><button class="jig" data-cw="-1">◀</button><button class="jig" data-cw="drop">Drop</button><button class="jig" data-cw="1">▶</button></div>',
+  odds:{plushbass:.45,plushduck:.35,plushbeast:.15,tix50:.6},
+  init(){const pool=['plushbass','plushduck','plushbeast','tix50','tix50','plushbass','plushduck','tix50'];const items=[];for(let i=0;i<6;i++){const k=pool[Math.floor(Math.random()*pool.length)];items.push({k,x:70+i*44+Math.random()*12,y:392+Math.random()*14})}
+    return {x:180,y:110,dir:0,t:20,ph:'move',items,grab:null,score:0,over:false}},
+  hud:st=>st.ph==='move'?`Steer the claw · ${Math.ceil(st.t)}s`:st.ph==='done'?'':'…',
+  bind(st){document.querySelectorAll('[data-cw]').forEach(b=>{const v=b.dataset.cw;if(v==='drop'){b.onclick=()=>AGAMES.claw.drop(st)}else{const s=()=>{st.dir=+v},e=()=>{st.dir=0};b.onpointerdown=s;b.onpointerup=e;b.onpointerleave=e;b.onpointercancel=e}})},
+  key(st,k,up){if(k==='ArrowLeft'||k==='a')st.dir=up?0:-1;else if(k==='ArrowRight'||k==='d')st.dir=up?0:1;else if(!up&&(k===' '||k==='Enter'||k==='ArrowDown'))AGAMES.claw.drop(st)},
+  down(st,x,y){if(st.ph==='move'){st.drag=x}},move(st,x){if(st.drag!=null&&st.ph==='move'){st.x=Math.max(60,Math.min(320,x))}},up(st){st.drag=null},
+  drop(st){if(st.ph!=='move')return;st.ph='down';sfx('ratchet')},
+  name:k=>({plushbass:'Bass Plush',plushduck:'Duck Plush',plushbeast:'Lake Beast Plush',tix50:'50 tickets'})[k],
+  tick(st,dt){const C=AGAMES.claw;if(st.ph==='move'){st.t-=dt;st.x=Math.max(60,Math.min(320,st.x+st.dir*150*dt));if(st.t<=0)C.drop(st)}
+    else if(st.ph==='down'){st.y+=200*dt;if(st.y>=370){st.y=370;const near=st.items.map((it,i)=>[i,Math.abs(it.x-st.x)]).filter(z=>z[1]<17).sort((a,b)=>a[1]-b[1])[0];
+        if(near&&Math.random()<C.odds[st.items[near[0]].k]){st.grab=st.items.splice(near[0],1)[0]}else st.grab=null;st.miss=!near;st.ph='up'}}
+    else if(st.ph==='up'){st.y-=170*dt;if(st.grab){st.grab.x=st.x;st.grab.y=st.y+30}if(st.y<=110){st.y=110;st.ph=st.grab?'home':'done';if(!st.grab){st.prizeMsg=st.miss?'Missed! The claw closed on nothing.':'So close! It slipped right out of the claw.';st.over=true}}}
+    else if(st.ph==='home'){st.x-=160*dt;st.grab.x=st.x;if(st.x<=60){st.x=60;st.ph='drop2'}}
+    else if(st.ph==='drop2'){st.grab.y+=260*dt;if(st.grab.y>430){const k=st.grab.k;st.grab=null;st.ph='done';
+        if(k==='tix50'){arcGive(50);st.prizePay=50;st.prizeMsg='A bag of 50 tickets!'}else{const it=ARC_ITEMS.find(z=>z.id===k);if(arcOwns(it)){arcGive(40);st.prizePay=40;st.prizeMsg=`A ${it.n}! You already have one, so the attendant swaps it for 40 tickets.`}else{arcGrant(k);save();st.prizeMsg=`You won the ${it.n}! It’s in your cabin now.`;celebrate({lbl:'Claw Machine',r:'R',name:it.n,sub:'Placed on your cabin windowsill',icon:svgI('crown','#ff8fb8')})}}
+        sfx('fanfare');st.over=true}}},
+  plush(x,k,px,py,s){x.save();x.translate(px,py);x.scale(s,s);if(k==='tix50'){x.fillStyle='#e8c050';x.beginPath();x.moveTo(-12,10);x.lineTo(12,10);x.lineTo(9,-10);x.lineTo(-9,-10);x.fill();x.fillStyle='#8a5a10';x.fillRect(-6,-14,12,5);agText(x,'50',0,6,10,'#5a3a08')}
+    else if(k==='plushduck'){x.fillStyle='#ffd23a';x.beginPath();x.ellipse(0,4,14,11,0,0,7);x.fill();x.beginPath();x.arc(5,-9,8,0,7);x.fill();x.fillStyle='#f08a2a';x.beginPath();x.moveTo(12,-10);x.lineTo(19,-8);x.lineTo(12,-6);x.fill();x.fillStyle='#222';x.beginPath();x.arc(7,-11,1.4,0,7);x.fill()}
+    else if(k==='plushbeast'){x.fillStyle='#2e7a5a';x.beginPath();x.ellipse(0,4,15,12,0,0,7);x.fill();x.beginPath();x.arc(-4,-10,9,0,7);x.fill();x.fillStyle='#5ac08a';for(let i=0;i<3;i++){x.beginPath();x.moveTo(-2+i*6,-8);x.lineTo(1+i*6,-16);x.lineTo(4+i*6,-8);x.fill()}x.fillStyle='#fff';x.beginPath();x.arc(-7,-12,2.6,0,7);x.arc(-1,-12,2.6,0,7);x.fill();x.fillStyle='#111';x.beginPath();x.arc(-7,-12,1.2,0,7);x.arc(-1,-12,1.2,0,7);x.fill()}
+    else{x.fillStyle='#5a9a4a';x.beginPath();x.ellipse(0,0,16,9,0,0,7);x.fill();x.beginPath();x.moveTo(13,0);x.lineTo(22,-7);x.lineTo(22,7);x.fill();x.fillStyle='#e8eec0';x.beginPath();x.ellipse(-2,3,10,4,0,0,7);x.fill();x.fillStyle='#111';x.beginPath();x.arc(-10,-2,1.6,0,7);x.fill()}
+    x.restore()},
+  draw(st,x,T){const C=AGAMES.claw;agBg(x,'#5a1a4a','#2a0a24');x.fillStyle='#ff8fb8';x.fillRect(20,20,320,440);x.fillStyle='#1a0e2a';x.fillRect(32,60,296,388);x.fillStyle='rgba(140,200,255,.12)';x.fillRect(32,60,296,388);
+    agText(x,'CLAW MACHINE',180,48,20,'#fff');x.fillStyle='#d8c0f0';x.fillRect(32,420,296,28);x.fillStyle='#2a1a3a';x.fillRect(40,424,44,24);agText(x,'PRIZE',62,440,9,'#ffd05a');
+    for(const it of st.items)C.plush(x,it.k,it.x,it.y,1);
+    x.strokeStyle='#bbb';x.lineWidth=2;x.beginPath();x.moveTo(st.x,64);x.lineTo(st.x,st.y);x.stroke();x.fillStyle='#ccc';x.fillRect(st.x-10,st.y-4,20,8);const open=st.ph==='move'||st.ph==='down'?1:0;x.strokeStyle='#ddd';x.lineWidth=3;
+    for(const sg of [-1,1]){x.beginPath();x.moveTo(st.x+sg*8,st.y+4);x.lineTo(st.x+sg*(8+open*8),st.y+18);x.lineTo(st.x+sg*(3+open*6),st.y+28);x.stroke()}
+    if(st.grab)C.plush(x,st.grab.k,st.grab.x,st.grab.y,1);
+    x.fillStyle='rgba(255,255,255,.08)';x.fillRect(36,64,40,380);agText(x,'Grab odds: Bass 45% · Duck 35% · Lake Beast 15% · Ticket bag 60%',180,474,9,'rgba(255,255,255,.85)')}},
+// Putt of the Day: one hole, the same for everyone today (seeded by the date). Drag back from the ball and let go. 6 strokes per try.
+putt:{tix:()=>0,
+  course(){const d=arcUTC();let h=7;for(const c of d)h=(Math.imul(h,31)+c.charCodeAt(0))>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;const R=()=>{h=(Math.imul(h,1664525)+1013904223)>>>0;return h/4294967296};
+    const T=Math.floor(R()*8),j=(a,b)=>a+R()*(b-a),C={tpl:T,walls:[],bumps:[],slopes:[],cup:{x:180,y:90},name:''};
+    if(T===0){C.name='Straight Shot';C.bumps.push({x:j(130,230),y:260,r:18})}
+    else if(T===1){C.name='The Gap';const g=j(100,260);C.walls.push({x:20,y:240,w:g-38,h:14},{x:g+38,y:240,w:340-(g+38),h:14});C.cup={x:j(100,260),y:90}}
+    else if(T===2){C.name='Dog-Leg';const right=R()<.5;C.walls.push(right?{x:20,y:250,w:230,h:14}:{x:110,y:250,w:230,h:14});C.cup={x:right?90:270,y:100}}
+    else if(T===3){C.name='Bumper Alley';C.bumps.push({x:120,y:230,r:16},{x:240,y:230,r:16},{x:180,y:j(150,175),r:15})}
+    else if(T===4){C.name='Crosswind';const s=R()<.5?-1:1;C.slopes.push({x:20,y:170,w:320,h:150,ax:150*s,ay:0});C.cup={x:180-60*s,y:90}}
+    else if(T===5){C.name='The Gate';const c=j(150,210);C.walls.push({x:20,y:230,w:c-32,h:14},{x:c+32,y:230,w:340-(c+32),h:14});C.bumps.push({x:c+(R()<.5?-70:70),y:150,r:13})}
+    else if(T===6){C.name='Bank Shot';C.walls.push({x:20,y:170,w:180,h:14});C.cup={x:80,y:105}}
+    else{C.name='Uphill';C.slopes.push({x:20,y:120,w:320,h:120,ax:0,ay:140});C.cup={x:j(150,210),y:80}}
+    return C},
+  init(){return {C:AGAMES.putt.course(),b:{x:180,y:430,vx:0,vy:0},strokes:0,aim:null,sunk:false,over:false,msg:'',wait:0}},
+  hud:st=>`${st.C.name} · Stroke ${Math.min(6,st.strokes+(st.sunk?0:1))} of 6`,
+  moving:st=>Math.hypot(st.b.vx,st.b.vy)>4,
+  down(st,x,y){if(st.sunk||AGAMES.putt.moving(st)||st.strokes>=6)return;if(Math.hypot(x-st.b.x,y-st.b.y)<70)st.aim={x,y}},move(st,x,y){if(st.aim){st.aim.x=x;st.aim.y=y}},
+  up(st){const A=st.aim;st.aim=null;if(!A)return;const dx=st.b.x-A.x,dy=st.b.y-A.y,L=Math.hypot(dx,dy);if(L<8)return;const p=Math.min(1,L/150),sp=p*860;st.b.vx=dx/L*sp;st.b.vy=dy/L*sp;st.strokes++;sfx('click')},
+  tick(st,dt){const b=st.b,C=st.C;if(st.wait>0){if((st.wait-=dt)<=0)st.over=true;return}if(st.sunk)return;
+    const steps=4;for(let n=0;n<steps;n++){const h=dt/steps;for(const s of C.slopes)if(b.x>s.x&&b.x<s.x+s.w&&b.y>s.y&&b.y<s.y+s.h&&Math.hypot(b.vx,b.vy)>2){b.vx+=s.ax*h;b.vy+=s.ay*h}
+      const k=Math.exp(-1.15*h);b.vx*=k;b.vy*=k;const sp=Math.hypot(b.vx,b.vy);if(sp>0){const dec=Math.min(sp,26*h);b.vx-=b.vx/sp*dec;b.vy-=b.vy/sp*dec}
+      b.x+=b.vx*h;b.y+=b.vy*h;const r=6;
+      if(b.x<20+r){b.x=20+r;b.vx=Math.abs(b.vx)*.8}if(b.x>340-r){b.x=340-r;b.vx=-Math.abs(b.vx)*.8}if(b.y<20+r){b.y=20+r;b.vy=Math.abs(b.vy)*.8}if(b.y>460-r){b.y=460-r;b.vy=-Math.abs(b.vy)*.8}
+      for(const w of C.walls){const cx=Math.max(w.x,Math.min(b.x,w.x+w.w)),cy=Math.max(w.y,Math.min(b.y,w.y+w.h)),dx=b.x-cx,dy=b.y-cy,d=Math.hypot(dx,dy);if(d<r){const nx=d?dx/d:0,ny=d?dy/d:(b.vy>0?-1:1),dot=b.vx*nx+b.vy*ny;if(dot<0){b.vx-=1.8*dot*nx;b.vy-=1.8*dot*ny}b.x=cx+nx*r;b.y=cy+ny*r}}
+      for(const u of C.bumps){const dx=b.x-u.x,dy=b.y-u.y,d=Math.hypot(dx,dy);if(d<u.r+r){const nx=dx/d,ny=dy/d,dot=b.vx*nx+b.vy*ny;if(dot<0){b.vx-=2.1*dot*nx;b.vy-=2.1*dot*ny;u.f=.3;sfx('pop')}b.x=u.x+nx*(u.r+r);b.y=u.y+ny*(u.r+r)}}
+      const dc=Math.hypot(b.x-C.cup.x,b.y-C.cup.y),spd=Math.hypot(b.vx,b.vy);if(dc<8.5){if(spd<210){st.sunk=true;b.x=C.cup.x;b.y=C.cup.y;b.vx=b.vy=0;sfx(st.strokes===1?'fanfare':'chime');st.wait=1.3;return}else{b.vx+=(b.x-C.cup.x)*4;b.vy+=(b.y-C.cup.y)*4}}}
+    for(const u of C.bumps)if(u.f)u.f=Math.max(0,u.f-dt);
+    if(!AGAMES.putt.moving(st)){b.vx=b.vy=0;if(st.strokes>=6&&!st.sunk){st.wait=.8}}},
+  draw(st,x,T){const C=st.C,b=st.b;agBg(x,'#1e3a24','#0e2414');x.fillStyle='#6a4a2a';x.fillRect(12,12,336,456);const g=x.createLinearGradient(0,20,0,460);g.addColorStop(0,'#3aa85a');g.addColorStop(1,'#2e9a4c');x.fillStyle=g;x.fillRect(20,20,320,440);
+    x.fillStyle='rgba(255,255,255,.04)';for(let i=0;i<14;i++)x.fillRect(20,20+i*32,320,16);
+    for(const s of C.slopes){x.fillStyle='rgba(200,240,140,.18)';x.fillRect(s.x,s.y,s.w,s.h);x.fillStyle='rgba(255,255,255,.5)';const ang=Math.atan2(s.ay,s.ax),o=(T*30)%40;for(let yy=s.y+20;yy<s.y+s.h;yy+=40)for(let xx=s.x+20;xx<s.x+s.w;xx+=60){x.save();x.translate(xx+Math.cos(ang)*o*.4,yy+Math.sin(ang)*o*.4);x.rotate(ang);x.beginPath();x.moveTo(8,0);x.lineTo(-4,-5);x.lineTo(-4,5);x.fill();x.restore()}}
+    for(const w of C.walls){x.fillStyle='#8a5a30';x.fillRect(w.x,w.y,w.w,w.h);x.fillStyle='#b07a44';x.fillRect(w.x,w.y,w.w,4)}
+    for(const u of C.bumps){x.fillStyle=u.f?'#ffd05a':'#e03a6a';x.beginPath();x.arc(u.x,u.y,u.r,0,7);x.fill();x.fillStyle='rgba(255,255,255,.4)';x.beginPath();x.arc(u.x-u.r*.3,u.y-u.r*.3,u.r*.35,0,7);x.fill()}
+    x.fillStyle='#0a1a0e';x.beginPath();x.arc(C.cup.x,C.cup.y,9,0,7);x.fill();x.strokeStyle='#ddd';x.lineWidth=1.5;x.beginPath();x.moveTo(C.cup.x,C.cup.y);x.lineTo(C.cup.x,C.cup.y-40);x.stroke();x.fillStyle='#e03a2a';x.beginPath();x.moveTo(C.cup.x,C.cup.y-40);x.lineTo(C.cup.x+18,C.cup.y-34);x.lineTo(C.cup.x,C.cup.y-28);x.fill();
+    x.fillStyle='rgba(255,255,255,.18)';x.fillRect(165,422,30,16);
+    if(st.aim){const dx=b.x-st.aim.x,dy=b.y-st.aim.y,L=Math.min(150,Math.hypot(dx,dy)),a=Math.atan2(dy,dx);x.strokeStyle=`hsl(${120-L*.8},90%,60%)`;x.lineWidth=3;x.setLineDash([5,5]);x.beginPath();x.moveTo(b.x,b.y);x.lineTo(b.x+Math.cos(a)*L*1.2,b.y+Math.sin(a)*L*1.2);x.stroke();x.setLineDash([])}
+    if(!st.sunk){x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(b.x+2,b.y+3,6,4,0,0,7);x.fill();x.fillStyle='#fff';x.beginPath();x.arc(b.x,b.y,6,0,7);x.fill()}
+    if(st.sunk)agText(x,st.strokes===1?'HOLE-IN-ONE!':`In the cup! ${st.strokes} strokes`,180,250,24,'#fff');
+    else if(st.strokes===0&&!st.aim)agText(x,'Drag back from the ball, then let go',180,470,11,'rgba(255,255,255,.85)');
+    agText(x,`Today’s hole: ${C.name}`,28,36,11,'rgba(255,255,255,.75)','left')}}
+};
+AGAMES.pin={tix:s=>Math.min(80,Math.floor(s/500))};
+
 // ==FRIENDS EXTRAS== lake monster, challenges, guestbooks and yard likes
 const GB_ST=['🎃','🐟','⭐','👻','🏆','🌲','❤️','🎣','🦆','🌙','🍂','🔥'];
 const XKIND={
@@ -7438,7 +7779,12 @@ $('bugSend').onclick=sendBug;$('bugCancel').onclick=()=>$('bugModal').hidden=tru
 $('ownClose').onclick=()=>$('ownModal').hidden=true;$('ownModal').onclick=e=>{if(e.target.id==='ownModal')$('ownModal').hidden=true};
 addEventListener('keydown',e=>{if(!$('keeperModal').hidden&&(e.key===' '||e.key==='Enter')){e.preventDefault();keeperSignal()}});
 addEventListener('keydown',e=>{if($('mmModal').hidden)return;const d={ArrowLeft:'L',a:'L',ArrowUp:'A',w:'A',ArrowRight:'R',d:'R'}[e.key];if(d){e.preventDefault();mmInput(d)}});
-document.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>mmInput(b.dataset.mm));$('mmClose').onclick=mmClose;$('mmOk').onclick=()=>{MM.on=false;$('mmModal').hidden=true;if(!$('slotsModal').hidden&&phView==='case')renderCase()};
+document.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>mmInput(b.dataset.mm));
+{const cv=$('agCv'),go=(f,e)=>{if(!AG.on||AG.done||!AG.g[f])return;const [x,y]=agPt(e);AG.g[f](AG.st,x,y)};cv.addEventListener('pointerdown',e=>{e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}go('down',e)});cv.addEventListener('pointermove',e=>go('move',e));cv.addEventListener('pointerup',e=>go('up',e));cv.addEventListener('pointercancel',e=>go('up',e));
+  addEventListener('keydown',e=>{if($('agModal').hidden||!AG.on||AG.done||!AG.g.key)return;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();AG.g.key(AG.st,e.key,false)});
+  addEventListener('keyup',e=>{if($('agModal').hidden||!AG.on||!AG.g.key)return;AG.g.key(AG.st,e.key,true)});
+  $('agClose').onclick=agClose;$('agOk').onclick=()=>{AG.on=false;$('agModal').hidden=true;openArcade()};$('agAgain').onclick=()=>{const id=AG.id;AG.on=false;$('agModal').hidden=true;arcPlay(id)};
+  $('arcClose').onclick=()=>{$('arcModal').hidden=true};$('arcModal').onclick=e=>{if(e.target.id==='arcModal')$('arcModal').hidden=true}}$('mmClose').onclick=mmClose;$('mmOk').onclick=()=>{MM.on=false;$('mmModal').hidden=true;if(!$('slotsModal').hidden&&phView==='case')renderCase()};
 
 // ==LIVE LAKE== see friends fishing the same water in real time, with name tags, catches, emotes and live raids.
 const LIVE={ws:null,room:'',st:'off',peers:new Map(),raid:null,retry:0,nextTry:0,cid:'',me:'',offT:0,lastSt:'',pingT:0,myEmo:null,emoT:0,meXY:null,drawing:false,drawWear:null,drawG:'m',hidT:null};
@@ -7701,7 +8047,7 @@ function tick(now){if(SESS.paused)return;
   if(dt>2){offline(dt);dt=0;renderAll()}
   dt=Math.min(dt,.25);
   advanceClock(dt);
-  S.wx.left-=dt*(S.sleep&&S.sleep.ph==='sleep'?(S.sleep.spd||SLEEP_SPEED):1);if(S.wx.left<=0)newWeather(true);
+  if((WXT.t-=dt)<=0){WXT.t=1;wxSync(true)}
   vitalsTick(dt);
   if(!S.sleep&&!TRV.on){cast.el+=dt;if(cast.el>=cast.dur){cast.el=0;doCatch();cast.dur=castDur()}}
   tourTick(dt);ambient(dt);{const L=sceneLoc();scnTick(dt,L);hwPumpTick(dt,L)}totInsideTick(dt);liveTick(dt);q4Tick(dt);realmTick(dt);audioTick(dt);for(const q of AMB.drones)q.t+=dt;if(AMB.drones.some(q=>q.t>=4.2)){AMB.drones=AMB.drones.filter(q=>q.t<4.2);if(phView==='shop'&&!$('slotsModal').hidden)renderDecor()}
@@ -7716,7 +8062,7 @@ function tick(now){if(SESS.paused)return;
     renderVitals();if(coolDirty)updateCooler();
     $('scene').classList.toggle('in',indoor()||!!VISIT);$('leaveBar').hidden=!(S.sleep&&S.sleep.ph==='awake')||!!VISIT;renderVisitBar();if(S.sleep&&S.sleep.ph==='awake')$('leaveTxt').textContent=ROOM==='basement'?'Down in the basement. Tap the stairs to go up.':S.sleep.visit?(S.shack===0?'In your tent. Craft or rest, then head back out.':'At home. Craft, decorate, then head back out.'):'Up and rested. Decorate, or head back out?';$('decoBtn').hidden=(ROOM==='basement')||S.shack===0;$('yardBtn').hidden=ROOM==='basement';renderYNav();if(gearDirty){gearDirty=false;refreshGear()}{const fr=S.sleep&&S.sleep.at==='friend',lb=TRV.on?['On the move',TRV.to==='friend'?placeName('friend'):TRV.to==='pond'&&TRV.label?'Home':placeName(TRV.to)]:VISIT?['Visiting',VISIT.name+'’s home']:fr?['At',placeName('friend')]:S.sleep?['At home',ROOM==='basement'?'Basement':indoor()?GEAR.shack.items[S.shack].n:'Dock Pond']:['Fishing',W(S.water).n],k=lb.join('|');if($('waterName').dataset.k!==k){$('waterName').dataset.k=k;$('locLbl').textContent=lb[0];$('waterName').textContent=lb[1]}}
     $('hint').hidden=yardStill();$('hint').textContent=VISIT?'Hover the shelves, trophies and tank':indoor()?(ROOM==='basement'?'Tap the fish sticks, fridge, aquarium, pinball or light switch':(S.shack===0?'Tap the bed or crafting table':'Tap the TV, tank, drawers, bed or crafting table')):S.sleep?$('stamTxt').textContent:'Tap the water to jig';
-    $('castLabel').textContent=TRV.on?'On the move…':S.sleep?(S.sleep.at?(VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
+    $('castLabel').textContent=TRV.on?'On the move…':S.sleep?(S.sleep.at?(VT&&VT.arcade?'At the arcade…':VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
     refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();
     if(!$('slotsModal').hidden){if(!spinning)updateSlots();if(phView==='lock')renderLock()}else{$('phClock').textContent=fmtClock(S.min).replace(/ [AP]M/,'');$('phBat').style.width=Math.max(4,S.stamina)+'%'}
     ensureBounties();checkStreak();qStart();renderGuide();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
@@ -7743,7 +8089,7 @@ function start(data){
   if(!Array.isArray(S.hot))S.hot=[];while(S.hot.length<5)S.hot.push(null);
   if(S.snd&&!S.snd.v){if(S.snd.amb===.6)S.snd.amb=.4;if(S.snd.music===.35)S.snd.music=.5;S.snd.v=2}
   if(S.tvInput==='console')S.tvInput='vhs';delete S.cart;delete S.games;
-  if(!S.wx||!WX[S.wx.id])S.wx={id:'clear',left:300};
+  if(!S.wx||!WX[S.wx.id])S.wx={id:'clear',left:300};wxSync(false);
   {const X=WX[S.wx.id];AMB.cover=X.cover;AMB.wind=X.wind;AMB.rainK=X.rain||0;AMB.snowK=X.snow||0;AMB.fogK=S.wx.id==='fog'?1:0;AMB.snowAcc=S.wx.id==='snow'?.6:0}
   cast.dur=castDur();resize();renderAll();
   const gap=(Date.now()-(BOOT_LAST||Date.now()))/1000;if(gap>60)offline(gap);
