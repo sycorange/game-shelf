@@ -180,6 +180,16 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .set-claim{margin-left:4px}.set-done{color:var(--reed);font-weight:700}.set-rw{color:var(--muted)}
 ol.sig{margin:6px 0;padding-left:20px;display:grid;gap:2px;font-size:.84rem}ol.sig li.got{color:#2a7a2a}ol.sig li.cur{font-weight:800}ol.sig small{color:#6a6050}
 .away .box.kp{max-width:440px;gap:8px}#kpCv{aspect-ratio:3/2;border-radius:10px;cursor:pointer;touch-action:manipulation}.kp-msg{font-weight:700;color:var(--fg)!important;min-height:1.3em}
+.away .box.mm{max-width:460px}#mmCv{aspect-ratio:3/2;border-radius:10px;width:100%}
+.mm-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mm-pad .jig{padding:12px 4px;font-size:1rem}.mm-pad .jig:disabled{opacity:.45}
+.q4fake{outline:1px dashed rgba(160,210,240,.7);outline-offset:-3px;cursor:pointer;animation:q4wob 3.2s ease-in-out infinite}.q4fake svg{transform:scaleX(-1)}
+@keyframes q4wob{50%{filter:hue-rotate(12deg) brightness(1.06)}}.q4ink{display:block;color:#8ac4e0;font-style:italic;margin-top:2px}
+.q4photo{display:flex;gap:10px;align-items:center;border:2px solid #1e1a14;padding:6px;margin:8px 0;background:#f2ead6;cursor:pointer}.q4photo img{width:72px;height:60px;object-fit:cover;filter:grayscale(1) contrast(1.2);transform:scaleX(-1)}.q4photo b{display:block;font-size:.78rem;letter-spacing:.02em}.q4photo small{font-size:.72rem;line-height:1.35}
+.q4lie{background:none;border:0;border-bottom:1px dashed #6a8aa0;color:inherit;font:inherit;font-weight:700;cursor:pointer;padding:0}
+.q4av{background:#9fb4c4!important;overflow:hidden;padding:0}.q4av img{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}.q4bub{background:#dfe8ef!important;color:#2a3a48!important;font-style:italic}
+.head h1.q4flip{transform:scaleX(-1);display:inline-block;filter:blur(.3px)}
+.ct-flick{animation:ctFlick 11s steps(1) infinite}@keyframes ctFlick{0%,96.5%{transform:none}97%{transform:scaleX(-1);filter:hue-rotate(160deg) saturate(.6)}98%,100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.q4fake,.ct-flick{animation:none}}
 .kp-res{display:grid;gap:6px;padding:10px;border-radius:10px;background:rgba(255,208,90,.12);border:1px solid rgba(255,208,90,.4)}.kp-res b{font-size:1.1rem}
 .gb-stickers{display:flex;flex-wrap:wrap;gap:6px}.gb-stickers button{font-size:1.4rem;width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);cursor:pointer}.gb-stickers button[aria-pressed="true"]{border-color:#ff8a2a;background:rgba(255,138,42,.2)}
 #gbNote,#bugTxt{width:100%;box-sizing:border-box;font:inherit;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:vertical}
@@ -1633,6 +1643,15 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
     <div id="kpRes" class="kp-res" hidden><b id="kpResT"></b><p id="kpResP"></p><button class="jig" id="kpOk">Done</button></div>
   </div>
 </div>
+<div class="away" id="mmModal" hidden>
+  <div class="box kp mm"><span class="eyebrow">The Angler Who Isn’t There</span><h2>Mirror Match</h2>
+    <canvas id="mmCv" width="720" height="480" aria-label="Upside down under the surface: you and your reflection face each other"></canvas>
+    <p id="mmMsg" class="kp-msg" role="status"></p><p id="mmHud" class="xf-sub"></p>
+    <div class="mm-pad"><button class="jig" data-mm="L" aria-label="Cast left">◀ Left</button><button class="jig" data-mm="A" aria-label="Cast straight ahead">▲ Ahead</button><button class="jig" data-mm="R" aria-label="Cast right">Right ▶</button></div>
+    <div class="xf-row"><button class="ghost" id="mmClose">Give up</button></div>
+    <div id="mmRes" class="kp-res" hidden><b id="mmResT"></b><p id="mmResP"></p><button class="jig" id="mmOk">Done</button></div>
+  </div>
+</div>
 <div class="away" id="gbModal" hidden>
   <div class="box"><span class="eyebrow">Guestbook</span><h2 id="gbTitle">Sign the guestbook</h2>
     <div class="gb-stickers" id="gbStickers"></div>
@@ -2372,6 +2391,7 @@ function rollPull(m,water,minute){
   if(q.step===6&&!m.offline&&water==='deep'&&qph==='night'&&(m.wx==='storm'||m.wx==='fog')&&$('beastModal').hidden&&Math.random()<1/20)return {beast:true};
   {const r2=q2Roll(m,water,minute);if(r2)return r2}
   {const r3=q3Roll(m,water,minute);if(r3)return r3}
+  {const r4=q4Roll(m,water,minute);if(r4)return r4}
   if(q.step===2&&water==='lake'&&qph==='night'&&Math.random()<1/50)return {qi:'photo'};
   if(q.step===3&&water==='river'&&['fog','drizzle','rain','storm'].includes(m.wx)&&Math.random()<1/30)return {qi:'scale'};
   if(q.step===4&&!S.tapes.beast&&Math.random()<1/60)return {tape:'beast'};
@@ -2435,6 +2455,7 @@ function doCatch(){
   if(r.qi){questItem(r.qi,true);return}
   if(r.q2){q2Item(r.q2,true);return}
   if(r.q3){q3Item(r.q3,true);return}
+  if(r.q4){q4Item(r.q4,true);return}
   if(r.ghost){startGhost();return}
   if(r.mat){sfx('pop');startCatchAnim(1,r.mat.col,true);addMat(r.mat,true);return}
   if(r.beast){openBeast();return}
@@ -2442,7 +2463,7 @@ function doCatch(){
   const val=Math.round(saleValue(f,w)*(m.gold?2:1)*(WX[S.wx.id].sellX||1)*(vr?VAR[vr].mult:1));
   const L=S.log[f.id]||(S.log[f.id]={n:0,big:0});
   const isNew=L.n===0, isRec=!isNew&&w>L.big;
-  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);chalOnCatch(f,w);monOnCatch(w);liveOnCatch(f,w,vr);realmOnCatch(f);
+  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);q4OnCatch(f,w,vr);chalOnCatch(f,w);monOnCatch(w);liveOnCatch(f,w,vr);realmOnCatch(f);
   let newVar=false;if(vr){L.v=L.v||{};newVar=!L.v[vr];L.v[vr]=(L.v[vr]||0)+1}
   bountyEvent('catch',{f,w,water:S.water,ph:phaseOf(S.min)});
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
@@ -2468,6 +2489,8 @@ function offline(sec){
     if(r.mat){addMat(r.mat,false);matsN++;continue}
     if(r.qi){questItem(r.qi,false);cols.push(r.qi==='photo'?'a torn photograph':'a strange scale');continue}
     if(r.q2){q2Item(r.q2,false);cols.push(r.q2==='bell'?'an old ship’s bell':'a soggy logbook page');continue}
+    if(r.q3){if(r.q3!=='keeper'){q3Item(r.q3,false);cols.push(r.q3==='key'?'the keeper’s key':'a letter in a bottle')}continue}
+    if(r.q4){if(r.q4==='shard'){q4Item('shard',false);cols.push('a mirror shard')}continue}
     if(r.ghost)continue;
     if(r.beast)continue;
     const c=r.fish,vr=rollVariant({});if(vr==='giant')c.w=+(c.f.w[1]*rnd(1.2,1.6)).toFixed(2);
@@ -2837,7 +2860,7 @@ function renderLog(){
     const all=FISH.filter(f=>f.at===w.id);
     const h=document.createElement('div');h.className='sec-h';
     h.innerHTML=`<h3>${w.n}</h3><small>${all.filter(f=>S.log[f.id]).length}/${all.length} · ${setHdr(w.id)}</small>`;p.append(h);
-    const g=document.createElement('div');g.className='grid';
+    const g=document.createElement('div');g.className='grid';if(w.id==='lake'&&q4LieOn('log'))g.innerHTML=q4LogLieHTML();
     for(const f of sp){
       const L=S.log[f.id],c=document.createElement('div');c.className='card fish'+(L?'':' unk');
       const times=f.quest?'<span class="chip wx">Mystery quest</span>':f.t.filter(x=>PH[x]).map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('');
@@ -3070,7 +3093,7 @@ function renderWeatherApp(){const b=$('wxBody');if(!b)return;ensureFc();
       <div class="nxt">Our towers can't reach you through the gate. Here's what's waiting back home at Lantern Lake: ${WX[id].n.toLowerCase()}, high of ${today.hi}°.</div></div>`
     :`<div class="l7-hero" style="background:${wxHeroBg(id,ph)}"><div class="loc">📍 Lantern Lake · ${W(S.water).n}</div><div><div class="tmp">${tNow}°</div><div class="cond">${X.n}</div><div class="hl">H ${today.hi}° · L ${today.lo}°</div></div><div class="ic">${wxIc(id,S.min)}</div><div class="nxt">${nxt}</div></div>`;
   // alerts: the worst weather in the next 3 days, plus fog nights for the casefiles
-  const al=[];if(!realm&&id==='storm')al.push(['⚡','Thunderstorm warning in effect','Lightning over the lake. Legendary odds are doubled while it lasts.','']);
+  const al=[];if(!realm&&S.q4&&S.q4.step===4)al.push(['🪞','Reflections: severe','Still water is showing more than it should tonight. Do not stare back. (Mirror shards surface at night.)','']);if(!realm&&id==='storm')al.push(['⚡','Thunderstorm warning in effect','Lightning over the lake. Legendary odds are doubled while it lasts.','']);
   else for(let i=0;i<=2;i++){const f=S.fc[S.day+i];if(f&&f.wx==='storm'){al.push(['⚡',`Thunderstorm watch · ${i===0?'Today':i===1?'Tomorrow':WD[(S.day+i)%7]}`,'Storms expected. Legendary odds double while they last.','']);break}}
   if(!realm&&id==='snow')al.push(['❄️','Winter weather advisory','Snow on the water. Fish sell for 30% more until it clears.','info']);
   else if(!realm&&id==='fog'&&(ph==='night'||ph==='dusk'))al.push(['🌫️','Dense fog advisory','Visibility near zero on Misty Bay tonight. Boaters report green lights.','info']);
@@ -3114,7 +3137,9 @@ const SKINS=[
   SK('aurora','Aurora','E','#0c1838','aurora','#3affb0','#b05aff','glow'),SK('galaxy','Galaxy','E','#140a30','galaxy','#5a2ab0','#ffffff','sparkle'),
   SK('frost','Frostbite','E','#bfe6ff','ice','#ffffff','#6ab8f0','sparkle'),
   SK('gold','Solid Gold','L','#d8a828','gold','#fff2b0','#8a6410','sparkle'),SK('prism','Prismatic','L','#ff3a3a','prism','#ffffff','#ffffff','sparkle')];
-const SKIN_BY=Object.fromEntries(SKINS.map(s=>[s.id,s]));
+// Case rewards: never in crates, shown in the Locker once owned
+const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true}];
+const SKIN_BY=Object.fromEntries([...SKINS,...QSKINS].map(s=>[s.id,s]));
 const PNT=()=>{if(!S.paint||typeof S.paint!=='object')S.paint={own:{},eq:null,eqR:null,eqB:null,free:'',opened:0,log:[]};const p=S.paint;p.own=p.own||{};p.log=p.log||[];if(p.eq&&!SKIN_BY[p.eq])p.eq=null;if(p.eqR&&!(typeof ITEM_BY!=='undefined'&&ITEM_BY[p.eqR]))p.eqR=null;if(p.eqB&&!(typeof ITEM_BY!=='undefined'&&ITEM_BY[p.eqB]))p.eqB=null;return p};
 const crateCost=()=>Math.max(500,Math.round(rwCoins(20)/50)*50);
 const SK_REFUND={C:.15,U:.4,R:1.2,E:4,L:15};
@@ -3125,7 +3150,9 @@ const skSeed=id=>{let h=7;for(const ch of id)h=(h*31+ch.charCodeAt(0))>>>0;retur
 function hullPath(c,x,y,L,b){const bow=b>=3?6:0;c.beginPath();c.moveTo(x,y);c.lineTo(x+L,y-bow);c.lineTo(x+L-(b===2?4:16),y+14);c.lineTo(x+10,y+14);c.closePath()}
 function star4(c,x,y,r){c.beginPath();c.moveTo(x,y-r);c.quadraticCurveTo(x,y,x+r,y);c.quadraticCurveTo(x,y,x,y+r);c.quadraticCurveTo(x,y,x-r,y);c.quadraticCurveTo(x,y,x,y-r);c.fill()}
 // Paints the hull at x,y (stern top) with length L for boat tier b. d is daylight 0..1, T is time in seconds.
-function drawPaint(c,x,y,L,b,d,T,sk){const top=y-(b>=3?6:0),H=y+14-top,R=skRand(skSeed(sk.id));
+// Reflection paint: a faint upside-down copy of the hull shimmers under the water
+function mirrorGhost(c,x,y,L,b,d,T){c.save();c.globalAlpha=.26+.08*Math.sin(T*1.7);c.translate(Math.sin(T*1.3)*1.5,2*(y+15));c.scale(1,-1);hullPath(c,x,y,L,b);const g=c.createLinearGradient(0,y,0,y+14);g.addColorStop(0,'#e8f4ff');g.addColorStop(1,'rgba(232,244,255,0)');c.fillStyle=g;c.fill();c.restore()}
+function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x,y,L,b,d,T);const top=y-(b>=3?6:0),H=y+14-top,R=skRand(skSeed(sk.id));
   c.save();hullPath(c,x,y,L,b);c.fillStyle=sk.base;c.fill();c.clip();
   const p=sk.p;
   if(p==='band'){c.fillStyle=sk.c2;c.fillRect(x-4,y+5,L+8,3.2)}
@@ -3149,10 +3176,12 @@ function drawPaint(c,x,y,L,b,d,T,sk){const top=y-(b>=3?6:0),H=y+14-top,R=skRand(
   else if(p==='ice'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#eaf8ff');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     c.fillStyle='rgba(255,255,255,.45)';for(let i=0;i<L/10;i++){const sx=x+R()*L,sy=top+R()*H;c.beginPath();c.moveTo(sx,sy-3);c.lineTo(sx+3,sy+1);c.lineTo(sx-2,sy+3);c.fill()}}
   else if(p==='gold'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#fff2b0');g.addColorStop(.35,sk.base);g.addColorStop(.7,'#a87c18');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4)}
+  else if(p==='mirror'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#f4f8fc');g.addColorStop(.45,sk.base);g.addColorStop(.55,'#9aaebe');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
+    c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=.8;c.beginPath();c.moveTo(x,y+7);c.lineTo(x+L,y+7-(b>=3?3:0));c.stroke()}
   else if(p==='prism'){const g=c.createLinearGradient(x,0,x+L,0);for(let i=0;i<=6;i++)g.addColorStop(i/6,`hsl(${(i*60+T*60)%360},90%,60%)`);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     c.fillStyle='rgba(255,255,255,.35)';c.fillRect(x-4,top-2,L+8,3)}
   // a sweeping highlight on the fancy tiers
-  if(p==='gold'||p==='ice'||p==='prism'){const sx=x-20+((T*.35)%1.6)*(L+40);const g=c.createLinearGradient(sx-10,0,sx+10,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.save();c.transform(1,0,-.6,1,0,0);c.fillRect(sx+top*.6-10,top-2,20,H+4);c.restore()}
+  if(p==='gold'||p==='ice'||p==='prism'||p==='mirror'){const sx=x-20+((T*.35)%1.6)*(L+40);const g=c.createLinearGradient(sx-10,0,sx+10,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.save();c.transform(1,0,-.6,1,0,0);c.fillRect(sx+top*.6-10,top-2,20,H+4);c.restore()}
   // night dims the paint, but glowing paints keep shining through
   if(d<1){c.fillStyle=`rgba(8,12,22,${(1-d)*(sk.fx==='glow'?.25:.62)})`;c.fillRect(x-4,top-2,L+8,H+4)}
   c.fillStyle='rgba(0,0,0,.14)';c.fillRect(x-4,y+10,L+8,6);
@@ -3185,7 +3214,7 @@ const BOB_SKINS=[
 const CRATES={paint:{n:'Paint',noun:'boat paint',items:SKINS,eq:'eq',verb:'Paint my boat',on:'On your boat'},
   rod:{n:'Rod',noun:'rod finish',items:ROD_SKINS,eq:'eqR',verb:'Use on my rod',on:'On your rod'},
   bob:{n:'Bobber',noun:'bobber',items:BOB_SKINS,eq:'eqB',verb:'Use this bobber',on:'On your line'}};
-const ITEM_BY=Object.fromEntries([...SKINS.map(s=>[s.id,{...s,kind:'paint'}]),...ROD_SKINS.map(s=>[s.id,s]),...BOB_SKINS.map(s=>[s.id,s])]);
+const ITEM_BY=Object.fromEntries([...[...SKINS,...QSKINS].map(s=>[s.id,{...s,kind:'paint'}]),...ROD_SKINS.map(s=>[s.id,s]),...BOB_SKINS.map(s=>[s.id,s])]);
 const kindOf=id=>(ITEM_BY[id]||{}).kind||'paint';
 const rodEq=()=>{const id=PNT().eqR;return id&&ITEM_BY[id]?ITEM_BY[id]:null},bobEq=()=>{const id=PNT().eqB;return id&&ITEM_BY[id]?ITEM_BY[id]:null};
 function itemRoll(kind){let r=Math.random()*100,t='C';for(const k of SK_ORDER){r-=SK_TIERS[k].w;if(r<0){t=k;break}}const pool=CRATES[kind].items.filter(s=>s.t===t);return pool[Math.floor(Math.random()*pool.length)]}
@@ -3244,7 +3273,7 @@ function itemThumb(id,w,h){const it=ITEM_BY[id];if(!it)return '';if(it.kind==='p
   return ITH[k]=cv.toDataURL('image/png')}
 // --- the app
 const CR={tab:'open',kind:'paint',lk:'paint',spin:null,raf:0,prevRaf:0};
-function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crateCost(),free=crateFree(),K=CRATES[CR.kind],all=Object.values(ITEM_BY),own=all.filter(s=>p.own[s.id]).length;
+function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crateCost(),free=crateFree(),K=CRATES[CR.kind],all=Object.values(ITEM_BY).filter(s=>!s.quest||p.own[s.id]),own=all.filter(s=>p.own[s.id]).length;
   const tabs=`<div class="cr-tabs">${[['open','Open'],['locker',`Locker ${own}/${all.length}`],['odds','Odds']].map(([k,n])=>`<button class="${CR.tab===k?'on':''}" data-crt="${k}">${n}</button>`).join('')}</div>`;
   const kinds=(cur,attr)=>`<div class="cr-kinds" role="group" aria-label="Crate type">${Object.entries(CRATES).map(([k,c])=>`<button data-${attr}="${k}" aria-pressed="${cur===k}">${c.n}${attr==='crk'?' crate':'s'}</button>`).join('')}</div>`;
   let body='';
@@ -3255,7 +3284,7 @@ function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crate
       <p class="cr-note">${K.n} crates hold one ${K.noun} from ${K.items.length}.${CR.kind==='rod'?' Rare and better finishes add an effect when you land a fish.':CR.kind==='paint'?' Paint fits every boat.':''} Duplicates sell back for cash. ${free?'Your free crate for today is ready, any type.':'Next free crate tomorrow.'}</p>
       ${eq?`<div class="cr-eq"><img alt="" src="${itemThumb(eq.id,96,44)}"><div><small>${K.on}</small><b style="color:${SK_TIERS[eq.t].col}">${eq.n}</b></div></div>`:''}`}
   else if(CR.tab==='locker'){const L=CRATES[CR.lk],eqId=p[L.eq];
-    body=`${kinds(CR.lk,'crl')}<p class="cr-note">Tap something you own to use it. Tap it again to go back to the stock one.</p>${CR.lk==='paint'&&S.boat<1?'<p class="cr-note warn">You need a boat to show paint off. Buy one in Gear.</p>':''}<div class="cr-grid">${L.items.map(s=>{const n=p.own[s.id]||0,on=eqId===s.id;
+    body=`${kinds(CR.lk,'crl')}<p class="cr-note">Tap something you own to use it. Tap it again to go back to the stock one.</p>${CR.lk==='paint'&&S.boat<1?'<p class="cr-note warn">You need a boat to show paint off. Buy one in Gear.</p>':''}<div class="cr-grid">${(CR.lk==='paint'?L.items.concat(QSKINS.filter(q=>p.own[q.id])):L.items).map(s=>{const n=p.own[s.id]||0,on=eqId===s.id;
       return `<button class="cr-item t-${s.t}${n?'':' locked'}${on?' on':''}" data-skin="${s.id}" ${n?'':'disabled'} aria-label="${n?s.n:'Locked '+SK_TIERS[s.t].n+' '+L.noun}">${n?`<img alt="" src="${itemThumb(s.id,96,44)}">`:'<span class="q">?</span>'}<b>${n?s.n:'???'}</b><small>${SK_TIERS[s.t].n}${n>1?' · ×'+n:''}${on?' · On':''}</small></button>`}).join('')}</div>`}
   else{const L=CRATES[CR.lk];body=`${kinds(CR.lk,'crl')}<p class="cr-note">Every crate rolls a tier first, then a random ${L.noun} from that tier. All three crates use the same odds.</p><ul class="cr-odds">${SK_ORDER.map(t=>{const T0=SK_TIERS[t],n=L.items.filter(s=>s.t===t).length,got=L.items.filter(s=>s.t===t&&p.own[s.id]).length;
       return `<li style="--tc:${T0.col}"><b>${T0.n}</b><span>${T0.w}%</span><small>${n} ${L.noun}s · ${got} found · duplicate sells for ${Math.round(SK_REFUND[t]*100)}% of a crate</small></li>`}).join('')}</ul><p class="cr-note">Crates opened: ${p.opened}</p>`}
@@ -3324,6 +3353,7 @@ function renderLock(){
   const rb=readyBounties();if(rb||!S.streak.claimed)notes.push(['bounty','Bounty Board',rb?`${rb} bount${rb>1?'ies':'y'} ready to claim`:'Your daily streak reward is waiting']);
   if(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step)notes.push(['case','Casefile','New lead in the Lake Beast mystery']);
   {const q2=Q2();if(q2.step>0&&q2.step<7&&q2.seen!==q2.step)notes.push(['case','Casefile','New lead in the Emerald Wake case'])}
+  {const q4=S.q4;if(q4&&q4.step>0&&q4.step<7&&q4.seen!==q4.step)notes.push(['case','Casefile','New lead in the Angler Who Isn’t There'])}
   if(MPV.mail.length)notes.push(['friends','Friends',`${MPV.mail.length} gift${MPV.mail.length>1?'s':''} waiting in your mailbox`]);else if(mpCommClaimable())notes.push(['friends','Friends','The community goal is done. Claim your reward!']);
   const ct=coolTotals();if(ct.n)notes.push(['help','Cooler',`${ct.n} fish worth $${money(ct.v)} waiting to be sold`]);
   const np=radioLockCard()+musLockCard();
@@ -3496,13 +3526,14 @@ async function txLoadDir(){const m=mpS();try{const r=await api('texts/dir',{id:m
 function renderTexts(scrollEnd){
   const m=mpS(),b=$('textsBody'),comp=$('txCompose'),title=$('txTitle'),act=$('txNew'),back=$('txBack');
   comp.hidden=true;act.style.visibility='hidden';back.textContent='‹ Home';title.textContent='Messages';b.classList.remove('thread');
+  if(TX.view==='q4')return q4Thread(b,back,title);
   if(!m.id||MPV.online==='nodb'||MPV.online===false){
-    b.innerHTML=`<div class="tx-empty">${avatar('?','x')}<b>${m.id?'Texting works on your live site':'Pick an angler name first'}</b><p>${m.id?'Messages travel through your Lantern Lake website. Open the game there to text friends.':'Open the Friends app and choose a name. Then you can text anyone on the lake.'}</p>${m.id?'':'<button class="fr-mini" id="txGoFr">Open Friends</button>'}</div>`;
-    if($('txGoFr'))$('txGoFr').onclick=()=>phShow('friends');return}
+    b.innerHTML=q4InboxRow()+`<div class="tx-empty">${avatar('?','x')}<b>${m.id?'Texting works on your live site':'Pick an angler name first'}</b><p>${m.id?'Messages travel through your Lantern Lake website. Open the game there to text friends.':'Open the Friends app and choose a name. Then you can text anyone on the lake.'}</p>${m.id?'':'<button class="fr-mini" id="txGoFr">Open Friends</button>'}</div>`;
+    if($('txGoFr'))$('txGoFr').onclick=()=>phShow('friends');q4BindRow(b);return}
   if(TX.view==='inbox'){act.style.visibility='';
     const th=TX.threads;
-    b.innerHTML=th===null?'<p class="tx-muted">Loading…</p>':(th.length?`<ul class="tx-list">${th.map(t=>`<li><button data-th="${esc(t.id)}" data-nm="${esc(t.name)}" class="${t.un?'un':''}">${avatar(t.name,t.id)}<span class="tx-mid"><b>${esc(t.name)}${t.group?` <small style="font-weight:600;color:#8a8f9a">· ${t.n}</small>`:''}</b><span>${t.mine?'You: ':t.from?esc(t.from)+': ':''}${t.photo?'📷 Photo':esc(t.body)}</span></span><span class="tx-time">${txWhen(t.ts)}${t.un?'<i class="tx-dot"></i>':''}</span></button></li>`).join('')}</ul>`
-      :`<div class="tx-empty">${avatar('✎','y')}<b>No messages yet</b><p>Tap <b>New</b> to text anyone on the lake, or start a group chat.</p></div>`)+'<p class="tx-foot">Messages disappear after 7 days.</p>';
+    b.innerHTML=q4InboxRow()+(th===null?'<p class="tx-muted">Loading…</p>':(th.length?`<ul class="tx-list">${th.map(t=>`<li><button data-th="${esc(t.id)}" data-nm="${esc(t.name)}" class="${t.un?'un':''}">${avatar(t.name,t.id)}<span class="tx-mid"><b>${esc(t.name)}${t.group?` <small style="font-weight:600;color:#8a8f9a">· ${t.n}</small>`:''}</b><span>${t.mine?'You: ':t.from?esc(t.from)+': ':''}${t.photo?'📷 Photo':esc(t.body)}</span></span><span class="tx-time">${txWhen(t.ts)}${t.un?'<i class="tx-dot"></i>':''}</span></button></li>`).join('')}</ul>`
+      :`<div class="tx-empty">${avatar('✎','y')}<b>No messages yet</b><p>Tap <b>New</b> to text anyone on the lake, or start a group chat.</p></div>`))+'<p class="tx-foot">Messages disappear after 7 days.</p>';q4BindRow(b);
     b.querySelectorAll('[data-th]').forEach(x=>x.onclick=()=>txOpenThread(x.dataset.th,x.dataset.nm));
     if(th===null)txLoadInbox();return}
   if(TX.view==='new'){back.textContent='‹ Messages';title.textContent='New Message';
@@ -3533,7 +3564,7 @@ function renderTexts(scrollEnd){
   const atEnd=b.scrollHeight-b.scrollTop-b.clientHeight<40;b.innerHTML=html;
   b.querySelectorAll('img[data-pic]').forEach(async im=>{try{const p=JSON.parse(im.dataset.pic);const u=await makePolaroid(p);im.src=u;im.onload=()=>{if(scrollEnd||atEnd)b.scrollTop=b.scrollHeight}}catch(e){}});
   if(scrollEnd||atEnd)b.scrollTop=b.scrollHeight}
-$('txBack').onclick=()=>{if(TX.view==='inbox')phShow('home');else if(TX.view==='ginfo'){TX.view='thread';renderTexts(true)}else if(TX.view==='gadd'){TX.view='ginfo';renderTexts()}else if(TX.view==='newgroup'){TX.view='new';TX.q='';renderTexts()}else{TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts()}};
+$('txBack').onclick=()=>{if(TX.view==='q4'){TX.view='inbox';renderTexts();return}if(TX.view==='inbox')phShow('home');else if(TX.view==='ginfo'){TX.view='thread';renderTexts(true)}else if(TX.view==='gadd'){TX.view='ginfo';renderTexts()}else if(TX.view==='newgroup'){TX.view='new';TX.q='';renderTexts()}else{TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts()}};
 $('txNew').onclick=()=>{TX.view='new';TX.q='';TX.people=null;renderTexts();setTimeout(()=>{const q=$('txQ');if(q)q.focus()},50)};
 $('txCompose').onsubmit=e=>{e.preventDefault();const v=$('txInput').value.trim();if(!v)return;$('txInput').value='';txSend(v)};
 $('txCam').onclick=txPhoto;
@@ -3758,6 +3789,7 @@ function renderMuseum(){const b=$('musBody'),m=mpS(),map=MUS.map;
   {const cnt={};for(const x of Object.values(map)){const k=x.pid;cnt[k]=cnt[k]||{n:0,name:x.name};cnt[k].n++;cnt[k].name=x.name}
     const top=Object.entries(cnt).sort((a,b)=>b[1].n-a[1].n).slice(0,5);
     if(top.length)h+=`<div class="mus-top"><h3>Top curators</h3><ol>${top.map(([pid,o],i)=>`<li class="${pid===m.id?'me':''}"><span class="mt-r">${i+1}</span><b>${esc(o.name)}${pid===m.id?' (you)':''}</b><span>${o.n} plaque${o.n>1?'s':''}</span></li>`).join('')}</ol></div>`}
+  if(q4LieOn('mus'))h+=q4MusLieHTML();
   h+=`<div class="mus-case"><h3>Your Museum Case <small>${c.length}/${MUSEUM_CASE}</small></h3>${c.length?musCaseHTML(true):'<p class="fr-muted">Empty for now. When you catch a fish heavier than its plaque, it’s saved here automatically instead of going to your cooler.</p>'}</div>`;
   h+=`<div class="fbar" role="group" aria-label="Museum wings">${[['main','Main hall'],['golden','Golden wing'],['albino','Albino wing'],['giant','Giant wing']].map(([k,n])=>`<button data-mtab="${k}" aria-pressed="${MUS.tab===k}">${n}</button>`).join('')}</div>`;
   h+=`<div class="fbar" role="group" aria-label="Show plaques">${[['all','All plaques'],['open','Empty'],['mine','Mine']].map(([k,n])=>`<button data-mf="${k}" aria-pressed="${MUS.filt===k}">${n}</button>`).join('')}</div>`;
@@ -4084,9 +4116,9 @@ const fem=L.g==='f';
 }
 
 function contactHTML(p,mine){const st=p.stats||{},L=lookOf(st.look),db=st.today&&st.today.d===localDay()&&FI(st.today.f)?st.today:null,big=st.big&&FI(st.big.fish)?st.big:null;
-  const pic=`<img class="ct-pic" src="${portraitURL(L)}" alt="${esc(p.name)} in a ${LOOK_BODY.find(b=>b[0]===L.b)[1].toLowerCase()}">`;
+  const lie=mine&&q4LieOn('card'),pic=`<img class="ct-pic${st.mir?' ct-flick':''}" src="${portraitURL(L)}" alt="${esc(p.name)} in a ${LOOK_BODY.find(b=>b[0]===L.b)[1].toLowerCase()}">`;
   return `<div class="ct-card">${st.beta?betaFrame(pic):pic}<div class="ct-name"><b>${esc(p.name)}</b>${st.adm||st.beta||st.sup?`<span class="ctb-row">${st.adm?'<span class="ctb-chip adm" title="Runs Lantern Lake">⚑ Admin</span>':''}${st.beta?'<span class="ctb-chip" title="Played Lantern Lake before it moved to lanternlake.app">★ Beta</span>':''}${st.sup?'<span class="ctb-chip sup" title="Helped keep the lake lit with a donation">♥ Supporter</span>':''}</span>`:''}${p.seen&&!mine?`<small>Fished ${ago(p.seen)}</small>`:mine?'<small>This is how friends see you</small>':''}</div>
-    <dl class="ct-facts"><div><dt>Best catch today</dt><dd>${db?`${(+db.w).toFixed(2)} lb ${db.v&&VAR[db.v]?VAR[db.v].n+' ':''}${FI(db.f).n}`:'Nothing yet today'}</dd></div>
+    <dl class="ct-facts"><div><dt>Best catch today</dt><dd>${lie?`<button class="q4lie" data-lie="card">${q4FakeW()} lb Glass Perch</button>`:db?`${(+db.w).toFixed(2)} lb ${db.v&&VAR[db.v]?VAR[db.v].n+' ':''}${FI(db.f).n}`:'Nothing yet today'}</dd></div>
     <div><dt>Pinball high score</dt><dd>${st.pin?Number(st.pin).toLocaleString():'No games yet'}</dd></div>
     <div><dt>FinDuel record</dt><dd>${st.bet&&(st.bet.w||st.bet.l)?`${st.bet.w}-${st.bet.l} · <span class="${st.bet.net>=0?'ct-up':'ct-down'}">${st.bet.net>=0?'+':'−'}$${money(Math.abs(st.bet.net))}</span>`:'No bets yet'}</dd></div>
     <div><dt>Biggest fish ever</dt><dd>${big?`${big.w} lb ${FI(big.fish).n}`:'None yet'}</dd></div>
@@ -4255,11 +4287,11 @@ function renderNews(){
   rollDay();ensureFc();let bonus=0;const fresh=newsUnread();
   if(fresh){bonus=Math.round(rnd(100,1000));S.coins+=bonus;S.newsDay=S.day;S.newsBonus=bonus;sfx('coin');showToast('Found a coupon in the paper',`+$${money(bonus)}`);save();renderHome()}
   const N=HEADLINES.length,h=k=>HEADLINES[(S.day*17+k)%N];
-  const q2s=Q2().step,q3s=S.q3?S.q3.step:0;
-  const lead=q3s===1?'Gull Point Lighthouse Shines Again After 40 Years. Who Has the Key?':q3s===7&&S.day-(S.q3.doneDay||0)<=1?'LOST KEEPER’S ROWBOAT FINALLY COMES HOME':q2s===1?'Green Lights Over Misty Bay: Is the Emerald Wake Sailing Again?':q2s===7&&S.day-(S.q2.doneDay||0)<=1?'LOCAL ANGLER OUT-FISHES A GHOST!':S.q.step===1?"Is the Lake Beast Back? Night Fishers Report 'Eyes in the Fog' on Reed Lake":S.q.doneDay&&S.day-S.q.doneDay<=1?'LOCAL ANGLER LANDS THE LAKE BEAST!':hwOn()&&S.day%2===0?pick(['Ghost Gar Spotted on Reed Lake! Halloween Contest Heats Up','Glowing Pumpkins Wash Up on Local Docks. Experts Baffled','Trick-or-Treaters Report Record Candy Haul at Lakeside Cabins','Skeleton Pike Caught in Deepwater Basin, Angler Still Shaking']):h(0);
+  const q2s=Q2().step,q3s=S.q3?S.q3.step:0,q4s=S.q4?S.q4.step:0;
+  const lead=q4s===1?'Anglers Report ‘Seeing Double’ on Reed Lake':q4s===3?'Who Is Fishing Reed Lake at Dusk? Locals Say ‘It Looked Just Like Me’':q4s===7&&S.day-(S.q4.doneDay||0)<=1?'LOCAL ANGLER STARES DOWN OWN REFLECTION, WINS':q3s===1?'Gull Point Lighthouse Shines Again After 40 Years. Who Has the Key?':q3s===7&&S.day-(S.q3.doneDay||0)<=1?'LOST KEEPER’S ROWBOAT FINALLY COMES HOME':q2s===1?'Green Lights Over Misty Bay: Is the Emerald Wake Sailing Again?':q2s===7&&S.day-(S.q2.doneDay||0)<=1?'LOCAL ANGLER OUT-FISHES A GHOST!':S.q.step===1?"Is the Lake Beast Back? Night Fishers Report 'Eyes in the Fog' on Reed Lake":S.q.doneDay&&S.day-S.q.doneDay<=1?'LOCAL ANGLER LANDS THE LAKE BEAST!':hwOn()&&S.day%2===0?pick(['Ghost Gar Spotted on Reed Lake! Halloween Contest Heats Up','Glowing Pumpkins Wash Up on Local Docks. Experts Baffled','Trick-or-Treaters Report Record Candy Haul at Lakeside Cabins','Skeleton Pike Caught in Deepwater Basin, Angler Still Shaking']):h(0);
   if(S.q.step===1)setTimeout(()=>questAdvance(2),600);
   if(q2s===1)setTimeout(()=>q2Advance(2),600);
-  if(q3s===1)setTimeout(()=>q3Advance(2),600);guideMark('news');
+  if(q3s===1)setTimeout(()=>q3Advance(2),600);if(q4s===1)q4Read('news');guideMark('news');
   const yc=yesterdayCatches(),yf=S.fc[S.day-1],tf=S.fc[S.day];
   $('newsBody').innerHTML=`<div class="paper">
     <div class="mast"><h2>The Lantern Ledger</h2><small><span>${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][S.day%7]}, Day ${S.day}</span><span>Est. 1952 · 25¢</span></small></div>
@@ -4270,6 +4302,7 @@ function renderNews(){
     <table class="ptable">${yc.map(c=>`<tr class="${c.you?'you':''}"><td><b>${c.who}</b><br><small>${c.f.n} · ${W(c.f.at).n}${c.f.r==='L'?' · LEGENDARY':c.f.r==='R'?' · rare':''}</small></td><td>${c.w.toFixed(2)} lb</td></tr>`).join('')}</table>
     ${S.yday&&S.yday.n?`<div class="pfoot">You landed ${S.yday.n} fish yesterday.</div>`:'<div class="pfoot">No catches from you yesterday. The lake missed you.</div>'}
     ${sbNewsHTML()}
+    ${q4LieOn('news')?q4NewsLieHTML():''}
     <div class="ptitle">Weather desk</div>
     <div style="font-size:.8rem;line-height:1.4">${yf?`Yesterday: ${WX[yf.wx].n.toLowerCase()}, high of ${yf.hi}°. `:''}${tf?`Today: ${WX[tf.wx].n.toLowerCase()} expected, high of ${tf.hi}°, low of ${tf.lo}°.`:''} For the full forecast, open the Lake 7 Weather app on your phone or watch Lake 7 on your cabin TV.</div>
     <div class="coupon${fresh?'':' used'}">${fresh?`A coupon fell out of today's paper!<b>+$${money(bonus)}</b>Added to your wallet.`:`Today's coupon (+$${money(S.newsBonus||0)}) has been clipped. A new paper comes out tomorrow.`}</div>
@@ -4291,6 +4324,7 @@ function renderHelp(){
    ['Lake projects',`<p>Open the Shop app and tap <b>Projects</b>. Fund big builds in stages with money and materials. Each stage finishes the next morning and gives a permanent bonus: the Marina makes fish sell for more, the Fish Hatchery brings more Rare and Legendary bites, and the Salvage Barn turns up more materials.</p>`],
    ['Retiring',`<p>Once you have $5,000,000 you can retire from the Projects tab. You start over with a lean-to and a stick rod but keep your logbook, trophies, collectibles, tapes, decor, cases and projects, and every fish you sell is worth 10% more for good each time you retire.</p>`],
    ['Logbook sets',`<p>Catch every species in a water to claim a set reward and a Master trophy from the Logbook: $5,000 for Dock Pond up to $500,000 for Misty Bay.</p>`],
+   ['The Angler Who Isn’t There',`<p>A fourth case opens after you close the Keeper’s Light. Someone on Reed Lake is wearing your face. Follow the leads (a text from your own number, a figure on the far water at dusk, lies in your own records, mirror shards at night) and craft a Silvered Lantern. The finale is Mirror Match on a clear night at Reed Lake: your reflection shows a pattern of casts and you answer with the mirror image (its left is your right). Tap the buttons or use the arrow keys. Win five rounds before three mistakes. The lies are only on your screen: your real stats, plaques and what friends see never change.</p>`],
    ['The Keeper’s Light',`<p>A third case opens after you close the Emerald Wake. Its finale is a storm rescue: when the lighthouse beam crosses the lost rowboat, tap Signal (or press Space). Three good signals bring the keeper home.</p>`],
    ['Lake monster, challenges and guestbooks',`<p>Open the <b>Together</b> tab in the Friends app. Every week a lake monster appears and every pound anyone lands hits it; beat it together for a $20,000 bounty each. Challenge a friend from their contact card: biggest fish of one kind in 24 hours, winner takes both stakes. When you visit a friend you can sign their guestbook and like their yard; the most-liked yard each week wins $25,000.</p>`],
    ['Portals: the Moon, the Underworld and the Cloud Sea',`<p>Once you have one of the biggest boats, you can build portal gates from the <b>Beyond the Lake</b> section of the Waters tab. Each gate needs rare materials, and each realm drops the materials for the next gate. A glowing portal ring then floats beside your dock: tap it, or use the Waters tab, to step through.</p><p><b>Sea of Tranquility</b> (Lunar Gate): low gravity means huge fish, but you only have a few minutes of air. A Big Air Tank doubles it and a Moon Base makes it unlimited. <b>The Ember Lake</b> (Hellmouth Gate): fish come up already cooked and feed you a little, but the heat melts 1 in 5 lines until you craft a Hellforged Line, and it tires you faster. <b>The Cloud Sea</b> (Skyward Gate): peaceful and restful. Updrafts lift whole schools: tap one to scoop up three fish at once, and a Sky Kite brings them twice as often.</p><p>Raids, live friends, tournaments and other events stay on Lantern Lake. If you close the game while in a realm, you’ll be back on the lake next time.</p>`],
@@ -4402,14 +4436,14 @@ function showTip(h,e){
   else if(h.kind==='deco'){const nm={bed:'Bed',rug:'Rug',curt:'Curtains',lamp:'Lamp',wall:'Wall decor',extra:'Fern'}[h.data]||'Decor';html=`<b>${nm}</b><small>${S.sleep.ph==='awake'?'Tap to decorate: colors and styles':'Decorate once you’re up and about'}</small>`}
   if(h.kind[0]==='y'&&!html)html=yardTip(h);
   if(h.kind==='gate')html=`<b>Portal ring</b><small>${REALMS.filter(r=>gateOwned(r.id)).map(r=>r.gate).join(' · ')} · tap to travel</small>`;if(h.kind==='updraft')html='<b>Updraft!</b><small>Tap to scoop up the whole school</small>';
-  if(h.kind==='peer')html=peerTip(h.data);if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
+  if(h.kind==='peer')html=h.data&&h.data.q4?'<b>…you?</b><small>Tap them</small>':peerTip(h.data);if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
   if(h.kind==='door'&&TOT.inside)html='<b>Trick or treat!</b><small>Tap the door to hand out candy</small>';
   tip.innerHTML=html;tip.hidden=false;
   const r=$('scene').getBoundingClientRect();let x=e.clientX-r.left+14,y=e.clientY-r.top+14;
   const w=tip.offsetWidth,hh=tip.offsetHeight;if(x+w>r.width-8)x=Math.max(8,e.clientX-r.left-w-14);if(y+hh>r.height-8)y=Math.max(8,r.height-hh-8);if(h.kind[0]==='y'&&r.width<560){x=Math.max(6,(r.width-w)/2);y=6}
   tip.style.left=x+'px';tip.style.top=y+'px';
 }
-$('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
+$('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(h&&h.kind==='peer'&&h.data&&h.data.q4){q4TapReflect();return}if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
   if(indoor()){if(!h){hideTip();return}
   if(h.kind==='tv')openTV();else if(h.kind==='drawer'){hideTip();openTapes()}else if(h.kind==='trodrawer'){openTroDrawer()}else if(h.kind==='colldrawer'){openCollDrawer()}else if(h.kind==='craft'){openCraft()}else if(h.kind==='coll'){hideTip();openItem(h.data)}
   else if(h.kind==='stairs'){if(S.sleep.ph==='awake')goRoom('basement');else showTip(h,e)}else if(h.kind==='up')goRoom('cabin');else if(h.kind==='cswitch'){if(S.sleep.ph==='awake'){S.cLight=S.cLight===false;tone(1400,.03,{type:'square',vol:.03});hideTip();save()}else showTip(h,e)}else if(h.kind==='bplate')bAct('fish');else if(h.kind==='bfridge')bAct('beer');else if(h.kind==='pinball')pbOpen();else if(h.kind==='bswitch'){S.bLight=S.bLight===false;tone(1400,.03,{type:'square',vol:.03});hideTip();save()}else if(h.kind==='btank')showTip(h,e);else if(h.kind==='door'){if(totInsideGive()){hideTip();return}if(S.sleep.ph==='awake'){hideTip();stepOutside()}else showTip(h,e)}else if(h.kind==='bstore'){hideTip();openTab('storage');$('pane-storage').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
@@ -4766,7 +4800,7 @@ async function api(path,body){const r=await fetch('/api/'+path,body?{method:'POS
   let j=null;try{j=await r.json()}catch(e){throw new Error('offline')}if(!r.ok||j.error){const er=new Error(j.error||('HTTP '+r.status));er.j=j;throw er}return j}
 async function mpCheck(){if(MPV.online!==null)return MPV.online;try{await api('ping');MPV.online=true}catch(e){MPV.online=e.message==='no-db'?'nodb':false}return MPV.online}
 function mpStats(){const _mus=musMine();let big=null;for(const [id,L] of Object.entries(S.log))if(L&&L.big>0&&FI(id)&&(!big||L.big>big.w))big={fish:id,w:+L.big.toFixed(2)};
-  return {beta:S.beta?1:0,sup:S.sup?1:0,adm:MPV.owner?1:0,mus:_mus,day:S.day,coins:Math.floor(S.coins),total:S.total,species:Object.keys(S.log).filter(k=>S.log[k].n>0).length,coll:COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,trophies:S.trophies.length,variants:varN(),big,look:lookOf(S.look),pin:S.pinHi||0,bet:S.sb&&S.sb.rec?{w:S.sb.rec.w,l:S.sb.rec.l,net:S.sb.rec.net}:null,today:(()=>{const d=dayBest();return d?{f:d.f,w:d.w,v:d.v,d:d.d}:null})()}}
+  return {mir:S.q4&&S.q4.everSolved?1:0,beta:S.beta?1:0,sup:S.sup?1:0,adm:MPV.owner?1:0,mus:_mus,day:S.day,coins:Math.floor(S.coins),total:S.total,species:Object.keys(S.log).filter(k=>S.log[k].n>0).length,coll:COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,trophies:S.trophies.length,variants:varN(),big,look:lookOf(S.look),pin:S.pinHi||0,bet:S.sb&&S.sb.rec?{w:S.sb.rec.w,l:S.sb.rec.l,net:S.sb.rec.net}:null,today:(()=>{const d=dayBest();return d?{f:d.f,w:d.w,v:d.v,d:d.d}:null})()}}
 function mpCabin(){return {cab:CAB(),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,decor:Object.keys(S.decor).filter(has)},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
 async function mpSync(force){const m=mpS();if(SESS.paused||!m.id||MPV.busy)return;if(!SESS.claimed&&!titleOn)await sessClaim();if(SESS.paused)return;if(!force&&Date.now()-MPV.last<(afk()?600000:110000))return;if(MPV.online===false&&!force)return;
   MPV.busy=true;
@@ -5109,6 +5143,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:72,n:'The Angler Who Isn’t There',items:['A fourth mystery for the Casefile app, unlocked by closing the Keeper’s Light: someone is fishing Reed Lake wearing your face.','Follow texts from your own number, a figure on the far water at dusk, lies hiding in your own records and mirror shards that surface at night.','The finale is Mirror Match, a memory duel with your reflection in an upside-down world. Win a trophy, $250,000 and the Reflection boat paint, which leaves a ghostly copy of your boat under the water.','Bug fix: finding the keeper’s key or a letter in a bottle while you were away no longer interrupts your away catch summary.']},
  {v:71,n:'Quick Replies',items:['Texts are checked every 45 seconds again, even when you’ve stepped away from the game, so new messages still show up quickly.']},
  {v:70,n:'Quiet Hours',items:['Behind the scenes: when you leave the game running without touching it for 5 minutes, it checks in with the server less often (every 10 minutes instead of every 2). Fishing and earnings carry on exactly the same, and everything catches up the moment you move the mouse or tap. This lets many more anglers share the lake.']},
  {v:69,n:'Radio to Go',items:['Radio on phones: Spotify only plays 30-second previews in mobile browsers, even when you’re signed in. The Radio app now explains this and adds an Open in Spotify button, so you can hear the full songs in the Spotify app while you fish. You can also switch your browser to its desktop site to hear full songs right in the game.']},
@@ -5359,7 +5394,7 @@ function draw0(now){
   drawDock(d,T);if(loc==='pond'){drawMarina(d,T);drawGateRing(d,T)}if(loc==='friend')drawNameSign(d);
   drawLand(d,T,night);
   hwDock(d,T);hwLand(d,T);if(CAMT.z>1.3)yardHits();drawBoxes(d,T);scnDraw('yard',d,T,loc);}
-  liveDraw(d,T,loc);hwPumpDraw(d,T,loc);
+  liveDraw(d,T,loc);q4Draw(d,T,loc);hwPumpDraw(d,T,loc);
   // fireflies
   const ff=RL||PT?0:Math.max(0,night*1.3-.2);if(ff>0)for(const f of AMB.flies){const x=f.x+Math.sin(T*.6+f.p)*8,y=f.y+Math.cos(T*.5+f.p*2)*5,a=ff*Math.max(0,Math.sin(T*2+f.p*3));if(a>.05){glow(x,y,5,a*.5,'210,255,120');ctx.fillStyle=`rgba(230,255,150,${a})`;ctx.fillRect(x-.8,y-.8,1.6,1.6)}}
   if(loc==='bay')drawGhostWake(d,T);
@@ -6635,7 +6670,7 @@ function renderBounties(){
   S.bty.list.forEach(b=>p.append(card(b)));
   const h2=document.createElement('div');h2.className='shop-h';h2.innerHTML='<h3>This week</h3><small>Resets Monday</small>';p.append(h2);p.append(card(S.bty.weekly));
 }
-function badgeFor(id){let n=0;if(id==='friends')n=mpBadge();if(id==='texts')n=TX.unread;if(id==='news'&&newsUnread())n=1;if(id==='crate'&&crateFree())n=1;if(id==='bounty')n=readyBounties()+(S.streak.claimed?0:1);if(id==='case'&&((S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step)||(Q2().step>0&&Q2().step<7&&Q2().seen!==Q2().step)||(Q3().step>0&&Q3().step<7&&Q3().seen!==Q3().step)))n='!';return n?`<span class="badge">${n}</span>`:''}
+function badgeFor(id){let n=0;if(id==='friends')n=mpBadge();if(id==='texts')n=TX.unread+q4Unread();if(id==='news'&&newsUnread())n=1;if(id==='crate'&&crateFree())n=1;if(id==='bounty')n=readyBounties()+(S.streak.claimed?0:1);if(id==='case'&&((S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step)||(Q2().step>0&&Q2().step<7&&Q2().seen!==Q2().step)||(Q3().step>0&&Q3().step<7&&Q3().seen!==Q3().step)))n='!';return n?`<span class="badge">${n}</span>`:''}
 // ---------- Lake Beast mystery ----------
 const magSvg=`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="13" cy="13" r="8" fill="#e8f4ff" stroke="#2a1a0a" stroke-width="3"/><path d="M19 19l8 8" stroke="#2a1a0a" stroke-width="4" stroke-linecap="round"/></svg>`;
 const photoSvg=`<svg viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(-6 16 16)"><rect x="5" y="4" width="22" height="24" fill="#f4eedc"/><rect x="8" y="7" width="16" height="13" fill="#6a6050"/><path d="M10 17q4-5 7-1 2-2 5 0" stroke="#2a241c" stroke-width="1.5" fill="none"/></g><path d="M21 3l7 9" stroke="#14100c" stroke-width="3"/></svg>`;
@@ -6647,7 +6682,7 @@ const QSTEPS=[null,
   {t:'Beast bait',d:'Nothing ordinary will tempt it. Craft a Beast Lure from 3 strange scales, one Legendary fish from your cooler, and $25,000.'},
   {t:'The showdown',d:'The sonar contact was 212 feet down in Deepwater Basin. Fish there at night during a thunderstorm or fog (check the TV forecast). When it bites, hold on.',w:'deep'},
   {t:'Case closed',d:'You landed the Lake Beast. Old Pete Dunmore owes you an apology.'}];
-function qStart(){q2Start();q3Start();if(S.q.step===0&&S.total>=25){S.q.step=1;S.q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Lake Beast',sub:'Open the Casefile app on your phone',icon:magSvg});save()}}
+function qStart(){q2Start();q3Start();q4Start();if(S.q.step===0&&S.total>=25){S.q.step=1;S.q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Lake Beast',sub:'Open the Casefile app on your phone',icon:magSvg});save()}}
 function questAdvance(n,quiet){if(S.q.step>=n)return;S.q.step=n;if(n===7)caseSolved(S.q);const st=QSTEPS[n];if(st&&!quiet)celebrate({lbl:n===7?'Case closed!':'Mystery updated',r:'M',name:st.t,sub:n===7?'The Lake Beast is yours':'New lead in your Casefile',icon:magSvg});save()}
 function questItem(k,live){
   if(k==='photo'){S.q.photo=true;if(live){celebrate({lbl:'Clue found!',r:'M',name:'A torn photograph',sub:'Huge scales on a riverbank…',icon:photoSvg});burst(BOB.x,BOB.y-10,['#ff8fb8','#fff'],30)}questAdvance(3,live)}
@@ -6656,10 +6691,10 @@ function questItem(k,live){
 }
 function craftLure(){const lg=coolerIds().find(k=>FI(k).r==='L');if(S.q.step!==5||S.q.scales<3||!lg||S.coins<25000)return;
   S.coins-=25000;S.q.scales-=3;const e=S.cooler[lg];e.val-=e.val/e.n;e.lbs-=e.lbs/e.n;e.n--;if(e.n<=0)delete S.cooler[lg];coolDirty=true;S.q.lure=true;questAdvance(6);renderCase()}
-function caseTabs(){const L=caseList();if(!CASEV)CASEV=c2Solved()&&Q3().step>0&&Q3().step<7?3:c1Solved()&&Q2().step>0&&Q2().step<7?2:1;return `<div class="case-tabs" role="tablist">${L.map(c=>`<button role="tab" data-case="${c.id}" aria-selected="${CASEV===c.id}" class="${c.open?'':'locked'}">${c.open?'':'🔒 '}${c.n}${c.done?' ✓':''}</button>`).join('')}</div>`}
+function caseTabs(){const L=caseList();if(!CASEV)CASEV=c3Solved()&&Q4().step>0&&Q4().step<7?4:c2Solved()&&Q3().step>0&&Q3().step<7?3:c1Solved()&&Q2().step>0&&Q2().step<7?2:1;return `<div class="case-tabs" role="tablist">${L.map(c=>`<button role="tab" data-case="${c.id}" aria-selected="${CASEV===c.id}" class="${c.open?'':'locked'}">${c.open?'':'🔒 '}${c.n}${c.done?' ✓':''}</button>`).join('')}</div>`}
 function bindCaseTabs(){document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{CASEV=+b.dataset.case;renderCase()})}
 function renderCase(){
-  const tabs=caseTabs();if(CASEV===3){const p=$('caseBody');p.innerHTML=tabs+renderCase3();bindCaseTabs();bindRestart();const ob=$('oilBtn');if(ob)ob.onclick=craftOil;return}if(CASEV===2){const p=$('caseBody');p.innerHTML=tabs+renderCase2();bindCaseTabs();bindRestart();const sb=$('spiritBtn');if(sb)sb.onclick=craftSpirit;return}
+  const tabs=caseTabs();if(CASEV===4){const p=$('caseBody');p.innerHTML=tabs+renderCase4();bindCaseTabs();bindRestart();const lb=$('lanternBtn');if(lb)lb.onclick=craftLantern;return}if(CASEV===3){const p=$('caseBody');p.innerHTML=tabs+renderCase3();bindCaseTabs();bindRestart();const ob=$('oilBtn');if(ob)ob.onclick=craftOil;return}if(CASEV===2){const p=$('caseBody');p.innerHTML=tabs+renderCase2();bindCaseTabs();bindRestart();const sb=$('spiritBtn');if(sb)sb.onclick=craftSpirit;return}
   const q=S.q;q.seen=q.step;const p=$('caseBody');
   const ok=v=>v?'✓':'✗';
   let html=`<div class="paper"><div class="mast"><h2>THE LAKE BEAST</h2><small><span>Case no. 1974-LB</span><span>${q.step===7?'Closed':q.step?'Open':'Rumor'}</span></small></div>`;
@@ -6732,10 +6767,11 @@ function drawGhostWake(d,T){const q=S.q2;if(!q||!q.ghost)return;const now=perfor
   ctx.restore()}
 var CASEV=0;
 const c1Solved=()=>!!(S.q&&(S.q.everSolved||S.q.step===7));
-function caseList(){return [{id:1,n:'The Lake Beast',open:true,done:S.q.step===7},{id:2,n:'The Emerald Wake',open:c1Solved(),done:Q2().step===7},{id:3,n:'The Keeper’s Light',open:c2Solved(),done:Q3().step===7}]}
+function caseList(){return [{id:1,n:'The Lake Beast',open:true,done:S.q.step===7},{id:2,n:'The Emerald Wake',open:c1Solved(),done:Q2().step===7},{id:3,n:'The Keeper’s Light',open:c2Solved(),done:Q3().step===7},{id:4,n:'The Angler Who Isn’t There',open:c3Solved(),done:Q4().step===7}]}
 function caseSolved(q){q.everSolved=true;q.runs=(q.runs||0)+1;if(q.startDay==null){q.last=null;return}const days=Math.max(1,S.day-q.startDay+1);q.last=days;
   if(q.best==null||days<q.best){const had=q.best!=null;q.best=days;if(had)setTimeout(()=>showToast(`New case record: ${days} day${days>1?'s':''}!`,'Casefile'),2500)}}
 function caseRestart(id){if(id===1){const o=S.q;S.q={step:1,startDay:S.day,scales:0,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=1}
+  else if(id===4){const o=Q4();S.q4={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true,msgs:[],lies:{}};CASEV=4;setTimeout(()=>q4Text(1),3000)}
   else if(id===3){const o=Q3();S.q3={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=3}
   else{const o=Q2();S.q2={step:1,startDay:S.day,pages:0,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=2}
   sfx('click');showToast('Case reopened. The clock is running.','Casefile');save();renderCase()}
@@ -7144,6 +7180,143 @@ function keeperLoop(now){if(!KP.on)return;const dt=Math.min(.05,(now-KP.last)/10
   $('kpMsg').textContent=KP.msg;$('kpHud').textContent=`Signals ${KP.hits}/3 · Misses ${KP.miss}/3 · ${Math.max(0,Math.ceil(45-KP.t))}s`;
   requestAnimationFrame(keeperLoop)}
 
+// ---------- Case 4: The Angler Who Isn't There ----------
+// Someone is fishing Reed Lake wearing your face. Texts from "you", a reflection on the far water at dusk, lies in your own
+// records, mirror shards at night, a Silvered Lantern, then Mirror Match: answer your reflection's casts with the mirror image.
+// Every lie is local and cosmetic: real stats, plaques and what friends see are never changed.
+const Q4STEPS=[null,
+  {t:'A text from yourself',d:'Someone texted you from your own number: “Don’t look at the water after dark.” Read it in the Messages app, then check today’s Lantern Ledger.'},
+  {t:'Someone wearing your face',d:'Anglers keep “seeing double” on Reed Lake. Fish there at dusk and watch the far water. If someone familiar shows up, tap them.',w:'lake'},
+  {t:'Things you never did',d:'The wet photograph shows you somewhere you’ve never been, and your own records have started to lie. Find the lies and tap each one.'},
+  {t:'Pieces of the mirror',d:'Lake 7 is warning of “severe reflections.” Fish at night in any water to pull up 4 mirror shards. Each one holds part of an old legend.'},
+  {t:'The Silvered Lantern',d:'“Only a silvered light shows what the water keeps.” Make a Silvered Lantern from 4 mirror shards, 10 Old Rope, 5 Brass Fittings and $100,000.'},
+  {t:'Mirror Match',d:'Hang the Silvered Lantern on Reed Lake on a clear night and your reflection will come to you. Beat it at its own game: answer every cast with the mirror image.',w:'lake'},
+  {t:'Case closed',d:'Your reflection is just a reflection again. Mostly.'}];
+const Q4LEGEND=['“Reed Lake was dug as a mill pond in 1889. The miller called it his looking glass.”','“He fished it every night for forty years, and the water learned his face.”','“One morning two millers walked home. Only one of them cast a shadow.”','“A mirror lake keeps what it sees. Fish it long enough and it keeps you.”'];
+const Q4TXT={1:'Don’t look at the water after dark.',2:'Reed Lake. Dusk. I’ll be where you can see me.',3:'Nice photo, right? I’ve been busy being you.',4:'You’re starting to notice. That’s cute.',5:'Those shards are mine. Put them back.',6:'Hang your little lantern. I’ve been practicing your moves.',7:'Fine. You win. But I’ll still be here every time you look down.'};
+function Q4(){if(!S.q4||typeof S.q4!=='object')S.q4={step:0};const q=S.q4;q.msgs=q.msgs||[];q.lies=q.lies||{};return q}
+const c3Solved=()=>!!(S.q3&&(S.q3.everSolved||S.q3.step===7));
+const q4On=()=>{const q=S.q4;return !!(q&&q.step>0&&q.step<7)};
+const myName=()=>(S.mp&&S.mp.name)||'You';
+const q4Rev=s=>[...String(s)].reverse().join('');
+function q4Text(n){const q=Q4(),body=Q4TXT[n];if(!body||q.msgs.some(m=>m.n===n))return;q.msgs.push({n,body,ts:Date.now()});q.un=(q.un||0)+1;
+  if(typeof phNotify==='function')phNotify('texts',myName(),body);save()}
+const q4Unread=()=>S.q4&&S.q4.msgs&&S.q4.msgs.length?(S.q4.un||0):0;
+function q4Start(){const q=Q4();if(q.step===0&&c3Solved()){q.step=1;q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Angler Who Isn’t There',sub:'A fourth case is open in the Casefile app',icon:magSvg});CASEV=4;setTimeout(()=>q4Text(1),4000);save()}}
+function q4Advance(n,quiet){const q=Q4();if(q.step>=n)return;q.step=n;if(n===7)caseSolved(q);const st=Q4STEPS[n];
+  if(st&&!quiet)celebrate({lbl:n===7?'Case closed!':'Mystery updated',r:'M',name:st.t,sub:n===7?'Your reflection lets go':'New lead in your Casefile',icon:magSvg});setTimeout(()=>q4Text(n),n===7?6000:3500);save()}
+// lead 1: read the text and the paper
+function q4Read(k){const q=S.q4;if(!q||q.step!==1)return;q[k]=1;if(q.txt&&q.news)setTimeout(()=>q4Advance(2),700);save()}
+// lead 3: which lies exist depends on whether the player has an angler name (contact card and museum need one)
+const q4LieKeys=()=>mpS().id?['card','news','mus']:['log','news'];
+const q4LieOn=k=>{const q=S.q4;return !!(q&&q.step===3&&q4LieKeys().includes(k)&&!(q.lies||{})[k])};
+const q4FakeW=()=>(2+((S.q4&&S.q4.startDay)||7)%5+.33).toFixed(2);
+function q4Lie(k){if(!q4LieOn(k))return;const q=Q4();q.lies[k]=1;sfx('ominous');const keys=q4LieKeys(),n=keys.filter(x=>q.lies[x]).length;
+  const what={card:'Your contact card shows a fish that doesn’t exist',news:'That photo was taken at 3 AM. You were asleep.',mus:'You never donated a Glass Perch',log:'A fish you never caught, in your own handwriting'}[k];
+  celebrate({lbl:'A lie!',r:'M',name:`${what} (${n} of ${keys.length})`,sub:'Added to your evidence',icon:magSvg});
+  if(n>=keys.length)setTimeout(()=>q4Advance(4),1500);save();
+  if(k==='card'&&phOpen()&&phView==='friends')renderFriends();if(k==='mus'&&!$('musModal').hidden)renderMuseum();if(k==='news'&&phOpen()&&phView==='news')renderNews();if(k==='log')renderAll()}
+document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('[data-lie]');if(el){e.preventDefault();e.stopPropagation();q4Lie(el.dataset.lie)}},true);
+const q4GlassSvg=()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M3 16c5-7 13-8 20-3l6-4v14l-6-4c-7 5-15 4-20-3z" fill="#cfe6f2" stroke="#6a8aa0" stroke-width="1.2" opacity=".85"/><circle cx="9" cy="15" r="1.4" fill="#2a3a48"/><path d="M12 12l6 8M16 11l4 6" stroke="#fff" stroke-width="1" opacity=".7"/></svg>`;
+const q4LogLieHTML=()=>`<div class="card fish q4fake" data-lie="log" role="button" tabindex="0">${q4GlassSvg()}<div><span class="nm">Glass Perch</span><span class="chip wx">Caught by you</span><small>Biggest ${q4FakeW()} lb · 1 caught · Day ${S.day}</small><small class="q4ink">Logged in handwriting that looks exactly like yours. Tap to look closer.</small></div></div>`;
+const q4MusLieHTML=()=>`<div class="mus-case q4fakebox"><h3>Recently donated</h3><div class="plqs"><div class="plq mine q4fake" data-lie="mus" role="button" tabindex="0">${q4GlassSvg()}<b>Glass Perch</b><small>${esc(myName())} · <em>${q4FakeW()} lb</em></small></div></div></div>`;
+const q4NewsLieHTML=()=>`<div class="q4photo" data-lie="news" role="button" tabindex="0"><img alt="" src="${portraitURL(lookOf(S.look))}"><div><b>SPOTTED: ${esc(myName().toUpperCase())} ON MISTY BAY AT 3 A.M.</b><small>A Ledger reader snapped this local angler casting into the fog “without blinking once.” Tap to look closer.</small></div></div>`;
+// lead 4: mirror shards at night; lead 6: Mirror Match on a clear night at Reed Lake
+function q4Roll(m,water,minute){const q=S.q4;if(!q||!q.step||q.step===7)return null;const ph=phaseOf(minute);
+  if(q.step===4&&!isRealm(water)&&ph==='night'&&(q.sh||0)<4&&Math.random()<1/25)return {q4:'shard'};
+  if(q.step===6&&q.lantern&&!m.offline&&water==='lake'&&ph==='night'&&m.wx==='clear'&&!S.tour&&!MM.on&&!KP.on&&Math.random()<1/12)return {q4:'mirror'};
+  return null}
+function q4Item(k,live){const q=Q4();
+  if(k==='shard'){q.sh=(q.sh||0)+1;const n=q.sh;if(live){celebrate({lbl:'Clue found!',r:'M',name:`Mirror shard (${n} of 4)`,sub:Q4LEGEND[n-1]||'',icon:svgI('scale','#cfe6f2')});burst(BOB.x,BOB.y-10,['#e8f4ff','#9fd0ff'],24)}if(n>=4)q4Advance(5,live)}
+  else if(k==='mirror'){mmOpen();return}
+  save()}
+function craftLantern(){const q=Q4();if(q.step!==5||(q.sh||0)<4||(S.mats.rope||0)<10||(S.mats.brass||0)<5||S.coins<100000)return;S.mats.rope-=10;S.mats.brass-=5;S.coins-=100000;q.lantern=true;storeDirty=true;sfx('craft');q4Advance(6);renderCase()}
+// lead 2: your reflection on the far water at dusk. It copies your catches a couple of seconds late. Tap it.
+const Q4R={on:false,wait:0,p:null};
+function q4Here(){const q=S.q4;return !!(q&&q.step===2&&S.water==='lake'&&phaseOf(S.min)==='dusk'&&!S.sleep&&!TRV.on&&!VISIT&&!titleOn&&!S.tour)}
+function q4Tick(dt){if(!S||!S.q4)return;const p=Q4R.p;
+  if(p){p.t+=dt;p.castT+=dt;if(p.fx)p.fx.t+=dt;if(p.out!=null){p.out+=dt;if(p.out>1.3){Q4R.p=null;Q4R.on=false}}else if(!q4Here()){p.out=0}if(p.pend&&(p.pend.t-=dt)<=0){p.fx={f:p.pend.f,w:p.pend.w,v:p.pend.v,r:p.pend.r,t:0};p.castT=-1.6;p.pend=null}}
+  else if(q4Here()){Q4R.wait+=dt;if(Q4R.wait>(Q4R.need||(Q4R.need=8+Math.random()*12))){Q4R.wait=0;Q4R.need=0;const used=new Set([...LIVE.peers.values()].map(x=>x.slot)),slot=[3,1,5,0,4,2].find(s=>!used.has(s));
+    if(slot!=null){const P=PNT();Q4R.p={q4:true,slot,boat:Math.max(1,S.boat),pt:P.eq||'',rd:P.eqR||'',bb:P.eqB||'',wear:hwWear()||null,g:lookOf(S.look).g,name:q4Rev(myName()),t:0,castT:0,out:null,fx:null,ghost:.55};Q4R.on=true;sfx('ominous');showToast('Someone is fishing the far water. They look… familiar.','Reed Lake')}}}
+  else Q4R.wait=0;
+  // creepy touches while the case is open: the title flips for a moment now and then
+  if(q4On()&&S.q4.step>=2&&!document.hidden&&!titleOn){Q4R.ft=(Q4R.ft||240+Math.random()*240)-dt;if(Q4R.ft<=0){Q4R.ft=0;q4FlipTitle()}}}
+function q4FlipTitle(){Q4R.ft=240+Math.random()*300;const h=document.querySelector('.head h1');if(!h)return;const o=h.innerHTML;h.innerHTML='ekaL <span>nretnaL</span>';h.classList.add('q4flip');setTimeout(()=>{h.innerHTML=o;h.classList.remove('q4flip')},1300)}
+function q4Draw(d,T,loc){const p=Q4R.p;if(!p||loc!=='lake'||S.sleep)return;drawPeer(p,d,T);
+  const sl=liveSlotPos(p);if(sl&&p.out==null){ctx.save();ctx.strokeStyle=`rgba(190,230,255,${.18+.1*Math.sin(T*2)})`;ctx.lineWidth=1;for(let i=0;i<3;i++){const r=(T*.6+i/3)%1;ctx.globalAlpha=1-r;ctx.beginPath();ctx.ellipse(sl[0],sl[1]+18*sl[2],30*sl[2]+r*40*sl[2],4+r*6,0,0,7);ctx.stroke()}ctx.restore()}}
+function q4TapReflect(){const p=Q4R.p;if(!p||p.out!=null)return;p.out=0;sfx('splash');burst(liveSlotPos(p)[0],liveSlotPos(p)[1],['#cfe6f2','#ffffff'],30);const q=Q4();q.photo=1;
+  celebrate({lbl:'Clue found!',r:'M',name:'A wet photograph',sub:'It shows you, fishing somewhere you’ve never been',icon:photoSvg});q4Advance(3,false);save()}
+function q4OnCatch(f,w,vr){const p=Q4R.p;if(p&&p.out==null)p.pend={f:f.id,w:+(+w).toFixed(2),v:vr||'',r:f.r,t:2.2};
+  if(q4On()&&S.q4.step>=2&&Math.random()<1/30)setTimeout(()=>showToast(`An echo across the water: “You caught a ${f.n}.”`,'???'),4000)}
+function renderCase4(){const q=Q4();q.seen=q.step;const ok=v=>v?'✓':'✗';
+  let html=`<div class="paper"><div class="mast"><h2>THE ANGLER WHO ISN’T THERE</h2><small><span>Case no. 2026-AW</span><span>${q.step===7?'Closed':q.step?'Open':'Locked'}</span></small></div>`;
+  if(!q.step)return html+`<p style="font-size:.84rem;line-height:1.45;margin:0">Sealed. Close the Keeper’s Light case first.</p></div>`;
+  html+=caseRecordHTML(q,4)+`<div class="ptitle">Leads</div>`;
+  for(let i=1;i<=7;i++){const st=Q4STEPS[i],done=q.step>i||(i===7&&q.step===7),cur=q.step===i&&i<7;if(i===7&&q.step<7)continue;let extra='';
+    if(cur&&st.w&&S.boat<W(st.w).boat)extra+=`<p class="need">You'll need a ${GEAR.boat.items[W(st.w).boat].n} to reach ${W(st.w).n}.</p>`;
+    if(cur&&i===1)extra+=`<div class="chk"><span>${ok(q.txt)} Read the text in Messages</span><span>${ok(q.news)} Read today’s Lantern Ledger</span></div>`;
+    if(cur&&i===2){const ph=phaseOf(S.min);extra+=`<div class="chk"><span>${ok(S.water==='lake')} Fishing Reed Lake</span><span>${ok(ph==='dusk')} Dusk (now ${PH[ph].toLowerCase()})</span></div>`}
+    if(cur&&i===3){const L=q.lies,nm={card:'Your contact card (Friends app, Me)',news:'Today’s Lantern Ledger',mus:'The Museum',log:'Your Logbook (Reed Lake)'};extra+=`<div class="chk">${q4LieKeys().map(k=>`<span>${ok(L[k])} ${nm[k]}</span>`).join('')}</div>`}
+    if(cur&&i===4){const ph=phaseOf(S.min);extra+=`<div class="chk"><span>${ok((q.sh||0)>=4)} Mirror shards: ${q.sh||0} of 4</span><span>${ok(ph==='night')} Night (now ${PH[ph].toLowerCase()})</span></div>`}
+    if(cur&&i===5){const can=(q.sh||0)>=4&&(S.mats.rope||0)>=10&&(S.mats.brass||0)>=5&&S.coins>=100000;extra+=`<div class="chk"><span>✓ 4 mirror shards</span><span>${ok((S.mats.rope||0)>=10)} 10 Old Rope (${S.mats.rope||0})</span><span>${ok((S.mats.brass||0)>=5)} 5 Brass Fittings (${S.mats.brass||0})</span><span>${ok(S.coins>=100000)} $100,000</span></div><button class="sbtn" id="lanternBtn" ${can?'':'disabled'}>Make the Silvered Lantern</button>`}
+    if(cur&&i===6){const ph=phaseOf(S.min);extra+=`<div class="chk"><span>${ok(S.water==='lake')} Fishing Reed Lake</span><span>${ok(ph==='night')} Night (now ${PH[ph].toLowerCase()})</span><span>${ok(S.wx.id==='clear')} Clear skies (now ${WX[S.wx.id].n.toLowerCase()})</span><span>✓ Silvered Lantern</span></div><p>Mirror Match: your reflection shows a pattern of casts. Answer with the mirror image: if it casts left, you cast right. Five rounds, three mistakes allowed. The last round goes backwards too.</p>`}
+    html+=`<div class="case-step${cur?' cur':''}${!done&&!cur?' lock':''}"><span class="mk">${done?'✓':cur?'➤':'?'}</span><div><b>${done||cur?st.t:'Unknown lead'}</b>${done||cur?`<p>${st.d}</p>`:''}${extra}</div></div>`}
+  const ev=[];if(q.step>=2)ev.push('A text from yourself');if(q.photo||q.step>=3)ev.push('Wet photograph');const nl=Object.keys(q.lies||{}).length;if(nl)ev.push(`Lies ×${nl}`);if(q.sh)ev.push(`Mirror shards ×${q.sh}`);if(q.lantern)ev.push('Silvered Lantern');if(q.step===7)ev.push('A reflection that blinks first');
+  return html+`<div class="ptitle">Evidence</div><div class="ev">${ev.map(e=>`<span>${e}</span>`).join('')}</div>${q.sh?`<div class="ptitle">The legend</div><div style="font-size:.8rem;line-height:1.45;font-style:italic">${Q4LEGEND.slice(0,Math.min(4,q.sh)).join(' ')}</div>`:''}</div>`}
+function q4Solve(){const q=Q4();const prize=Math.round(250000*caseReplayMult(q));S.coins+=prize;
+  if(!q.replay){S.trophies.unshift({name:'Mirror Match Champion',water:'lake',type:'big',score:'Beat your reflection',day:S.day});const P=PNT();P.own.reflection=(P.own.reflection||0)+1}
+  q.doneDay=S.day;q4Advance(7,true);sfx('fanfare');Q4R.p=null;
+  celebrate({lbl:'You beat your reflection!',r:'M',name:'The water lets go',sub:q.replay?`+$${money(prize)} · solved in ${q.last||'?'} day${q.last===1?'':'s'}`:`+$${money(prize)}, a trophy and the Reflection boat paint (find it in Crate Expectations, Locker)`,icon:magSvg});save()}
+// Messages: a thread from "you" (local only, never sent to the server)
+const q4Av=()=>`<span class="tx-av q4av"><img alt="" src="${portraitURL(lookOf(S.look))}"></span>`;
+function q4InboxRow(){const q=S.q4;if(!q||!q.msgs||!q.msgs.length)return '';const last=q.msgs[q.msgs.length-1];
+  return `<ul class="tx-list q4list"><li><button data-q4th="1" class="${q.un?'un':''}">${q4Av()}<span class="tx-mid"><b>${esc(myName())}</b><span>${esc(last.body)}</span></span><span class="tx-time">${txWhen(last.ts)}${q.un?'<i class="tx-dot"></i>':''}</span></button></li></ul>`}
+function q4BindRow(b){const r=b.querySelector('[data-q4th]');if(r)r.onclick=()=>{TX.view='q4';renderTexts()}}
+function q4Thread(b,back,title){const q=Q4();back.textContent='‹ Messages';title.innerHTML=`${esc(myName())}<small>This is your number</small>`;b.classList.add('thread');
+  let html='<p class="tx-foot">You can’t reply to this conversation.</p>';for(const m of q.msgs)html+=`<p class="tx-stamp">${txWhen(m.ts)}</p><div class="bub them q4bub">${esc(m.body)}</div>`;b.innerHTML=html;b.scrollTop=b.scrollHeight;
+  q.un=0;if(q.step===1&&!q.txt)q4Read('txt');save()}
+// Mirror Match: the finale
+const MM={on:false};
+const MM_LEN=[3,4,5,5,6],MM_DIR={L:'◀',A:'▲',R:'▶'},MM_MIR={L:'R',A:'A',R:'L'};
+function mmPattern(n){const o=[];while(o.length<n){const d='LAR'[Math.floor(Math.random()*3)];if(o.length>=2&&o[o.length-1]===d&&o[o.length-2]===d)continue;o.push(d)}return o}
+function mmOpen(){if(MM.on)return;Object.assign(MM,{on:true,round:0,miss:0,seq:[],want:[],pos:0,ph:'intro',pt:0,show:-1,flash:0,bad:0,me:null,last:performance.now(),done:false,msg:'Your reflection steps out of the water.'});
+  sfx('ominous');$('mmModal').hidden=false;$('mmRes').hidden=true;mmBtns(false);requestAnimationFrame(mmLoop);if(typeof phNotify==='function')phNotify('case','The Angler Who Isn’t There','Your reflection wants a rematch. Mirror Match!')}
+function mmBtns(on){document.querySelectorAll('[data-mm]').forEach(b=>b.disabled=!on)}
+function mmNext(){const n=MM_LEN[MM.round];MM.seq=mmPattern(n);const rev=MM.round===MM_LEN.length-1;MM.want=(rev?[...MM.seq].reverse():MM.seq).map(d=>MM_MIR[d]);MM.pos=0;MM.ph='show';MM.pt=0;MM.show=-1;mmBtns(false);
+  MM.msg=rev?'Final round. Watch closely: answer mirrored AND backwards.':`Round ${MM.round+1}: watch your reflection…`}
+function mmInput(d){if(!MM.on||MM.ph!=='input')return;MM.me={d,t:0};if(MM.want[MM.pos]===d){MM.pos++;sfx('click');
+    if(MM.pos>=MM.want.length){MM.round++;MM.flash=1;sfx('chime','R');if(MM.round>=MM_LEN.length){mmEnd(true);return}MM.ph='between';MM.pt=0;mmBtns(false);MM.msg='It flinches. Next round…'}}
+  else{MM.miss++;MM.bad=1;sfx('miss');mmBtns(false);if(MM.miss>=3){MM.msg='It copies you perfectly. You blink first.';mmEnd(false);return}MM.ph='between';MM.pt=-.6;MM.msg=`Wrong way (${MM.miss} of 3). It smirks and starts the round over.`}}
+function mmEnd(won){MM.done=true;MM.ph='done';mmBtns(false);setTimeout(()=>{$('mmRes').hidden=false;$('mmResT').textContent=won?'Your reflection blinks first':'Your reflection wins';$('mmResP').textContent=won?'It ripples, shrugs, and sinks back into an ordinary reflection. Case closed.':'It sinks away smiling. Your lantern still works: try again on the next clear night on Reed Lake.';if(won)q4Solve()},800)}
+function mmClose(){MM.on=false;$('mmModal').hidden=true;if(!MM.done)showToast('Your reflection sinks back under. Try again on another clear night.','The Angler Who Isn’t There')}
+function mmLoop(now){if(!MM.on)return;const dt=Math.min(.05,(now-MM.last)/1000);MM.last=now;const step=Math.max(.42,.72-MM.round*.06);
+  if(!MM.done){MM.pt+=dt;
+    if(MM.ph==='intro'&&MM.pt>2.2)mmNext();
+    else if(MM.ph==='show'){const i=Math.floor(MM.pt/step);if(i!==MM.show&&i<MM.seq.length){MM.show=i;tone(MM.seq[i]==='L'?520:MM.seq[i]==='R'?780:640,.08,{type:'sine',vol:.05})}if(MM.pt>step*MM.seq.length+.3){MM.ph='input';MM.show=-1;mmBtns(true);MM.msg=MM.round===MM_LEN.length-1?`Your turn: ${MM.want.length} casts, mirrored and in reverse.`:`Your turn: answer its ${MM.want.length} casts with the mirror image.`}}
+    else if(MM.ph==='between'&&MM.pt>1.1){if(MM.bad){MM.bad=0}mmNext()}}
+  MM.flash=Math.max(0,MM.flash-dt*2);MM.bad=Math.max(0,MM.bad-dt*1.5);if(MM.me)MM.me.t+=dt;
+  const c=$('mmCv'),x=c.getContext('2d'),W2=360,H2=240,T=now/1000;x.setTransform(c.width/W2,0,0,c.height/H2,0,0);
+  // upside-down world: the surface is a bright line near the top, the sky (and moon) are below
+  let g=x.createLinearGradient(0,0,0,H2);g.addColorStop(0,'#0b3a44');g.addColorStop(.25,'#08222c');g.addColorStop(1,'#04121a');x.fillStyle=g;x.fillRect(0,0,W2,H2);
+  x.fillStyle='rgba(230,245,255,.1)';x.beginPath();x.arc(36,212,22,0,7);x.fill();x.fillStyle='rgba(235,245,255,.75)';x.beginPath();x.arc(36,212,12,0,7);x.fill();x.fillStyle='#04121a';x.beginPath();x.arc(41,209,11,0,7);x.fill();
+  for(let i=0;i<40;i++){const sx=(i*73)%W2,sy=120+(i*41)%110,a=.2+.3*Math.abs(Math.sin(T+i));x.fillStyle=`rgba(255,255,255,${a})`;x.fillRect(sx,sy,1,1)}
+  x.strokeStyle='rgba(180,230,255,.55)';x.lineWidth=2;x.beginPath();for(let xx=0;xx<=W2;xx+=6){const yy=46+Math.sin(xx/18+T*1.4)*2;xx?x.lineTo(xx,yy):x.moveTo(xx,yy)}x.stroke();
+  x.fillStyle='rgba(180,230,255,.08)';x.fillRect(0,0,W2,46);
+  // two anglers hanging from the surface: you on the left, it on the right (mirrored)
+  const fig=(cx,dir,al,col,face)=>{x.save();x.globalAlpha=al;x.translate(cx,48);x.scale(face*1.45,-1.45);x.fillStyle='#2a2f38';x.beginPath();x.moveTo(-26,0);x.lineTo(26,0);x.lineTo(18,-12);x.lineTo(-18,-12);x.fill();
+    x.fillStyle=col;x.fillRect(-7,-36,14,24);x.fillStyle='#e2b48e';x.beginPath();x.arc(0,-44,8,0,7);x.fill();x.fillStyle='#3a4a2a';x.fillRect(-9,-52,18,5);
+    const ang={L:-2.3,A:-1.57,R:-.85}[dir]||-1.2;x.strokeStyle='#d8c8a8';x.lineWidth=2;x.beginPath();x.moveTo(4,-26);x.lineTo(4+Math.cos(ang)*46,-26+Math.sin(ang)*46);x.stroke();x.restore()};
+  const rd=MM.ph==='show'&&MM.show>=0?MM.seq[MM.show]:null,md=MM.me&&MM.me.t<.5?MM.me.d:null;
+  fig(100,md?{L:'R',R:'L',A:'A'}[md]:null,1,'#e2723a',1);fig(260,rd?{L:'R',R:'L',A:'A'}[rd]:null,.75+.15*Math.sin(T*3),'#7ab8d0',-1);x.strokeStyle='rgba(170,230,255,.25)';for(let i=0;i<3;i++){const r=(T*.5+i/3)%1;x.globalAlpha=1-r;x.beginPath();x.ellipse(260,50,30+r*30,3+r*3,0,0,7);x.stroke()}x.globalAlpha=1;
+  x.font='bold 11px sans-serif';x.textAlign='center';x.fillStyle='rgba(255,255,255,.7)';x.fillText('You',100,150);x.fillStyle='rgba(170,220,240,.75)';x.fillText(q4Rev(myName()),260,150);
+  if(rd){x.font='bold 46px sans-serif';x.fillStyle='rgba(170,230,255,.95)';x.fillText(MM_DIR[rd],260,200)}
+  if(md){x.font='bold 40px sans-serif';x.fillStyle='rgba(255,210,150,.95)';x.fillText(MM_DIR[md],100,198)}
+  if(MM.ph==='input'){x.font='bold 12px sans-serif';x.fillStyle='rgba(255,255,255,.75)';x.fillText(`${MM.pos} / ${MM.want.length}`,180,228)}
+  x.textAlign='left';
+  if(MM.flash>0){x.fillStyle=`rgba(200,240,255,${MM.flash*.3})`;x.fillRect(0,0,W2,H2)}if(MM.bad>0){x.fillStyle=`rgba(255,60,60,${MM.bad*.25})`;x.fillRect(0,0,W2,H2)}
+  $('mmMsg').textContent=MM.msg;$('mmHud').textContent=`Round ${Math.min(MM.round+1,MM_LEN.length)}/${MM_LEN.length} · Mistakes ${MM.miss}/3`;
+  requestAnimationFrame(mmLoop)}
+
 // ==FRIENDS EXTRAS== lake monster, challenges, guestbooks and yard likes
 const GB_ST=['🎃','🐟','⭐','👻','🏆','🌲','❤️','🎣','🦆','🌙','🍂','🔥'];
 const XKIND={
@@ -7264,6 +7437,8 @@ $('gbSend').onclick=sendGuestbook;$('gbCancel').onclick=()=>$('gbModal').hidden=
 $('bugSend').onclick=sendBug;$('bugCancel').onclick=()=>$('bugModal').hidden=true;$('bugModal').onclick=e=>{if(e.target.id==='bugModal')$('bugModal').hidden=true};
 $('ownClose').onclick=()=>$('ownModal').hidden=true;$('ownModal').onclick=e=>{if(e.target.id==='ownModal')$('ownModal').hidden=true};
 addEventListener('keydown',e=>{if(!$('keeperModal').hidden&&(e.key===' '||e.key==='Enter')){e.preventDefault();keeperSignal()}});
+addEventListener('keydown',e=>{if($('mmModal').hidden)return;const d={ArrowLeft:'L',a:'L',ArrowUp:'A',w:'A',ArrowRight:'R',d:'R'}[e.key];if(d){e.preventDefault();mmInput(d)}});
+document.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>mmInput(b.dataset.mm));$('mmClose').onclick=mmClose;$('mmOk').onclick=()=>{MM.on=false;$('mmModal').hidden=true;if(!$('slotsModal').hidden&&phView==='case')renderCase()};
 
 // ==LIVE LAKE== see friends fishing the same water in real time, with name tags, catches, emotes and live raids.
 const LIVE={ws:null,room:'',st:'off',peers:new Map(),raid:null,retry:0,nextTry:0,cid:'',me:'',offT:0,lastSt:'',pingT:0,myEmo:null,emoT:0,meXY:null,drawing:false,drawWear:null,drawG:'m',hidT:null};
@@ -7328,7 +7503,7 @@ function liveOnCatch(f,w,vr){if(LIVE.st!=='on')return;liveSend({t:'catch',f:f.id
 function liveEmote(i){if(LIVE.st!=='on'||LIVE.emoT>0)return;LIVE.emoT=2;LIVE.myEmo={e:i,t:0};liveSend({t:'emo',e:i});$('emoPop').hidden=true;sfx('pop')}
 const peerHullC=[[120,82,52],[120,82,52],[118,126,130],[196,64,48],[236,234,224],[52,92,120],[236,238,242],[30,34,44]];
 function drawPeer(p,d,T){const sl=liveSlotPos(p);if(!sl)return;const [x,y0,s]=sl,b=Math.max(1,p.boat|0),L=[0,90,110,130,150,180,190,200][b],bob=Math.sin(T*1.5+p.slot*1.7)*1.8,y=y0+bob;
-  const a=p.out!=null?Math.max(0,1-p.out/1.2):Math.min(1,p.t/1.2);if(a<=0)return;ctx.save();ctx.globalAlpha=a;
+  const a=(p.out!=null?Math.max(0,1-p.out/1.2):Math.min(1,p.t/1.2))*(p.ghost||1);if(a<=0)return;ctx.save();ctx.globalAlpha=a;
   const bobX=x+(L/2+40)*s,bobY=y+26*s+(p.castT>-.2&&p.castT<0?0:Math.sin(T*2.2+p.slot)*1);
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);
   ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(0,16,L*.6,5,0,0,7);ctx.fill();
@@ -7529,7 +7704,7 @@ function tick(now){if(SESS.paused)return;
   S.wx.left-=dt*(S.sleep&&S.sleep.ph==='sleep'?(S.sleep.spd||SLEEP_SPEED):1);if(S.wx.left<=0)newWeather(true);
   vitalsTick(dt);
   if(!S.sleep&&!TRV.on){cast.el+=dt;if(cast.el>=cast.dur){cast.el=0;doCatch();cast.dur=castDur()}}
-  tourTick(dt);ambient(dt);{const L=sceneLoc();scnTick(dt,L);hwPumpTick(dt,L)}totInsideTick(dt);liveTick(dt);realmTick(dt);audioTick(dt);for(const q of AMB.drones)q.t+=dt;if(AMB.drones.some(q=>q.t>=4.2)){AMB.drones=AMB.drones.filter(q=>q.t<4.2);if(phView==='shop'&&!$('slotsModal').hidden)renderDecor()}
+  tourTick(dt);ambient(dt);{const L=sceneLoc();scnTick(dt,L);hwPumpTick(dt,L)}totInsideTick(dt);liveTick(dt);q4Tick(dt);realmTick(dt);audioTick(dt);for(const q of AMB.drones)q.t+=dt;if(AMB.drones.some(q=>q.t>=4.2)){AMB.drones=AMB.drones.filter(q=>q.t<4.2);if(phView==='shop'&&!$('slotsModal').hidden)renderDecor()}
   let buffEnded=false;for(const k in S.buffs){S.buffs[k]-=dt;if(S.buffs[k]<=0){delete S.buffs[k];buffEnded=true;showToast(`${POT[k].n} wore off`)}}
   if(buffEnded){const fr=cast.el/cast.dur;cast.dur=castDur();cast.el=fr*cast.dur;renderHot()}
   S.st.play+=dt;rateT+=dt;if(rateT>=60){S.rate=S.rate?Math.round(S.rate*.6+earnAcc*.4):Math.round(earnAcc);S.crate=S.crate?S.crate*.6+catchAcc*.4:catchAcc;earnAcc=0;catchAcc=0;rateT=0}
