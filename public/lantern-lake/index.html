@@ -508,7 +508,17 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 @media (max-width:520px){.tv{grid-template-columns:minmax(0,1fr)}.tv-side{flex-direction:row}.fc svg{width:24px;height:24px}}
 @media (prefers-reduced-motion:reduce){.tv-inner,.tk-run,.slide-txt{animation:none}}
 .tvwrap{width:min(620px,100%);max-height:calc(100vh - 40px);overflow-y:auto;display:grid;gap:12px}
-.tvwrap .tv{max-height:none;width:100%}
+.tvwrap .tv{max-height:none;width:100%;box-sizing:border-box}.tvwrap{overflow-x:hidden}.vcr{box-sizing:border-box}
+.tv-chbtns{display:flex;flex-direction:column;gap:6px}@media (max-width:520px){.tv-chbtns{flex-direction:row}}
+.tv-chbug{opacity:0;transition:opacity .4s;position:absolute;right:10px;top:40px;background:rgba(0,0,0,.45);border-radius:6px;padding:2px 6px;font:700 .58rem/1.2 monospace;color:#9fffa0;text-align:right;pointer-events:none;z-index:2}.tv-chbug b{display:block;font-size:.72rem}
+.tv-static{position:absolute;inset:0;z-index:5;background:repeating-linear-gradient(0deg,rgba(255,255,255,.18) 0 1px,rgba(0,0,0,.25) 1px 3px),radial-gradient(circle,#888,#222);opacity:0}.tv-static.on{animation:tvStatic .38s steps(6) forwards}@keyframes tvStatic{0%{opacity:1;background-position:0 0}50%{opacity:1;background-position:0 40px}100%{opacity:0;background-position:0 90px}}
+.tv-news-lead{background:linear-gradient(90deg,#b8202a,#7a1018);border-radius:8px;padding:8px 10px}.tv-news-lead small{display:block;font:800 .6rem/1 monospace;letter-spacing:.12em;color:#ffd05a}.tv-news-lead b{font-size:.9rem;line-height:1.25}.tv-news-lead.sp{background:linear-gradient(90deg,#1a4ab8,#0e2a6a)}
+.fof-q,.fof-end,.shop8{display:grid;gap:8px;padding-bottom:12px}.fof-host,.s8-host{font-size:.78rem;opacity:.9}.fof-fish{display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(255,255,255,.08);border-radius:10px;padding:10px}.fof-fish svg{width:90px}.fof-fish b{font-size:1.1rem}.fof-fish small{opacity:.75}
+.fof-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fof-note{font-size:.66rem;opacity:.7;margin:0}.fof-rev{border-radius:8px;padding:6px 10px;font-size:.74rem;display:grid;gap:2px}.fof-rev.ok{background:rgba(58,168,90,.35)}.fof-rev.no{background:rgba(200,60,60,.35)}
+.fof-end b{font-size:1.4rem;color:#ffd05a}.fof-dots{font-size:1.4rem;letter-spacing:4px}
+.tv-chbug.show{opacity:1}.tv-top{flex-wrap:wrap;row-gap:4px}.tvlist.sp li{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:2px 6px}.tvlist.sp li>span{grid-row:span 2}.sp-g b{min-width:0;white-space:nowrap;overflow:hidden}.sp-g b{display:flex;align-items:center;gap:4px;font-size:.74rem}.sp-g em{font-style:normal;margin-left:auto;color:#ffd05a}.tvlist.sp .sb-badge{font-size:.55rem;padding:1px 3px}
+.sp-st{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.72rem}.sp-st div{display:grid;gap:2px}.sp-st small{opacity:.7;font-weight:700}.sp-st em{font-style:normal;opacity:.8;margin-left:4px}.sp-st .sb-badge{font-size:.55rem;padding:1px 3px}
+.s8-deal{background:linear-gradient(160deg,#ff3ad8,#7a1aa0);border-radius:12px;padding:12px;display:grid;gap:4px;text-align:center}.s8-deal small{font:800 .62rem/1 monospace;letter-spacing:.14em;color:#fff6a0}.s8-deal b{font-size:1.05rem}.s8-deal span{font-size:.74rem;opacity:.9}.s8-price s{opacity:.7}.s8-price b{font-size:1.4rem;color:#fff6a0}
 .tv-input{border:0;background:#2a1a10;color:#ffd05a;font-weight:800;border-radius:8px;padding:6px 8px;font-size:.66rem;letter-spacing:.06em;line-height:1.3;box-shadow:inset 0 -2px 0 rgba(0,0,0,.4)}
 .tv-input b{display:block;color:#fff;font-size:.8rem}
 .con-wrap{background:#000;line-height:0}
@@ -1524,9 +1534,9 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 <div class="away" id="tvModal" hidden>
   <div class="tvwrap">
     <div class="tv">
-      <div class="tv-screen"><div class="tv-inner" id="tvInner"></div><div class="con-wrap" id="vhsWrap" hidden><canvas id="vhsCv" width="320" height="240" aria-label="Tape playback"></canvas></div>
+      <div class="tv-screen"><div class="tv-inner" id="tvInner"></div><div class="tv-chbug"><b id="tvCh">CH 3</b><span id="tvChName">LAKE 7</span></div><div class="tv-static" id="tvStatic" hidden></div><div class="con-wrap" id="vhsWrap" hidden><canvas id="vhsCv" width="320" height="240" aria-label="Tape playback"></canvas></div>
         <div class="nosig" id="noSig" hidden><b>VIDEO 1</b><span>NO TAPE</span><span>Open the drawer under the TV to pick a tape.</span></div></div>
-      <div class="tv-side"><div class="knob"></div><div class="knob" style="transform:rotate(60deg)"></div><button class="tv-input" id="tvInput">INPUT<b id="tvSrc">TV</b></button><div class="grille"></div><button class="tv-power" id="tvClose">Power</button></div>
+      <div class="tv-side"><div class="knob"></div><div class="knob" style="transform:rotate(60deg)"></div><div class="tv-chbtns"><button class="tv-input" id="tvUp" aria-label="Channel up">CH ▲</button><button class="tv-input" id="tvDn" aria-label="Channel down">CH ▼</button></div><button class="tv-input" id="tvInput">INPUT<b id="tvSrc">TV</b></button><div class="grille"></div><button class="tv-power" id="tvClose">Power</button></div>
     </div>
     <div class="vcr" id="vcr" hidden>
       <div class="vcr-slot" id="vcrTitle">No tape</div>
@@ -3200,7 +3210,7 @@ const SKINS=[
   SK('frost','Frostbite','E','#bfe6ff','ice','#ffffff','#6ab8f0','sparkle'),
   SK('gold','Solid Gold','L','#d8a828','gold','#fff2b0','#8a6410','sparkle'),SK('prism','Prismatic','L','#ff3a3a','prism','#ffffff','#ffffff','sparkle')];
 // Case rewards: never in crates, shown in the Locker once owned
-const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true},{...SK('bit8','8-Bit','E','#2a2a6a','pixel','#ff3a6a','#3affb0'),quest:true},{...SK('pinneon','Pinball Neon','E','#140c24','pinball','#ff3ad8','#ffd23a','glow'),quest:true}];
+const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true},{...SK('bit8','8-Bit','E','#2a2a6a','pixel','#ff3a6a','#3affb0'),quest:true},{...SK('pinneon','Pinball Neon','E','#140c24','pinball','#ff3ad8','#ffd23a','glow'),quest:true},{...SK('testpat','Test Pattern','E','#c0c0c0','testpat','#ffffff','#000000'),quest:true}];
 const SKIN_BY=Object.fromEntries([...SKINS,...QSKINS].map(s=>[s.id,s]));
 const PNT=()=>{if(!S.paint||typeof S.paint!=='object')S.paint={own:{},eq:null,eqR:null,eqB:null,free:'',opened:0,log:[]};const p=S.paint;p.own=p.own||{};p.log=p.log||[];if(p.eq&&!SKIN_BY[p.eq])p.eq=null;if(p.eqR&&!(typeof ITEM_BY!=='undefined'&&ITEM_BY[p.eqR]))p.eqR=null;if(p.eqB&&!(typeof ITEM_BY!=='undefined'&&ITEM_BY[p.eqB]))p.eqB=null;return p};
 const crateCost=()=>Math.max(500,Math.round(rwCoins(20)/50)*50);
@@ -3238,6 +3248,7 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
   else if(p==='ice'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#eaf8ff');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     c.fillStyle='rgba(255,255,255,.45)';for(let i=0;i<L/10;i++){const sx=x+R()*L,sy=top+R()*H;c.beginPath();c.moveTo(sx,sy-3);c.lineTo(sx+3,sy+1);c.lineTo(sx-2,sy+3);c.fill()}}
   else if(p==='gold'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#fff2b0');g.addColorStop(.35,sk.base);g.addColorStop(.7,'#a87c18');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4)}
+  else if(p==='testpat'){const bars=['#c0c0c0','#c0c000','#00c0c0','#00c000','#c000c0','#c00000','#0000c0'];const bw=(L+8)/7;bars.forEach((c2,i)=>{c.fillStyle=c2;c.fillRect(x-4+i*bw,top-2,bw+.5,H*.7+2)});c.fillStyle='#101010';c.fillRect(x-4,top+H*.7,L+8,H*.3+4);c.fillStyle='#fff';c.font='bold 4px monospace';c.fillText('PLEASE STAND BY',x+L/2-16,y+12)}
   else if(p==='pixel'){const cols=[sk.c2,sk.c3,'#ffd23a','#3a9aff'];for(let i=0;i*5<L+8;i++)for(let j=0;j*5<H+6;j++){const r=R();if(r<.42){c.fillStyle=cols[Math.floor(r*9.5)%4];c.fillRect(x+i*5,top+j*5,5,5)}}}
   else if(p==='pinball'){c.fillStyle='rgba(255,255,255,.08)';c.fillRect(x-4,y+6,L+8,2);const n=Math.max(6,Math.round(L/14));for(let i=0;i<n;i++){const on=(Math.floor(T*5)+i)%3===0;c.fillStyle=on?(i%2?sk.c3:sk.c2):'rgba(255,255,255,.15)';c.beginPath();c.arc(x+8+i*(L-12)/(n-1),y+5,1.8,0,7);c.fill();if(on){c.globalAlpha=.35;c.beginPath();c.arc(x+8+i*(L-12)/(n-1),y+5,4,0,7);c.fill();c.globalAlpha=1}}}
   else if(p==='mirror'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#f4f8fc');g.addColorStop(.45,sk.base);g.addColorStop(.55,'#9aaebe');g.addColorStop(1,sk.c3);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
@@ -4388,6 +4399,7 @@ function renderHelp(){
    ['Lake projects',`<p>Open the Shop app and tap <b>Projects</b>. Fund big builds in stages with money and materials. Each stage finishes the next morning and gives a permanent bonus: the Marina makes fish sell for more, the Fish Hatchery brings more Rare and Legendary bites, and the Salvage Barn turns up more materials.</p>`],
    ['Retiring',`<p>Once you have $5,000,000 you can retire from the Projects tab. You start over with a lean-to and a stick rod but keep your logbook, trophies, collectibles, tapes, decor, cases and projects, and every fish you sell is worth 10% more for good each time you retire.</p>`],
    ['Logbook sets',`<p>Catch every species in a water to claim a set reward and a Master trophy from the Logbook: $5,000 for Dock Pond up to $500,000 for Misty Bay.</p>`],
+   ['Cabin TV',`<p>Tap the TV in your cabin and use CH ▲▼ to flip channels. Channel 3 is Lake 7 (forecast and tournaments). Channel 4 is LLNN with news from around the lake. Channel 5 is Fish or Fake?, a daily quiz show: is each fish real or made up for Lantern Lake? It pays 5 prize tickets per right answer. Channel 6 is LLBA Tonight, with live scores, last night’s results and standings. Channel 8 is the Lake Shopping Channel, with one deal a day and the occasional TV-exclusive boat paint.</p>`],
    ['Fishdle',`<p>A daily puzzle in the Fishdle phone app: guess today’s mystery fish in 6 tries. Each guess shows whether its water, rarity, max size, bite times and weather match today’s fish (green), are close (yellow) or don’t (grey), with arrows pointing higher or lower. Everyone gets the same fish each day. Solving it pays 60 prize tickets for a first-try guess, down to 10 for a sixth. Tap Copy result to share your squares.</p>`],
    ['Lantern Pier Arcade',`<p>Visit the arcade from the Waters tab or when you leave your cabin. Play Bobber Toss, Whack-a-Gar and Pinball to win prize tickets (up to 600 a day), try the Claw Machine (30 tickets) for plushies, and take your 3 daily tries at Putt of the Day, the same hole for everyone. Spend tickets at the Prize Counter on crates, plushies, a neon sign and arcade-only boat paints. Tickets never cost cash and prices never change. Weekly high-score boards crown a champion for each cabinet with a trophy.</p>`],
    ['The Angler Who Isn’t There',`<p>A fourth case opens after you close the Keeper’s Light. Someone on Reed Lake is wearing your face. Follow the leads (a text from your own number, a figure on the far water at dusk, lies in your own records, mirror shards at night) and craft a Silvered Lantern. The finale is Mirror Match on a clear night at Reed Lake: your reflection flashes a row of arrows and you press the opposite of each one in order (◀ becomes ▶, ▲ stays ▲). Tap the buttons or use the arrow keys. Win five rounds before three mistakes. The lies are only on your screen: your real stats, plaques and what friends see never change.</p>`],
@@ -4481,7 +4493,7 @@ function showTip(h,e){
   else if(h.kind==='coll'){const c=h.data;html=`<b class="rar-${c.r}">${c.n}</b><small>${RAR[c.r]} · tap to inspect</small>`}
   else if(h.kind==='collv'){const c=h.data;html=`<b class="rar-${c.r}">${c.n}</b><small>${RAR[c.r]}</small>`}
   else if(h.kind==='box'){const it=DECOR.find(x=>x.id===h.data.id);html=`<b>Delivery box</b><small>${it?it.n:''} · tap to unpack</small>`}
-  else if(h.kind==='tv')html=`<b>TV</b><small>${S.tvInput==='vhs'?'Tap to watch your tape':'Tap to watch the Lake 7 news'}. The INPUT button switches between TV and VHS.</small>`;
+  else if(h.kind==='tv')html=`<b>TV</b><small>${S.tvInput==='vhs'?'Tap to watch your tape':'Tap to watch TV'}. CH ▲▼ flips channels: news, Fish or Fake?, LLBA sports and the Shopping Channel.</small>`;
   else if(h.kind==='craft')html=`<b>Crafting table</b><small>${['rod','lure','boat','shack'].some(canCraft)?'Something is ready to craft! ':''}Tap to build new gear</small>`;
   else if(h.kind==='trodrawer')html=`<b>Trophy drawer</b><small>${shownTrophies().length} of ${TRO_CAP} on the shelves · ${S.trophies.length} won · tap to choose what's on display</small>`;
   else if(h.kind==='colldrawer')html=`<b>Collectibles drawer</b><small>${shownColl().length} of ${COLL_CAP} in the cabinet · ${ownedColl().length} found · tap to choose what's on display</small>`;
@@ -5210,6 +5222,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:79,n:'Prime Time',items:['The cabin TV has channels now! Flip with CH ▲▼.','Channel 4, LLNN: headlines from around the lake: contest leaders, the community goal, new museum plaques, records and arcade leaders.','Channel 5, Fish or Fake?: a daily quiz show. Is each fish real, or made up for Lantern Lake? 5 prize tickets per right answer, plus a bonus for a perfect show.','Channel 6, LLBA Tonight: live scores when games are on, last night’s results, the play of the night and standings from the basketball league.','Channel 8, the Lake Shopping Channel: one deal a day (decor at 30% off, potion and material bundles) and now and then a TV-exclusive boat paint, Test Pattern.']},
+ {v:78,n:'Clear Picture',items:['Bug fix: the cabin TV now fits the screen, so you no longer have to scroll sideways to see the power and input buttons.']},
  {v:77,n:'Fishdle',items:['New phone app: Fishdle! Guess the daily mystery fish in 6 tries. Each guess tells you if the water, rarity, max size, bite times and weather match, are close, or point higher or lower.','Everyone gets the same fish each day. Solving it pays up to 60 prize tickets (on top of the arcade’s daily limit), and keeps a streak going.','Tap Copy result to share your green and yellow squares in Discord or a text, without spoiling the answer.']},
  {v:76,n:'Counter Check',items:['Bug fix: arcade prizes (plushies and the Arcade Champ sign) no longer show up as free items in the crafting table’s “Ready now” list. They only come from the Prize Counter and the Claw Machine.']},
  {v:75,n:'Clearer Reflections',items:['Bug fix: in Mirror Match, your angler’s rod now points the way you pressed (it used to point the opposite way, which made it look like you’d answered wrong).','Bug fix: Mirror Match now blinks between arrows, so two of the same arrow in a row are easy to tell apart. Dots show how many arrows are in the round, and your answers appear as you enter them.','Clearer Mirror Match instructions: press the opposite of each arrow (◀ becomes ▶, ▲ stays ▲).']},
@@ -6626,6 +6640,7 @@ function applyInput(){
   $('vcrTitle').textContent=has?TAPES[S.tape].n:'No tape';
   if(has&&!VHS.on)startVHS();if(!has)stopVHS();
 }
+$('tvUp').onclick=()=>{if(S.tvInput==='vhs'){S.tvInput='tv';stopVHS();applyInput()}tvFlip(1)};$('tvDn').onclick=()=>{if(S.tvInput==='vhs'){S.tvInput='tv';stopVHS();applyInput()}tvFlip(-1)};
 $('tvInput').onclick=()=>{S.tvInput=S.tvInput==='vhs'?'tv':'vhs';if(S.tvInput==='tv')stopVHS();else renderTV();applyInput();save()};
 $('vPlay').onclick=()=>{if(VHS.mode==='play')VHS.mode='pause';else{VHS.mode='play';VHS.osdT=0}};
 $('vRew').onclick=()=>{if(VHS.t>0){VHS.mode='rew';VHS.osdT=0}};
@@ -6689,8 +6704,9 @@ function tapeWrestle(x,t){
 }
 // ---------- TV news ----------
 const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-function openTV(){ensureFc();ensureSched();renderTV();hideTip();$('tvModal').hidden=false;applyInput();$('tvInput').focus()}
-function renderTV(){
+function openTV(){ensureFc();ensureSched();renderTV();setTimeout(tvBug,50);hideTip();$('tvModal').hidden=false;applyInput();$('tvInput').focus()}
+function renderTV(){const ch=TVCH[TVS().ch];$('tvCh').textContent=`CH ${ch.n}`;$('tvChName').textContent=ch.nm;
+  if(ch.id!=='lake7'){$('tvInner').innerHTML=ch.id==='news'?tvNewsHTML():ch.id==='quiz'?tvQuizHTML():ch.id==='sports'?tvSportsHTML():tvShopHTML();tvBind();return}
   const days=[1,2,3,4,5].map(i=>S.day+i);
   const fc=days.map(dd=>{const f=S.fc[dd];return `<div class="fc"><b>${WD[dd%7]}</b>${wxSvg(f.wx)}<span>${WX[f.wx].n}</span><small>${f.hi}° / ${f.lo}°</small></div>`}).join('');
   const now=S.day*1440+S.min,list=S.sched.filter(sp=>sp.day*1440+sp.min>=now&&sp.day<=S.day+5).slice(0,5);
@@ -7721,6 +7737,75 @@ function renderFishdle(){const b=$('fdBody');if(!b)return;const f=FD(),a=fdAnswe
     <div class="fd-dist">${st.dist.map((n,i)=>`<div><span>${i+1}</span><i style="width:${Math.max(6,n/tot*100)}%">${n}</i></div>`).join('')}</div>`;
   b.innerHTML=h;const fm=$('fdForm');if(fm)fm.onsubmit=e=>{e.preventDefault();fdGuess($('fdQ').value)};const sh=$('fdShare');if(sh)sh.onclick=fdShare}
 const fdIc='<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="5" width="7" height="7" rx="1.5" fill="#6ad86a"/><rect x="12.5" y="5" width="7" height="7" rx="1.5" fill="#ffd05a"/><rect x="21" y="5" width="7" height="7" rx="1.5" fill="#3a4a56"/><path d="M6 22c4-5 12-6 17-2l4-3v10l-4-3c-5 4-13 3-17-2z" fill="#fff"/><circle cx="10" cy="21.5" r="1.3" fill="#1a3a2a"/></svg>';
+
+// ==TV CHANNELS== flip with CH ▲▼. Lake 7 (forecast/schedule), LLNN community news, Fish or Fake? quiz show, LLBA Tonight
+// sports highlights from the shared basketball league, and the Lake Shopping Channel's daily deal. Daily things use the UTC date.
+const TVCH=[{n:3,id:'lake7',nm:'LAKE 7'},{n:4,id:'news',nm:'LLNN'},{n:5,id:'quiz',nm:'FISH OR FAKE?'},{n:6,id:'sports',nm:'LLBA TONIGHT'},{n:8,id:'shop',nm:'SHOP 8'}];
+function TVS(){if(!S.tv||typeof S.tv!=='object')S.tv={ch:0};const t=S.tv;if(t.ch==null||!TVCH[t.ch])t.ch=0;return t}
+function tvBug(){const e=document.querySelector('.tv-chbug');if(!e)return;e.classList.add('show');clearTimeout(TVN.bt);TVN.bt=setTimeout(()=>e.classList.remove('show'),2600)}
+function tvFlip(dir){tvBug();const t=TVS();t.ch=(t.ch+dir+TVCH.length)%TVCH.length;save();const st=$('tvStatic');if(st){st.hidden=false;st.classList.remove('on');void st.offsetWidth;st.classList.add('on');setTimeout(()=>{st.hidden=true},380)}tone(180+Math.random()*80,.12,{type:'sawtooth',vol:.02});setTimeout(renderTV,120)}
+const tvSeed=s=>{let h=17;for(const c of s)h=(Math.imul(h,31)+c.charCodeAt(0))>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;h=Math.imul(h,0x45d9f3b)>>>0;h^=h>>>16;return ()=>{h=(Math.imul(h,1664525)+1013904223)>>>0;return h/4294967296}};
+const tvTop=(logo,extra)=>`<div class="tv-top"><span class="tv-logo">${logo}</span>${extra||''}<span class="tv-clock">${WD[S.day%7]} · ${fmtClock(S.min)}</span></div>`;
+const tvUntil=()=>{const t=new Date(),m=Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate()+1)-t.getTime();return `${Math.floor(m/36e5)}h ${Math.floor(m%36e5/6e4)}m`};
+// --- LLNN: headlines built from what the lake already knows
+function tvNews(){const L=[],m=mpS();
+  if(m.id&&MPV.weekly&&MPV.weekly.top&&MPV.weekly.top[0]){const t=MPV.weekly.top[0];L.push(['CONTEST',`${t.name} leads this week’s lake contest with a ${(+t.w).toFixed(2)} lb catch`])}
+  if(m.id&&MPV.community&&MPV.community.total>0){const c=MPV.community,p=Math.min(100,Math.round(c.total/c.goal*100));L.push(['COMMUNITY',`Anglers have landed ${Number(c.total).toLocaleString()} fish this week: ${p}% of the way to the community goal`])}
+  if(MUS.map){const v=Object.values(MUS.map).filter(x=>x&&x.ts).sort((a,b)=>b.ts-a.ts).slice(0,2);for(const x of v){const f=FI(x.fish);if(f)L.push(['MUSEUM',`${x.name} claims the ${x.v&&VAR[x.v]?VAR[x.v].n+' ':''}${f.n} plaque with ${x.w} lb (${ago(x.ts)})`])}}
+  if(m.id&&MPV.records&&MPV.records.length){const R=[...MPV.records].filter(r=>FI(r.fish)).sort((a,b)=>({L:3,R:2,U:1,C:0}[FI(b.fish).r]||0)-({L:3,R:2,U:1,C:0}[FI(a.fish).r]||0)||b.w-a.w).slice(0,2);for(const r of R)L.push(['RECORD',`${r.name} still holds the lake record for ${FI(r.fish).n}: ${(+r.w).toFixed(2)} lb`])}
+  if(TVN.champ)L.push(['ARCADE',TVN.champ]);
+  try{const b=sbInit(),d=sbDoneDays();if(d>=1){const gs=sbDayGames(b.season,d).map(g=>sbGame(b.season,d,g.h,g.a));const big=gs.sort((x,y)=>Math.abs(y.hs-y.as)-Math.abs(x.hs-x.as))[0];if(big){const w=big.hs>big.as?big.home:big.away,l=w===big.home?big.away:big.home;L.push(['LLBA',`${tName(w)} rout the ${LT[l].nick} ${Math.max(big.hs,big.as)}-${Math.min(big.hs,big.as)}. Highlights on channel 6.`])}}}catch(e){}
+  {const pu=arcPutt?arcPutt():null,C=AGAMES.putt.course();L.push(['ARCADE',`Today’s Putt of the Day is “${C.name}”. Visit the Lantern Pier Arcade for 3 tries.`])}
+  L.push(['WEATHER',`${WX[S.wx.id].n} over the lake right now. Every angler is under the same sky.`]);
+  if(!m.id)L.push(['TIP','Pick an angler name in the Friends app to see your friends in the news']);
+  return L}
+const TVN={champ:null,t:0};
+async function tvNewsFetch(){const m=mpS();if(!m.id||Date.now()-TVN.t<120000)return;TVN.t=Date.now();try{const r=await api('arcade/top',{id:m.id,key:m.key,g:'toss'});if(r.top&&r.top[0])TVN.champ=`${r.top[0].name} leads Bobber Toss this week with ${Number(r.top[0].s).toLocaleString()} points`;if(TVS().ch===1&&!$('tvModal').hidden)renderTV()}catch(e){}}
+function tvNewsHTML(){const L=tvNews(),lead=L[0];tvNewsFetch();
+  return tvTop('LL<b>NN</b>','<span class="tv-live">LIVE</span>')+`<div class="tv-news-lead"><small>${lead[0]}</small><b>${esc(lead[1])}</b></div><ul class="tvlist">${L.slice(1,7).map(([t,s])=>`<li><span>${t}</span><b>${esc(s)}</b></li>`).join('')}</ul>`+
+    `<div class="ticker"><span class="tk-tag">LLNN</span><div class="tk-track"><div class="tk-run">${L.map(x=>esc(x[1])).join(' &nbsp;•&nbsp; ')} &nbsp;•&nbsp; </div></div></div>`}
+// --- Fish or Fake? 5 fish a day: is it a real species, or one invented for Lantern Lake?
+function tvQuizQs(day){const R=tvSeed('fof'+day),real=FISH.filter(f=>!f.quest&&WATERS.some(w=>w.id===f.at)&&WIKI[f.id]&&!WIKI_NOTE[f.id]),fake=FISH.filter(f=>!f.quest&&WATERS.some(w=>w.id===f.at)&&LORE[f.id]),out=[],used=new Set();
+  const nf=2+Math.floor(R()*2);for(let i=0;i<5;i++){const isF=i<nf,pool=isF?fake:real;let f;do{f=pool[Math.floor(R()*pool.length)]}while(used.has(f.id));used.add(f.id);out.push({id:f.id,fake:isF})}
+  for(let i=out.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[out[i],out[j]]=[out[j],out[i]]}return out}
+function tvQuiz(){const t=TVS(),d=arcUTC();if(!t.q||t.q.d!==d)t.q={d,a:[],paid:0};return t.q}
+function tvAnswer(fake){const q=tvQuiz(),Q=tvQuizQs(q.d);if(q.a.length>=5)return;const cur=Q[q.a.length];q.a.push(fake===cur.fake?1:0);sfx(fake===cur.fake?'chime':'miss');
+  if(q.a.length>=5){const n=q.a.reduce((a,b)=>a+b,0),pay=n*5+(n===5?5:0);q.paid=pay;if(pay){arcGive(pay);showToast(`+${pay} prize tickets`,'Fish or Fake?')}}save();renderTV()}
+function tvQuizHTML(){const q=tvQuiz(),Q=tvQuizQs(q.d),i=q.a.length;let h=tvTop('FISH <b>OR</b> FAKE?',`<span class="tv-live">Q ${Math.min(5,i+1)}/5</span>`);
+  if(i>0){const p=Q[i-1],f=FI(p.id),ok=q.a[i-1];h+=`<div class="fof-rev ${ok?'ok':'no'}"><b>${ok?'Correct!':'Not quite!'} ${esc(f.n)} is ${p.fake?'made up for Lantern Lake':'a real fish'}.</b><span>${p.fake?esc(LORE[p.id]||''):'You’ll find its real Wikipedia facts under Fish facts in your Logbook once you catch one.'}</span></div>`}
+  if(i<5){const f=FI(Q[i].id);h+=`<div class="fof-q"><div class="fof-host">🎤 <i>Gil Finnegan:</i> “Real fish, or a fishy fib?”</div><div class="fof-fish">${fishSvg(RCOL[f.r])}<b>${esc(f.n)}</b><small>${RAR[f.r]} · ${W(f.at).n}</small></div><div class="fof-btns"><button class="jig" data-fof="0">🐟 Real fish</button><button class="jig" data-fof="1">🎭 Fake fish</button></div><p class="fof-note">5 questions a day · 5 tickets each, 5 bonus for a perfect show</p></div>`}
+  else{const n=q.a.reduce((a,b)=>a+b,0);h+=`<div class="fof-end"><b>${n}/5 ${n===5?'· PERFECT SHOW!':''}</b><span>${q.paid?`+${q.paid} prize tickets`:'No tickets today'} · New show in ${tvUntil()}</span><div class="fof-dots">${q.a.map(x=>x?'🟩':'⬛').join('')}</div></div>`}
+  return h}
+// --- LLBA Tonight: highlights from the shared basketball league
+function tvSportsHTML(){const b=sbInit(),season=b.season,d=sbLDay(),done=sbDoneDays();let h=tvTop('LLBA <b>TONIGHT</b>','<span class="tv-live">SPORTS</span>');
+  const row=(g,r,live)=>{const hw=r.hs>r.as;return `<li class="sp-g"><span>${live?(live.state==='live'?`${live.q} ${live.clock}`:'7:00 PM'):(r.ot?'Final/OT':'Final')}</span><b>${tBadge(g.h)} ${LT[g.h].nick} <em>${live?live.hs:r.hs}</em></b><b>${tBadge(g.a)} ${LT[g.a].nick} <em>${live?live.as:r.as}</em></b></li>`};
+  if(S.min>=SB_OPEN&&S.min<SB_END){const gs=sbFeatured(season,d);h+=`<div class="tv-h">Live now</div><ul class="tvlist sp">${gs.map(g=>{const r=sbGame(season,d,g.h,g.a);return row(g,r,sbLive(r,S.min))}).join('')}</ul>`}
+  else if(S.min<SB_OPEN&&d<=sbSeasonLen(season)){const gs=sbFeatured(season,d);h+=`<div class="tv-h">Tonight · tip-off 7:00 PM</div><ul class="tvlist sp">${gs.map(g=>{const r=sbGame(season,d,g.h,g.a);return row(g,r,{state:'pre',hs:'',as:''})}).join('')}</ul>`}
+  if(done>=1){const gs=sbDayGames(season,done).map(g=>({g,r:sbGame(season,done,g.h,g.a)}));if(gs.length){const pt=[...gs].sort((x,y)=>(y.r.ot-x.r.ot)||(Math.abs(x.r.hs-x.r.as)-Math.abs(y.r.hs-y.r.as)))[0],w=pt.r.hs>pt.r.as?pt.g.h:pt.g.a,l=w===pt.g.h?pt.g.a:pt.g.h;
+    h+=`<div class="tv-news-lead sp"><small>PLAY OF THE NIGHT</small><b>${LT[w].city} ${LT[w].nick} edge the ${LT[l].nick} ${Math.max(pt.r.hs,pt.r.as)}-${Math.min(pt.r.hs,pt.r.as)}${pt.r.ot?' in overtime':''}!</b></div>
+      <div class="tv-h">Last night’s scores${done>SB_REG?' · Playoffs':''}</div><ul class="tvlist sp">${gs.slice(0,4).map(x=>row(x.g,x.r)).join('')}</ul>`}}
+  else if(b.champs.length){const c=b.champs[0];h+=`<div class="tv-news-lead sp"><small>CHAMPIONS</small><b>The ${tName(c.champ)} won season ${c.season}! A new season tips off tonight.</b></div>`}
+  if(done>=1&&done<=SB_REG){const st=sbStandings(season,done),top=c=>sbSort(st.filter(r=>r.t.conf===c),season).slice(0,3);h+=`<div class="tv-h">Standings</div><div class="sp-st">${['East','West'].map(c=>`<div><small>${c}</small>${top(c).map((r,i)=>`<span>${i+1}. ${tBadge(r.t.i)} ${LT[r.t.i].nick} <em>${r.w}-${r.l}</em></span>`).join('')}</div>`).join('')}</div>`}
+  return h+`<p class="fof-note">Bet on tonight’s games in the FinDuel app on your phone.</p>`}
+// --- Lake Shopping Channel: one deal a day
+function tvDeal(){const d=arcUTC(),R=tvSeed('shop'+d),kind=R()<1/7?'paint':['decor','pots','mats'][Math.floor(R()*3)];
+  if(kind==='paint'&&!PNT().own.testpat)return {kind,id:'testpat',n:'Test Pattern boat paint',d:'Color bars and a little “PLEASE STAND BY” on your hull. Only on Shop 8.',c:Math.max(5000,rwCoins(300))};
+  if(kind==='decor'||kind==='paint'){const opts=DECOR.filter(x=>!owned(x.id)&&!S.boxes.some(b=>b.id===x.id)&&x.c>0);if(opts.length){const it=opts[Math.floor(R()*opts.length)];return {kind:'decor',id:it.id,n:it.n,d:it.d,was:it.c,c:Math.round(it.c*.7/10)*10}}}
+  if(kind==='mats')return {kind:'mats',n:'Tackle-box bundle',d:'8 Old Rope, 5 Brass Fittings and 3 Sea Glass, boxed and shipped.',m:{rope:8,brass:5,glass:3},c:rwCoins(30)};
+  const ps=[];for(let i=0;i<5;i++)ps.push(PKEYS[Math.floor(R()*PKEYS.length)]);return {kind:'pots',n:'Potion party pack',d:'Five potions, picked by our host: '+ps.map(k=>POT[k].n).join(', ')+'.',ps,c:rwCoins(25)}}
+function tvBuy(){const t=TVS(),d=arcUTC(),it=tvDeal();if(t.shop===d||S.coins<it.c)return;S.coins-=it.c;t.shop=d;sfx('coin');
+  if(it.kind==='decor'){S.coins+=it.c;orderItem({...DECOR.find(x=>x.id===it.id),c:it.c})}
+  else if(it.kind==='paint'){const P=PNT();P.own.testpat=(P.own.testpat||0)+1;celebrate({lbl:'Shop 8 exclusive',r:'E',name:'Test Pattern paint',sub:'Find it in Crate Expectations, Locker',icon:svgI('crown','#3af0ff')})}
+  else if(it.kind==='mats'){for(const [k,n] of Object.entries(it.m))S.mats[k]=(S.mats[k]||0)+n;storeDirty=true;showToast('Your bundle is in Storage','Shop 8')}
+  else{for(const k of it.ps)givePotion(k,1);showToast('Five potions added','Shop 8')}
+  save();renderTV();try{renderAll()}catch(e){}}
+function tvShopHTML(){const t=TVS(),it=tvDeal(),bought=t.shop===arcUTC();
+  return tvTop('SHOP <b>8</b>','<span class="tv-live">CALL NOW</span>')+`<div class="shop8"><div class="s8-host">📞 <i>Bonnie Bargain:</i> “${bought?'Thanks for shopping! See you tomorrow, sweetie!':'Operators are standing by!'}”</div>
+    <div class="s8-deal"><small>TODAY ONLY · ${it.kind==='paint'?'TV EXCLUSIVE':it.kind==='decor'?'30% OFF':'BUNDLE'}</small><b>${esc(it.n)}</b><span>${esc(it.d)}</span>
+    <div class="s8-price">${it.was?`<s>$${money(it.was)}</s> `:''}<b>$${money(it.c)}</b></div>
+    <button class="jig" id="s8Buy" ${bought||S.coins<it.c?'disabled':''}>${bought?'Sold to you!':S.coins<it.c?'Not enough cash':'Buy now'}</button></div>
+    <p class="fof-note">One deal a day · next deal in ${tvUntil()}</p></div>`}
+function tvBind(){document.querySelectorAll('[data-fof]').forEach(b=>b.onclick=()=>tvAnswer(b.dataset.fof==='1'));const sb=$('s8Buy');if(sb)sb.onclick=tvBuy}
 
 // ==FRIENDS EXTRAS== lake monster, challenges, guestbooks and yard likes
 const GB_ST=['🎃','🐟','⭐','👻','🏆','🌲','❤️','🎣','🦆','🌙','🍂','🔥'];
