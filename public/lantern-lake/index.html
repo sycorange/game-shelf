@@ -2029,7 +2029,7 @@ function rollCatch(water,minute,lure,rod,mods){
   {const ev=hwFishRoll(water,minute,mods);if(ev)return ev}
   const ph=phaseOf(minute), here=FISH.filter(f=>f.at===water);
   const G={C:[],U:[],R:[],L:[]};
-  for(const f of here) if(f.t.includes(ph)&&(!f.wx||f.wx.includes(mods.wx))) G[f.r].push(f);
+  for(const f of here) if(f.t.includes(ph)&&(!f.wx||f.wx.includes(mods.wx)||mods.charm)) G[f.r].push(f);
   const lk=(mods.luck?2.5:1)*(1+.08*projLv('hatch'));
   const gw={C:72,U:20*(1+.25*lure),R:4*RAREM[lure]*lk*(X.rareX||1),L:(LEGM[lure]?.9*LEGM[lure]*lk:(mods.luck?.45:0))*(X.legX||1)};
   let tot=0; for(const r in G) if(G[r].length) tot+=gw[r];
@@ -2408,8 +2408,9 @@ const POT={
   magnet:{n:'Magnet Draught',d:'Triple the chance of pulling up items and collectibles.',col:'#a070e0'},
   giant:{n:'Big Fish Brew',d:'Fish run much heavier.',col:'#ff7a3d'},
   coffee:{n:'Thermos of Coffee',d:'Restores 30 stamina right away.',col:'#8a5a34',ic:'mug',inst:true},
+  charm:{n:'Weather Charm',d:'Fish that need special weather bite in any weather.',col:'#7a8ad8',dur:600,shop:true},
 };
-const PKEYS=Object.keys(POT).filter(k=>!POT[k].inst),PALL=Object.keys(POT); // PKEYS: random reward pool. PALL: everything you can hold (incl. coffee)
+const PKEYS=Object.keys(POT).filter(k=>!POT[k].inst&&!POT[k].shop),PALL=Object.keys(POT); // PKEYS: random reward pool. PALL: everything you can hold (incl. coffee)
 const MT=(id,n,r,at,night,ic,col,d)=>({id,n,r,at,night,ic,col,d});
 const MATS=[
   MT('drift','Driftwood','C','any',0,'branch','#a07a4a','Bleached and sturdy. Good for hulls and walls.'),
@@ -2523,8 +2524,8 @@ function addCollectible(c,live){
 function givePotion(p,n){S.pots[p]=(S.pots[p]||0)+n;if(!S.hot.includes(p)){let i=S.hot.indexOf(null);if(i<0)i=S.hot.findIndex(k=>k&&!(S.pots[k]>0));if(i>=0)S.hot[i]=p}storeDirty=true;renderHot()}
 function usePotion(p){
   if(!(S.pots[p]>0))return;if(POT[p].inst){if(S.stamina>=99){showToast('You’re already full of energy');return}S.pots[p]--;S.stamina=Math.min(100,S.stamina+30);sfx('pop');showToast('Ahh, coffee. +30 stamina',POT[p].n);storeDirty=true;renderHot();renderVitals();save();return}S.pots[p]--;
-  const frac=cast.el/cast.dur;S.buffs[p]=Math.min(300,(S.buffs[p]||0)+60);cast.dur=castDur();cast.el=frac*cast.dur;
-  showToast(`${POT[p].n} active`,'+60s');storeDirty=true;renderHot();save();
+  const frac=cast.el/cast.dur,dur=POT[p].dur||60;S.buffs[p]=Math.min(Math.max(300,dur*2),(S.buffs[p]||0)+dur);cast.dur=castDur();cast.el=frac*cast.dur;
+  showToast(`${POT[p].n} active`,dur>=120?`+${dur/60} minutes`:'+60s');storeDirty=true;renderHot();save();
 }
 function burst(x,y,cols,n){if(RM)return;for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,sp=rnd(30,110);AMB.sparks.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-50,life:rnd(1,1.8),c:pick(cols)})}}
 const achQ=[];let achBusy=false;
@@ -2559,7 +2560,7 @@ function newWeather(live){
 function renderWx(){
   if(isRealm(S.water)){const r=REALMS_BY[S.water];$('wxName').textContent=r.wx[1];$('wxIcon').innerHTML=`<span class="rwx">${r.wx[0]}</span>`;$('wxinfo').innerHTML=`<span class="rwx">${r.wx[0]}</span><div style="min-width:0"><b>${r.n}</b> <span>· ${r.d}</span></div>`;return}
   const X=WX[S.wx.id],ph=phaseOf(S.min),hrs=Math.max(1,Math.round(S.wx.left/60));
-  const special=FISH.filter(f=>f.at===S.water&&f.wx&&f.wx.includes(S.wx.id)&&f.t.includes(ph));
+  const special=FISH.filter(f=>f.at===S.water&&f.wx&&(f.wx.includes(S.wx.id)||S.buffs.charm>0)&&f.t.includes(ph));
   $('wxName').textContent=X.n;$('wxIcon').innerHTML=wxSvg(S.wx.id);
   $('wxinfo').innerHTML=`${wxSvg(S.wx.id)}<div style="min-width:0"><b>${X.n}</b> <span>· ${X.fx} Lasts about ${hrs} more hour${hrs>1?'s':''}.${special.length?` ${special.length} weather-only fish ${special.length>1?'are':'is'} biting here now.`:''}</span></div>`;
 }
@@ -2879,6 +2880,7 @@ function renderDecor(){
   if(shopFilter==='pets'){const pd=document.createElement('div');pd.innerHTML=petShopHTML();p.append(pd);bindPetShop(pd);return}
   if(shopFilter==='sup'){const sd=document.createElement('div');sd.className='pj-wrap';const n=S.pots.coffee||0;
     sd.innerHTML=`<div class="pj-card"><div class="pj-h"><b>☕ Thermos of Coffee</b><span>You have ${n}</span></div><p>Restores 30 stamina right away, so you can keep fishing without heading home. Lands on your potion bar.</p><div class="xf-row"><button class="sbtn" data-buyc="1" ${S.coins<300?'disabled':''}>Buy 1 · $300</button><button class="sbtn" data-buyc="5" ${S.coins<1400?'disabled':''}>Buy 5 · $1,400</button></div></div>`;
+    {const cp=Math.max(5000,Math.round((S.rate||0)*20)),cn=S.pots.charm||0;const cc=document.createElement('div');cc.className='pj-card';cc.innerHTML=`<div class="pj-h"><b>🔮 Weather Charm</b><span>You have ${cn}</span></div><p>For 10 minutes, fish that only bite in special weather (storms, snow, fog and more) bite in any weather. Great for finishing your logbook. Lands on your potion bar.</p><div class="xf-row"><button class="sbtn" id="buyCharm" ${S.coins<cp?'disabled':''}>Buy 1 · $${money(cp)}</button></div>`;sd.append(cc);cc.querySelector('#buyCharm').onclick=()=>{if(S.coins<cp)return;S.coins-=cp;givePotion('charm',1);sfx('coin');showToast(S.hot.includes('charm')?'+1 Weather Charm':'+1 Weather Charm · in Storage (hot bar full)',`-$${money(cp)}`);save();renderDecor()}}
     p.append(sd);sd.querySelectorAll('[data-buyc]').forEach(b=>b.onclick=()=>{const q=+b.dataset.buyc,c=q===5?1400:300;if(S.coins<c)return;S.coins-=c;givePotion('coffee',q);sfx('coin');showToast(S.hot.includes('coffee')?`+${q} Thermos of Coffee`:`+${q} Thermos of Coffee · in Storage (hot bar full)`,`-$${money(c)}`);save();renderDecor()});return}
   if(shopFilter==='proj'){const pd=document.createElement('div');pd.className='pj-wrap';pd.innerHTML=projHTML();p.append(pd);bindProj(pd);return}
   const n=document.createElement('div');n.className='shop-note';
@@ -2920,7 +2922,7 @@ function renderWaters(){
   for(const w of WATERS){
     const ok=S.boat>=w.boat,act=S.water===w.id;
     const sp=FISH.filter(f=>f.at===w.id),got=sp.filter(f=>S.log[f.id]).length;
-    const biting=sp.filter(f=>f.t.includes(ph)&&(!f.wx||f.wx.includes(S.wx.id))).length;
+    const biting=sp.filter(f=>f.t.includes(ph)&&(!f.wx||f.wx.includes(S.wx.id)||S.buffs.charm>0)).length;
     const c=document.createElement('div');c.className='card water'+(act?' active':'');
     c.innerHTML=`<span class="eyebrow">${got}/${sp.length} species logged</span><h3>${w.n}</h3><p>${w.d}</p><p>${biting} species active at ${PH[ph].toLowerCase()} in ${WX[S.wx.id].n.toLowerCase()} weather</p>`;
     const b=document.createElement('button');b.className='go';b.id='go-'+w.id;
@@ -2953,7 +2955,7 @@ function svgImg(key,svg){let im=IMG[key];if(!im){im=new Image();im.src='data:ima
 const cupSvg=`<svg viewBox="0 0 26 30" aria-hidden="true"><path d="M6 3h14v7a7 7 0 0 1-14 0z" fill="#ffd05a"/><path d="M6 5H2v3a4 4 0 0 0 4 4M20 5h4v3a4 4 0 0 1-4 4" fill="none" stroke="#ffd05a" stroke-width="2"/><rect x="11.5" y="16" width="3" height="6" fill="#e0a830"/><rect x="7" y="22" width="12" height="5" rx="1" fill="#8a5a2b"/></svg>`;
 const RCOL={C:'#9db4ae',U:'#7cc7dc',R:'#c9a0f2',L:'#ffd05a',M:'#ff8fb8'};
 let logF='all';
-const bitingNow=f=>!f.quest&&f.at===S.water&&f.t.includes(phaseOf(S.min))&&(!f.wx||f.wx.includes(S.wx.id));
+const bitingNow=f=>!f.quest&&f.at===S.water&&f.t.includes(phaseOf(S.min))&&(!f.wx||f.wx.includes(S.wx.id)||S.buffs.charm>0);
 const LOGF={all:['All fish',()=>true],now:['Biting here now',bitingNow],new:['Not caught yet',f=>!S.log[f.id]],vars:['Missing variants',f=>!f.quest&&!!S.log[f.id]&&['golden','albino','giant'].some(k=>!(S.log[f.id].v&&S.log[f.id].v[k]))]};
 const varN=()=>FISH.reduce((a,f)=>a+(S.log[f.id]&&S.log[f.id].v?Object.keys(S.log[f.id].v).filter(k=>VAR[k]).length:0),0);
 function progBars(){
@@ -3049,7 +3051,7 @@ function renderStorage(){
   let g=document.createElement('div');g.className='grid';
   for(const k of PALL){const P=POT[k],n=S.pots[k]||0,on=S.hot.includes(k);
     const c=document.createElement('div');c.className='card srow';
-    c.innerHTML=`${svgI(P.ic||'potion',P.col)}<div style="min-width:0"><b>${P.n}</b> <span style="color:var(--muted);font-variant-numeric:tabular-nums">×${n}</span><p>${P.d}${P.inst?'':' Lasts 1 minute.'}</p></div>`;
+    c.innerHTML=`${svgI(P.ic||'potion',P.col)}<div style="min-width:0"><b>${P.n}</b> <span style="color:var(--muted);font-variant-numeric:tabular-nums">×${n}</span><p>${P.d}${P.inst?'':(P.dur||60)>=120?` Lasts ${(P.dur||60)/60} minutes.`:' Lasts 1 minute.'}</p></div>`;
     const a=document.createElement('div');a.className='acts';
     const u=document.createElement('button');u.className='mini';u.textContent=P.inst?'Use':'Drink';u.disabled=!n;u.onclick=()=>usePotion(k);
     const hb=document.createElement('button');hb.className='mini'+(on?' hot':'');hb.textContent=on?'On hot bar ✓':'Add to hot bar';
@@ -3881,7 +3883,8 @@ if(appHost()&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();APP.bip=e;try{if(phOpen()&&phView==='settings')renderSettings()}catch(_){}});
 addEventListener('appinstalled',()=>{APP.bip=null;showToast('Lantern Lake is on your home screen','Installed')});
 async function appInstall(){if(!APP.bip)return;const e=APP.bip;APP.bip=null;try{e.prompt();await e.userChoice}catch(_){}renderSettings()}
-const pushPrefs=()=>{const st=SETS();if(!st.pushP||typeof st.pushP!=='object')st.pushP={garden:true,yard:true,texts:true};return st.pushP};
+const pushPrefs=()=>{const st=SETS();if(!st.pushP||typeof st.pushP!=='object')st.pushP={garden:true,yard:true,texts:true};if(!Array.isArray(st.pushP.wx))st.pushP.wx=['storm','snow'];return st.pushP};
+const WXA=[['storm','⛈️ Storms'],['snow','❄️ Snow'],['fog','🌫️ Fog'],['rain','🌧️ Rain']];
 async function pushSend(sub){const m=mpS();await api('push/sub',{id:m.id,key:m.key,sub:sub.toJSON(),prefs:pushPrefs()})}
 async function pushEnable(){const m=mpS();if(!m.id){showToast('Pick an angler name in Friends first','Alerts');return}if(!pushOK()||APP.busy)return;APP.busy=true;
   try{const perm=await Notification.requestPermission();if(perm!=='granted'){showToast('Alerts are blocked','Allow notifications for this site in your browser settings');return}
@@ -3894,17 +3897,20 @@ async function pushPref(k,on){pushPrefs()[k]=on;save();try{const sub=APP.reg&&aw
 // Next times the garden needs you, sent with each sync so the server can alert you while you're away.
 function alertsDue(){const now=Date.now(),L=yardOk(S.yard)?S.yard.it:[];let crop=0,fruit=0;
   for(const a of L){if(a[0]==='plot'&&CROPS[a[5]]){const r=(+a[4]||0)+CROPS[a[5]].min*6e4;if(r>now&&(!crop||r<crop))crop=r}else if(YI[a[0]]&&YI[a[0]].fruit){const r=(+a[4]||0)+FRUIT_MS;if(r>now&&(!fruit||r<fruit))fruit=r}}
-  return [{k:'crop',due:crop},{k:'fruit',due:pushPrefs().garden===false?0:fruit}]}
+  const out=[{k:'crop',due:crop&&crop+3e5},{k:'fruit',due:pushPrefs().garden===false||!fruit?0:fruit+3e5}],want=pushPrefs().wx||['storm','snow'],k0=wxBlock(now)+1;
+  for(const t of ['storm','snow','fog','rain']){let due=0;if(want.includes(t)&&pushPrefs().weather!==false){const m=id=>t==='rain'?(id==='rain'||id==='drizzle'):id===t;for(let k=k0;k<k0+840;k++)if(m(wxOfBlock(k))&&!m(wxOfBlock(k-1))){due=k*WXB_MS;break}}out.push({k:'wx:'+t,due})}
+  return out}
 function appSettingsHTML(row,sw){const st=SETS(),inst=appStandalone();let h='';
   h+=row('Install the app',inst?'Installed. Open it from your home screen':APP.bip?'Opens full screen from your home screen, like any app':appIOS()?'In Safari, tap Share, then “Add to Home Screen”':'Use your browser menu: “Install app” or “Add to Home screen”',inst?'<small class="fr-muted">✓</small>':APP.bip?'<button class="ghost" id="appInst">Install</button>':'');
   if(!appHost())return h+row('Alerts','Available on lanternlake.app','');
   if(!pushOK())return h+row('Alerts',appIOS()&&!inst?'On iPhone, install the app first, then turn alerts on from inside it':'This browser can’t show alerts','');
   const on=!!st.push&&typeof Notification!=='undefined'&&Notification.permission==='granted';
-  h+=row('Alerts',on?'We’ll let you know when something needs you':'Get a heads-up when crops are ready, friends visit or text you',`<input type="checkbox" class="sw2" id="pushSw" ${on?'checked':''} ${APP.busy?'disabled':''} aria-label="Alerts">`);
-  if(on){const P=pushPrefs();h+=row('🌱 Garden','Crops ready and fruit ripe',`<input type="checkbox" class="sw2" data-pp="garden" ${P.garden!==false?'checked':''} aria-label="Garden alerts">`)+row('🏡 Your yard','Visitors, likes and guestbook notes',`<input type="checkbox" class="sw2" data-pp="yard" ${P.yard!==false?'checked':''} aria-label="Yard alerts">`)+row('💬 Texts','New messages from friends',`<input type="checkbox" class="sw2" data-pp="texts" ${P.texts!==false?'checked':''} aria-label="Text alerts">`)+`<div class="row"><span>Send a test alert</span><button class="ghost" id="pushTest">Send</button></div>`}
+  h+=row('Alerts',on?'We’ll let you know when something needs you':'Get a heads-up when crops are ready, special weather is coming, or friends visit or text you',`<input type="checkbox" class="sw2" id="pushSw" ${on?'checked':''} ${APP.busy?'disabled':''} aria-label="Alerts">`);
+  if(on){const P=pushPrefs();h+=row('🌱 Garden','Crops ready and fruit ripe',`<input type="checkbox" class="sw2" data-pp="garden" ${P.garden!==false?'checked':''} aria-label="Garden alerts">`)+row('🏡 Your yard','Visitors, likes and guestbook notes',`<input type="checkbox" class="sw2" data-pp="yard" ${P.yard!==false?'checked':''} aria-label="Yard alerts">`)+row('💬 Texts','New messages from friends',`<input type="checkbox" class="sw2" data-pp="texts" ${P.texts!==false?'checked':''} aria-label="Text alerts">`)+row('🌦️ Weather','A heads-up a few minutes before this weather starts, for catching weather-only fish',`<span class="seg" role="group">${WXA.map(([k,n])=>`<button data-pwx="${k}" aria-pressed="${P.wx.includes(k)}">${n}</button>`).join('')}</span>`)+`<div class="row"><span>Send a test alert</span><button class="ghost" id="pushTest">Send</button></div>`}
   return h}
 function appSettingsBind(b){const i=$('appInst');if(i)i.onclick=appInstall;const s=$('pushSw');if(s)s.onchange=()=>{s.checked?pushEnable():pushDisable()};
-  b.querySelectorAll('[data-pp]').forEach(x=>x.onchange=()=>pushPref(x.dataset.pp,x.checked));const t=$('pushTest');if(t)t.onclick=async()=>{const m=mpS();t.disabled=true;try{const r=await api('push/test',{id:m.id,key:m.key});showToast(r.sent?'Test alert sent':'No devices are set up yet','Alerts')}catch(_){}t.disabled=false}}
+  b.querySelectorAll('[data-pp]').forEach(x=>x.onchange=()=>pushPref(x.dataset.pp,x.checked));
+  b.querySelectorAll('[data-pwx]').forEach(x=>x.onclick=()=>{const P=pushPrefs(),k=x.dataset.pwx;P.wx=P.wx.includes(k)?P.wx.filter(y=>y!==k):[...P.wx,k];mpS().alSig='';save();renderSettings()});const t=$('pushTest');if(t)t.onclick=async()=>{const m=mpS();t.disabled=true;try{const r=await api('push/test',{id:m.id,key:m.key});showToast(r.sent?'Test alert sent':'No devices are set up yet','Alerts')}catch(_){}t.disabled=false}}
 // Photo mode: hides everything over the scene for clean screenshots; the little bar fades out and comes back on a tap or mouse move.
 const PHOTO={on:false,t:null};
 function photoWake(){if(!PHOTO.on)return;const b=$('photoBar');b.classList.remove('fade');clearTimeout(PHOTO.t);PHOTO.t=setTimeout(()=>b.classList.add('fade'),2500)}
@@ -5346,6 +5352,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:97,n:'Weatherwise',items:['Weather Charm: a new item in Shop → Supplies. For 10 minutes, fish that only bite in special weather (storms, snow, fog and more) bite in any weather.','Weather alerts: with alerts on, pick the weather you’re hunting in Settings (storms, snow, fog or rain) and get a heads-up a few minutes before it starts.','Garden alerts now arrive closer to the moment your crops or fruit are ready.']},
  {v:96,n:'Collar Check',items:['Bug fix: collars, bandanas and bows now wrap around your pet’s neck, tucked under the ear, instead of sitting on the shoulder.']},
  {v:95,n:'Dressed Right',items:['Bug fix: pet collars, bandanas and bows now sit around the neck instead of over the ear.']},
  {v:94,n:'Good Boy',items:['Removed the “All games” link from the title screen.','Pets have more personality: each one makes its own sound when you tap it, and gets excited when you land a fish.','Daily pet gifts: once a day your pet brings you something (look for the ! bubble). It could be materials, a few coins, fruit or sometimes a potion.','Play fetch: tap 🎾 Fetch in your yard and watch your pet chase the ball and bring it back.','New Pet House for the yard ($2,500, under Fences & hedges) and a Pet Bed for the cabin (at the crafting table). Your pet naps in them.','Next goals: a small card under the scene suggests what to do next. Hide it any time, or turn it back on in Settings.']},

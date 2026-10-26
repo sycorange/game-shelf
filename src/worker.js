@@ -435,7 +435,7 @@ async function pushTo(db,pid,kind,msg,opts){try{const rows=(await db.prepare('SE
 async function pushRoutes(p,db,me,b,now){
   if(p==='push/key'){const V=await vapid(db);return json({key:V.pubB64})}
   if(p==='push/sub'){const s=b.sub;if(!s||typeof s.endpoint!=='string'||!/^https:\/\//.test(s.endpoint)||s.endpoint.length>800||!s.keys||typeof s.keys.p256dh!=='string'||typeof s.keys.auth!=='string')return json({error:'bad-sub'},400);
-    const prefs={};for(const k of ['garden','yard','texts'])prefs[k]=!(b.prefs&&b.prefs[k]===false);
+    const prefs={};for(const k of ['garden','yard','texts','weather'])prefs[k]=!(b.prefs&&b.prefs[k]===false);
     const cnt=await db.prepare('SELECT COUNT(*) AS c FROM pushsub WHERE pid=?').bind(me.id).first();if((cnt.c|0)>=5)await db.prepare('DELETE FROM pushsub WHERE pid=? AND endpoint IN (SELECT endpoint FROM pushsub WHERE pid=? ORDER BY ts LIMIT 1)').bind(me.id,me.id).run();
     await db.prepare('INSERT INTO pushsub(endpoint,pid,sub,prefs,ts) VALUES(?,?,?,?,?) ON CONFLICT(endpoint) DO UPDATE SET pid=excluded.pid,sub=excluded.sub,prefs=excluded.prefs,ts=excluded.ts').bind(s.endpoint,me.id,JSON.stringify({endpoint:s.endpoint,keys:{p256dh:s.keys.p256dh,auth:s.keys.auth}}),JSON.stringify(prefs),now).run();return json({ok:true})}
   if(p==='push/unsub'){await db.prepare('DELETE FROM pushsub WHERE pid=? AND endpoint=?').bind(me.id,String(b.endpoint||'')).run();return json({ok:true})}
@@ -443,11 +443,13 @@ async function pushRoutes(p,db,me,b,now){
   return null}
 // Timed alerts the game schedules for itself (crops ready, fruit ripe). Replaces that kind's previous alert.
 async function pushSchedule(db,pid,list){if(!Array.isArray(list))return;const has=await db.prepare('SELECT 1 FROM pushsub WHERE pid=? LIMIT 1').bind(pid).first();if(!has)return;
-  for(const a of list.slice(0,4)){const k=['crop','fruit'].includes(a&&a.k)?a.k:null;if(!k)continue;await db.prepare('DELETE FROM pushq WHERE pid=? AND k=?').bind(pid,k).run();
+  for(const a of list.slice(0,8)){const k=a&&PUSHQ_MSG[a.k]?a.k:null;if(!k)continue;await db.prepare('DELETE FROM pushq WHERE pid=? AND k=?').bind(pid,k).run();
     const due=+a.due;if(isFinite(due)&&due>Date.now()&&due<Date.now()+7*864e5)await db.prepare('INSERT INTO pushq(pid,k,due) VALUES(?,?,?)').bind(pid,k,Math.round(due)).run()}}
-const PUSHQ_MSG={crop:{title:'🌱 Your garden is ready',body:'Your crops are ready to harvest.',kind:'garden'},fruit:{title:'🍎 Fruit is ripe',body:'Your trees are full of fruit. Come pick it!',kind:'garden'}};
+const PUSHQ_MSG={crop:{title:'🌱 Your garden is ready',body:'Your crops are ready to harvest.',kind:'garden'},fruit:{title:'🍎 Fruit is ripe',body:'Your trees are full of fruit. Come pick it!',kind:'garden'},
+  'wx:storm':{title:'⛈️ A thunderstorm is rolling in',body:'Storm fish are about to bite. It only lasts about 12 minutes.',kind:'weather'},'wx:snow':{title:'❄️ Snow is starting',body:'Snow fish are about to bite. It only lasts about 12 minutes.',kind:'weather'},
+  'wx:fog':{title:'🌫️ Fog is settling in',body:'Fog fish are about to bite. It only lasts about 12 minutes.',kind:'weather'},'wx:rain':{title:'🌧️ Rain is on the way',body:'Rain fish are about to bite.',kind:'weather'}};
 async function pushCron(env){const db=env.DB;if(!db)return;await init(db);const now=Date.now();
-  const due=(await db.prepare('SELECT rowid AS id,pid,k FROM pushq WHERE due<=? LIMIT 200').bind(now).all()).results||[];
+  const due=(await db.prepare('SELECT rowid AS id,pid,k FROM pushq WHERE due<=? LIMIT 300').bind(now+5*60000).all()).results||[];
   for(const d of due){await db.prepare('DELETE FROM pushq WHERE rowid=?').bind(d.id).run();const M=PUSHQ_MSG[d.k];if(M)await pushTo(db,d.pid,M.kind,{title:M.title,body:M.body,tag:d.k})}}
 
 async function route(req,env,url,ctx){
