@@ -168,6 +168,8 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .away .xf-sync{font-size:.82rem;padding:8px 10px;border-radius:10px;background:rgba(160,200,90,.1);color:var(--fg)}
 .xf-off summary{cursor:pointer;color:var(--muted);font-size:.85rem}.xf-off[open]{display:grid;gap:8px}
 .xf-off textarea{width:100%;box-sizing:border-box;font:11px/1.4 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px;resize:vertical;word-break:break-all}
+.goals{background:linear-gradient(90deg,rgba(124,199,220,.1),rgba(255,138,42,.08));border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0;display:grid;gap:6px}.gl-h{display:flex;justify-content:space-between;align-items:center}.gl-h b{font-size:.86rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.gl-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}.gl-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);font-weight:800;font-size:.78rem}.gl-go{padding:4px 12px;font-size:.8rem}
 .guide{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:10px;align-items:center;background:linear-gradient(90deg,rgba(255,138,42,.16),rgba(124,199,220,.08));border:1px solid rgba(255,170,90,.45);border-radius:12px;padding:8px 12px;margin:8px 0}
 .gd-n{font:800 .8rem var(--font-display,inherit);background:#ff8a2a;color:#2a1206;border-radius:999px;padding:3px 9px}.gd-t{display:grid;min-width:0}.gd-t small{color:var(--muted);font-size:.8rem}.gd-rw{font-weight:800;color:var(--reed);font-size:.85rem;white-space:nowrap}
 .gd-x{background:none;border:0;color:var(--muted);font:inherit;font-size:.78rem;cursor:pointer;text-decoration:underline}
@@ -421,8 +423,6 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .tscreen .ghost{padding:9px 18px;font-size:.95rem;background:rgba(30,12,30,.5);color:#fff3e0;border-color:rgba(255,230,200,.35);backdrop-filter:blur(4px)}
 .tnew{background:var(--buoy);color:var(--buoy-ink);border-radius:99px;padding:1px 7px;font-size:.7rem;margin-left:4px;vertical-align:1px}
 .tsave{margin:0;color:#ffe8c8;font-size:.85rem;opacity:.85;text-shadow:0 1px 4px rgba(0,0,0,.6)}
-.tback{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:max(14px,env(safe-area-inset-top,0px));color:#ffe8c8;text-decoration:none;font-size:.88rem;opacity:.85;z-index:2}
-.tback:hover{opacity:1}
 #updModal,#saveModal,#loginModal,#lpinModal,#cloudModal{z-index:75}
 .cardbox{max-width:560px;width:100%}.cardbox img{width:100%;border-radius:10px;display:block}.cardbox a.ghost{text-decoration:none;color:var(--fg);display:inline-flex;align-items:center}
 .fr{display:grid;gap:10px;color:#1a1d24}
@@ -1341,7 +1341,6 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 <body>
 <div class="tscreen" id="titleScreen" hidden>
   <canvas id="titleCv" aria-hidden="true"></canvas>
-  <a class="tback" id="tBack" href="../" hidden>← All games</a>
   <div class="tinner">
     <button class="tribbon" id="tRibbon" aria-label="New: the Multiplayer Update. See what’s new"><span class="trb-new">New</span><span class="trb-txt">Multiplayer Update</span></button>
     <h1 class="tlogo" aria-label="Lantern Lake"><span class="tl1" aria-hidden="true"><span style="--i:0">L</span><span style="--i:1">a</span><span style="--i:2">n</span><span style="--i:3">t</span><span style="--i:4">e</span><span style="--i:5">r</span><span style="--i:6">n</span></span><span class="tl2" aria-hidden="true"><span style="--i:0">L</span><span style="--i:1">a</span><span style="--i:2">k</span><span style="--i:3">e</span></span></h1>
@@ -1391,6 +1390,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 
   <div class="pinbar" id="pinbar" hidden></div>
   <div class="guide" id="guide" hidden></div>
+  <div class="goals" id="goals" hidden></div>
 
   <div class="vitals">
     <div class="vital" id="vHunger"><div class="vh"><span class="eyebrow">Hunger</span><b id="hungerTxt">Full</b></div><div class="meter"><i id="hungerBar"></i></div><button class="mini cook" id="eatBtn">Eat</button></div>
@@ -4025,6 +4025,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   const ver=UPDATES.reduce((m,u)=>Math.max(m,u.v),0);
   b.innerHTML=`
   <div><h4>Appearance</h4><div class="grp">
+    ${row('Next goals card','Suggestions for what to do next, under the scene',sw('goals',st.goals!==false,'Next goals card'))}
     ${row('Dark mode',st.dark==='auto'?'Auto: follows your device':'Dark backgrounds for the phone’s apps',seg('dark',[['off','Off'],['on','On'],['auto','Auto']]))}
     ${(()=>{const own=COSTUMES.filter(c=>c.own());if(!own.length)return row('Costume','Earn costumes in holiday events','<small class="fr-muted">None yet</small>');const cur=hwWear()||'';return row('Costume','From holiday events. Pick None to take it off',`<span class="seg" role="group">${[['','None'],...own.map(c=>[c.k,c.n])].map(([k,n])=>`<button data-cos="${k}" aria-pressed="${cur===k}">${n}</button>`).join('')}</span>`)})()}
   </div></div>
@@ -5178,10 +5179,10 @@ function tripFrom(dest){if(!S.sleep||S.sleep.at!=='friend')return;$('tripModal')
   renderAll();save()}
 function renderVisitBar(){const sl=S.sleep,fr=sl&&sl.at==='friend',bar=$('visitBar');
   const yd=!!sl&&!fr&&sl.ph==='yard';
-  const sig=fr?sl.ph+'|'+(VISIT?VISIT.S.sleep.ph:'')+'|'+(VT&&VT.name):yd?'yard|'+!!sl.dock+'|'+YED.on:'';if(bar.dataset.sig===sig)return;bar.dataset.sig=sig;
+  const sig=fr?sl.ph+'|'+(VISIT?VISIT.S.sleep.ph:'')+'|'+(VT&&VT.name):yd?'yard|'+!!sl.dock+'|'+YED.on+'|'+!!curPet():'';if(bar.dataset.sig===sig)return;bar.dataset.sig=sig;
   if(yd&&YED.on){bar.hidden=true;return}
-  if(yd){$('visitTxt').innerHTML=sl.dock?'Fishing off your dock. Catches come from the Dock Pond.':'Standing outside your cabin. Decorate, fish off the dock, or pick where to fish next.'+(nativeOf()?` Your native fruit: ${FRUITS[nativeOf()].n.toLowerCase()}.`:'');$('visitBtns').innerHTML='<button class="jig" id="vbGo">Where to?</button><button class="ghost" id="vbDeco">Decorate yard</button><button class="ghost" id="vbDock">'+(sl.dock?'Stop fishing':'Fish off dock')+'</button><button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;
-    $('vbIn').onclick=e=>{e.stopPropagation();yardIn()};$('vbGo').onclick=e=>{e.stopPropagation();openYardPicker()};$('vbDeco').onclick=e=>{e.stopPropagation();yedEnter()};$('vbDock').onclick=e=>{e.stopPropagation();dockFishToggle()};return}
+  if(yd){$('visitTxt').innerHTML=sl.dock?'Fishing off your dock. Catches come from the Dock Pond.':'Standing outside your cabin. Decorate, fish off the dock, or pick where to fish next.'+(nativeOf()?` Your native fruit: ${FRUITS[nativeOf()].n.toLowerCase()}.`:'');$('visitBtns').innerHTML='<button class="jig" id="vbGo">Where to?</button><button class="ghost" id="vbDeco">Decorate yard</button>'+(curPet()?'<button class="ghost" id="vbFetch">🎾 Fetch</button>':'')+'<button class="ghost" id="vbDock">'+(sl.dock?'Stop fishing':'Fish off dock')+'</button><button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;
+    $('vbIn').onclick=e=>{e.stopPropagation();yardIn()};$('vbGo').onclick=e=>{e.stopPropagation();openYardPicker()};$('vbDeco').onclick=e=>{e.stopPropagation();yedEnter()};$('vbDock').onclick=e=>{e.stopPropagation();dockFishToggle()};if($('vbFetch'))$('vbFetch').onclick=e=>{e.stopPropagation();petFetch()};return}
   if(!fr||!VT){bar.hidden=true;return}const nm=esc(VT.name);let txt='',btns='';
   if(sl.ph==='door'&&VT.arcade){txt='At the Lantern Pier Arcade. Play the cabinets for prize tickets and spend them at the Prize Counter.';btns='<button class="jig" id="vbEnter">Enter the arcade</button><button class="ghost" id="vbLeave">Leave</button>'}
   else if(sl.ph==='door'&&VT.museum){txt='At the Lantern Lake Museum. Donate record fish and see who holds every plaque.';btns='<button class="jig" id="vbEnter">Enter the museum</button><button class="ghost" id="vbLeave">Leave</button>'}
@@ -5345,6 +5346,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:94,n:'Good Boy',items:['Removed the “All games” link from the title screen.','Pets have more personality: each one makes its own sound when you tap it, and gets excited when you land a fish.','Daily pet gifts: once a day your pet brings you something (look for the ! bubble). It could be materials, a few coins, fruit or sometimes a potion.','Play fetch: tap 🎾 Fetch in your yard and watch your pet chase the ball and bring it back.','New Pet House for the yard ($2,500, under Fences & hedges) and a Pet Bed for the cabin (at the crafting table). Your pet naps in them.','Next goals: a small card under the scene suggests what to do next. Hide it any time, or turn it back on in Settings.']},
  {v:93,n:'Pocket Lake',items:['Install Lantern Lake as an app: it gets its own icon and opens full screen. Find it in Settings → App and alerts. On iPhone, tap Share, then Add to Home Screen.','Alerts (optional): get a heads-up when your crops are ready or fruit is ripe, when friends visit, like your yard or sign your guestbook, and when you get a text. Turn each kind on or off in Settings.','You won’t get alerts while you’re playing, and visits only alert you once every few hours per friend.']},
  {v:92,n:'Best Friends',items:['Pets! Adopt a dog, cat, duck, frog, otter or fox from the new 🐾 Pets section of the Shop, and give them a name.','Your companion naps and wanders in your yard, rides along in your boat, and curls up by the rug in your cabin. Friends see them when they visit.','Tap your pet to give them some love. The first pet each day gives +10 stamina.','Pick each pet’s coat and dress them up with a collar, bandana, bow or tiny hat.']},
  {v:91,n:'Fair Reflection',items:['Bug fix: in Mirror Match, the final round now really is mirrored. It used to also make you answer back to front, which flipped the arrows a second time so the right answer often looked unmirrored.','Mirror Match is easier: shorter rounds (3, 4, 4, 5 and 5 arrows), the arrows play a little slower, and after a mistake your reflection shows the same arrows again instead of new ones.']},
@@ -5444,7 +5446,7 @@ function openUpdates(){renderUpdates();$('updModal').hidden=false;$('updClose').
 let titleOn=false,titleRAF=0;
 function showTitle(){titleOn=true;$('titleScreen').hidden=false;
  try{$('tNew').hidden=+(localStorage.getItem('ll-upd-seen')||0)>=UPDATES[0].v}catch(e){$('tNew').hidden=true}
- $('tBack').hidden=!/\/lantern-lake\/?(index\.html)?$/.test(location.pathname);
+
  {const sp=hwOn(),rb=$('tRibbon');$('titleScreen').classList.toggle('spooky',sp);rb.querySelector('.trb-txt').textContent=sp?'Halloween Update':`${UPDATES[0].n} Update`;rb.setAttribute('aria-label',`New: the ${sp?'Halloween':UPDATES[0].n} Update. See what’s new`);$('tGo').textContent=S&&S.total>0?'Continue':'Go fishing'}
  $('tSave').innerHTML=S&&S.total>0?`<b>Day ${S.day} · $${money(S.coins)}</b><span>${S.total.toLocaleString()} fish landed${S.mp&&S.mp.id&&SETS().cloud!==false?' · ☁ Cloud sync on':''}${hwOn()&&S.hw&&S.hw.pk?` · ${S.hw.pk} pumpkin${S.hw.pk===1?'':'s'} found`:''}</span>${S.mp&&S.mp.titleNote?`<em>${esc(S.mp.titleNote)}</em>`:''}`:'A fresh lake is waiting.';
  cancelAnimationFrame(titleRAF);titleRAF=requestAnimationFrame(drawTitle);setTimeout(()=>{const g=$('tGo');if(g)g.focus()},50)}
@@ -5863,20 +5865,51 @@ function petAcc(c,P,x,y,k){const a=P.acc;if(!a||a==='none')return;c.save();c.tra
 function petHearts(c,x,y,s){const t=(performance.now()-PET_RT.heart)/1000;if(t<0||t>1.4)return;c.save();for(let i=0;i<3;i++){const u=Math.min(1,Math.max(0,t-i*.15)/1.1);if(u<=0)continue;c.globalAlpha=1-u;c.fillStyle='#ff5a7a';c.font=`${Math.round(7*s)}px sans-serif`;c.textAlign='center';c.fillText('♥',x+(i-1)*5*s+Math.sin(u*6+i)*2*s,y-u*16*s)}c.restore()}
 // Yard: wanders around the lot, sits, naps. Shared by your yard and a friend's.
 function petYard(d,T){const ctxN=yardCtx(),P=ctxN==='friend'?(VT&&VT.ext&&VT.ext.pet):ctxN==='home'?curPet():null;if(!P)return;const R=PET_RT,now=performance.now(),dt=R.last?Math.min(.1,(now-R.last)/1000):0;R.last=now;
-  if(R.ctx!==ctxN){R.ctx=ctxN;R.x=R.tx=60;R.y=R.ty=310;R.st='idle';R.t=1}
-  const lx=Math.max(-800,yardLeft()+14);R.t-=dt;
-  if(R.st==='walk'){const dx=R.tx-R.x,dy=R.ty-R.y,dd=Math.hypot(dx,dy),sp=(P.k==='frog'?10:P.k==='duck'?12:18)*dt;if(dd<sp+.5){R.st=Math.random()<.35?'nap':'sit';R.t=4+Math.random()*7}else{R.x+=dx/dd*sp;R.y+=dy/dd*sp;R.face=dx>=0?1:-1}}
-  else if(R.t<=0){R.st='walk';const ny=258+Math.random()*95;R.ty=ny;R.tx=Math.max(lx,Math.min(yShoreX(ny)-14,R.x+(Math.random()-.5)*150))}
-  petDraw(ctx,P,R.x,R.y,R.face,R.st==='walk'?'walk':R.st,T,1.2,d);petHearts(ctx,R.x,R.y-16,1.2);
+  if(R.ctx!==ctxN){R.ctx=ctxN;R.x=R.tx=60;R.y=R.ty=310;R.st='idle';R.t=1;R.fetch=null}
+  const lx=Math.max(-800,yardLeft()+14),house=yardList().find(a=>a[0]==='pethouse'),sp0=P.k==='frog'?10:P.k==='duck'?12:18,move=(tx,ty,sp)=>{const dx=tx-R.x,dy=ty-R.y,dd=Math.hypot(dx,dy),st=sp*dt;if(dd<st+.5){R.x=tx;R.y=ty;return true}R.x+=dx/dd*st;R.y+=dy/dd*st;R.face=dx>=0?1:-1;return false};
+  let pose;const F=R.fetch;
+  if(F&&ctxN==='home'){F.t+=dt;
+    if(F.ph==='fly'){const u=Math.min(1,F.t/.9);F.bx=F.hx+(F.tx-F.hx)*u;F.by=236+(F.ty-236)*u-Math.sin(u*Math.PI)*38;if(u>=1){F.ph='chase';F.bx=F.tx;F.by=F.ty}pose='sit'}
+    if(F.ph==='chase'){pose='walk';if(move(F.tx,F.ty,sp0*2.4)){F.ph='back';petVoice(P.k)}}
+    else if(F.ph==='back'){pose='walk';F.bx=R.x+R.face*9;F.by=R.y-6;if(move(F.hx-14,F.hy+6,sp0*2)){F.ph='drop';F.t=0}}
+    else if(F.ph==='drop'){pose='sit';R.face=1;F.bx=R.x+12;F.by=R.y;if(F.t>.4){PET_RT.heart=performance.now();R.fetch=null;R.st='sit';R.t=3}}
+    ctx.fillStyle=rgb(mix([60,70,20],[210,230,60],d));ctx.beginPath();ctx.arc(F.bx,F.by-1.6,1.8,0,7);ctx.fill()}
+  else{R.t-=dt;
+    if(R.st==='walk'){if(move(R.tx,R.ty,sp0)){R.st=R.toHouse?'nap':Math.random()<.35?'nap':'sit';R.t=R.toHouse?10+Math.random()*10:4+Math.random()*7;R.toHouse=false}}
+    else if(R.t<=0){R.st='walk';if(house&&Math.random()<.3){R.tx=house[1]+(house[3]?-1:1)*2;R.ty=house[2]+3;R.toHouse=true}else{const ny=258+Math.random()*95;R.ty=ny;R.tx=Math.max(lx,Math.min(yShoreX(ny)-14,R.x+(Math.random()-.5)*150))}}
+    pose=R.st==='walk'?'walk':R.st}
+  petDraw(ctx,P,R.x,R.y,R.face,pose,T,1.2,d);petHearts(ctx,R.x,R.y-16,1.2);if(ctxN==='home'&&petGiftReady()&&!F)petBubble(ctx,R.x+R.face*6,R.y-14,1.3);
   if(CAMT.z>1.3&&!YED.on)HITS.push({x:R.x-14,y:R.y-19,w:28,h:21,kind:'ypet',data:P.name})}
 // Rides along in the boat (or sits on the dock) while you fish.
-function petBoat(ax,ay,deck,d,T){const P=curPet();if(!P)return;const x=deck?deck[0]+6:ax-16,y=deck?deck[1]+1:ay+1,pose=P.k==='frog'||P.k==='duck'?'sit':'sit';
-  petDraw(ctx,P,x,y,-1,pose,T,.82,d);petHearts(ctx,x,y-12,.8);HITS.push({x:x-10,y:y-14,w:20,h:16,kind:'fpet',data:P.name})}
+function petBoat(ax,ay,deck,d,T){const P=curPet();if(!P)return;const ex=CATCH.on&&!CATCH.item,x=deck?deck[0]+6:ax-16,y=(deck?deck[1]+1:ay+1)-(ex?Math.abs(Math.sin(T*12))*3:0),pose=ex?'walk':'sit';
+  petDraw(ctx,P,x,y,ex?1:-1,pose,T,.82,d);if(petGiftReady())petBubble(ctx,x,y-11,1);petHearts(ctx,x,y-12,.8);HITS.push({x:x-10,y:y-14,w:20,h:16,kind:'fpet',data:P.name})}
 // Cabin: naps by the rug, or pads around while you're up.
-function petCabin(T){const P=VISIT?petParse(VISIT.S.petv):curPet();if(!P)return;const awake=S.sleep&&S.sleep.ph==='awake',x=awake?560+Math.sin(T*.15)*120:610,face=awake?(Math.cos(T*.15)>0?1:-1):1,pose=awake?(Math.abs(Math.cos(T*.15))>.25?'walk':'sit'):'nap';
-  petDraw(ctx,P,x,424,face,pose,T,2.6,1);petHearts(ctx,x,386,2.6);RH(x-30,378,60,48,'pet',P.name)}
-function petTap(){const P=curPet();if(!P)return;PET_RT.heart=performance.now();sfx('pop');const ps=petsS(),day=todayKey();
+function petCabin(T){const P=VISIT?petParse(VISIT.S.petv):curPet();if(!P)return;const cb=VISIT?VISIT.S.cab:CAB(),bed=Array.isArray(cb.fp)&&cb.fp.find(a=>a[0]==='petbed'&&cb.own.petbed),awake=S.sleep&&S.sleep.ph==='awake',onBed=bed&&(!awake||Math.sin(T*.07)>.3);
+  const x=onBed?bed[1]:awake?560+Math.sin(T*.15)*120:610,y=onBed?bed[2]-8:424,face=onBed?1:awake?(Math.cos(T*.15)>0?1:-1):1,pose=onBed?'nap':awake?(Math.abs(Math.cos(T*.15))>.25?'walk':'sit'):'nap';
+  petDraw(ctx,P,x,y,face,pose,T,2.6,1);petHearts(ctx,x,y-38,2.6);if(!VISIT&&petGiftReady())petBubble(ctx,x+14,y-30,2.6);RH(x-30,y-46,60,48,'pet',P.name)}
+function petTap(){const P=curPet();if(!P)return;PET_RT.heart=performance.now();petVoice(P.k);const ps=petsS(),day=todayKey();
+  const g=petGift();if(g){sfx('chime','R');setTimeout(()=>showToast(`${P.name} brought you ${g}!`,'A gift'),ps.day!==day?1400:0);save()}
   if(ps.day!==day){ps.day=day;const before=S.stamina;S.stamina=Math.min(100,S.stamina+10);renderVitals();showToast(`You pet ${P.name} ♥`,before<100?'+10 stamina (once a day)':'Good pet!');save()}}
+// ---- pet fun: voices, daily gifts, a pet house and bed, fetch, excitement on a catch ----
+function petVoice(k){try{if(k==='dog'){tone(240,.09,{type:'square',vol:.05,to:180});tone(260,.1,{type:'square',vol:.05,to:190,delay:.16})}
+  else if(k==='cat')tone(620,.32,{type:'triangle',vol:.05,to:820});else if(k==='duck'){noise(.09,{f:900,q:3,vol:.06});noise(.09,{f:900,q:3,vol:.06,delay:.14})}
+  else if(k==='frog'){tone(140,.08,{type:'square',vol:.05});tone(190,.08,{type:'square',vol:.05,delay:.1})}else if(k==='otter')tone(1300,.12,{type:'sine',vol:.04,to:1700});else tone(900,.14,{type:'sawtooth',vol:.03,to:1300})}catch(e){}}
+const petGiftReady=()=>{const P=S.pets;return !!(P&&P.out&&P.own&&P.own[P.out])&&P.gift!==todayKey()};
+function petGift(){const ps=petsS(),P=curPet();if(!P||ps.gift===todayKey())return null;ps.gift=todayKey();const r=Math.random();let what;
+  if(r<.55){const pool=MATS.filter(m=>m.r==='C'),m=pool[Math.floor(Math.random()*pool.length)],n=1+Math.floor(Math.random()*3);S.mats[m.id]=(S.mats[m.id]||0)+n;what=`${n} ${m.n}`;storeDirty=true}
+  else if(r<.8){const c=Math.max(150,Math.round((S.rate||0)*1.5));S.coins+=c;what=`$${money(c)} they found in the reeds`}
+  else if(r<.95){const f=FIDS[Math.floor(Math.random()*FIDS.length)];pantry()[f]=(pantry()[f]|0)+2;what=`2 ${FRUITS[f].n.toLowerCase()}`;storeDirty=true}
+  else{const k=pick(PKEYS);givePotion(k,1);what=`a ${POT[k].n}`}
+  return what}
+function petBubble(c,x,y,s){c.save();c.translate(x,y);c.scale(s,s);c.fillStyle='#fffdf6';c.strokeStyle='#2a2018';c.lineWidth=.8;c.beginPath();c.arc(0,-6,4.4,0,7);c.fill();c.stroke();c.fillStyle='#e8502a';c.font='bold 6px sans-serif';c.textAlign='center';c.fillText('!',0,-3.8);c.restore()}
+const PET_HOUSE_C='#b07a4a';
+function petHouseDraw(d){const g=(c,k)=>rgb(mix(c.map(v=>v*(k||.28)),c,d*.8+.2)),P=yardCtx()==='friend'?(VT&&VT.ext&&VT.ext.pet):curPet();
+  ctx.fillStyle=g([176,122,74]);ctx.fillRect(-13,-18,26,18);ctx.fillStyle=g([150,56,44]);ctx.beginPath();ctx.moveTo(-16,-17);ctx.lineTo(0,-28);ctx.lineTo(16,-17);ctx.closePath();ctx.fill();
+  ctx.fillStyle=g([40,28,20]);ctx.beginPath();ctx.moveTo(-6,0);ctx.lineTo(-6,-9);ctx.arc(0,-9,6,Math.PI,0);ctx.lineTo(6,0);ctx.fill();ctx.fillStyle=g([140,96,58]);for(let y=-15;y<0;y+=4)ctx.fillRect(-13,y,26,.6);
+  if(P){ctx.fillStyle=g([236,226,200]);ctx.fillRect(-7,-22.5,14,4);ctx.fillStyle=g([60,40,24]);ctx.font='bold 3px sans-serif';ctx.textAlign='center';ctx.fillText(String(P.name).slice(0,10),0,-19.6);ctx.textAlign='left'}}
+function petBedDraw(){const B=CC('bed');ctx.fillStyle=shd(B,-.3);ctx.beginPath();ctx.ellipse(0,-10,40,12,0,0,7);ctx.fill();ctx.fillStyle=B;ctx.beginPath();ctx.ellipse(0,-13,32,8,0,0,7);ctx.fill();ctx.fillStyle=shd(B,.2);ctx.beginPath();ctx.ellipse(-6,-15,10,3,0,0,7);ctx.fill()}
+function petFetch(){if(yardCtx()!=='home'||!curPet()||PET_RT.fetch)return;const G=shackGeo(),hx=G.t===0?78:G.door+7,lx=Math.max(-800,yardLeft()+20),ty=262+Math.random()*90,tx=Math.max(lx,Math.min(yShoreX(ty)-16,hx-60-Math.random()*140));
+  PET_RT.fetch={ph:'fly',t:0,hx,hy:246,bx:hx,by:236,tx,ty};CAM.user='in';sfx('click');petVoice(curPet().k)}
 // ---- Lakeside Rescue (in the Shop) ----
 function petShopHTML(){const ps=petsS();let h='<div class="pj-wrap">';
   h+=`<div class="pj-card"><div class="pj-h"><b>🐾 Lakeside Rescue</b><span>${Object.keys(ps.own).length}/${Object.keys(PETS).length} adopted</span></div><p>Adopt a companion. One follows you at a time: it naps in your yard, rides in your boat and curls up in the cabin. Friends see it when they visit. Pet it once a day for +10 stamina.</p></div>`;
@@ -5960,6 +5993,7 @@ function yDraw(id,d,T,night,ph){
   else if(id==='jacks'||id==='scarecrow'||id==='tombstones'||id==='cauldron')hwLandOne(id,d,T);
   else if(YI[id]&&YI[id].fruit)treeDraw(YI[id].fruit,d,T,YCUR);
   else if(id==='plot')plotDraw(d,T,YCUR);
+  else if(id==='pethouse')petHouseDraw(d);
   else if(YI[id]&&YI[id].unit)yUnitDraw(id,d,T,ph)}
 // back=true draws what stands behind the house (trees at the back of the lot); the rest draws in front.
 function drawYard(d,T,night,back){const L=yardList(),own=yardCtx()==='home';const idx=L.map((a,i)=>i).filter(i=>(L[i][2]<250)===back&&yHas(L[i][0])).sort((a,b)=>L[a][2]-L[b][2]);
@@ -6050,7 +6084,8 @@ const CROPS={carrot:{n:'Carrots',seed:50,min:30,yield:3,sell:35,eat:6,col:[240,1
   pumpkin:{n:'Pumpkins',seed:500,min:240,yield:2,sell:600,eat:20,col:[236,120,30]}};
 for(const f of FIDS)YI['tree_'+f]={ox:0,oy:0,w:34,h:62,def:[],unit:1,fruit:f};
 YI.plot={ox:0,oy:0,w:30,h:12,def:[],unit:1,plot:1};YUNIT.plot={n:'Garden Plot',c:800};
-YIDS.push(...FIDS.map(f=>'tree_'+f),'plot');
+YI.pethouse={ox:0,oy:0,w:32,h:29,def:[],unit:1};YUNIT.pethouse={n:'Pet House',c:2500};
+YIDS.push(...FIDS.map(f=>'tree_'+f),'plot','pethouse');
 const yDur=ms=>{const m=Math.max(1,Math.ceil(ms/6e4));return m>=60?(m%60?`${Math.floor(m/60)}h ${m%60}m`:`${m/60}h`):`${m}m`};
 const nativeOf=()=>FRUITS[S.native]?S.native:null;
 function fruitPrice(f){const base=Math.max(400,Math.round((S.rate||0)*1.5));return f===nativeOf()?Math.max(80,Math.round(base/5)):base}
@@ -6492,6 +6527,7 @@ const COS=[
  CZ('armchair','Reading Armchair','free',12000,{fabric:10,drift:6},'Matches your bedding. Perfect for long winter nights.'),
  CZ('record','Record Player','free',15000,{scrap:6,glass:2,brass:2},'Spins an old lake-country album.'),
  CZ('stove','Wood Stove','free',25000,{scrap:14,brass:3},'Cast iron, always crackling.'),
+ CZ('petbed','Pet Bed','free',1500,{fabric:4},'A plush round bed. Your pet naps here when you’re asleep.'),
  {...CZ('plushbass','Bass Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushduck','Duck Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushbeast','Lake Beast Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},
  {...CZ('arcneon','“Arcade Champ” Neon','wall',0,{},'From the Lantern Pier Arcade.'),arc:true},
 ];
@@ -6532,7 +6568,7 @@ function renderDeco(){const cb=CAB(),b=$('decoBody');let h='<h3 class="dh">Color
 
 // ---------- Phase 3: free-placed cabin decor, wallpaper, floors, themes ----------
 const CAB_SLOTS=[[58,108],[353,120],[946,128]];
-const FREE_SZ={fern:[30,50],plushbass:[36,32],plushduck:[36,32],plushbeast:[36,32],armchair:[92,92],bookshelf:[84,156],sidetable:[52,72],stove:[70,124],record:[70,74],cushion:[72,24],palm:[46,96]};
+const FREE_SZ={fern:[30,50],plushbass:[36,32],plushduck:[36,32],plushbeast:[36,32],armchair:[92,92],bookshelf:[84,156],sidetable:[52,72],stove:[70,124],record:[70,74],cushion:[72,24],palm:[46,96],petbed:[82,26]};
 const isFree=id=>!!FREE_SZ[id];
 const WPAT=[['plain','Plain'],['boards','Pine boards'],['stripes','Stripes'],['pin','Pinstripe'],['plaid','Plaid'],['fish','Fish print'],['stars','Starry'],['wains','Wainscot']];
 const FPAT=[['planks','Planks'],['wide','Wide boards'],['herring','Herringbone'],['checker','Checker tile'],['stone','Stone'],['carpet','Carpet']];
@@ -6589,6 +6625,7 @@ function drawFreeItem(id,d,T){const F=CC('furn'),B=CC('bed'),dark=d<.4;
   else if(id==='record'){ctx.fillStyle=F;ctx.fillRect(-32,-46,64,46);ctx.fillStyle=shd(F,-.3);ctx.fillRect(-28,-40,26,34);ctx.fillRect(2,-40,26,34);ctx.fillStyle=shd(F,.2);ctx.fillRect(-34,-50,68,6);
     ctx.fillStyle='#1a1a1e';ctx.beginPath();ctx.ellipse(-4,-54,22,5,0,0,7);ctx.fill();ctx.fillStyle='#c84a3a';ctx.beginPath();ctx.ellipse(-4,-54,6,1.5,0,0,7);ctx.fill();ctx.strokeStyle='#c8c0b0';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(24,-56);ctx.lineTo(10,-54);ctx.stroke();
     const p=(T*.5)%1;ctx.fillStyle=`rgba(255,240,200,${.7*(1-p)})`;ctx.font='bold 14px sans-serif';ctx.fillText('♪',8+Math.sin(p*6)*6,-66-p*40)}
+  else if(id==='petbed')petBedDraw();
   else if(id==='cushion'){ctx.fillStyle=shd(B,-.15);ctx.beginPath();ctx.ellipse(0,-9,34,11,0,0,7);ctx.fill();ctx.fillStyle=B;ctx.beginPath();ctx.ellipse(0,-13,30,9,0,0,7);ctx.fill();ctx.fillStyle=shd(B,-.25);ctx.beginPath();ctx.arc(0,-13,2.4,0,7);ctx.fill()}
   else if(id==='palm'){ctx.fillStyle='#d8d0c0';ctx.beginPath();ctx.moveTo(-16,-30);ctx.lineTo(16,-30);ctx.lineTo(12,0);ctx.lineTo(-12,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#4a7a3a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,-30);ctx.lineTo(0,-70);ctx.stroke();
     ctx.fillStyle='#5a9a4a';for(let k=0;k<6;k++){const a=-Math.PI/2+(k-2.5)*.55+Math.sin(T*.7+k)*.04;ctx.save();ctx.translate(0,-70);ctx.rotate(a+Math.PI/2);ctx.beginPath();ctx.ellipse(0,-14,5,16,0,0,7);ctx.fill();ctx.restore()}}}
@@ -7725,6 +7762,25 @@ const GUIDE=[
   {k:'cooked',t:'Grill a fish',h:'Tap Eat next to Hunger, pick a fish and pull it off the grill in the gold zone.',rw:{pot:1}},
   {k:'craft',t:'Upgrade your gear or yard',h:'Craft a rod or lure in the Gear tab, or order decor from the Shop app.',rw:{coins:300}},
   {k:'bed',t:'Head home and sleep',h:'Tap Return home, then tap your bed when you’re tired.',rw:{coins:500}}];
+// ==NEXT GOALS== A small card with the next 3 things worth doing. Each goal disappears on its own once it's done.
+const gearNext=()=>{for(const k of ['rod','lure','boat','shack']){const it=GEAR[k]&&GEAR[k].items[(S[k]|0)+1];if(it&&S.coins>=it.c&&Object.keys(it.m||{}).every(m=>(S.mats[m]||0)>=it.m[m]))return [k,it]}return null};
+const goPhone=v=>()=>{openPhone();phShow(v)};
+const GOALS=[
+  {id:'name',ok:()=>!(S.mp&&S.mp.id)&&S.total>=25,t:'Pick an angler name',h:'Play with friends, visit yards and join the leaderboards.',go:goPhone('friends'),b:'Friends'},
+  {id:'gear',ok:()=>!!gearNext(),t:()=>`Craft the ${gearNext()[1].n}`,h:'You have enough for it. Head home and use the crafting table.',go:()=>openTab('gear'),b:'Gear'},
+  {id:'pet',ok:()=>!Object.keys((S.pets&&S.pets.own)||{}).length&&S.coins>=2000,t:'Adopt a pet',h:'A companion that naps in your yard and rides in your boat.',go:()=>{shopFilter='pets';openPhone();phShow('shop')},b:'Pets'},
+  {id:'land',ok:()=>yardOk(S.yard)&&yardLand()===0&&S.coins>=YLAND[1].c,t:'Buy more land',h:'Step outside your cabin and tap the For Sale sign.'},
+  {id:'plot',ok:()=>yardOk(S.yard)&&!yInv('plot')&&S.coins>=YUNIT.plot.c,t:'Start a garden',h:'Decorate yard → Fences & hedges → Garden Plot.'},
+  {id:'decor',ok:()=>S.coins>=900&&yardList().length<4,t:'Decorate your yard',h:'Order yard decor from the Shop on your phone.',go:()=>{shopFilter='land';openPhone();phShow('shop')},b:'Shop'},
+  {id:'fruit',ok:()=>!!(S.mp&&S.mp.id)&&!Object.keys(S.picks||{}).length&&!FIDS.some(f=>f!==nativeOf()&&(S.pantry||{})[f]),t:'Pick a friend’s fruit',h:'Visit a friend or a random yard and tap a ripe tree.',go:()=>{MPV.tab='together';openPhone();phShow('friends')},b:'Yards'},
+  {id:'water',ok:()=>{const w=WATERS.find(w=>w.boat===(S.boat|0)+1);return !!w&&S.total>=50},t:()=>`Reach ${WATERS.find(w=>w.boat===(S.boat|0)+1).n}`,h:'A bigger boat opens new water with new fish.',go:()=>openTab('waters'),b:'Waters'},
+  {id:'log',ok:()=>{const n=FISH.filter(f=>!f.quest&&S.log[f.id]).length;return n<FISH.filter(f=>!f.quest).length&&S.total>=100},t:()=>`Fill your logbook (${FISH.filter(f=>!f.quest&&S.log[f.id]).length}/${FISH.filter(f=>!f.quest).length})`,h:'Some fish only bite at dawn, dusk or night.',go:()=>openTab('log'),b:'Logbook'}];
+function renderGoals(){const el=$('goals');if(!el)return;if(guideOn()||SETS().goals===false||titleOn||S.total<3){el.hidden=true;return}
+  let list=[];try{list=GOALS.filter(g=>g.ok()).slice(0,3)}catch(e){}if(!list.length){el.hidden=true;return}
+  const T=g=>typeof g.t==='function'?g.t():g.t,sig=list.map(g=>g.id+T(g)).join('|');if(el.dataset.sig===sig&&!el.hidden)return;el.dataset.sig=sig;el.hidden=false;
+  el.innerHTML=`<div class="gl-h"><b>Next goals</b><button class="gd-x" id="glHide" aria-label="Hide next goals">Hide</button></div>`+list.map((g,i)=>`<div class="gl-row"><span class="gl-dot">${i+1}</span><div class="gd-t"><b>${esc(T(g))}</b><small>${g.h}</small></div>${g.go?`<button class="ghost gl-go" data-gl="${g.id}">${g.b}</button>`:''}</div>`).join('');
+  el.querySelectorAll('[data-gl]').forEach(b=>b.onclick=()=>{const g=GOALS.find(x=>x.id===b.dataset.gl);if(g&&g.go)g.go()});
+  $('glHide').onclick=()=>{SETS().goals=false;save();renderGoals();showToast('Next goals hidden','Turn them back on in Settings')}}
 function guideOn(){return !!(S.guide&&!S.guide.done&&!S.guide.skip)}
 function guideMark(k){if(!S.guide)return;S.guide.m=S.guide.m||{};S.guide.m[k]=1;guideCheck()}
 function guideCheck(){if(!guideOn())return;const g=S.guide,st=GUIDE[g.step];if(!st)return;if((st.done&&st.done())||(g.m&&g.m[st.k])){
@@ -8793,7 +8849,7 @@ function tick(now){if(SESS.paused)return;
     $('castLabel').textContent=TRV.on?'On the move…':S.sleep?dockFishing()?(cast.el/cast.dur>.85?'Something’s biting…':'Fishing off the dock'):(S.sleep.at?(VT&&VT.arcade?'At the arcade…':VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
     refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();
     if(!$('slotsModal').hidden){if(!spinning)updateSlots();if(phView==='lock')renderLock()}else{$('phClock').textContent=fmtClock(S.min).replace(/ [AP]M/,'');$('phBat').style.width=Math.max(4,S.stamina)+'%'}
-    ensureBounties();checkStreak();qStart();renderGuide();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
+    ensureBounties();checkStreak();qStart();renderGuide();renderGoals();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
     {const bc=mpBadge()+TX.unread+(newsUnread()?1:0)+readyBounties()+(S.streak.claimed?0:1)+(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step?1:0)+(S.q2&&S.q2.step>0&&S.q2.step<7&&S.q2.seen!==S.q2.step?1:0)+(S.q3&&S.q3.step>0&&S.q3.step<7&&S.q3.seen!==S.q3.step?1:0);$('phoneBadge').hidden=!bc;$('phoneBadge').textContent=bc}
     if(storeDirty){renderStorage();renderHot()}
     if(collDirty)renderColl();
