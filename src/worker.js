@@ -63,6 +63,11 @@ async function init(db){
   try{await db.prepare('CREATE TABLE IF NOT EXISTS pinfail(k TEXT PRIMARY KEY,n INTEGER,ts INTEGER)').run()}catch(e){}
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS houses(pid TEXT PRIMARY KEY,name TEXT,ts INTEGER,n INTEGER DEFAULT 0)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS invites(id INTEGER PRIMARY KEY AUTOINCREMENT,to_pid TEXT,from_pid TEXT,from_name TEXT,ts INTEGER)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS invites_to ON invites(to_pid)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS blocks(a TEXT,b TEXT,ts INTEGER,PRIMARY KEY(a,b))`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS reports(id INTEGER PRIMARY KEY AUTOINCREMENT,from_pid TEXT,from_name TEXT,to_pid TEXT,to_name TEXT,reason TEXT,where_ TEXT,ts INTEGER)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS pushsub(endpoint TEXT PRIMARY KEY,pid TEXT,sub TEXT,prefs TEXT,ts INTEGER)`),
     db.prepare(`CREATE INDEX IF NOT EXISTS pushsub_pid ON pushsub(pid)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS pushq(pid TEXT,k TEXT,due INTEGER)`),
@@ -228,6 +233,7 @@ async function syncExtras(db,me,b,now,wk){const out={};
   try{out.ev=await evPart(db,me,b,now)}catch(e){}
   try{out.mon=await monPart(db,me,b,now,wk)}catch(e){}
   try{out.gb=await yardPart(db,me,b,now,wk)}catch(e){}
+  try{const iv=(await db.prepare('SELECT id,from_pid,from_name,ts FROM invites WHERE to_pid=? AND ts>? ORDER BY id DESC LIMIT 5').bind(me.id,now-15*60000).all()).results||[];if(iv.length){out.inv=iv;await db.prepare('DELETE FROM invites WHERE to_pid=? AND id<=?').bind(me.id,iv[0].id).run()}if(Math.random()<.02)await db.prepare('DELETE FROM invites WHERE ts<?').bind(now-864e5).run()}catch(e){}
   try{out.chal=await chalPart(db,me,b,now)}catch(e){}
   try{out.owner=(await ownerId(db))===me.id}catch(e){}
   try{out.musv=await musVer(db);const n=await db.prepare('SELECT id,body,ts FROM mnote WHERE pid=? AND seen=0 ORDER BY id LIMIT 10').bind(me.id).all();
@@ -301,6 +307,8 @@ async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.wai
   if(p==='owner/bugs'){const r=await db.prepare('SELECT id,name,msg,errs,ua,ver,scr,ts FROM bugs ORDER BY id DESC LIMIT 60').all();return json({bugs:r.results})}
   if(p==='owner/pinreset'){const n=clean(b.name,16).toLowerCase();const r=await db.prepare('UPDATE players SET pin=NULL WHERE lname=?').bind(n).run();
     await db.prepare("DELETE FROM pinfail WHERE k LIKE ?").bind('%:'+n+'|%').run();return json({ok:true,found:!!(r.meta&&r.meta.changes)})}
+  if(p==='owner/reports'){const r=await db.prepare('SELECT id,from_name,to_pid,to_name,reason,where_ AS wh,ts FROM reports ORDER BY id DESC LIMIT 80').all();return json({reports:r.results||[]})}
+  if(p==='owner/repdel'){await db.prepare('DELETE FROM reports WHERE id=?').bind(b.rid|0).run();return json({ok:true})}
   if(p==='owner/bugdel'){await db.prepare('DELETE FROM bugs WHERE id=?').bind(b.bid|0).run();return json({ok:true})}
   if(p==='owner/backup'){const [pl,cl]=await Promise.all([db.prepare('SELECT id,name,created,seen,COALESCE(pub,1) AS pub,stats FROM players ORDER BY created').all(),db.prepare('SELECT c.pid,p.name,c.ts,c.day,c.coins,c.data FROM cloud c LEFT JOIN players p ON p.id=c.pid').all()]);
     return json({made:now,players:pl.results,cloud:cl.results})}
@@ -452,10 +460,71 @@ async function pushCron(env){const db=env.DB;if(!db)return;await init(db);const 
   const due=(await db.prepare('SELECT rowid AS id,pid,k FROM pushq WHERE due<=? LIMIT 300').bind(now+5*60000).all()).results||[];
   for(const d of due){await db.prepare('DELETE FROM pushq WHERE rowid=?').bind(d.id).run();const M=PUSHQ_MSG[d.k];if(M)await pushTo(db,d.pid,M.kind,{title:M.title,body:M.body,tag:d.k})}}
 
+// ==OPEN HOUSE== A host opens their yard; anyone on their lake can join (up to 8 guests). One live room per host.
+const HOUSE_CAP=8,HOUSE_TTL=150000,SAYS=16;
+async function blockedEither(db,a,b){const r=await db.prepare('SELECT 1 FROM blocks WHERE (a=? AND b=?) OR (a=? AND b=?) LIMIT 1').bind(a,b,b,a).first();return !!r}
+async function houseRoute(req,env,url,db){
+  if((req.headers.get('Upgrade')||'').toLowerCase()!=='websocket')return json({error:'expected-websocket'},426);
+  if(!env.YARD)return json({error:'no-live'},503);
+  const q=url.searchParams,me=await auth(db,{id:q.get('id')||'',key:q.get('key')||''}),host=String(q.get('host')||'');
+  const h=await db.prepare('SELECT pid,ts FROM houses WHERE pid=?').bind(host).first();
+  if(host!==me.id){if(!h||Date.now()-h.ts>HOUSE_TTL)return json({error:'closed'},404);if(!(await canSee(db,me,host)))return json({error:'private'},403);if(await blockedEither(db,me.id,host))return json({error:'blocked'},403)}
+  const fw=new URL('https://yard/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('host',host);
+  for(const k of ['wear','g','pet'])fw.searchParams.set(k,String(q.get(k)||'').slice(0,120));
+  return env.YARD.get(env.YARD.idFromName('house:'+host)).fetch(new Request(fw.toString(),{headers:req.headers}))}
+export class YardRoom{
+  constructor(ctx,env){this.ctx=ctx;this.env=env;try{ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping','pong'))}catch(e){}}
+  socks(except){return this.ctx.getWebSockets().filter(w=>w!==except)}
+  att(w){try{return w.deserializeAttachment()}catch(e){return null}}
+  bcast(o,except){const m=JSON.stringify(o);for(const w of this.socks(except)){try{w.send(m)}catch(e){}}}
+  async count(){const host=await this.ctx.storage.get('host');if(!host||!this.env.DB)return;const n=this.socks().map(w=>this.att(w)).filter(a=>a&&!a.host).length;try{await this.env.DB.prepare('UPDATE houses SET n=? WHERE pid=?').bind(n,host).run()}catch(e){}}
+  async fetch(req){const q=new URL(req.url).searchParams,host=q.get('host'),pid=q.get('pid'),isHost=pid===host;await this.ctx.storage.put('host',host);
+    const bans=(await this.ctx.storage.get('bans'))||{};if(!isHost&&bans[pid]&&bans[pid]>Date.now())return new Response(JSON.stringify({error:'removed'}),{status:403});
+    for(const w of this.socks()){const a=this.att(w);if(a&&a.pid===pid){try{w.close(4000,'replaced')}catch(e){}}}
+    const guests=this.socks().map(w=>this.att(w)).filter(a=>a&&!a.host&&a.pid!==pid).length;if(!isHost&&guests>=HOUSE_CAP)return new Response(JSON.stringify({error:'full'}),{status:409});
+    let pet=null;try{const p=JSON.parse(q.get('pet')||'null');if(p&&typeof p.k==='string')pet={k:String(p.k).slice(0,8),coat:p.coat|0,acc:String(p.acc||'').slice(0,8),name:String(p.name||'').slice(0,16)}}catch(e){}
+    const me={pid,name:String(q.get('name')||'').slice(0,20),host:isHost,cid:Math.random().toString(36).slice(2,8),wear:String(q.get('wear')||'').slice(0,8),g:q.get('g')==='f'?'f':'m',pet,x:isHost?null:140,y:246,f:-1,at:Date.now()};
+    const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(me);
+    server.send(JSON.stringify({t:'hello',me:me.cid,peers:this.socks(server).map(w=>this.att(w)).filter(a=>a&&a.pid!==pid)}));
+    this.bcast({t:'join',p:me},server);await this.count();return new Response(null,{status:101,webSocket:client})}
+  async webSocketMessage(ws,msg){if(typeof msg!=='string'||msg.length>500)return;let o;try{o=JSON.parse(msg)}catch(e){return}const a=this.att(ws);if(!a)return;
+    if(o.t==='mv'){const now=Date.now();if(a.lt&&now-a.lt<120)return;a.lt=now;a.x=Math.max(-830,Math.min(400,+o.x||0));a.y=Math.max(230,Math.min(400,+o.y||0));a.f=o.f<0?-1:1;ws.serializeAttachment(a);this.bcast({t:'mv',cid:a.cid,x:a.x,y:a.y,f:a.f,m:o.m?1:0},ws)}
+    else if(o.t==='emo'){const e=o.e|0;if(e>=0&&e<12)this.bcast({t:'emo',cid:a.cid,e},ws)}
+    else if(o.t==='say'){const i=o.i|0;const now=Date.now();if(a.st&&now-a.st<1500)return;a.st=now;ws.serializeAttachment(a);if(i>=0&&i<SAYS)this.bcast({t:'say',cid:a.cid,i},ws)}
+    else if(o.t==='game'){const g=o.g&&typeof o.g==='object'?o.g:null;if(!g)return;const out={k:String(g.k||'').slice(0,10)};for(const k of ['sx','sy','ex','ey','h','dur','i','on','score'])if(isFinite(g[k]))out[k]=+g[k];if(typeof g.col==='string')out.col=g.col.slice(0,9);if(g.hoop)out.hoop=1;if(typeof g.msg==='string')out.msg=g.msg.slice(0,30);this.bcast({t:'game',cid:a.cid,g:out},ws)}
+    else if(o.t==='kick'&&a.host){const bans=(await this.ctx.storage.get('bans'))||{},now=Date.now();for(const k in bans)if(bans[k]<now)delete bans[k];
+      for(const w of this.socks()){const b=this.att(w);if(b&&b.cid===o.cid&&!b.host){bans[b.pid]=now+864e5;try{w.send(JSON.stringify({t:'removed'}))}catch(e){}try{w.close(4001,'removed')}catch(e){}this.bcast({t:'leave',cid:b.cid},w)}}
+      await this.ctx.storage.put('bans',bans);await this.count()}
+    else if(o.t==='close'&&a.host){this.bcast({t:'closed'},ws);for(const w of this.socks(ws)){try{w.close(4002,'closed')}catch(e){}}}}
+  async webSocketClose(ws){await this.left(ws)}
+  async webSocketError(ws){await this.left(ws)}
+  async left(ws){const a=this.att(ws);try{ws.close(1000,'bye')}catch(e){}if(a){this.bcast({t:'leave',cid:a.cid},ws);if(a.host)this.bcast({t:'hostaway'},ws)}await this.count()}}
+async function houseRoutes(p,db,me,b,now,ctx){
+  if(p==='house/open'){await db.prepare('INSERT INTO houses(pid,name,ts,n) VALUES(?,?,?,0) ON CONFLICT(pid) DO UPDATE SET name=excluded.name,ts=excluded.ts').bind(me.id,me.name,now).run();return json({ok:true})}
+  if(p==='house/close'){await db.prepare('DELETE FROM houses WHERE pid=?').bind(me.id).run();return json({ok:true})}
+  if(p==='house/list'){const r=await db.prepare(`SELECT h.pid,h.name,h.n FROM houses h JOIN players pl ON pl.id=h.pid WHERE h.ts>? AND h.pid<>? AND (COALESCE(pl.pub,1)=1 OR EXISTS(SELECT 1 FROM members m1 JOIN members m2 ON m1.code=m2.code WHERE m1.pid=? AND m2.pid=h.pid))
+      AND NOT EXISTS(SELECT 1 FROM blocks WHERE (a=? AND b=h.pid) OR (a=h.pid AND b=?)) ORDER BY h.n DESC,h.ts DESC LIMIT 20`).bind(now-HOUSE_TTL,me.id,me.id,me.id,me.id).all();
+    if(Math.random()<.05)await db.prepare('DELETE FROM houses WHERE ts<?').bind(now-36e5).run();return json({houses:r.results||[]})}
+  if(p==='house/invite'){const h=await db.prepare('SELECT ts FROM houses WHERE pid=?').bind(me.id).first();if(!h||now-h.ts>HOUSE_TTL)return json({error:'closed'},409);
+    const to=[...new Set((Array.isArray(b.to)?b.to:[]).map(String))].filter(x=>x!==me.id).slice(0,10);let n=0;
+    for(const t of to){if(!(await canSee(db,me,t))||(await blockedEither(db,me.id,t)))continue;const k='inv:'+me.id+':'+t,o=await db.prepare('SELECT ts FROM kvc WHERE k=?').bind(k).first();if(o&&now-o.ts<10*60000)continue;
+      await db.prepare('INSERT INTO kvc(k,v,ts) VALUES(?,?,?) ON CONFLICT(k) DO UPDATE SET ts=excluded.ts').bind(k,'1',now).run();await db.prepare('INSERT INTO invites(to_pid,from_pid,from_name,ts) VALUES(?,?,?,?)').bind(t,me.id,me.name,now).run();n++;
+      const job=pushTo(db,t,'yard',{title:'🏡 You’re invited over!',body:`${me.name} opened their house. Come hang out!`,tag:'inv-'+me.id},{evenOnline:false});if(ctx)ctx.waitUntil(job);else await job}
+    return json({ok:true,sent:n})}
+  // block / report
+  if(p==='block/add'){const t=String(b.pid||'');if(!t||t===me.id)return json({error:'bad'},400);await db.prepare('INSERT OR IGNORE INTO blocks(a,b,ts) VALUES(?,?,?)').bind(me.id,t,now).run();return json({ok:true})}
+  if(p==='block/del'){await db.prepare('DELETE FROM blocks WHERE a=? AND b=?').bind(me.id,String(b.pid||'')).run();return json({ok:true})}
+  if(p==='block/list'){const r=await db.prepare('SELECT bl.b AS pid,pl.name FROM blocks bl LEFT JOIN players pl ON pl.id=bl.b WHERE bl.a=? ORDER BY bl.ts DESC LIMIT 200').bind(me.id).all();return json({blocked:r.results||[]})}
+  if(p==='report'){const t=String(b.pid||'');const pl=await db.prepare('SELECT id,name FROM players WHERE id=?').bind(t).first();if(!pl||t===me.id)return json({error:'bad'},400);
+    const recent=await db.prepare('SELECT COUNT(*) AS c FROM reports WHERE from_pid=? AND ts>?').bind(me.id,now-864e5).first();if((recent.c|0)>=10)return json({error:'slow-down'},429);
+    await db.prepare('INSERT INTO reports(from_pid,from_name,to_pid,to_name,reason,where_,ts) VALUES(?,?,?,?,?,?,?)').bind(me.id,me.name,pl.id,pl.name,clean(b.reason,200),clean(b.where,20),now).run();return json({ok:true})}
+  return null}
+
 async function route(req,env,url,ctx){
   const db=env.DB,p=url.pathname.replace(/^\/api\//,''),now=Date.now();
   if(p==='ping')return json({ok:true,week:weekKey(),v:7,live:!!env.LAKE});
   if(p==='live')return liveRoute(req,env,url,db);
+  if(p==='house')return houseRoute(req,env,url,db);
   // Radio app: look up a Spotify track's name (public oEmbed, no key), cached for 30 days.
   if(p==='spname'){const id=String(url.searchParams.get('id')||''),k=String(url.searchParams.get('k')||'track');
     if(!/^[A-Za-z0-9]{22}$/.test(id)||!['track','episode'].includes(k))return json({error:'bad-id'},400);
@@ -534,6 +603,7 @@ async function route(req,env,url,ctx){
     if(p==='arcade/champs'){const lw=String(+weekKey()-1),out={};for(const g of ['toss','gar','pin']){const t=(await topOf(lw,g))[0];if(t)out[g]={pid:t.pid,name:t.name,s:t.s,wk:lw}}return json({champs:out})}
     return json({error:'not-found'},404)}
   {const pr=await pushRoutes(p,db,me,b,now);if(pr)return pr}
+  {const hr=await houseRoutes(p,db,me,b,now,ctx);if(hr)return hr}
   {const xr=await extraRoutes(p,db,me,b,now,url,ctx);if(xr)return xr}
   // One session at a time: pressing Play claims the session; saves and syncs from any older session are refused with 'taken'.
   if(p==='sess/claim'){const sid=clean(b.sid,16);if(sid.length<6)return json({error:'bad-request'},400);
@@ -653,7 +723,8 @@ async function route(req,env,url,ctx){
     if(t.id!==me.id&&ctx)ctx.waitUntil((async()=>{const k='pv:'+t.id+':'+me.id,o=await db.prepare('SELECT ts FROM kvc WHERE k=?').bind(k).first();if(o&&now-o.ts<3*36e5)return;
       await db.prepare('INSERT INTO kvc(k,v,ts) VALUES(?,?,?) ON CONFLICT(k) DO UPDATE SET ts=excluded.ts').bind(k,'1',now).run();await pushTo(db,t.id,'yard',{title:'🏡 You have a visitor',body:`${me.name} is visiting your place.`,tag:'visit'})})());
     const yw=await db.prepare('SELECT (SELECT pid FROM yardwin WHERE week=?) AS champ,(SELECT COUNT(*) FROM yardwin WHERE pid=?) AS wins').bind(String(+weekKey()-1),t.id).first();
-    return json({name:t.name,cabin:t.cabin,champ:!!(yw&&yw.champ===t.id),wins:yw?yw.wins|0:0});
+    const hh=await db.prepare('SELECT ts FROM houses WHERE pid=?').bind(t.id).first();
+    return json({name:t.name,cabin:t.cabin,champ:!!(yw&&yw.champ===t.id),wins:yw?yw.wins|0:0,house:!!(hh&&now-hh.ts<HOUSE_TTL)&&!(await blockedEither(db,me.id,t.id))});
   }
   if(p==='mail'){
     if(!['pot','mat'].includes(b.kind))return json({error:'bad-kind'},400);
@@ -760,7 +831,7 @@ async function route(req,env,url,ctx){
       return json({name:who.name,seen:who.seen,msgs:r.results.reverse().map(x=>({id:x.id,mine:x.a===me.id,body:x.body,photo:x.photo?JSON.parse(x.photo):null,ts:x.ts}))});
     }
     if(p==='texts/send'){
-      const to=await canSee(db,me,b.to);if(!to)return json({error:'no-player'},404);
+      const to=await canSee(db,me,b.to);if(!to)return json({error:'no-player'},404);if(await blockedEither(db,me.id,to.id))return json({error:'blocked'},403);
       const text=clean(b.body,280),photo=b.photo?cleanPhoto(b.photo):null;
       if(!text&&!photo)return json({error:'empty'},400);
       if(b.photo&&!photo)return json({error:'bad-photo'},400);

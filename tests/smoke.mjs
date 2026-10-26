@@ -145,6 +145,29 @@ await check('yard games: buy from the Games tab, cornhole scoring, hoop swish, t
   await p.evaluate(()=>ygStart(S.yard.it.findIndex(a=>a[0]==='tireswing')));on=false;for(let i=0;i<20&&!on;i++){await p.waitForTimeout(400);on=await p.evaluate(()=>!!YG.on)}ok(on,'swing');
   ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('open house: host and guests see each other walk, chat, pets, invite card, phone More menu, remove, block, report, close',async()=>{
+  const mk=async(vp,st,name)=>{const p=await page(vp,save(st));p.me=await p.evaluate(async(name)=>{const r=await api('hello',{name});S.mp=S.mp||{};mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});await mpSync(true);return r},name);return p};
+  const R=Math.floor(Math.random()*9e4);
+  const A=await mk(VPS[0][1],{pets:{own:{dog:{name:'Biscuit',coat:0,acc:'collar'}},out:'dog',day:today,gift:today,acc:{}},sleep:{ph:'yard',t:0,visit:true}},'Oh'+R);
+  const B=await mk(VPS[0][1],{pets:{own:{cat:{name:'Miso',coat:1,acc:'bow'}},out:'cat',day:today,gift:today,acc:{}}},'Og'+R);
+  const C=await mk(VPS[1][1],{},'Op'+R);
+  await A.evaluate(()=>houseOpen());await A.waitForFunction(()=>HOUSE.st==='on',null,{timeout:10000});
+  const L=await B.evaluate(async()=>{const m=mpS();return (await api('house/list',{id:m.id,key:m.key})).houses.map(h=>h.name)});ok(L.includes(A.me.name),'list '+L);
+  await A.evaluate(async(id)=>{const m=mpS();return api('house/invite',{id:m.id,key:m.key,to:[id]})},C.me.id);await C.evaluate(()=>mpSync(true));ok(await C.evaluate(()=>!document.getElementById('invCard').hidden),'invite card');
+  await B.evaluate(id=>houseJoin(id),A.me.id);await C.click('#invGo');
+  for(const P of [B,C])await P.waitForFunction(()=>houseHere()&&WALK.ctx==='friend',null,{timeout:25000});
+  await A.waitForFunction(()=>HOUSE.peers.size===2,null,{timeout:5000});ok(await A.evaluate(()=>[...HOUSE.peers.values()].some(p=>p.pet&&p.pet.name==='Miso')),'guest pet');
+  await B.evaluate(()=>{WALK.tx=150;WALK.ty=330;houseSay(1)});await C.evaluate(()=>houseEmo(1));await A.waitForTimeout(3500);
+  const seen=await A.evaluate(()=>[...HOUSE.peers.values()].map(p=>[p.name,Math.round(p.tx),Math.round(p.ty),p.bub&&p.bub.s]));const gb=seen.find(x=>x[0].startsWith('Og'));ok(gb&&gb[1]===150&&gb[2]===330&&gb[3]==='Nice yard!','guest walk/say '+JSON.stringify(seen));
+  ok(await B.evaluate(()=>[...HOUSE.peers.values()].some(p=>p.host)),'guest sees host');
+  await C.click('#vbMore');ok(await C.isVisible('#vbLeave'),'phone More menu');await C.click('#vbMore');
+  await A.evaluate(()=>{const p=[...HOUSE.peers.values()].find(p=>p.name.startsWith('Op'));hsend({t:'kick',cid:p.cid})});await C.waitForTimeout(1500);ok(await C.evaluate(()=>HOUSE.st==='off'),'kicked');
+  await C.evaluate(id=>{HOUSE.host=null;houseConnect(id,false)},A.me.id);await C.waitForTimeout(1500);ok(await C.evaluate(()=>HOUSE.st!=='on'),'ban holds');
+  const bl=await B.evaluate(async(id)=>{const m=mpS();await api('block/add',{id:m.id,key:m.key,pid:id});const l=await api('house/list',{id:m.id,key:m.key});const t=await api('texts/send',{id:m.id,key:m.key,to:id,body:'hi'}).then(()=>'sent',e=>e.message);const r=await api('report',{id:m.id,key:m.key,pid:id,reason:'Spamming or annoying',where:'test'});return [l.houses.some(h=>h.pid===id),t,r.ok]},A.me.id);
+  ok(!bl[0]&&bl[1]!=='sent'&&bl[2],'block/report '+bl);
+  await A.evaluate(()=>houseClose());ok(!(await A.evaluate(async()=>{const m=mpS();return (await api('house/list',{id:m.id,key:m.key})).houses.length})),'closed');
+  for(const P of [A,B,C]){ok(!P.errs.length,P.errs.join('; '));await P.context().close()}});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

@@ -889,6 +889,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .yed-tray.hp{flex-wrap:wrap;overflow:visible}.yed-roles{display:flex;gap:6px;flex:none}.yed-sws{display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding-left:6px;min-width:0}
 .yed-sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:#24343a;color:#edf2ea;font-size:.8rem;cursor:pointer;padding:0;flex:none}.yed-sw.on{border-color:#ffd05a;box-shadow:0 0 0 2px rgba(255,208,90,.35)}.yed-sw:disabled{opacity:.4}
 .box.land{max-width:380px}
+.vb-more{position:absolute;right:10px;bottom:calc(100% + 6px);z-index:7;display:flex;flex-direction:column;gap:6px;background:rgba(10,22,28,.95);border:1px solid var(--line);border-radius:12px;padding:8px}.vb-more[hidden]{display:none}.vb-more button{text-align:left}
+.hchat{position:absolute;left:8px;right:8px;bottom:64px;z-index:6;background:rgba(10,22,28,.94);border:1px solid var(--line);border-radius:14px;padding:8px;display:grid;gap:6px;max-width:560px}.hc-emo{display:flex;flex-wrap:wrap;gap:4px}.hc-emo button{font-size:1.2rem;background:rgba(255,255,255,.07);border:0;border-radius:8px;padding:4px 7px;cursor:pointer}
+.hc-say{display:flex;flex-wrap:wrap;gap:4px}.hc-say button{background:rgba(255,255,255,.08);border:1px solid var(--line);color:#edf2ea;border-radius:999px;padding:4px 10px;font:inherit;font-size:.8rem;cursor:pointer}.hc-say button:hover,.hc-emo button:hover{background:rgba(255,255,255,.16)}
+.hg-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border:1px solid var(--line);border-radius:10px}.hg-row span{display:flex;gap:4px;flex-wrap:wrap}
+.invcard{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;display:flex;gap:10px;align-items:center;background:#16303a;border:1px solid rgba(255,208,90,.6);border-radius:14px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:calc(100% - 24px);color:#edf2ea}.invcard>span{font-size:1.4rem}.invcard div{display:grid}.invcard small{opacity:.75}
 .ygbar .yg-meter{position:relative;display:inline-block;width:120px;height:10px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden;vertical-align:middle;margin:0 8px}.yg-meter i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ffd05a,#ff7a3d)}.yg-meter em{position:absolute;top:0;bottom:0;background:rgba(120,230,120,.55);outline:1px solid rgba(120,230,120,.9)}
 .pet-row{display:flex;gap:10px;align-items:center}.pet-cv{width:60px;height:40px;flex:none;border-radius:8px;background:rgba(0,0,0,.08)}.pet-card.out{outline:2px solid var(--gold,#ffd05a)}
 .pet-adopt{display:flex;gap:6px;flex-wrap:wrap}.pet-name{flex:1;min-width:120px;border:1px solid #c8ccd6;border-radius:8px;padding:6px 8px;font:inherit;font-size:.86rem}
@@ -1376,6 +1381,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
     <div class="stip" id="stip" hidden></div>
     <div class="ynav" id="ynav" hidden><button data-yf="house">House</button><button data-yf="yard">Yard</button><button data-yf="dock">Dock</button><button class="yz" id="yZoom">Zoom out</button></div>
     <div class="leave ygbar" id="ygBar" hidden></div>
+    <div class="hchat" id="hchat" hidden></div>
     <div class="leave" id="visitBar" hidden><div><span id="visitTxt"></span><span class="vbtns" id="visitBtns"></span></div></div>
     <div class="leave" id="leaveBar" hidden><div><span id="leaveTxt">Up and rested. Ready to head back out?</span><button class="ghost" id="yardBtn">Step outside</button><button class="ghost" id="decoBtn">Decorate</button><button class="ghost" id="arrBtn">Arrange</button><button class="jig" id="leaveBtn">Head back out</button></div></div>
     <div class="toast"><div id="toast" style="opacity:0">Casting…</div></div>
@@ -1453,6 +1459,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 </div>
 
 <div class="ach-wrap" id="achWrap" aria-live="polite"></div>
+<div class="invcard" id="invCard" hidden role="status"></div>
 <div class="newver" id="newVer" role="status" hidden><span class="nv-ic" aria-hidden="true">✨</span><div><b id="nvT">A new update is ready</b><small>Refresh to get it. Your game is saved first.</small></div><button class="jig" id="nvGo">Refresh</button><button class="ghost" id="nvNo" aria-label="Remind me later">Later</button></div>
 
 <div class="away" id="itemModal" hidden>
@@ -4059,6 +4066,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   <div><h4>Account</h4><div class="grp">
     ${row('Cloud sync',S.mp&&S.mp.id?'Your latest game follows you between devices':'Pick an angler name in Friends to turn this on',sw('cloud',st.cloud,'Cloud sync'))}
     <div class="row"><span>Login PIN<small>${S.mp&&S.mp.id?(MPV.hasPin?`Set. Log in on new devices with “${esc(S.mp.name)}” and your PIN`:'Not set. Set one so you can log in on a new device'):'Pick an angler name in Friends first'}</small></span><button class="ghost" id="setPin" ${S.mp&&S.mp.id?'':'disabled'}>${MPV.hasPin?'Change':'Set PIN'}</button></div>
+    ${S.mp&&S.mp.id?`<div class="row"><span>Blocked players<small>${(HOUSE.blockedList||[]).length?`${HOUSE.blockedList.length} blocked`:'Nobody blocked'}</small></span><button class="ghost" id="setBlocks">Manage</button></div>`:''}
     <div class="row"><span>Move your game<small>Send it to your phone or computer with a short code</small></span><button class="ghost" id="setMove">Open</button></div>
   </div></div>
   <div><h4>Your game</h4><div class="grp">
@@ -4072,7 +4080,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   </div></div>
   <div><h4>Support Lantern Lake</h4><div class="grp"><div class="row col"><span><small style="line-height:1.45">${donateNote()}</small></span><a class="set-donate" href="${DONATE_URL}" target="_blank" rel="noopener">♥ Donate with PayPal</a></div></div></div>
   <p class="set-foot">Lantern Lake · version ${ver}</p>`;
-  appSettingsBind(b);
+  appSettingsBind(b);{const sb=$('setBlocks');if(sb)sb.onclick=blocksUI}
   b.querySelectorAll('[data-cos]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.cos||null;sfx('click');save();renderSettings()});
   b.querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{let v=x.dataset.sv;if(v==='true')v=true;else if(v==='false')v=false;st[x.dataset.sk]=v;sfx('click');applyDock();applyPhTheme();applyTextSize();save();renderSettings();renderLock();renderVitals&&renderVitals()});
   b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();});
@@ -4651,7 +4659,7 @@ $('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,
   else if(h.kind==='deco'){if(S.sleep.ph==='awake')openDeco(h.data);else showTip(h,e)}else showTip(h,e);return}
   if(CAM.moved){CAM.moved=false;YED.skip=false;return}if(h&&h.kind==='fpet'){petTap();return}if(h&&h.kind==='gate'){hideTip();openTab('waters');setTimeout(()=>{const x=document.querySelector('.realm-h');if(x)x.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})},50);return}if(h&&h.kind==='updraft'){hideTip();updraftScoop();return}if(h&&h.kind==='peer'){hideTip();peerOpen(h.data);return}if(h&&h.kind==='hwpk'){hideTip();hwCollect(h.data);return}if(h&&h.kind==='tot'){hideTip();totGive(h.data);return}if(h&&h.kind==='box'){openBox(h.data);return}
   if(CAMT.z>1.3&&yardCtx()==='home'&&YED.on){if(YED.skip){YED.skip=false;return}if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(YED.tab==='paths'||YED.tab==='house')return;YED.sel=yardPick(x,y);renderYed();return}
-  if(CAMT.z>1.3&&yardCtx()){if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(h&&h.kind==='ytree'){hideTip();treeTap(h.data);return}if(h&&h.kind==='ygame'){hideTip();ygStart(h.data.i);return}if(h&&h.kind==='ypet'){hideTip();if(yardCtx()==='home')petTap();else{PET_RT.heart=performance.now();sfx('pop')}return}if(h&&h.kind==='yplot'&&yardCtx()==='home'){hideTip();openPlot(h.data.i);return}if(h&&h.kind==='ydoor'){hideTip();walkThen(()=>{if(S.sleep.at==='friend')enterFriend();else yardIn()});return}if(h&&h.kind[0]==='y')showTip(h,e);else{hideTip();if(dockFishing())jig();else if(walkCtx())walkTo(x,y)}return}jig()};
+  if(CAMT.z>1.3&&yardCtx()){if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(h&&h.kind==='ytree'){hideTip();treeTap(h.data);return}if(h&&h.kind==='ygame'){hideTip();ygStart(h.data.i);return}if(h&&h.kind==='ypeer'){hideTip();peerMenu(h.data);return}if(h&&h.kind==='ypet'){hideTip();if(yardCtx()==='home')petTap();else{PET_RT.heart=performance.now();sfx('pop')}return}if(h&&h.kind==='yplot'&&yardCtx()==='home'){hideTip();openPlot(h.data.i);return}if(h&&h.kind==='ydoor'){hideTip();walkThen(()=>{if(S.sleep.at==='friend')enterFriend();else yardIn()});return}if(h&&h.kind[0]==='y')showTip(h,e);else{hideTip();if(dockFishing())jig();else if(walkCtx())walkTo(x,y)}return}jig()};
 $('scene').onmousemove=e=>{if(CAM.drag&&CAM.moved)return;const [x,y]=scenePt(e),h0=hitAt(x,y),h=VISIT&&h0&&!['trophy','coll','tank','door'].includes(h0.kind)?null:h0;if(VISIT&&h){const real=S;S=VISIT.S;$('scene').style.cursor='pointer';try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}return}if(VISIT){$('scene').style.cursor='default';hideTip();return}if(!indoor()&&!h){$('scene').style.cursor='';hideTip();return}$('scene').style.cursor=h?'pointer':'default';if(h)showTip(h,e);else hideTip()};
 $('scene').onmouseleave=hideTip;
 $('leaveBtn').onclick=e=>{e.stopPropagation();leaveHouse()};
@@ -5066,8 +5074,8 @@ async function renderFriends(){const b=$('friendsBody'),m=mpS();if(!b)return;
     $('frSave').onclick=async()=>{try{const r=await api('rename',{id:m.id,key:m.key,name:$('frName').value.trim()});m.name=r.name;save();renderFriends()}catch(e){$('frErr').textContent=e.message==='name-taken'?'Someone already has that name.':'Use 2 to 16 letters, numbers or spaces.'}}};
   const p=$('frPane');
   try{
-  if(MPV.contact){const c=MPV.contact,me=c.id===m.id;p.innerHTML=`<button class="fr-link ct-back" id="ctBack">‹ Back</button>${contactHTML(c,me)}${me?'':`<div class="ct-acts"><button class="fr-btn" id="ctMsg">Message ${esc(c.name)}</button><button class="fr-mini" id="ctVisit">Visit their place</button><button class="fr-mini" id="ctChal">Challenge</button></div>`}`;
-    $('ctBack').onclick=()=>{MPV.contact=null;renderFriends()};if(!me){$('ctMsg').onclick=()=>{phShow('texts');txOpenThread(c.id,c.name)};$('ctVisit').onclick=()=>visitCabin(c.id);$('ctChal').onclick=()=>{p.innerHTML=chalFormHTML(c);bindChalForm(c,()=>renderFriends())}}return}
+  if(MPV.contact){const c=MPV.contact,me=c.id===m.id;p.innerHTML=`<button class="fr-link ct-back" id="ctBack">‹ Back</button>${contactHTML(c,me)}${me?'':`<div class="ct-acts"><button class="fr-btn" id="ctMsg">Message ${esc(c.name)}</button><button class="fr-mini" id="ctVisit">Visit their place</button><button class="fr-mini" id="ctChal">Challenge</button><button class="fr-mini" id="ctBlock">${HOUSE.blocked.has(c.id)?'Unblock':'Block'}</button><button class="fr-mini" id="ctReport">Report</button></div>`}`;
+    $('ctBack').onclick=()=>{MPV.contact=null;renderFriends()};if(!me){$('ctBlock').onclick=async()=>{if(HOUSE.blocked.has(c.id)){await unblockPlayer(c.id,c.name);renderFriends()}else{await blockPlayer(c.id,c.name);renderFriends()}};$('ctReport').onclick=()=>reportPlayer(c.id,c.name,'Contact card');$('ctMsg').onclick=()=>{phShow('texts');txOpenThread(c.id,c.name)};$('ctVisit').onclick=()=>visitCabin(c.id);$('ctChal').onclick=()=>{p.innerHTML=chalFormHTML(c);bindChalForm(c,()=>renderFriends())}}return}
   if(MPV.tab==='together'){p.innerHTML=togetherHTML();bindTogether(p);return}
   if(MPV.tab==='me'){p.innerHTML=contactHTML({name:m.name,stats:mpStats()},true)+lookEditorHTML();bindLookEditor();return}
   if(MPV.tab==='lakes'){p.innerHTML=`<div class="fr-card"><b>Join a lake</b><p>Got a code from a friend? Enter it here.</p><div class="fr-row"><input id="lkCode" maxlength="20" placeholder="e.g. PERCH-27" autocapitalize="characters"><button class="fr-btn" id="lkJoin">Join</button></div><p class="fr-err" id="lkJErr"></p></div>
@@ -5153,7 +5161,7 @@ async function visitCabin(id){const me=mpS();if(isRealm(S.water)){showToast('Com
   if(S.sleep&&!['awake','yard'].includes(S.sleep.ph)){showToast('Wait until you’re up and about');return}
   try{const r=await api('cabin',{id:me.id,key:me.key,target:id});const c=JSON.parse(r.cabin),ext=c.ext||{};
     if(VT||TRV.on||(S.sleep&&!['awake','yard'].includes(S.sleep.ph)))return;
-    VT={id,name:r.name,c,ext:{shack:Math.max(0,Math.min(GEAR.shack.items.length-1,ext.shack??1)),decor:Object.fromEntries((Array.isArray(ext.decor)?ext.decor:[]).filter(k=>DECOR.some(x=>x.id===k)).map(k=>[k,1])),off:{},boxes:[],trophies:Array.isArray(c.trophies)?c.trophies:[],yard:yardParse(ext.yard),native:FRUITS[ext.native]?ext.native:null,pet:petParse(c.pet)},champ:!!r.champ,wins:r.wins|0};
+    VT={id,name:r.name,c,ext:{shack:Math.max(0,Math.min(GEAR.shack.items.length-1,ext.shack??1)),decor:Object.fromEntries((Array.isArray(ext.decor)?ext.decor:[]).filter(k=>DECOR.some(x=>x.id===k)).map(k=>[k,1])),off:{},boxes:[],trophies:Array.isArray(c.trophies)?c.trophies:[],yard:yardParse(ext.yard),native:FRUITS[ext.native]?ext.native:null,pet:petParse(c.pet)},champ:!!r.champ,wins:r.wins|0,house:!!r.house};
     closePhone();hideTip();showToast(`Heading to ${r.name}’s place`,'By boat');
     if(S.sleep&&S.sleep.ph==='yard'){VT.go=true;yardOut()}else if(S.sleep&&S.sleep.ph==='awake'){VT.go=true;leaveHouse()}else boatTrip(S.water,'friend',friendArrive)}
   catch(e){showToast(e.message==='no-cabin'?'That angler hasn’t opened the game since this update.':e.message==='private'?'That cabin is private.':'Couldn’t load that cabin.')}}
@@ -5187,19 +5195,24 @@ function tripFrom(dest){if(!S.sleep||S.sleep.at!=='friend')return;$('tripModal')
   renderAll();save()}
 function renderVisitBar(){if(YG.on){$('visitBar').hidden=true;return}const sl=S.sleep,fr=sl&&sl.at==='friend',bar=$('visitBar');
   const yd=!!sl&&!fr&&sl.ph==='yard';
-  const sig=fr?sl.ph+'|'+(VISIT?VISIT.S.sleep.ph:'')+'|'+(VT&&VT.name):yd?'yard|'+!!sl.dock+'|'+YED.on+'|'+!!curPet():'';if(bar.dataset.sig===sig)return;bar.dataset.sig=sig;
+  const hs='|'+HOUSE.st+HOUSE.n+HOUSE.me,sig=fr?sl.ph+'|'+(VISIT?VISIT.S.sleep.ph:'')+'|'+(VT&&VT.name)+hs:yd?'yard|'+!!sl.dock+'|'+YED.on+'|'+!!curPet()+hs:'';if(bar.dataset.sig===sig)return;bar.dataset.sig=sig;
   if(yd&&YED.on){bar.hidden=true;return}
-  if(yd){$('visitTxt').innerHTML=sl.dock?'Fishing off your dock. Catches come from the Dock Pond.':'Tap the ground to walk around'+(matchMedia('(pointer:fine)').matches?' (or use WASD)':'')+'. Decorate, fish off the dock, or pick where to fish next.'+(nativeOf()?` Your native fruit: ${FRUITS[nativeOf()].n.toLowerCase()}.`:'');$('visitBtns').innerHTML='<button class="jig" id="vbGo">Where to?</button><button class="ghost" id="vbDeco">Decorate yard</button>'+(curPet()?'<button class="ghost" id="vbFetch">🎾 Fetch</button>':'')+'<button class="ghost" id="vbDock">'+(sl.dock?'Stop fishing':'Fish off dock')+'</button><button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;
+  if(yd&&HOUSE.me&&HOUSE.host){const n=HOUSE.n;$('visitTxt').innerHTML=HOUSE.st==='on'?`🏡 <b>Your house is open.</b> ${n?`${n} guest${n>1?'s':''} here.`:'Waiting for guests…'} Tap the ground to walk around.`:'🏡 Reconnecting your Open House…';
+    $('visitBtns').innerHTML='<button class="jig" id="vbChat">💬 Chat</button><button class="ghost" id="vbInv">Invite</button><button class="ghost" id="vbGuests">Guests'+(n?` (${n})`:'')+'</button>'+(curPet()?'<button class="ghost" id="vbFetch">🎾 Fetch</button>':'')+'<button class="ghost" id="vbClose">Close house</button><button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;
+    const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbChat',houseChatUI);on('vbInv',houseInviteUI);on('vbGuests',houseGuestsUI);on('vbClose',()=>houseClose());on('vbFetch',petFetch);on('vbIn',()=>walkThen(yardIn));vbCompact();return}
+  if(yd){$('visitTxt').innerHTML=sl.dock?'Fishing off your dock. Catches come from the Dock Pond.':'Tap the ground to walk around'+(matchMedia('(pointer:fine)').matches?' (or use WASD)':'')+'. Decorate, fish off the dock, or pick where to fish next.'+(nativeOf()?` Your native fruit: ${FRUITS[nativeOf()].n.toLowerCase()}.`:'');$('visitBtns').innerHTML='<button class="jig" id="vbGo">Where to?</button><button class="ghost" id="vbDeco">Decorate yard</button>'+(curPet()?'<button class="ghost" id="vbFetch">🎾 Fetch</button>':'')+'<button class="ghost" id="vbDock">'+(sl.dock?'Stop fishing':'Fish off dock')+'</button>'+(S.mp&&S.mp.id?'<button class="ghost" id="vbHouse">🏡 Open House</button>':'')+'<button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;if($('vbHouse'))$('vbHouse').onclick=e=>{e.stopPropagation();houseOpen()};
     $('vbIn').onclick=e=>{e.stopPropagation();walkThen(yardIn)};$('vbGo').onclick=e=>{e.stopPropagation();openYardPicker()};$('vbDeco').onclick=e=>{e.stopPropagation();yedEnter()};$('vbDock').onclick=e=>{e.stopPropagation();dockFishToggle()};if($('vbFetch'))$('vbFetch').onclick=e=>{e.stopPropagation();petFetch()};return}
   if(!fr||!VT){bar.hidden=true;return}const nm=esc(VT.name);let txt='',btns='';
   if(sl.ph==='door'&&VT.arcade){txt='At the Lantern Pier Arcade. Play the cabinets for prize tickets and spend them at the Prize Counter.';btns='<button class="jig" id="vbEnter">Enter the arcade</button><button class="ghost" id="vbLeave">Leave</button>'}
   else if(sl.ph==='door'&&VT.museum){txt='At the Lantern Lake Museum. Donate record fish and see who holds every plaque.';btns='<button class="jig" id="vbEnter">Enter the museum</button><button class="ghost" id="vbLeave">Leave</button>'}
+  else if(sl.ph==='door'&&houseHere()){txt=`🏡 <b>${nm}’s Open House</b> · ${HOUSE.n} guest${HOUSE.n===1?'':'s'} here. Tap the ground to walk around.`;btns=`<button class="jig" id="vbChat">💬 Chat</button><button class="ghost" id="vbGuests">Who’s here</button><button class="ghost" id="vbEnter">Enter ${nm}’s house</button>${S.mp&&S.mp.id?`<button class="ghost" id="vbSign">Sign guestbook</button><button class="ghost" id="vbLike"${VT.liked?' disabled':''}>${VT.liked?'❤ Liked':'❤ Like yard'}</button>`:''}<button class="ghost" id="vbLeave">Leave</button>`}
   else if(sl.ph==='door'){txt=(VT.champ?'🏆 Yard of the Week! ':'')+`At ${nm}’s place. Tap the ground to walk around.`+(VT.ext.native?` Their native fruit is ${FRUITS[VT.ext.native].n.toLowerCase()}: tap a ripe tree to pick some.`:'');btns=`<button class="jig" id="vbEnter">Enter ${nm}’s house</button>${S.mp&&S.mp.id?`<button class="ghost" id="vbSign">Sign guestbook</button><button class="ghost" id="vbLike"${VT.liked?' disabled':''}>${VT.liked?'❤ Liked':'❤ Like yard'}</button>`:''}<button class="ghost" id="vbLeave">Leave</button>`}
   else if(sl.ph==='inside'&&VISIT&&VISIT.S.sleep.ph==='awake'){txt=`Visiting ${nm}’s cabin. Look around, but you can’t change anything.`;btns='<button class="jig" id="vbOut">Head out</button>'}
   else if(sl.ph==='pick'){txt='Back on the boat.';btns='<button class="jig" id="vbPick">Choose where to go</button>'}
   else{bar.hidden=true;return}
   $('visitTxt').textContent='';$('visitTxt').innerHTML=txt;$('visitBtns').innerHTML=btns;bar.hidden=false;
-  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum&&!VT.arcade)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker)}
+  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum&&!VT.arcade)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker);on('vbChat',houseChatUI);on('vbGuests',houseGuestsUI);if(houseHere())vbCompact()}
+function vbCompact(){const B=$('visitBtns');if(!matchMedia('(max-width:560px)').matches)return;const bs=[...B.children];if(bs.length<=3)return;const m=document.createElement('div');m.className='vb-more';m.hidden=true;bs.slice(2).forEach(b=>{m.appendChild(b);b.addEventListener('click',()=>{m.hidden=true})});const t=document.createElement('button');t.className='ghost';t.id='vbMore';t.textContent='More ▾';t.onclick=e=>{e.stopPropagation();m.hidden=!m.hidden};B.appendChild(t);B.appendChild(m)}
 function drawNameSign(d){if(VT&&VT.arcade)return;const x=VT&&VT.museum?200:176,y=244,nm=VT?VT.name:'';ctx.fillStyle=rgb(mix([30,22,16],[110,78,48],d));ctx.fillRect(x-1.5,y-26,3,26);
   ctx.font='bold 9px sans-serif';const w=Math.max(38,ctx.measureText(nm).width+12);ctx.fillStyle=rgb(mix([40,30,20],[196,160,110],d));ctx.fillRect(x-w/2,y-38,w,14);
   ctx.strokeStyle=rgb(mix([20,14,10],[90,62,36],d));ctx.lineWidth=1;ctx.strokeRect(x-w/2,y-38,w,14);ctx.fillStyle=rgb(mix([10,8,6],[50,30,16],d));ctx.textAlign='center';ctx.fillText(nm,x,y-28);ctx.textAlign='left';
@@ -5244,7 +5257,7 @@ function yardHits(){const G=shackGeo(),e=dockEnd(),P=(x,y,w,h,kind,data)=>HITS.p
   D('docklights',[139,218,8,28],[e-7,218,8,28]);D('skeleton',[177,225,14,32]);D('rocker',[142,225,18,23]);
   {const py=has('bollards')?240:246;D('pelican',[211,py-21,31,22])}
   if(fr&&!(VT&&VT.arcade))P(VT&&VT.museum?174:150,203,52,42,'ysign')}
-function yardTip(h){if(h.kind==='ygame'){const K=YGAMES[h.data.id];return `<b>${K.n}</b><small>${K.d} Tap to play.</small>`}if(h.kind==='ypet')return `<b>${esc(h.data)}</b><small>Tap to pet</small>`;const fr=S.sleep&&S.sleep.at==='friend',who=fr&&VT?(VT.arcade?'The arcade’s':VT.museum?'The museum’s':esc(VT.name)+'’s'):'Your';
+function yardTip(h){if(h.kind==='ypeer'){const p=HOUSE.peers.get(h.data);return p?`<b>${p.host?'🏡 ':''}${esc(p.name)}</b><small>Tap for options</small>`:''}if(h.kind==='ygame'){const K=YGAMES[h.data.id];return `<b>${K.n}</b><small>${K.d} Tap to play.</small>`}if(h.kind==='ypet')return `<b>${esc(h.data)}</b><small>Tap to pet</small>`;const fr=S.sleep&&S.sleep.at==='friend',who=fr&&VT?(VT.arcade?'The arcade’s':VT.museum?'The museum’s':esc(VT.name)+'’s'):'Your';
   if(h.kind==='yhouse'&&h.data===7)return '<b>Lantern Lake Museum</b><small>Tap the door to go inside and donate</small>';
   if(h.kind==='ytree')return yTreeTip(h);if(h.kind==='yplot')return yPlotTip(h);
   if(h.kind==='ydeco'){const it=DECOR.find(x=>x.id===h.data);if(!it)return YUNIT[h.data]?`<b>${YUNIT[h.data].n}</b><small>Yard build</small>`:'';return `<b>${it.n}</b><small>${CAT[it.cat]} decor${it.hw?' · '+HWL():''} · from the Shop</small><small class="yd">${it.d}</small>`}
@@ -5354,6 +5367,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:100,n:'Open House',items:['Open House! Step outside and tap 🏡 Open House, and anyone on your lake can drop by. Up to 8 guests can walk around your yard with you, live.','Invite friends: they get an alert (if they’ve turned alerts on) and an invite card in the game. Find parties in Friends → Together → Open houses now.','Say hi with 💬 Chat: emotes and preset phrases appear as speech bubbles. Everyone sees each other’s pets, cornhole throws and hoop shots.','Hosts can remove a guest (they can’t come back for 24 hours). Anyone can block or report a player from their name or contact card. Blocked players disappear for you everywhere.']},
  {v:99,n:'Game Night',items:['Yard games that double as decor: a Cornhole Set ($3,000), a Basketball Hoop ($5,000) and a Tire Swing ($2,000), in Decorate yard → Games.','Tap a game in your yard to walk over and play. Cornhole: hold to wind up, release to throw (on the board +1, in the hole +3). Hoop: stop the meter in the green, and the zone shrinks as your streak grows.','Rounds earn a few arcade prize tickets. You can play friends’ yard games when you visit, too.']},
  {v:98,n:'Stretch Your Legs',items:['Walk around! In your yard (and when visiting a friend’s place), tap anywhere on the ground to walk there. On a computer you can also use WASD or the arrow keys.','The camera follows you, and your pet tags along behind.','Walk out onto your dock, wander the land you’ve bought, and head back to the door to go inside.']},
  {v:97,n:'Weatherwise',items:['Weather Charm: a new item in Shop → Supplies. For 10 minutes, fish that only bite in special weather (storms, snow, fog and more) bite in any weather.','Weather alerts: with alerts on, pick the weather you’re hunting in Settings (storms, snow, fog or rain) and get a heads-up a few minutes before it starts.','Garden alerts now arrive closer to the moment your crops or fruit are ready.']},
@@ -5631,7 +5645,7 @@ function draw0(now){
   drawGround(d);if(YED.on&&YED.tab==='paths'&&yardCtx()==='home')yGridDraw();drawYard(d,T,night,true);
   drawShack(d,h,T);
   drawDock(d,T);if(loc==='pond'){drawMarina(d,T);drawGateRing(d,T)}if(loc==='friend')drawNameSign(d);
-  drawLand(d,T,night);petYard(d,T);ygDraw(d,T);
+  drawLand(d,T,night);petYard(d,T);ygDraw(d,T);houseDraw(d,T);
   hwDock(d,T);if(CAMT.z>1.3)yardHits();drawBoxes(d,T);scnDraw('yard',d,T,loc);}
   liveDraw(d,T,loc);q4Draw(d,T,loc);hwPumpDraw(d,T,loc);
   // fireflies
@@ -5884,7 +5898,7 @@ function petAcc(c,P,x,y,k){const a=P.acc;if(!a||a==='none')return;c.save();c.tra
   c.restore()}
 function petHearts(c,x,y,s){const t=(performance.now()-PET_RT.heart)/1000;if(t<0||t>1.4)return;c.save();for(let i=0;i<3;i++){const u=Math.min(1,Math.max(0,t-i*.15)/1.1);if(u<=0)continue;c.globalAlpha=1-u;c.fillStyle='#ff5a7a';c.font=`${Math.round(7*s)}px sans-serif`;c.textAlign='center';c.fillText('♥',x+(i-1)*5*s+Math.sin(u*6+i)*2*s,y-u*16*s)}c.restore()}
 // Yard: wanders around the lot, sits, naps. Shared by your yard and a friend's.
-function petYard(d,T){const ctxN=yardCtx(),P=ctxN==='friend'?(VT&&VT.ext&&VT.ext.pet):ctxN==='home'?curPet():null;if(!P)return;const R=PET_RT,now=performance.now(),dt=R.last?Math.min(.1,(now-R.last)/1000):0;R.last=now;
+function petYard(d,T){const ctxN=yardCtx(),P=ctxN==='friend'?(VT&&VT.ext&&VT.ext.pet):ctxN==='home'?curPet():null;if(!P)return;if(ctxN==='friend'&&houseHere()&&[...HOUSE.peers.values()].some(p=>p.host&&p.pet))return;const R=PET_RT,now=performance.now(),dt=R.last?Math.min(.1,(now-R.last)/1000):0;R.last=now;
   if(R.ctx!==ctxN){R.ctx=ctxN;R.x=R.tx=60;R.y=R.ty=310;R.st='idle';R.t=1;R.fetch=null}
   const lx=Math.max(-800,yardLeft()+14),house=yardList().find(a=>a[0]==='pethouse'),sp0=P.k==='frog'?10:P.k==='duck'?12:18,move=(tx,ty,sp)=>{const dx=tx-R.x,dy=ty-R.y,dd=Math.hypot(dx,dy),st=sp*dt;if(dd<st+.5){R.x=tx;R.y=ty;return true}R.x+=dx/dd*st;R.y+=dy/dd*st;R.face=dx>=0?1:-1;return false};
   let pose;const F=R.fetch;
@@ -6183,8 +6197,8 @@ function ygItemDraw(id,d,T,a){const g=(c,k)=>rgb(mix(c.map(v=>v*(k||.28)),c,d*.8
     if(sw){ctx.save();ctx.translate(0,28);ctx.scale(.62,.62);ctx.strokeStyle=rgb(mix([20,20,30],[50,60,90],d));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,-2);ctx.lineTo(-3,9);ctx.moveTo(2,-2);ctx.lineTo(3,9);ctx.stroke();drawAngler(0,-1,d,T);ctx.restore()}ctx.restore()}}
 function ygStand(a){const dir=a[3]?-1:1;if(a[0]==='cornhole')return [a[1]-dir*62,a[2]+2,dir];if(a[0]==='hoop')return [a[1]+dir*(-34),a[2]+6,dir];return [a[1],a[2]+3,1]}
 function ygStart(i){const ctxN=yardCtx(),L=yardList(),a=L[i];if(!a||!YGAMES[a[0]]||YG.on||!walkCtx())return;const [sx,sy,dir]=ygStand(a);
-  walkTo(sx,sy,()=>{if(!walkCtx())return;WALK.face=dir;YG.on={kind:a[0],i,x:a[1],y:a[2],dir,ph:'aim',t0:performance.now(),score:0,shots:0,streak:0,pow:0,hold:false,proj:null,msg:'',ctx:ctxN};ygUI();sfx('click')})}
-function ygEnd(){const G=YG.on;if(!G)return;YG.on=null;$('ygBar').hidden=true;renderVisitBar();if(G.kind!=='tireswing'&&G.done){const t=arcEarn(G.kind==='cornhole'?G.score*2:G.score*3);if(t)showToast(`+${t} prize tickets`,'Yard game')}}
+  walkTo(sx,sy,()=>{if(!walkCtx())return;WALK.face=dir;if(a[0]==='tireswing'&&houseHere())hsend({t:'game',g:{k:'swing',on:1}});YG.on={kind:a[0],i,x:a[1],y:a[2],dir,ph:'aim',t0:performance.now(),score:0,shots:0,streak:0,pow:0,hold:false,proj:null,msg:'',ctx:ctxN};ygUI();sfx('click')})}
+function ygEnd(){const G=YG.on;if(!G)return;YG.on=null;if(G.kind==='tireswing'&&houseHere())hsend({t:'game',g:{k:'swing',on:0}});$('ygBar').hidden=true;renderVisitBar();if(G.kind!=='tireswing'&&G.done){const t=arcEarn(G.kind==='cornhole'?G.score*2:G.score*3);if(t)showToast(`+${t} prize tickets`,'Yard game')}}
 const YG_ROUND={cornhole:5,hoop:10};
 function ygUI(){const G=YG.on,b=$('ygBar');if(!G){b.hidden=true;return}$('visitBar').hidden=true;const K=YGAMES[G.kind];
   if(G.kind==='tireswing'){b.innerHTML=`<div><span><b>${K.n}</b> · Wheee! Swinging…</span><span class="vbtns"><button class="ghost" id="ygDone">Hop off</button></span></div>`}
@@ -6200,11 +6214,12 @@ function ygThrow(){const G=YG.on;if(!G||G.proj||G.shots>=YG_ROUND[G.kind])return
     G.proj={sx:px,sy:py,ex:lx,ey:pts===3?ly-3:ly,t0:performance.now(),dur:.8,col:'#c83a30',pts,msg,h:30}}
   else{const zw=Math.max(.06,.16-G.streak*.015),zc=.5,diff=Math.abs(p-zc);const make=diff<zw/2||(diff<zw/2+.07&&Math.random()<.4);const rx=G.x+G.dir*13,ry=G.y-55;
     G.proj={sx:px,sy:py-6,ex:make?rx:rx+G.dir*(Math.random()<.5?6:-6),ey:make?ry+12:ry+4,t0:performance.now(),dur:.9,col:'#e8742a',pts:make?1:0,msg:make?(diff<zw/2?'Swish!':'Rattled in!'):'Clank! Miss',h:34,hoop:1}}
+  if(houseHere()&&G.proj){const q=G.proj;hsend({t:'game',g:{k:'proj',sx:Math.round(q.sx),sy:Math.round(q.sy),ex:Math.round(q.ex),ey:Math.round(q.ey),h:q.h,dur:q.dur,col:q.col,hoop:q.hoop?1:0}})}
   sfx('click')}
 function ygDraw(d,T){const G=YG.on;if(!G)return;if(G.ctx!==yardCtx()||!walkCtx()){YG.on=null;$('ygBar').hidden=true;return}
   if(G.kind!=='tireswing'){const f=$('ygFill');if(f)f.style.width=Math.round(ygMeter()*100)+'%';const z=$('ygZone');if(z){const zw=Math.max(.06,.16-G.streak*.015);z.style.left=((.5-zw/2)*100)+'%';z.style.width=(zw*100)+'%'}}
   const P=G.proj;if(P){const u=Math.min(1,(performance.now()-P.t0)/1000/P.dur),x=P.sx+(P.ex-P.sx)*u,y=P.sy+(P.ey-P.sy)*u-Math.sin(u*Math.PI)*P.h;ctx.fillStyle=P.col;if(P.hoop){ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill()}else ctx.fillRect(x-1.8,y-1.2,3.6,2.4);
-    if(u>=1){G.proj=null;G.score+=P.pts;G.msg=P.msg;if(P.pts){G.streak++;sfx('chime','R');if(G.kind==='cornhole'&&P.pts<3)(G.bags=G.bags||[]).push([P.ex,P.ey])}else{G.streak=0;sfx('miss')}if(G.shots>=YG_ROUND[G.kind])G.done=true;ygUI()}}
+    if(u>=1){G.proj=null;G.score+=P.pts;G.msg=P.msg;if(P.pts){G.streak++;sfx('chime','R');if(G.kind==='cornhole'&&P.pts<3)(G.bags=G.bags||[]).push([P.ex,P.ey])}else{G.streak=0;sfx('miss')}if(G.shots>=YG_ROUND[G.kind]){G.done=true;if(houseHere())hsend({t:'game',g:{k:'score',score:G.score,msg:`${YGAMES[G.kind].n.split(' ')[0]}: ${G.score} pts!`}})}ygUI()}}
   for(const [bx,by] of (G.kind==='cornhole'&&G.bags)||[]){ctx.fillStyle='#c83a30';ctx.fillRect(bx-1.8,by-6,3.6,2.4)}
   if(G.kind==='tireswing'&&(performance.now()-G.t0)>9000)ygEnd()}
 // ---- dock fishing ----
@@ -6494,7 +6509,7 @@ function walkTo(x,y,after){WALK.tx=x;WALK.ty=y;WALK.after=after||null}
 function walkThen(act){const [dx,dy]=WALK.door;if(!walkCtx()||Math.hypot(WALK.x-dx,WALK.y-dy)<14){act();return}walkTo(dx,dy,act)}
 function walkDraw(d,T,wc){const now=performance.now(),dt=WALK.last?Math.min(.1,(now-WALK.last)/1000):0;WALK.last=now;
   const G=shackGeo();WALK.door=[G.t===0?78:G.door+7,246];
-  if(WALK.ctx!==wc){WALK.ctx=wc;[WALK.x,WALK.y]=WALK.door;WALK.tx=WALK.ty=null;WALK.after=null;WALK.face=1}
+  if(WALK.ctx!==wc){WALK.ctx=wc;[WALK.x,WALK.y]=WALK.door;if(wc==='friend'){WALK.x+=Math.round(Math.random()*36-18);WALK.y+=Math.round(4+Math.random()*16)}WALK.tx=WALK.ty=null;WALK.after=null;WALK.face=1}
   const K=WALK.keys,kx=(K.right?1:0)-(K.left?1:0),ky=(K.down?1:0)-(K.up?1:0),sp=52;let moving=false;
   if(kx||ky){const n=Math.hypot(kx,ky);[WALK.x,WALK.y]=walkClamp(WALK.x+kx/n*sp*dt,WALK.y+ky/n*sp*.75*dt);if(kx)WALK.face=kx>0?1:-1;WALK.tx=WALK.ty=null;WALK.after=null;moving=true}
   else if(WALK.tx!=null){const [tx,ty]=walkClamp(WALK.tx,WALK.ty),dx=tx-WALK.x,dy=ty-WALK.y,dd=Math.hypot(dx,dy),st=sp*dt;
@@ -6506,11 +6521,97 @@ function walkDraw(d,T,wc){const now=performance.now(),dt=WALK.last?Math.min(.1,(
   ctx.save();ctx.translate(WALK.x,WALK.y);ctx.scale(WALK.face*k,k);ctx.fillStyle='rgba(0,0,0,.16)';ctx.beginPath();ctx.ellipse(0,0,7,1.6,0,0,7);ctx.fill();
   ctx.strokeStyle=rgb(mix([20,20,30],[50,60,90],d));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,-8-bob);ctx.lineTo(-2+leg,0);ctx.moveTo(2,-8-bob);ctx.lineTo(2-leg,0);ctx.stroke();
   drawAngler(0,-7-bob,d,T);ctx.restore();
-  if(WALK.tx!=null&&!(kx||ky)){const [tx,ty]=walkClamp(WALK.tx,WALK.ty);ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=.8;ctx.beginPath();ctx.ellipse(tx,ty,5,1.6,0,0,7);ctx.stroke()}}
+  if(WALK.tx!=null&&!(kx||ky)){const [tx,ty]=walkClamp(WALK.tx,WALK.ty);ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=.8;ctx.beginPath();ctx.ellipse(tx,ty,5,1.6,0,0,7);ctx.stroke()}
+  houseSendMv()}
 (()=>{const map={w:'up',arrowup:'up',s:'down',arrowdown:'down',a:'left',arrowleft:'left',d:'right',arrowright:'right'};
   const typing=e=>{const t=e.target;return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)};
   addEventListener('keydown',e=>{const k=map[e.key.toLowerCase()];if(!k||typing(e)||!walkCtx()||e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.away:not([hidden])'))return;WALK.keys[k]=true;e.preventDefault()});
   addEventListener('keyup',e=>{const k=map[e.key.toLowerCase()];if(k)WALK.keys[k]=false});addEventListener('blur',()=>{WALK.keys={}})})();
+// ==OPEN HOUSE== Host your yard live: friends walk around with you, wave, chat with preset phrases and watch each other play.
+const HSAY=['👋 Hi!','Nice yard!','Come see this!','🎣 Fish with me?','Wanna play cornhole?','Shoot some hoops?','Love your pet!','Haha 😂','Wow!','Thanks for having me!','Be right back','Gotta go, bye!','Over here!','🔥 Campfire time?','📸 Photo time!','GG!'];
+const HEMO=['👋','❤️','😂','🎣','🎉','😮','👍','😴','🔥','🐟','⭐','🎶'];
+const HOUSE={ws:null,host:null,me:false,peers:new Map(),st:'off',name:'',ka:0,away:0,blocked:new Set(),bl:false,lastMv:0,mvSig:'',join:null,bub:null,n:0};
+const houseHere=()=>HOUSE.st==='on'&&(HOUSE.me?yardCtx()==='home':yardCtx()==='friend'&&VT&&VT.id===HOUSE.host);
+async function blocksLoad(force){const m=mpS();if(!m.id||(HOUSE.bl&&!force))return;HOUSE.bl=true;try{const r=await api('block/list',{id:m.id,key:m.key});HOUSE.blocked=new Set(r.blocked.map(x=>x.pid));HOUSE.blockedList=r.blocked}catch(e){HOUSE.bl=false}}
+function houseConnect(host,asHost){const m=mpS();if(!m.id||typeof WebSocket==='undefined')return;houseDrop();HOUSE.host=host;HOUSE.me=!!asHost;HOUSE.st='connecting';HOUSE.peers.clear();
+  const u=new URL('/api/house',location.href);u.protocol=location.protocol==='https:'?'wss:':'ws:';const P=curPet();
+  const q={id:m.id,key:m.key,host,wear:hwWear()||'',g:lookOf(S.look).g,pet:P?JSON.stringify({k:P.k,coat:P.coat,acc:P.acc,name:P.name}):''};for(const k in q)u.searchParams.set(k,q[k]);
+  let ws;try{ws=new WebSocket(u.toString())}catch(e){HOUSE.st='off';return}HOUSE.ws=ws;
+  ws.onopen=()=>{if(HOUSE.ws!==ws)return;HOUSE.st='on';HOUSE.mvSig='';renderVisitBar(true)};
+  ws.onmessage=e=>{if(HOUSE.ws!==ws||e.data==='pong')return;let o;try{o=JSON.parse(e.data)}catch(_){return}houseMsg(o)};
+  ws.onclose=ev=>{if(HOUSE.ws!==ws)return;HOUSE.ws=null;HOUSE.st='off';HOUSE.peers.clear();if(ev.code===4001)showToast('The host asked you to leave','Open House');else if(ev.code===4002&&!HOUSE.me)showToast(`${HOUSE.name||'The host'} closed their house`,'Open House');
+    else if(!HOUSE.me&&ev.code!==1000&&ev.code!==4000)showToast('Lost the connection to the Open House');if(HOUSE.me&&ev.code!==1000&&ev.code!==4000)HOUSE.retryAt=Date.now()+5000;renderVisitBar(true)};
+  ws.onerror=()=>{}}
+function houseDrop(){const ws=HOUSE.ws;HOUSE.ws=null;HOUSE.st='off';HOUSE.peers.clear();if(ws)try{ws.close(1000)}catch(e){}}
+const hsend=o=>{try{if(HOUSE.ws&&HOUSE.st==='on')HOUSE.ws.send(JSON.stringify(o))}catch(e){}};
+function houseMsg(o){const P=HOUSE.peers,add=a=>{if(!a||!a.cid)return;P.set(a.cid,Object.assign(P.get(a.cid)||{},a,{x:a.x??null,tx:a.x,ty:a.y,y:a.y,f:a.f||1,m:0,bub:null,proj:[]}))};
+  if(o.t==='hello'){P.clear();for(const a of o.peers||[])add(a);const h=[...P.values()].find(p=>p.host);if(h)HOUSE.name=h.name;HOUSE.n=[...P.values()].filter(p=>!p.host).length+(HOUSE.me?0:1)}
+  else if(o.t==='join'){add(o.p);if(o.p.host)HOUSE.name=o.p.name;if(!HOUSE.blocked.has(o.p.pid)){sfx('pop');if(houseHere())showToast(`${o.p.name} ${o.p.host?'is back':'came over'}`,'Open House')}}
+  else if(o.t==='leave'){const p=P.get(o.cid);P.delete(o.cid);if(p&&!HOUSE.blocked.has(p.pid)&&houseHere()&&!p.host)showToast(`${p.name} headed home`,'Open House')}
+  else if(o.t==='mv'){const p=P.get(o.cid);if(p){if(p.x==null){p.x=o.x;p.y=o.y}p.tx=o.x;p.ty=o.y;p.f=o.f;p.m=o.m}}
+  else if(o.t==='emo'){const p=P.get(o.cid);if(p)p.bub={s:HEMO[o.e]||'👋',t:0}}
+  else if(o.t==='say'){const p=P.get(o.cid);if(p)p.bub={s:HSAY[o.i]||'👋',t:0}}
+  else if(o.t==='game'){const p=P.get(o.cid);if(!p)return;const g=o.g;if(g.k==='proj')p.proj.push({...g,t0:performance.now()});else if(g.k==='swing'){p.swing=g.on?1:0;if(g.on)p.bub={s:'🛞 Wheee!',t:0}}else if(g.k==='score')p.bub={s:g.msg||`Scored ${g.score}!`,t:0}}
+  else if(o.t==='hostaway'){if(!HOUSE.me&&houseHere())showToast(`${HOUSE.name||'The host'} stepped away`,'They may be back soon')}
+  else if(o.t==='closed'){}
+  HOUSE.n=[...P.values()].filter(p=>!p.host&&!HOUSE.blocked.has(p.pid)).length+(HOUSE.me?0:1);renderVisitBar(true)}
+// Your own position, sent only while it changes (and at most 5 times a second).
+function houseSendMv(){if(HOUSE.st!=='on'||!houseHere())return;const now=performance.now();if(now-HOUSE.lastMv<200)return;const sig=Math.round(WALK.x)+','+Math.round(WALK.y)+','+WALK.face+','+(WALK.mv>0?1:0);if(sig===HOUSE.mvSig)return;HOUSE.lastMv=now;HOUSE.mvSig=sig;hsend({t:'mv',x:Math.round(WALK.x),y:Math.round(WALK.y),f:WALK.face,m:WALK.mv>0?1:0})}
+function houseDraw(d,T){if(!houseHere())return;const now=performance.now(),dt=HOUSE.lt?Math.min(.1,(now-HOUSE.lt)/1000):0;HOUSE.lt=now;const G=shackGeo(),door=[G.t===0?78:G.door+7,246];
+  const ps=[...HOUSE.peers.values()].filter(p=>!HOUSE.blocked.has(p.pid));for(const p of ps){if(p.x==null){p.x=p.tx??door[0];p.y=p.ty??door[1]}if(p.tx==null){p.tx=p.x;p.ty=p.y}}
+  ps.sort((a,b)=>a.y-b.y);const tags=[];
+  for(const p of ps){const dx=p.tx-p.x,dy=p.ty-p.y,dd=Math.hypot(dx,dy),st=60*dt;let mv=0;if(dd>st+.3){p.x+=dx/dd*st;p.y+=dy/dd*st;mv=1}else{p.x=p.tx;p.y=p.ty;mv=p.m&&dd>0?1:0}
+    // pet
+    if(p.pet&&PETS[p.pet.k]){const P=petParse(p.pet);p.px=p.px??p.x-14;p.py=p.py??p.y+3;const pdx=p.x-p.f*14-p.px,pdy=p.y+3-p.py,pd=Math.hypot(pdx,pdy),pst=45*dt,pm=pd>4;if(pm){p.px+=pdx/pd*Math.min(pd,pst);p.py+=pdy/pd*Math.min(pd,pst)}
+      const k=1.3*Math.min(1.08,.66+(p.py-242)*.0028);petDraw(ctx,P,p.px,p.py,pdx>=0?1:-1,pm?'walk':'sit',T,k,d)}
+    const k=Math.min(1.08,.66+(p.y-242)*.0028),leg=Math.sin(T*13)*3.5*mv,bob=Math.abs(Math.sin(T*13))*1.5*mv;
+    ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.f*k,k);ctx.fillStyle='rgba(0,0,0,.16)';ctx.beginPath();ctx.ellipse(0,0,7,1.6,0,0,7);ctx.fill();ctx.strokeStyle=rgb(mix([20,20,30],[50,60,90],d));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,-8-bob);ctx.lineTo(-2+leg,0);ctx.moveTo(2,-8-bob);ctx.lineTo(2-leg,0);ctx.stroke();
+    LIVE.drawing=true;LIVE.drawWear=p.wear||null;LIVE.drawG=p.g==='f'?'f':'m';try{drawAngler(0,-7-bob,d,T,'clear')}finally{LIVE.drawing=false}ctx.restore();
+    // name tag
+    ctx.font='bold 5px sans-serif';const nm=(p.host?'🏡 ':'')+p.name,w=ctx.measureText(nm).width+6;let ty=p.y-46*k;for(let g=0;g<4;g++){const hit=tags.find(t=>Math.abs(t[0]-p.x)<(t[1]+w)/2&&Math.abs(t[2]-ty)<8);if(!hit)break;ty=hit[2]-8.5}tags.push([p.x,w,ty]);p.tagY=ty;ctx.fillStyle='rgba(10,22,28,.7)';rrect(p.x-w/2,ty,w,7,3);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(nm,p.x,ty+5);ctx.textAlign='left';
+    if(p.bub){p.bub.t+=dt;if(p.bub.t>4)p.bub=null;else{ctx.save();ctx.translate(p.x,Math.min(p.y-58*k,p.tagY-4));ctx.scale(.5,.5);emoBubble(0,0,p.bub.s,p.bub.t);ctx.restore()}}
+    for(const q of p.proj){const u=Math.min(1,(now-q.t0)/1000/(q.dur||.8)),x=q.sx+(q.ex-q.sx)*u,y=q.sy+(q.ey-q.sy)*u-Math.sin(u*Math.PI)*(q.h||30);ctx.fillStyle=q.col||'#c83a30';if(q.hoop){ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill()}else ctx.fillRect(x-1.8,y-1.2,3.6,2.4);q.done=u>=1}
+    p.proj=p.proj.filter(q=>!q.done);
+    if(CAMT.z>1.3&&!YED.on)HITS.push({x:p.x-9*k,y:p.y-44*k,w:18*k,h:44*k,kind:'ypeer',data:p.cid})}
+  if(!HOUSE.me&&walkCtx()==='friend'){const P=curPet();if(P){const o=HOUSE.sp||(HOUSE.sp={x:WALK.x-14,y:WALK.y+3});const dx=WALK.x-WALK.face*14-o.x,dy=WALK.y+3-o.y,dd=Math.hypot(dx,dy),m=dd>4;if(m){const st=(dd>80?110:48)*dt;o.x+=dx/dd*Math.min(dd,st);o.y+=dy/dd*Math.min(dd,st);o.f=dx>=0?1:-1}petDraw(ctx,P,o.x,o.y,o.f||1,m?'walk':'sit',T,1.3*Math.min(1.08,.66+(o.y-242)*.0028),d)}}else HOUSE.sp=null;
+  if(HOUSE.bub){HOUSE.bub.t+=dt;if(HOUSE.bub.t>4)HOUSE.bub=null;else{const k=Math.min(1.08,.66+(WALK.y-242)*.0028);ctx.save();ctx.translate(WALK.x,WALK.y-50*k);ctx.scale(.5,.5);emoBubble(0,0,HOUSE.bub.s,HOUSE.bub.t);ctx.restore()}}}
+async function houseOpen(){const m=mpS();if(!m.id){showToast('Pick an angler name in Friends first','Open House');return}try{await api('house/open',{id:m.id,key:m.key});HOUSE.ka=Date.now();HOUSE.name=m.name;houseConnect(m.id,true);sfx('chime','R');showToast('Your house is open!','Anyone on your lake can drop by')}catch(e){showToast('Couldn’t open your house. Try again.')}}
+async function houseClose(quiet){const m=mpS();hsend({t:'close'});houseDrop();HOUSE.me=false;HOUSE.host=null;try{await api('house/close',{id:m.id,key:m.key})}catch(e){}if(!quiet)showToast('Your house is closed','Open House');renderVisitBar(true)}
+function houseTick(){const now=Date.now();
+  if(HOUSE.me&&HOUSE.host){if(yardCtx()!=='home'){HOUSE.away=HOUSE.away||now;if(now-HOUSE.away>120000)houseClose(true)}else HOUSE.away=0;
+    if(now-HOUSE.ka>60000){HOUSE.ka=now;const m=mpS();api('house/open',{id:m.id,key:m.key}).catch(()=>{})}if(HOUSE.st==='off'&&HOUSE.retryAt&&now>HOUSE.retryAt&&yardCtx()==='home'){HOUSE.retryAt=0;houseConnect(HOUSE.host,true)}}
+  else{const want=VT&&!VT.arcade&&!VT.museum&&(VT.house||HOUSE.join===VT.id)?VT.id:null;if(want&&HOUSE.host!==want&&HOUSE.st==='off'){HOUSE.join=null;houseConnect(want,false)}else if(!want&&HOUSE.host&&!HOUSE.me){houseDrop();HOUSE.host=null}}}
+function houseJoin(pid){HOUSE.join=pid;closePhone();visitCabin(pid)}
+function houseSay(i){hsend({t:'say',i});HOUSE.bub={s:HSAY[i],t:0};$('hchat').hidden=true}
+function houseEmo(e){hsend({t:'emo',e});HOUSE.bub={s:HEMO[e],t:0};$('hchat').hidden=true}
+function houseChatUI(){const c=$('hchat');if(!c.hidden){c.hidden=true;return}c.innerHTML=`<div class="hc-emo">${HEMO.map((e,i)=>`<button data-he="${i}">${e}</button>`).join('')}</div><div class="hc-say">${HSAY.map((s,i)=>`<button data-hs="${i}">${s}</button>`).join('')}</div>`;
+  c.querySelectorAll('[data-he]').forEach(b=>b.onclick=e=>{e.stopPropagation();houseEmo(+b.dataset.he)});c.querySelectorAll('[data-hs]').forEach(b=>b.onclick=e=>{e.stopPropagation();houseSay(+b.dataset.hs)});c.hidden=false}
+function houseGuestsUI(){const list=[...HOUSE.peers.values()].filter(p=>!HOUSE.blocked.has(p.pid));const B=$('plotBody');
+  B.innerHTML=list.length?`<div class="plot-list">${list.map(p=>`<div class="hg-row"><b>${p.host?'🏡 ':''}${esc(p.name)}</b><span>${HOUSE.me&&!p.host?`<button class="sbtn" data-hk="${p.cid}">Remove</button>`:''}<button class="sbtn ghost" data-hb="${p.cid}">Block</button><button class="sbtn ghost" data-hr="${p.cid}">Report</button></span></div>`).join('')}</div>`:'<p class="land-d">Nobody else is here yet. Invite some friends!</p>';
+  $('plotTitle').textContent=HOUSE.me?'Your guests':'Who’s here';$('plotModal').hidden=false;bindPeerActs(B)}
+function bindPeerActs(B){B.querySelectorAll('[data-hk]').forEach(b=>b.onclick=()=>{if(!b.dataset.arm){b.dataset.arm=1;b.textContent='Sure?';return}hsend({t:'kick',cid:b.dataset.hk});$('plotModal').hidden=true;showToast('They’ve been asked to leave','They can’t come back for 24 hours')});
+  B.querySelectorAll('[data-hb]').forEach(b=>b.onclick=()=>{const p=HOUSE.peers.get(b.dataset.hb);if(p)blockPlayer(p.pid,p.name)});
+  B.querySelectorAll('[data-hr]').forEach(b=>b.onclick=()=>{const p=HOUSE.peers.get(b.dataset.hr);if(p)reportPlayer(p.pid,p.name,'Open House')})}
+function peerMenu(cid){const p=HOUSE.peers.get(cid);if(!p)return;const B=$('plotBody');B.innerHTML=`<p class="land-d">${p.host?'This is their place.':'A guest at this Open House.'}${p.pet?` With ${esc(p.pet.name||'their pet')}.`:''}</p><div class="xf-row">${HOUSE.me&&!p.host?`<button class="sbtn" data-hk="${p.cid}">Remove from my house</button>`:''}<button class="sbtn ghost" data-hb="${p.cid}">Block</button><button class="sbtn ghost" data-hr="${p.cid}">Report</button></div>`;
+  $('plotTitle').textContent=p.name;$('plotModal').hidden=false;bindPeerActs(B)}
+async function blockPlayer(pid,name){if(!confirmTwice('blk'+pid))return;const m=mpS();try{await api('block/add',{id:m.id,key:m.key,pid});HOUSE.blocked.add(pid);(HOUSE.blockedList=HOUSE.blockedList||[]).push({pid,name});$('plotModal').hidden=true;showToast(`${name} is blocked`,'You won’t see each other anymore');if(VT&&VT.id===pid&&HOUSE.host===pid)houseDrop()}catch(e){showToast('Couldn’t block them. Try again.')}}
+async function unblockPlayer(pid,name){const m=mpS();try{await api('block/del',{id:m.id,key:m.key,pid});HOUSE.blocked.delete(pid);HOUSE.blockedList=(HOUSE.blockedList||[]).filter(x=>x.pid!==pid);showToast(`${name||'They'} can see you again`,'Unblocked')}catch(e){showToast('Couldn’t unblock. Try again.')}}
+async function blocksUI(){await blocksLoad(true);const L=HOUSE.blockedList||[],B=$('plotBody');B.innerHTML=L.length?`<div class="plot-list">${L.map(x=>`<div class="hg-row"><b>${esc(x.name||'Unknown')}</b><button class="sbtn" data-ub="${esc(x.pid)}">Unblock</button></div>`).join('')}</div>`:'<p class="land-d">You haven’t blocked anyone.</p>';
+  $('plotTitle').textContent='Blocked players';$('plotModal').hidden=false;B.querySelectorAll('[data-ub]').forEach(b=>b.onclick=async()=>{const x=L.find(y=>y.pid===b.dataset.ub);await unblockPlayer(b.dataset.ub,x&&x.name);blocksUI()})}
+const CONF={};function confirmTwice(k){const now=Date.now();if(CONF[k]&&now-CONF[k]<4000){delete CONF[k];return true}CONF[k]=now;showToast('Tap again to confirm');return false}
+function reportPlayer(pid,name,where){const B=$('plotBody');B.innerHTML=`<p class="land-d">What’s wrong? The game’s owner will take a look.</p><div class="plot-list">${['Rude or hurtful name','Spamming or annoying','Harassing me or others','Something else'].map(r=>`<button class="tripopt" data-rr="${r}"><b>${r}</b></button>`).join('')}</div>`;
+  $('plotTitle').textContent=`Report ${name}`;$('plotModal').hidden=false;B.querySelectorAll('[data-rr]').forEach(b=>b.onclick=async()=>{const m=mpS();try{await api('report',{id:m.id,key:m.key,pid,reason:b.dataset.rr,where});showToast('Thanks, your report was sent','You can also block them')}catch(e){showToast('Couldn’t send the report. Try again.')}$('plotModal').hidden=true})}
+async function houseInviteUI(){const B=$('plotBody');B.innerHTML='<p class="land-d">Loading anglers…</p>';$('plotTitle').textContent='Invite friends over';$('plotModal').hidden=false;let pl=[];try{pl=await mpPlayers()}catch(e){}const m=mpS();
+  pl=pl.filter(x=>x.id!==m.id&&!HOUSE.blocked.has(x.id));const sel=new Set();
+  const draw=f=>{const L=pl.filter(x=>!f||x.name.toLowerCase().includes(f)).slice(0,40);B.querySelector('#hiList').innerHTML=L.length?L.map(x=>`<label class="hg-row"><b>${esc(x.name)}</b><input type="checkbox" data-hi="${esc(x.id)}" ${sel.has(x.id)?'checked':''}></label>`).join(''):'<p class="fr-muted">No anglers found.</p>';
+    B.querySelectorAll('[data-hi]').forEach(c=>c.onchange=()=>{c.checked?sel.add(c.dataset.hi):sel.delete(c.dataset.hi);B.querySelector('#hiGo').textContent=`Send ${sel.size||''} invite${sel.size===1?'':'s'}`})};
+  B.innerHTML=`<input class="pet-name" id="hiFind" placeholder="Search names" style="width:100%;box-sizing:border-box"><div id="hiList" class="plot-list" style="max-height:44vh;overflow:auto;margin:8px 0"></div><button class="jig" id="hiGo">Send invites</button>`;
+  draw('');$('hiFind').oninput=e=>draw(e.target.value.trim().toLowerCase());
+  $('hiGo').onclick=async()=>{if(!sel.size)return;try{const r=await api('house/invite',{id:m.id,key:m.key,to:[...sel].slice(0,10)});showToast(r.sent?`Sent ${r.sent} invite${r.sent>1?'s':''}`:'Already invited recently','Open House')}catch(e){showToast('Couldn’t send invites. Try again.')}$('plotModal').hidden=true}}
+function showInvites(list){for(const iv of list||[]){if(HOUSE.blocked.has(iv.from_pid))continue;const c=$('invCard');c.innerHTML=`<span>🏡</span><div><b>${esc(iv.from_name)} invited you over</b><small>Their Open House is going now</small></div><button class="jig" id="invGo">Join</button><button class="ghost" id="invNo">Not now</button>`;c.hidden=false;sfx('chime','U');
+  $('invGo').onclick=()=>{c.hidden=true;houseJoin(iv.from_pid)};$('invNo').onclick=()=>{c.hidden=true};setTimeout(()=>{c.hidden=true},60000)}}
+async function openHousesHTML(){const m=mpS();let r;try{r=await api('house/list',{id:m.id,key:m.key})}catch(e){return '<p class="fr-muted">Couldn’t load open houses.</p>'}const L=(r.houses||[]).filter(h=>!HOUSE.blocked.has(h.pid));
+  return L.length?`<ol class="yw-list">${L.map(h=>`<li><span class="yw-r">🏡</span><b>${esc(h.name)}</b><small>${h.n} guest${h.n===1?'':'s'}</small><button class="fr-mini" data-hj="${esc(h.pid)}">Join</button></li>`).join('')}</ol>`:'<p class="fr-muted">Nobody is hosting right now. Open your own house from your yard!</p>'}
 function drawSleep(d,T){
   {const wc=walkCtx();if(wc){walkDraw(d,T,wc);return}}
   const ph=S.sleep.ph;if(ph!=='run'&&ph!=='walkOut'&&ph!=='door'&&ph!=='yard')return;if(dockFishing())return;const st=ph==='door'||ph==='yard';
@@ -8533,7 +8634,7 @@ const XKIND={
   yard:{name:it=>{const [c]=String(it).split('|');return `Best yard of the week: $${money(+c)}`},give:it=>{const [c]=String(it).split('|');S.coins+=+c||0;S.trophies.unshift({name:'Best Yard',water:'pond',type:'big',score:'Most liked',day:S.day});celebrate({lbl:'Best yard!',r:'L',name:'Your yard got the most likes',sub:`+$${money(+c)} and a trophy`,icon:cupSvg});return true}},
   chal:{name:it=>{const [k,c,o,f]=String(it).split('|');const fn=FI(f)?FI(f).n:f;return k==='win'?`Challenge won vs ${o} (${fn}): $${money(+c)}`:k==='tie'?`Challenge tie with ${o}: $${money(+c)} back`:`Challenge refund (${o}): $${money(+c)}`},give:it=>{const [k,c,o]=String(it).split('|');S.coins+=+c||0;if(k==='win')celebrate({lbl:'Challenge won!',r:'R',name:`You beat ${o}`,sub:`+$${money(+c)}`,icon:cupSvg});else showToast(`+$${money(+c)}`,k==='tie'?'Challenge tie':'Challenge refund');return true}}};
 function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
-function mpSyncDone(body,r){const m=mpS();try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);
+function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);
   if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;
   if(r.chal){const prev=MPV.chal||[];MPV.chal=r.chal;const newIn=r.chal.filter(c=>c.mine==='b'&&c.st==='pend'&&!(m.chSeen||[]).includes(c.id));if(newIn.length){m.chSeen=(m.chSeen||[]).concat(newIn.map(c=>c.id)).slice(-40);phNotify('friends','Challenge!',`${newIn[0].other} challenges you: biggest ${FI(newIn[0].fish)?FI(newIn[0].fish).n:newIn[0].fish} for $${money(newIn[0].stake)}`)}
     const live=new Set(r.chal.filter(c=>c.st==='live').map(c=>String(c.id)));if(m.chw)for(const k of Object.keys(m.chw))if(!live.has(k))delete m.chw[k]}
@@ -8551,6 +8652,7 @@ function togetherHTML(){const M=MPV.mon,C=MPV.chal||[],G=MPV.gb;let h='';
   for(const c of live)h+=`<div class="ch-row live"><div><b>vs ${esc(c.other)} · biggest ${fn(c.fish)}</b><small>You ${c.me?(+c.me).toFixed(2)+' lb':'nothing yet'} · them ${c.them?(+c.them).toFixed(2)+' lb':'nothing yet'} · $${money(c.stake*2)} pot · ${tLeft(c.ends-Date.now())}</small></div></div>`;
   for(const c of done)h+=`<div class="ch-row old"><div><b>${c.st==='done'?(c.me>c.them?'Won':c.me<c.them?'Lost':'Tied'):c.st==='decl'?'Passed':'Expired'} vs ${esc(c.other)}</b><small>${fn(c.fish)}${c.st==='done'?` · ${(+c.me).toFixed(2)} vs ${(+c.them).toFixed(2)} lb`:''}</small></div></div>`;
   h+='</div>';
+  h+=`<div class="fr-card"><b>🏡 Open houses now</b><p>Anyone on your lake who’s hosting. Hop in and hang out!</p><div id="ohList"><p class="fr-muted">Loading…</p></div></div>`;
   h+=`<div class="fr-card cup yotw"><b>🏆 Yard of the Week</b><p>Visit yards and tap ❤ Like yard. The most-liked yard each week wins $25,000, a trophy, and a gold ribbon on their sign for the next week.</p><div id="yotwList"><p class="fr-muted">Loading…</p></div><div class="fr-row"><button class="fr-btn" id="yotwRand">🎲 Visit a random yard</button></div></div>`;
   h+=`<div class="fr-card"><b>Your guestbook</b><p>Friends who visit your place can leave a note and like your yard.</p><div id="gbList"><p class="fr-muted">Loading…</p></div></div>`;return h}
 async function loadYotw(){const m=mpS(),el=$('yotwList');if(!el||!m.id)return;
@@ -8561,7 +8663,7 @@ async function loadYotw(){const m=mpS(),el=$('yotwList');if(!el||!m.id)return;
     h+=r.top&&r.top.length?`<ol class="yw-list">${r.top.map((x,i)=>`<li><span class="yw-r">${i+1}</span><b>${esc(x.name)}</b><small>❤ ${x.n}</small>${x.id!==m.id?`<button class="fr-mini" data-yv="${esc(x.id)}">Visit</button>`:'<small>You</small>'}</li>`).join('')}</ol>`:'<p class="fr-muted">No likes yet this week. Be the first to visit and like a yard!</p>';
     const hall=(r.hall||[]).filter(x=>x.week!==r.lw&&x.name).slice(0,6);if(hall.length)h+=`<p class="yw-hall"><b>Past winners:</b> ${hall.map(x=>esc(x.name)).join(' · ')}</p>`;
     el.innerHTML=h;el.querySelectorAll('[data-yv]').forEach(b=>b.onclick=()=>visitCabin(b.dataset.yv))}catch(e){el.innerHTML='<p class="fr-muted">Couldn’t load the standings.</p>'}}
-async function bindTogether(p){const m=mpS();loadYotw();
+async function bindTogether(p){const m=mpS();loadYotw();openHousesHTML().then(h=>{const el=$('ohList');if(!el)return;el.innerHTML=h;el.querySelectorAll('[data-hj]').forEach(b=>b.onclick=()=>houseJoin(b.dataset.hj))});
   p.querySelectorAll('[data-cha]').forEach(b=>b.onclick=async()=>{const st=+b.dataset.stake;if(S.coins<st){showToast(`You need $${money(st)} to accept`);return}b.disabled=true;try{const r=await api('chal/answer',{id:m.id,key:m.key,cid:+b.dataset.cha,accept:true});S.coins-=r.stake;save();showToast('Challenge on! 24 hours, biggest fish wins.','Challenge');await mpSync(true);renderFriends()}catch(e){showToast('That challenge isn’t open any more');b.disabled=false}});
   p.querySelectorAll('[data-chd]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await api('chal/answer',{id:m.id,key:m.key,cid:+b.dataset.chd,accept:false});await mpSync(true);renderFriends()}catch(e){b.disabled=false}});
   try{const r=await api('guest/list',{id:m.id,key:m.key});const el=$('gbList');if(!el)return;
@@ -8620,12 +8722,16 @@ async function ownSupLoad(){const m=mpS(),box=$('ownSups');if(!box)return;
   let r;try{r=await api('owner/sups',{id:m.id,key:m.key})}catch(e){box.innerHTML='';return}
   box.innerHTML=r.sups.length?`<ul class="own-mv">${r.sups.map(x=>`<li><label><b>${esc(x.name)}</b> <small>${x.seen?'played '+ago(x.seen):''}</small><button class="fr-mini" data-supx="${esc(x.name)}" style="margin-left:auto">Remove</button></label></li>`).join('')}</ul>`:'<p class="own-note">No supporters yet.</p>';
   box.querySelectorAll('[data-supx]').forEach(b=>b.onclick=e=>{e.preventDefault();if(!b.dataset.arm){b.dataset.arm=1;b.textContent='Sure?';return}set(b.dataset.supx,false)})}
+async function ownReports(){const m=mpS(),box=$('ownReps');if(!box)return;let r;try{r=await api('owner/reports',{id:m.id,key:m.key})}catch(e){box.innerHTML='<p class="own-note">Couldn’t load reports.</p>';return}
+  box.innerHTML=r.reports.length?`<ul class="own-mv">${r.reports.map(x=>`<li><label><span><b>${esc(x.to_name)}</b> <small>reported by ${esc(x.from_name)} · ${esc(x.reason||'')}${x.wh?' · '+esc(x.wh):''} · ${ago(x.ts)}</small></span><button class="fr-mini" data-repx="${x.id}" style="margin-left:auto">Dismiss</button></label></li>`).join('')}</ul>`:'<p class="own-note">No reports. 🎉</p>';
+  box.querySelectorAll('[data-repx]').forEach(b=>b.onclick=async e=>{e.preventDefault();try{await api('owner/repdel',{id:m.id,key:m.key,rid:+b.dataset.repx})}catch(_){}ownReports()})}
 async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('ownBody');b.innerHTML='<p class="fr-muted">Loading…</p>';
   try{const [st,bg]=await Promise.all([api('owner/stats',{id:m.id,key:m.key}),api('owner/bugs',{id:m.id,key:m.key})]);
     const cell=(n,l)=>`<div><b>${n.toLocaleString()}</b><span>${l}</span></div>`;
     b.innerHTML=`<div class="own-grid">${cell(st.players,'anglers')}${cell(st.a24,'played today')}${cell(st.a7,'played this week')}${cell(st.c24,'notable catches today')}${cell(st.t24,'texts today')}${cell(st.cl24,'cloud saves updated today')}${cell(st.g24,'guestbook notes today')}${cell(st.chal,'open challenges')}</div>
       <p class="own-note">Cloudflare’s free plan allows 100,000 database writes a day. A rough guide: each active player uses about 30 an hour for cloud sync plus a few for catches and texts. Check exact usage in the Cloudflare dashboard under D1.</p>
       <div class="xf-row"><button class="jig" id="ownBackup">Download a backup</button></div>
+      <h3 class="own-h">Player reports</h3><div id="ownReps"><p class="own-note">Loading…</p></div>
       <h3 class="own-h">Reset a login PIN</h3><p class="own-note">For a player who lost every device and forgot their PIN. Make sure it's really them first. They can then set a new PIN after moving their game with a transfer code.</p>
       <div class="xf-row"><input id="ownPinName" class="lg-in" placeholder="Angler name" maxlength="16" style="flex:1;min-width:0"><button class="ghost" id="ownPinGo">Reset PIN</button></div><p class="own-note" id="ownPinMsg"></p>
       <h3 class="own-h">Discord posts</h3><p class="own-note">Paste a webhook link for each channel (in Discord: Edit Channel → Integrations → Webhooks → New Webhook → Copy Webhook URL). Leave one blank to turn it off. Links are kept on your server and never shown in full again.</p>
@@ -8638,6 +8744,7 @@ async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('o
     b.querySelectorAll('[data-bdel]').forEach(x=>x.onclick=async()=>{x.disabled=true;try{await api('owner/bugdel',{id:m.id,key:m.key,bid:+x.dataset.bdel});x.closest('li').remove()}catch(e){x.disabled=false}});
     ownDcLoad();ownMoveLoad();ownSupLoad();
     $('ownPinGo').onclick=async()=>{const n=$('ownPinName').value.trim();if(!n)return;$('ownPinGo').disabled=true;try{const r=await api('owner/pinreset',{id:m.id,key:m.key,name:n});$('ownPinMsg').textContent=r.found?`${n}'s PIN is cleared. They can set a new one in Settings.`:`No angler named ${n}.`}catch(e){$('ownPinMsg').textContent='Couldn’t reset it.'}$('ownPinGo').disabled=false};
+    ownReports();
     $('ownBackup').onclick=async()=>{const bt=$('ownBackup');bt.disabled=true;bt.textContent='Preparing…';try{const r=await api('owner/backup',{id:m.id,key:m.key});const blob=new Blob([JSON.stringify(r)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`lantern-lake-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);bt.textContent='Downloaded'}catch(e){bt.textContent='Couldn’t make a backup';bt.disabled=false}}}
   catch(e){b.innerHTML=`<p class="fr-err">${e.message==='not-owner'?'Owner tools are only for the site owner.':'Couldn’t load owner tools.'}</p>`}}
 
@@ -8748,7 +8855,7 @@ function drawPeer(p,d,T){const sl=liveSlotPos(p);if(!sl)return;const [x,y0,s]=sl
   ctx.textAlign='left';ctx.restore();HITS.push({x:x-L*s/2,y:ty-10,w:L*s+20,h:y-ty+24,kind:'peer',data:p})}
 function emoBubble(x,y,s,t){const al=Math.min(1,t/.2,(4-t)/.5),pop=1+Math.max(0,.3-t)*1.2;ctx.save();ctx.globalAlpha*=al;ctx.translate(x,y);ctx.scale(pop,pop);const big=[...s].length<=2;ctx.font=big?'16px sans-serif':'bold 10px "Sniglet",sans-serif';const w=ctx.measureText(s).width+(big?10:14);
   ctx.fillStyle='rgba(255,252,240,.96)';rrect(-w/2,-12,w,big?22:17,8);ctx.fill();ctx.beginPath();ctx.moveTo(-4,big?10:5);ctx.lineTo(0,big?15:10);ctx.lineTo(4,big?10:5);ctx.fill();ctx.fillStyle='#2a1a08';ctx.textAlign='center';ctx.fillText(s,0,big?5:1);ctx.restore()}
-function liveDraw(d,T,loc){if(LIVE.st!=='on'||loc!==S.water||S.sleep)return;const ps=[...LIVE.peers.values()].sort((a,b)=>liveY(a)-liveY(b));for(const p of ps)drawPeer(p,d,T);if(LIVE.raid)raidDraw(d,T)}
+function liveDraw(d,T,loc){if(LIVE.st!=='on'||loc!==S.water||S.sleep)return;const ps=[...LIVE.peers.values()].filter(p=>!HOUSE.blocked.has(p.pid)).sort((a,b)=>liveY(a)-liveY(b));for(const p of ps)drawPeer(p,d,T);if(LIVE.raid)raidDraw(d,T)}
 const liveY=p=>{const s=liveSlotPos(p);return s?s[1]:0};
 function liveTop(d,T,loc){if(LIVE.st!=='on'||loc!==S.water||S.sleep)return;if(LIVE.myEmo&&LIVE.myEmo.t<4&&LIVE.meXY)emoBubble(LIVE.meXY[0],LIVE.meXY[1]-72,EMO[LIVE.myEmo.e]||'👋',LIVE.myEmo.t)}
 function raidDraw(d,T){const R=LIVE.raid,k=Math.max(.35,R.hp/R.max),x=560+Math.sin(T*.35)*150,y=318+Math.sin(T*.6)*8,sz=70+50*Math.min(1,R.max/3000);
@@ -8942,7 +9049,7 @@ function tick(now){if(SESS.paused)return;
     $('castLabel').textContent=TRV.on?'On the move…':S.sleep?dockFishing()?(cast.el/cast.dur>.85?'Something’s biting…':'Fishing off the dock'):(S.sleep.at?(VT&&VT.arcade?'At the arcade…':VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
     refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();
     if(!$('slotsModal').hidden){if(!spinning)updateSlots();if(phView==='lock')renderLock()}else{$('phClock').textContent=fmtClock(S.min).replace(/ [AP]M/,'');$('phBat').style.width=Math.max(4,S.stamina)+'%'}
-    ensureBounties();checkStreak();qStart();renderGuide();renderGoals();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
+    ensureBounties();checkStreak();qStart();renderGuide();renderGoals();houseTick();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
     {const bc=mpBadge()+TX.unread+(newsUnread()?1:0)+readyBounties()+(S.streak.claimed?0:1)+(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step?1:0)+(S.q2&&S.q2.step>0&&S.q2.step<7&&S.q2.seen!==S.q2.step?1:0)+(S.q3&&S.q3.step>0&&S.q3.step<7&&S.q3.seen!==S.q3.step?1:0);$('phoneBadge').hidden=!bc;$('phoneBadge').textContent=bc}
     if(storeDirty){renderStorage();renderHot()}
     if(collDirty)renderColl();

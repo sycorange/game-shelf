@@ -13,9 +13,9 @@
   },
   // Live lake rooms (Durable Objects on the free plan use SQLite storage).
   "durable_objects": {
-    "bindings": [{ "name": "LAKE", "class_name": "LakeRoom" }]
+    "bindings": [{ "name": "LAKE", "class_name": "LakeRoom" }, { "name": "YARD", "class_name": "YardRoom" }]
   },
-  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["LakeRoom"] }],
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["LakeRoom"] }, { "tag": "v2", "new_sqlite_classes": ["YardRoom"] }],
   "d1_databases": [
     {
       "binding": "DB",
