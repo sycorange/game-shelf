@@ -132,6 +132,8 @@ await check('walking: tap to walk, WASD, onto the dock, stays on land, pet follo
   let r=await p.evaluate(()=>[WALK.x,WALK.y,PET_RT.x,PET_RT.y]);ok(Math.abs(r[0]-20)<1&&Math.abs(r[1]-300)<1,'tap-walk '+r);ok(Math.hypot(r[2]-r[0],r[3]-r[1])<60,'pet did not follow '+r);
   await p.keyboard.down('d');await p.waitForTimeout(5000);await p.keyboard.up('d');r=await p.evaluate(()=>[WALK.x,WALK.y,yShoreX(WALK.y)]);ok(r[0]<=r[2],'walked into the lake '+r);
   await p.evaluate(()=>{WALK.tx=999;WALK.ty=246});await p.waitForTimeout(6000);r=await p.evaluate(()=>[WALK.x,WALK.y]);ok(r[0]>200&&r[1]===246,'not on the dock '+r);
+  ok(await p.evaluate(()=>{WALK.tx=WALK.x>60?20:120;WALK.ty=330;return new Promise(r=>setTimeout(()=>r(document.getElementById('scene').classList.contains('ytuck')),400))}),'bar tucks while walking');
+  await p.waitForFunction(()=>!document.getElementById('scene').classList.contains('ytuck'),null,{timeout:6000});await p.click('#vbView');ok(await p.isVisible('[data-yf="dock"]'),'camera views behind View');await p.click('[data-yf="dock"]');ok(await p.evaluate(()=>!document.getElementById('scene').classList.contains('vpop')),'views close');
   await p.evaluate(()=>document.getElementById('vbIn').click());await p.waitForTimeout(7000);ok(await p.evaluate(()=>S.sleep.ph!=='yard'),'never went inside');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
 await check('yard games: buy from the Games tab, cornhole scoring, hoop swish, tickets, tire swing',async()=>{const p=await page(VPS[0][1],save({coins:50000,sleep:{ph:'yard',t:0,visit:true}}));
@@ -139,6 +141,7 @@ await check('yard games: buy from the Games tab, cornhole scoring, hoop swish, t
   await p.evaluate(()=>{const L=S.yard.it,set=(id,x,y)=>{const a=L.find(a=>a[0]===id);a[1]=x;a[2]=y};set('cornhole',40,330);set('hoop',60,370);set('tireswing',110,290)});await p.click('#yedDone');ok(await p.evaluate(()=>S.coins===40000),'prices');
   await p.evaluate(()=>ygStart(S.yard.it.findIndex(a=>a[0]==='cornhole')));let on=false;for(let i=0;i<20&&!on;i++){await p.waitForTimeout(400);on=await p.evaluate(()=>!!YG.on)}ok(on,'never started cornhole');
   const r=await p.evaluate(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));for(const v of [.79,.72,.2,.79,.74]){YG.on.pow=v;ygThrow();await w(950)}return [YG.on.score,YG.on.done]});ok(r[0]===8&&r[1],'cornhole '+r);
+  {const w0=await p.evaluate(()=>[WALK.x,WALK.y]);await p.keyboard.down('d');await p.waitForTimeout(300);await p.keyboard.up('d');const w1=await p.evaluate(()=>[WALK.x,WALK.y]);ok(w0[0]===w1[0]&&w0[1]===w1[1],'walked while playing')}
   const t0=await p.evaluate(()=>ARC().t);await p.evaluate(()=>ygEnd());ok(await p.evaluate(t0=>ARC().t-t0===16,t0),'tickets');
   await p.evaluate(()=>ygStart(S.yard.it.findIndex(a=>a[0]==='hoop')));on=false;for(let i=0;i<20&&!on;i++){await p.waitForTimeout(400);on=await p.evaluate(()=>!!YG.on)}
   const h=await p.evaluate(async()=>{YG.on.t0=performance.now()-714;ygThrow();await new Promise(r=>setTimeout(r,1100));return YG.on.score});ok(h===1,'hoop make');await p.evaluate(()=>ygEnd());
@@ -160,7 +163,7 @@ await check('open house: host and guests see each other walk, chat, pets, invite
   await B.evaluate(()=>{WALK.tx=150;WALK.ty=330;houseSay(1)});await C.evaluate(()=>houseEmo(1));await A.waitForTimeout(3500);
   const seen=await A.evaluate(()=>[...HOUSE.peers.values()].map(p=>[p.name,Math.round(p.tx),Math.round(p.ty),p.bub&&p.bub.s]));const gb=seen.find(x=>x[0].startsWith('Og'));ok(gb&&gb[1]===150&&gb[2]===330&&gb[3]==='Nice yard!','guest walk/say '+JSON.stringify(seen));
   ok(await B.evaluate(()=>[...HOUSE.peers.values()].some(p=>p.host)),'guest sees host');
-  await C.click('#vbMore');ok(await C.isVisible('#vbLeave'),'phone More menu');await C.click('#vbMore');
+  ok(await C.isVisible('#vbLeave')&&(await C.locator('#visitBar').boundingBox()).height<90,'phone bar is one slim row');
   await A.evaluate(()=>{const p=[...HOUSE.peers.values()].find(p=>p.name.startsWith('Op'));hsend({t:'kick',cid:p.cid})});await C.waitForTimeout(1500);ok(await C.evaluate(()=>HOUSE.st==='off'),'kicked');
   await C.evaluate(id=>{HOUSE.host=null;houseConnect(id,false)},A.me.id);await C.waitForTimeout(1500);ok(await C.evaluate(()=>HOUSE.st!=='on'),'ban holds');
   const bl=await B.evaluate(async(id)=>{const m=mpS();await api('block/add',{id:m.id,key:m.key,pid:id});const l=await api('house/list',{id:m.id,key:m.key});const t=await api('texts/send',{id:m.id,key:m.key,to:id,body:'hi'}).then(()=>'sent',e=>e.message);const r=await api('report',{id:m.id,key:m.key,pid:id,reason:'Spamming or annoying',where:'test'});return [l.houses.some(h=>h.pid===id),t,r.ok]},A.me.id);

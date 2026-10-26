@@ -889,6 +889,12 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .yed-tray.hp{flex-wrap:wrap;overflow:visible}.yed-roles{display:flex;gap:6px;flex:none}.yed-sws{display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding-left:6px;min-width:0}
 .yed-sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.25);background:#24343a;color:#edf2ea;font-size:.8rem;cursor:pointer;padding:0;flex:none}.yed-sw.on{border-color:#ffd05a;box-shadow:0 0 0 2px rgba(255,208,90,.35)}.yed-sw:disabled{opacity:.4}
 .box.land{max-width:380px}
+.leave .ib{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:50px;padding:4px 7px;line-height:1.05}.leave .ib span{font-size:1.1rem}.leave .ib small{font-size:.68rem;font-weight:700;white-space:nowrap}
+.leave.vb-y div{padding:6px 8px;gap:8px}.leave.vb-y .vbtns{gap:5px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.leave.vb-y #visitTxt{font-size:.85rem}
+.vb-pill{display:none;width:40px;height:40px;border-radius:50%;background:rgba(10,22,28,.85);border:1px solid var(--line);color:#edf2ea;font-size:1.1rem;cursor:pointer}
+.scene.ytuck #visitBar>div{display:none}.scene.ytuck #visitBar .vb-pill{display:block}.scene.ytuck .ynav{display:none}
+.scene.ystill .ynav{display:none}.scene.ystill.vpop .ynav{display:flex;top:auto;right:auto;z-index:8}
+@media (max-width:700px){.leave .ib{min-width:44px;padding:3px 5px}.leave .ib span{font-size:1rem}.leave .ib small{font-size:.62rem}.scene.ystill.vpop .ynav button{padding:6px 10px;font-size:.8rem}}
 .vb-more{position:absolute;right:10px;bottom:calc(100% + 6px);z-index:7;display:flex;flex-direction:column;gap:6px;background:rgba(10,22,28,.95);border:1px solid var(--line);border-radius:12px;padding:8px}.vb-more[hidden]{display:none}.vb-more button{text-align:left}
 .hchat{position:absolute;left:8px;right:8px;bottom:64px;z-index:6;background:rgba(10,22,28,.94);border:1px solid var(--line);border-radius:14px;padding:8px;display:grid;gap:6px;max-width:560px}.hc-emo{display:flex;flex-wrap:wrap;gap:4px}.hc-emo button{font-size:1.2rem;background:rgba(255,255,255,.07);border:0;border-radius:8px;padding:4px 7px;cursor:pointer}
 .hc-say{display:flex;flex-wrap:wrap;gap:4px}.hc-say button{background:rgba(255,255,255,.08);border:1px solid var(--line);color:#edf2ea;border-radius:999px;padding:4px 10px;font:inherit;font-size:.8rem;cursor:pointer}.hc-say button:hover,.hc-emo button:hover{background:rgba(255,255,255,.16)}
@@ -1382,7 +1388,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
     <div class="ynav" id="ynav" hidden><button data-yf="house">House</button><button data-yf="yard">Yard</button><button data-yf="dock">Dock</button><button class="yz" id="yZoom">Zoom out</button></div>
     <div class="leave ygbar" id="ygBar" hidden></div>
     <div class="hchat" id="hchat" hidden></div>
-    <div class="leave" id="visitBar" hidden><div><span id="visitTxt"></span><span class="vbtns" id="visitBtns"></span></div></div>
+    <div class="leave" id="visitBar" hidden><button class="vb-pill" id="vbPill" aria-label="Show buttons">☰</button><div><span id="visitTxt"></span><span class="vbtns" id="visitBtns"></span></div></div>
     <div class="leave" id="leaveBar" hidden><div><span id="leaveTxt">Up and rested. Ready to head back out?</span><button class="ghost" id="yardBtn">Step outside</button><button class="ghost" id="decoBtn">Decorate</button><button class="ghost" id="arrBtn">Arrange</button><button class="jig" id="leaveBtn">Head back out</button></div></div>
     <div class="toast"><div id="toast" style="opacity:0">Casting…</div></div>
   </div>
@@ -4659,7 +4665,7 @@ $('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,
   else if(h.kind==='deco'){if(S.sleep.ph==='awake')openDeco(h.data);else showTip(h,e)}else showTip(h,e);return}
   if(CAM.moved){CAM.moved=false;YED.skip=false;return}if(h&&h.kind==='fpet'){petTap();return}if(h&&h.kind==='gate'){hideTip();openTab('waters');setTimeout(()=>{const x=document.querySelector('.realm-h');if(x)x.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})},50);return}if(h&&h.kind==='updraft'){hideTip();updraftScoop();return}if(h&&h.kind==='peer'){hideTip();peerOpen(h.data);return}if(h&&h.kind==='hwpk'){hideTip();hwCollect(h.data);return}if(h&&h.kind==='tot'){hideTip();totGive(h.data);return}if(h&&h.kind==='box'){openBox(h.data);return}
   if(CAMT.z>1.3&&yardCtx()==='home'&&YED.on){if(YED.skip){YED.skip=false;return}if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(YED.tab==='paths'||YED.tab==='house')return;YED.sel=yardPick(x,y);renderYed();return}
-  if(CAMT.z>1.3&&yardCtx()){if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(h&&h.kind==='ytree'){hideTip();treeTap(h.data);return}if(h&&h.kind==='ygame'){hideTip();ygStart(h.data.i);return}if(h&&h.kind==='ypeer'){hideTip();peerMenu(h.data);return}if(h&&h.kind==='ypet'){hideTip();if(yardCtx()==='home')petTap();else{PET_RT.heart=performance.now();sfx('pop')}return}if(h&&h.kind==='yplot'&&yardCtx()==='home'){hideTip();openPlot(h.data.i);return}if(h&&h.kind==='ydoor'){hideTip();walkThen(()=>{if(S.sleep.at==='friend')enterFriend();else yardIn()});return}if(h&&h.kind[0]==='y')showTip(h,e);else{hideTip();if(dockFishing())jig();else if(walkCtx())walkTo(x,y)}return}jig()};
+  if(CAMT.z>1.3&&yardCtx()){if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(h&&h.kind==='ytree'){hideTip();treeTap(h.data);return}if(h&&h.kind==='ygame'){hideTip();ygStart(h.data.i);return}if(h&&h.kind==='ypeer'){hideTip();peerMenu(h.data);return}if(h&&h.kind==='ypet'){hideTip();if(yardCtx()==='home')petTap();else{PET_RT.heart=performance.now();sfx('pop')}return}if(h&&h.kind==='yplot'&&yardCtx()==='home'){hideTip();openPlot(h.data.i);return}if(h&&h.kind==='ydoor'){hideTip();walkThen(()=>{if(S.sleep.at==='friend')enterFriend();else yardIn()});return}if(h&&h.kind[0]==='y')showTip(h,e);else{hideTip();if(dockFishing())jig();else if(walkCtx()&&!YG.on)walkTo(x,y)}return}jig()};
 $('scene').onmousemove=e=>{if(CAM.drag&&CAM.moved)return;const [x,y]=scenePt(e),h0=hitAt(x,y),h=VISIT&&h0&&!['trophy','coll','tank','door'].includes(h0.kind)?null:h0;if(VISIT&&h){const real=S;S=VISIT.S;$('scene').style.cursor='pointer';try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}return}if(VISIT){$('scene').style.cursor='default';hideTip();return}if(!indoor()&&!h){$('scene').style.cursor='';hideTip();return}$('scene').style.cursor=h?'pointer':'default';if(h)showTip(h,e);else hideTip()};
 $('scene').onmouseleave=hideTip;
 $('leaveBtn').onclick=e=>{e.stopPropagation();leaveHouse()};
@@ -5195,13 +5201,13 @@ function tripFrom(dest){if(!S.sleep||S.sleep.at!=='friend')return;$('tripModal')
   renderAll();save()}
 function renderVisitBar(){if(YG.on){$('visitBar').hidden=true;return}const sl=S.sleep,fr=sl&&sl.at==='friend',bar=$('visitBar');
   const yd=!!sl&&!fr&&sl.ph==='yard';
-  const hs='|'+HOUSE.st+HOUSE.n+HOUSE.me,sig=fr?sl.ph+'|'+(VISIT?VISIT.S.sleep.ph:'')+'|'+(VT&&VT.name)+hs:yd?'yard|'+!!sl.dock+'|'+YED.on+'|'+!!curPet()+hs:'';if(bar.dataset.sig===sig)return;bar.dataset.sig=sig;
+  const hs='|'+HOUSE.st+HOUSE.n+HOUSE.me,sig=fr?sl.ph+'|'+(VISIT?VISIT.S.sleep.ph:'')+'|'+(VT&&VT.name)+hs:yd?'yard|'+!!sl.dock+'|'+YED.on+'|'+!!curPet()+hs:'';if(bar.dataset.sig===sig)return;bar.dataset.sig=sig;bar.classList.remove('vb-y');$('visitTxt').hidden=false;
   if(yd&&YED.on){bar.hidden=true;return}
   if(yd&&HOUSE.me&&HOUSE.host){const n=HOUSE.n;$('visitTxt').innerHTML=HOUSE.st==='on'?`🏡 <b>Your house is open.</b> ${n?`${n} guest${n>1?'s':''} here.`:'Waiting for guests…'} Tap the ground to walk around.`:'🏡 Reconnecting your Open House…';
     $('visitBtns').innerHTML='<button class="jig" id="vbChat">💬 Chat</button><button class="ghost" id="vbInv">Invite</button><button class="ghost" id="vbGuests">Guests'+(n?` (${n})`:'')+'</button>'+(curPet()?'<button class="ghost" id="vbFetch">🎾 Fetch</button>':'')+'<button class="ghost" id="vbClose">Close house</button><button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;
-    const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbChat',houseChatUI);on('vbInv',houseInviteUI);on('vbGuests',houseGuestsUI);on('vbClose',()=>houseClose());on('vbFetch',petFetch);on('vbIn',()=>walkThen(yardIn));vbCompact();return}
-  if(yd){$('visitTxt').innerHTML=sl.dock?'Fishing off your dock. Catches come from the Dock Pond.':'Tap the ground to walk around'+(matchMedia('(pointer:fine)').matches?' (or use WASD)':'')+'. Decorate, fish off the dock, or pick where to fish next.'+(nativeOf()?` Your native fruit: ${FRUITS[nativeOf()].n.toLowerCase()}.`:'');$('visitBtns').innerHTML='<button class="jig" id="vbGo">Where to?</button><button class="ghost" id="vbDeco">Decorate yard</button>'+(curPet()?'<button class="ghost" id="vbFetch">🎾 Fetch</button>':'')+'<button class="ghost" id="vbDock">'+(sl.dock?'Stop fishing':'Fish off dock')+'</button>'+(S.mp&&S.mp.id?'<button class="ghost" id="vbHouse">🏡 Open House</button>':'')+'<button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;if($('vbHouse'))$('vbHouse').onclick=e=>{e.stopPropagation();houseOpen()};
-    $('vbIn').onclick=e=>{e.stopPropagation();walkThen(yardIn)};$('vbGo').onclick=e=>{e.stopPropagation();openYardPicker()};$('vbDeco').onclick=e=>{e.stopPropagation();yedEnter()};$('vbDock').onclick=e=>{e.stopPropagation();dockFishToggle()};if($('vbFetch'))$('vbFetch').onclick=e=>{e.stopPropagation();petFetch()};return}
+    const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbChat',houseChatUI);on('vbInv',houseInviteUI);on('vbGuests',houseGuestsUI);on('vbClose',()=>houseClose());on('vbFetch',petFetch);on('vbIn',()=>walkThen(yardIn));vbFinish('host');return}
+  if(yd){$('visitTxt').innerHTML=sl.dock?'Fishing off your dock. Catches come from the Dock Pond.':'Tap the ground to walk around'+(matchMedia('(pointer:fine)').matches?' (or use WASD)':'')+'.';$('visitBtns').innerHTML='<button class="jig" id="vbGo">Where to?</button><button class="ghost" id="vbDeco">Decorate yard</button>'+(curPet()?'<button class="ghost" id="vbFetch">🎾 Fetch</button>':'')+'<button class="ghost" id="vbDock">'+(sl.dock?'Stop fishing':'Fish off dock')+'</button>'+(S.mp&&S.mp.id?'<button class="ghost" id="vbHouse">🏡 Open House</button>':'')+'<button class="ghost" id="vbIn">Go inside</button>';bar.hidden=false;if($('vbHouse'))$('vbHouse').onclick=e=>{e.stopPropagation();houseOpen()};
+    $('vbIn').onclick=e=>{e.stopPropagation();walkThen(yardIn)};$('vbGo').onclick=e=>{e.stopPropagation();openYardPicker()};$('vbDeco').onclick=e=>{e.stopPropagation();yedEnter()};$('vbDock').onclick=e=>{e.stopPropagation();dockFishToggle()};if($('vbFetch'))$('vbFetch').onclick=e=>{e.stopPropagation();petFetch()};vbFinish('home');return}
   if(!fr||!VT){bar.hidden=true;return}const nm=esc(VT.name);let txt='',btns='';
   if(sl.ph==='door'&&VT.arcade){txt='At the Lantern Pier Arcade. Play the cabinets for prize tickets and spend them at the Prize Counter.';btns='<button class="jig" id="vbEnter">Enter the arcade</button><button class="ghost" id="vbLeave">Leave</button>'}
   else if(sl.ph==='door'&&VT.museum){txt='At the Lantern Lake Museum. Donate record fish and see who holds every plaque.';btns='<button class="jig" id="vbEnter">Enter the museum</button><button class="ghost" id="vbLeave">Leave</button>'}
@@ -5211,7 +5217,25 @@ function renderVisitBar(){if(YG.on){$('visitBar').hidden=true;return}const sl=S.
   else if(sl.ph==='pick'){txt='Back on the boat.';btns='<button class="jig" id="vbPick">Choose where to go</button>'}
   else{bar.hidden=true;return}
   $('visitTxt').textContent='';$('visitTxt').innerHTML=txt;$('visitBtns').innerHTML=btns;bar.hidden=false;
-  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum&&!VT.arcade)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker);on('vbChat',houseChatUI);on('vbGuests',houseGuestsUI);if(houseHere())vbCompact()}
+  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum&&!VT.arcade)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker);on('vbChat',houseChatUI);on('vbGuests',houseGuestsUI);if(sl.ph==='door')vbFinish(houseHere()?'guest':'friend')}
+// ==YARD BAR== One slim row of icon buttons; the camera views live behind 🎥; hint text only for the first few visits.
+const VB_IC={vbGo:['🧭','Go'],vbDeco:['🎨','Decorate'],vbFetch:['🎾','Fetch'],vbHouse:['🏡','Host'],vbIn:['🚪','Inside'],vbChat:['💬','Chat'],vbInv:['✉️','Invite'],vbClose:['🔒','Close'],vbEnter:['🚪','Enter'],vbSign:['📖','Sign'],vbLeave:['⛵','Leave']};
+let VB_SEEN='';
+function vbFinish(kind){const B=$('visitBtns'),T=$('visitTxt'),sl=S.sleep;
+  for(const b of [...B.querySelectorAll('button')]){const full=b.textContent.trim();let ic=VB_IC[b.id];
+    if(b.id==='vbDock')ic=sl.dock?['🎣','Stop']:['🎣','Dock'];
+    else if(b.id==='vbGuests')ic=['👥',kind==='host'?`Guests${HOUSE.n?' '+HOUSE.n:''}`:'People'];
+    else if(b.id==='vbLike')ic=['❤',VT&&VT.liked?'Liked':'Like'];
+    if(!ic)continue;b.classList.add('ib');b.title=full;b.setAttribute('aria-label',full);b.innerHTML=`<span>${ic[0]}</span><small>${ic[1]}</small>`}
+  const v=document.createElement('button');v.className='ghost ib';v.id='vbView';v.title='Camera views';v.innerHTML=`<span>🎥</span><small>View</small>`;v.onclick=e=>{e.stopPropagation();vbViewToggle()};B.appendChild(v);
+  S.ui=S.ui||{};const key=kind+'|'+(VT&&VT.id||''),ck=kind==='home'?'yt':'ft';if(VB_SEEN!==key){VB_SEEN=key;if(kind==='home'||kind==='friend')S.ui[ck]=(S.ui[ck]|0)+1}
+  const showTip=(kind==='home'||kind==='friend')&&(S.ui[ck]|0)<=3&&!(kind==='home'&&sl.dock);
+  if(kind==='host')T.innerHTML=HOUSE.st==='on'?'🏡 <b>Your house is open</b>':'🏡 Reconnecting…';
+  else if(kind==='guest')T.innerHTML=`🏡 <b>${esc(VT.name)}’s Open House</b>`;
+  else if(!showTip)T.innerHTML=kind==='friend'&&VT&&VT.champ?'🏆 <b>Yard of the Week!</b>':'';
+  T.hidden=!T.innerHTML;$('visitBar').classList.add('vb-y')}
+function vbViewToggle(){const sc=$('scene'),on=!sc.classList.contains('vpop');sc.classList.toggle('vpop',on);if(on){const v=$('vbView'),r=v.getBoundingClientRect(),R=sc.getBoundingClientRect(),n=$('ynav');n.style.left=Math.max(6,Math.min(R.width-n.offsetWidth-6,r.left-R.left-8))+'px';n.style.bottom=(R.bottom-r.top+6)+'px'}}
+function vbTuck(now){const sc=$('scene');if(WALK.mvAt&&!WALK.pin&&now-WALK.mvAt<1300&&!YG.on&&$('hchat').hidden){if(!sc.classList.contains('ytuck')){sc.classList.add('ytuck');sc.classList.remove('vpop')}}else sc.classList.remove('ytuck')}
 function vbCompact(){const B=$('visitBtns');if(!matchMedia('(max-width:560px)').matches)return;const bs=[...B.children];if(bs.length<=3)return;const m=document.createElement('div');m.className='vb-more';m.hidden=true;bs.slice(2).forEach(b=>{m.appendChild(b);b.addEventListener('click',()=>{m.hidden=true})});const t=document.createElement('button');t.className='ghost';t.id='vbMore';t.textContent='More ▾';t.onclick=e=>{e.stopPropagation();m.hidden=!m.hidden};B.appendChild(t);B.appendChild(m)}
 function drawNameSign(d){if(VT&&VT.arcade)return;const x=VT&&VT.museum?200:176,y=244,nm=VT?VT.name:'';ctx.fillStyle=rgb(mix([30,22,16],[110,78,48],d));ctx.fillRect(x-1.5,y-26,3,26);
   ctx.font='bold 9px sans-serif';const w=Math.max(38,ctx.measureText(nm).width+12);ctx.fillStyle=rgb(mix([40,30,20],[196,160,110],d));ctx.fillRect(x-w/2,y-38,w,14);
@@ -5267,7 +5291,7 @@ function yardTip(h){if(h.kind==='ypeer'){const p=HOUSE.peers.get(h.data);return 
   if(h.kind==='ydoor')return `<b>Front door</b><small>Tap to go inside</small>`;
   if(h.kind==='yland'){const L=YLAND[h.data];return L?`<b>For sale: ${L.n}</b><small>$${money(L.c)} · tap to see it</small>`:''}
   if(h.kind==='ysign')return `<b>${who} sign</b><small>Hand-painted at the head of the dock</small>`;return ''}
-function renderYNav(){const el=$('ynav'),show=yardStill();$('scene').classList.toggle('ystill',show);$('scene').classList.toggle('yzoom',CAMT.z>1.3&&!!yardCtx());
+function renderYNav(){const el=$('ynav'),show=yardStill();if(!show||!walkCtx()){$('scene').classList.remove('ytuck');if(!show)$('scene').classList.remove('vpop')}$('scene').classList.toggle('ystill',show);$('scene').classList.toggle('yzoom',CAMT.z>1.3&&!!yardCtx());
   if(el.hidden===!show&&!show)return;el.hidden=!show;if(!show)return;const zin=yardWant(yardCtx());
   $('yZoom').textContent=zin?'Zoom out':'Zoom in';el.querySelectorAll('[data-yf]').forEach(b=>b.hidden=!zin)}
 function stepOutside(){if(!S.sleep||S.sleep.ph!=='awake'||S.sleep.at||VISIT)return;ROOM='cabin';$('decoModal').hidden=true;S.sleep={ph:'exit',t:0,yard:true,visit:true};hideTip();sfx('click');save()}
@@ -5292,8 +5316,9 @@ function yardOut(){if(!S.sleep||S.sleep.ph!=='yard')return;S.cLight=false;S.slee
     const d=CAM.drag;if(!d||e.pointerId!==d.id)return;const r=cv.getBoundingClientRect(),f=800/r.width,dx=(e.clientX-d.x)*f,dy=(e.clientY-d.y)*f;
     if(!CAM.moved&&Math.hypot(dx,dy)>6){CAM.moved=true;hideTip()}if(CAM.moved){CAM.user='in';CAM.tx=d.cx-dx/CAM.z;CAM.ty=d.cy-dy/CAM.z;camClamp()}});
   const end=e=>{if(CED.drag&&e.pointerId===CED.drag.id){if(CED.drag.moved){sfx('click');save()}CED.drag=null}if(YED.paint&&e.pointerId===YED.paint.id){YED.paint=null;YED.capT=0;save()}if(YED.drag&&e.pointerId===YED.drag.id){if(YED.drag.moved){sfx('click');save()}YED.drag=null;YED.edge=0}if(CAM.drag&&e.pointerId===CAM.drag.id)CAM.drag=null};addEventListener('pointerup',end);addEventListener('pointercancel',end);
-  $('ynav').querySelectorAll('[data-yf]').forEach(b=>b.onclick=e=>{e.stopPropagation();camFocus(b.dataset.yf)});
-  $('yZoom').onclick=e=>{e.stopPropagation();camToggle()};
+  $('ynav').querySelectorAll('[data-yf]').forEach(b=>b.onclick=e=>{e.stopPropagation();camFocus(b.dataset.yf);$('scene').classList.remove('vpop')});
+  $('vbPill').onclick=e=>{e.stopPropagation();WALK.pin=true;$('scene').classList.remove('ytuck')};
+  $('yZoom').onclick=e=>{e.stopPropagation();camToggle();$('scene').classList.remove('vpop')};
   $('yardBtn').onclick=e=>{e.stopPropagation();stepOutside()}})();
 function sleepInBed(){if(!S.sleep||S.sleep.ph!=='awake'||ROOM!=='cabin')return;guideMark('bed');if(S.stamina>=99){showToast('You’re already fully rested');return}
   const miss=100-S.stamina,mins=Math.max(30,Math.round(480*miss/100)),dur=Math.max(3,PH_T.sleep*miss/100);
@@ -5367,7 +5392,9 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:100,n:'Open House',items:['Open House! Step outside and tap 🏡 Open House, and anyone on your lake can drop by. Up to 8 guests can walk around your yard with you, live.','Invite friends: they get an alert (if they’ve turned alerts on) and an invite card in the game. Find parties in Friends → Together → Open houses now.','Say hi with 💬 Chat: emotes and preset phrases appear as speech bubbles. Everyone sees each other’s pets, cornhole throws and hoop shots.','Hosts can remove a guest (they can’t come back for 24 hours). Anyone can block or report a player from their name or contact card. Blocked players disappear for you everywhere.']},
+ {v:102,n:'Roomier yard',items:['The yard buttons are now one slim row of icons, so you can see much more of your yard. On a computer, hover a button for its full name.','The buttons tuck into a small ☰ while you walk and come back when you stop. Tap ☰ to bring them back early.','Camera views (House, Yard, Dock, Zoom out) moved behind the new 🎥 View button.','The walking tip only shows your first few visits. Your native fruit is now listed in Decorate yard.']},
+{v:101,n:'Cornhole fixes',items:['Bug fix: the two cornhole boards now face each other (the near board was turned the wrong way).','Bug fix: you now stay in place while playing cornhole or hoops. Tapping the throw button or the ground no longer walks you somewhere new. Tap Done to walk again.']},
+{v:100,n:'Open House',items:['Open House! Step outside and tap 🏡 Open House, and anyone on your lake can drop by. Up to 8 guests can walk around your yard with you, live.','Invite friends: they get an alert (if they’ve turned alerts on) and an invite card in the game. Find parties in Friends → Together → Open houses now.','Say hi with 💬 Chat: emotes and preset phrases appear as speech bubbles. Everyone sees each other’s pets, cornhole throws and hoop shots.','Hosts can remove a guest (they can’t come back for 24 hours). Anyone can block or report a player from their name or contact card. Blocked players disappear for you everywhere.']},
  {v:99,n:'Game Night',items:['Yard games that double as decor: a Cornhole Set ($3,000), a Basketball Hoop ($5,000) and a Tire Swing ($2,000), in Decorate yard → Games.','Tap a game in your yard to walk over and play. Cornhole: hold to wind up, release to throw (on the board +1, in the hole +3). Hoop: stop the meter in the green, and the zone shrinks as your streak grows.','Rounds earn a few arcade prize tickets. You can play friends’ yard games when you visit, too.']},
  {v:98,n:'Stretch Your Legs',items:['Walk around! In your yard (and when visiting a friend’s place), tap anywhere on the ground to walk there. On a computer you can also use WASD or the arrow keys.','The camera follows you, and your pet tags along behind.','Walk out onto your dock, wander the land you’ve bought, and head back to the door to go inside.']},
  {v:97,n:'Weatherwise',items:['Weather Charm: a new item in Shop → Supplies. For 10 minutes, fish that only bite in special weather (storms, snow, fog and more) bite in any weather.','Weather alerts: with alerts on, pick the weather you’re hunting in Settings (storms, snow, fog or rain) and get a heads-up a few minutes before it starts.','Garden alerts now arrive closer to the moment your crops or fruit are ready.']},
@@ -6186,8 +6213,8 @@ Object.assign(YI,{cornhole:{ox:0,oy:0,w:120,h:14,def:[],unit:1,game:1},hoop:{ox:
 Object.assign(YUNIT,YGAMES);YIDS.push('cornhole','hoop','tireswing');
 const YG={on:null};
 function ygItemDraw(id,d,T,a){const g=(c,k)=>rgb(mix(c.map(v=>v*(k||.28)),c,d*.8+.2)),sw=YG.on&&YG.on.kind==='tireswing'&&a&&YG.on.i===a._i;
-  if(id==='cornhole'){for(const [bx,col] of [[-48,[200,60,48]],[48,[50,90,170]]]){ctx.fillStyle=g([120,84,52]);ctx.fillRect(bx-10,-3,2,3);ctx.fillRect(bx+8,-6,2,6);ctx.fillStyle=g(col);ctx.beginPath();ctx.moveTo(bx-12,-2);ctx.lineTo(bx+12,-7);ctx.lineTo(bx+12,-4);ctx.lineTo(bx-12,1);ctx.closePath();ctx.fill();
-      ctx.fillStyle=g([236,226,200]);ctx.fillRect(bx-12,-1.4,24,.7);ctx.fillStyle=g([30,24,20]);ctx.beginPath();ctx.ellipse(bx+5,-5,2.2,.9,-.2,0,7);ctx.fill()}
+  if(id==='cornhole'){for(const [bx0,col] of [[-48,[200,60,48]],[48,[50,90,170]]]){const bx=bx0<0?0:bx0;ctx.save();if(bx0<0){ctx.translate(bx0,0);ctx.scale(-1,1)}ctx.fillStyle=g([120,84,52]);ctx.fillRect(bx-10,-3,2,3);ctx.fillRect(bx+8,-6,2,6);ctx.fillStyle=g(col);ctx.beginPath();ctx.moveTo(bx-12,-2);ctx.lineTo(bx+12,-7);ctx.lineTo(bx+12,-4);ctx.lineTo(bx-12,1);ctx.closePath();ctx.fill();
+      ctx.fillStyle=g([236,226,200]);ctx.fillRect(bx-12,-1.4,24,.7);ctx.fillStyle=g([30,24,20]);ctx.beginPath();ctx.ellipse(bx+5,-5,2.2,.9,-.2,0,7);ctx.fill();ctx.restore()}
     if(!(YG.on&&YG.on.kind==='cornhole'&&a&&YG.on.i===a._i)){ctx.fillStyle=g([200,60,48]);ctx.fillRect(-60,-2,3,2);ctx.fillStyle=g([50,90,170]);ctx.fillRect(-56,-2,3,2)}}
   else if(id==='hoop'){ctx.fillStyle=g([70,74,80]);ctx.fillRect(-1.5,-58,3,58);ctx.fillRect(-6,-1.5,12,1.5);ctx.fillRect(-1.5,-58,8,2);ctx.fillStyle=g([244,242,236]);ctx.fillRect(5,-66,4,16);ctx.strokeStyle=g([210,60,40]);ctx.lineWidth=.7;ctx.strokeRect(5.8,-62,2.4,5);
     ctx.strokeStyle=g([230,110,40]);ctx.lineWidth=1.2;ctx.beginPath();ctx.ellipse(13,-55,4.4,1.2,0,0,7);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=.4;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(9+i*2,-55);ctx.lineTo(10.4+i*1.4,-50);ctx.stroke()}}
@@ -6204,9 +6231,9 @@ function ygUI(){const G=YG.on,b=$('ygBar');if(!G){b.hidden=true;return}$('visitB
   if(G.kind==='tireswing'){b.innerHTML=`<div><span><b>${K.n}</b> · Wheee! Swinging…</span><span class="vbtns"><button class="ghost" id="ygDone">Hop off</button></span></div>`}
   else{const left=YG_ROUND[G.kind]-G.shots,over=left<=0;b.innerHTML=`<div><span><b>${K.n}</b> · ${over?`Round over! Score <b>${G.score}</b>`:`${G.kind==='cornhole'?`Bags left ${left}`:`Shots left ${left}`} · Score <b>${G.score}</b>`}${G.msg?` · ${G.msg}`:''}</span>
     <span class="yg-meter"><i id="ygFill"></i>${G.kind==='hoop'?`<em id="ygZone"></em>`:''}</span><span class="vbtns">${over?'<button class="jig" id="ygAgain">Play again</button>':`<button class="jig" id="ygAct">${G.kind==='cornhole'?'Hold to throw':'Shoot'}</button>`}<button class="ghost" id="ygDone">Done</button></span></div>`}
-  b.hidden=false;$('ygDone').onclick=e=>{e.stopPropagation();ygEnd()};
+  b.hidden=false;b.onclick=e=>e.stopPropagation();$('ygDone').onclick=e=>{e.stopPropagation();ygEnd()};
   const ag=$('ygAgain');if(ag)ag.onclick=e=>{e.stopPropagation();Object.assign(G,{score:0,shots:0,streak:0,msg:'',done:false});ygUI()};
-  const act=$('ygAct');if(act){if(G.kind==='cornhole'){act.onpointerdown=e=>{e.preventDefault();e.stopPropagation();if(!G.proj){G.hold=true;G.ht=performance.now()}};const rel=e=>{if(G.hold){e.stopPropagation();G.hold=false;ygThrow()}};act.onpointerup=rel;act.onpointerleave=rel}
+  const act=$('ygAct');if(act){if(G.kind==='cornhole'){act.onpointerdown=e=>{e.preventDefault();e.stopPropagation();if(!G.proj){G.hold=true;G.ht=performance.now()}};const rel=e=>{if(G.hold){e.stopPropagation();G.hold=false;ygThrow()}};act.onpointerup=rel;act.onpointerleave=rel;act.onclick=e=>e.stopPropagation()}
     else act.onclick=e=>{e.stopPropagation();ygThrow()}}}
 function ygMeter(){const G=YG.on;if(!G)return 0;const t=(performance.now()-(G.kind==='cornhole'?G.ht:G.t0))/1000;return G.kind==='cornhole'?(G.hold?(1-Math.cos(t*2.4))/2:G.pow):(1-Math.cos(t*(2.2+G.streak*.25)))/2}
 function ygThrow(){const G=YG.on;if(!G||G.proj||G.shots>=YG_ROUND[G.kind])return;const p=ygMeter();G.pow=p;G.shots++;const [px,py]=[WALK.x,WALK.y-12];
@@ -6239,7 +6266,7 @@ function yedPlace(id){if(!yardOk(S.yard))return;const n=yardStore().find(s=>s[0]
 function renderYed(){const b=$('yedBar');if(!YED.on){b.hidden=true;return}const L=yardList(),tab=YED.tab||'decor',it=tab==='decor'||tab==='build'||tab==='games'?L[YED.sel]:null,Y=S.yard;
   const nm=id=>{const x=DECOR.find(z=>z.id===id);return x?x.n:YUNIT[id]?YUNIT[id].n:id};
   const tabs=[['decor','Decor'],['build','Fences & hedges'],['games','Games'],['paths','Paths'],['house','House paint']];
-  const hint={games:'Yard games double as decor. Place them, then tap one in your yard to play.',decor:'Drag things to move them. Tap one to select it.',build:'Buy pieces and drag them into place. Fences and hedges snap together end to end.',
+  const hint={games:'Yard games double as decor. Place them, then tap one in your yard to play.',decor:'Drag things to move them. Tap one to select it.'+(nativeOf()?` Your native fruit: ${FRUITS[nativeOf()].n.toLowerCase()}.`:''),build:'Buy pieces and drag them into place. Fences and hedges snap together end to end.',
     paths:YED.brush&&YED.brush!=='pan'?'Drag across the ground to paint. Pick Move view to look around.':'Pick a path, then drag across your yard to paint it.',house:'Pick a part of your house, then a color. Repainting is free.'}[tab];
   let h=`<div class="yed-top"><div class="yed-tabs">${tabs.map(([k,n])=>`<button class="yed-tab${k===tab?' on':''}" data-yt="${k}">${n}</button>`).join('')}</div><button class="jig" id="yedDone">Done</button></div>`;
   h+=`<div class="yed-sel">${it?`<i>${esc(nm(it[0]))}</i><button class="ghost" id="yedFlip">Flip</button><button class="ghost" id="yedAway">Put away</button>`:`<span>${hint}</span>`}</div><div class="yed-tray${tab==='house'?' hp':''}">`;
@@ -6514,7 +6541,7 @@ function walkDraw(d,T,wc){const now=performance.now(),dt=WALK.last?Math.min(.1,(
   if(kx||ky){const n=Math.hypot(kx,ky);[WALK.x,WALK.y]=walkClamp(WALK.x+kx/n*sp*dt,WALK.y+ky/n*sp*.75*dt);if(kx)WALK.face=kx>0?1:-1;WALK.tx=WALK.ty=null;WALK.after=null;moving=true}
   else if(WALK.tx!=null){const [tx,ty]=walkClamp(WALK.tx,WALK.ty),dx=tx-WALK.x,dy=ty-WALK.y,dd=Math.hypot(dx,dy),st=sp*dt;
     if(dd<=st+.4){WALK.x=tx;WALK.y=ty;WALK.tx=WALK.ty=null;const a=WALK.after;WALK.after=null;if(a)setTimeout(a,0)}else{WALK.x+=dx/dd*st;WALK.y+=dy/dd*st;if(Math.abs(dx)>.5)WALK.face=dx>0?1:-1;moving=true}}
-  WALK.mv=moving?Math.min(1,WALK.mv+dt*6):Math.max(0,WALK.mv-dt*6);
+  WALK.mv=moving?Math.min(1,WALK.mv+dt*6):Math.max(0,WALK.mv-dt*6);if(moving)WALK.mvAt=now;else WALK.pin=false;vbTuck(now);
   if(moving&&CAMT.z>1.3){CAM.user='in';CAM.tx=WALK.x;CAM.ty=WALK.y-30;camClamp()}
   if(YG.on&&YG.on.kind==='tireswing')return;
   const k=Math.min(1.08,.66+(WALK.y-242)*.0028),leg=Math.sin(T*13)*3.5*WALK.mv,bob=Math.abs(Math.sin(T*13))*1.5*WALK.mv;
@@ -6525,7 +6552,7 @@ function walkDraw(d,T,wc){const now=performance.now(),dt=WALK.last?Math.min(.1,(
   houseSendMv()}
 (()=>{const map={w:'up',arrowup:'up',s:'down',arrowdown:'down',a:'left',arrowleft:'left',d:'right',arrowright:'right'};
   const typing=e=>{const t=e.target;return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)};
-  addEventListener('keydown',e=>{const k=map[e.key.toLowerCase()];if(!k||typing(e)||!walkCtx()||e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.away:not([hidden])'))return;WALK.keys[k]=true;e.preventDefault()});
+  addEventListener('keydown',e=>{const k=map[e.key.toLowerCase()];if(!k||typing(e)||!walkCtx()||YG.on||e.metaKey||e.ctrlKey||e.altKey)return;if(document.querySelector('.away:not([hidden])'))return;WALK.keys[k]=true;e.preventDefault()});
   addEventListener('keyup',e=>{const k=map[e.key.toLowerCase()];if(k)WALK.keys[k]=false});addEventListener('blur',()=>{WALK.keys={}})})();
 // ==OPEN HOUSE== Host your yard live: friends walk around with you, wave, chat with preset phrases and watch each other play.
 const HSAY=['👋 Hi!','Nice yard!','Come see this!','🎣 Fish with me?','Wanna play cornhole?','Shoot some hoops?','Love your pet!','Haha 😂','Wow!','Thanks for having me!','Be right back','Gotta go, bye!','Over here!','🔥 Campfire time?','📸 Photo time!','GG!'];

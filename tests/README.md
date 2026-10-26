@@ -32,6 +32,7 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - After Halloween: keepsakes only for owners, costumes in Settings
 - Visiting a friend with broken data doesn’t crash
 - Server: likes, the Yard of the Week board, random yard visits
+- The yard button row: tucks away while you walk, camera views behind View
 - Open House: three players at once (host, guest, phone guest) see each other walk and chat, invites, the phone More menu, remove, block, report, close
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
