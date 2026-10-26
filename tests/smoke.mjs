@@ -143,6 +143,7 @@ await check('yard games: buy from the Games tab, cornhole scoring, hoop swish, t
   {const ends=[];for(const ms of [250,700]){const bb=await p.locator('#ygAct').boundingBox();await p.mouse.move(bb.x+bb.width/2,bb.y+bb.height/2);await p.mouse.down();await p.waitForTimeout(ms);await p.mouse.up();ends.push(await p.evaluate(()=>YG.on.proj&&YG.on.proj.ex));await p.waitForTimeout(1000)}
     ok(ends[0]!=null&&ends[1]!=null&&ends[1]-ends[0]>20,'longer hold throws farther '+ends);await p.evaluate(()=>Object.assign(YG.on,{score:0,shots:0,streak:0,bags:[],done:false}))}
   const r=await p.evaluate(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));for(const v of [.79,.72,.2,.79,.74]){YG.on.pow=v;ygThrow();await w(950)}return [YG.on.score,YG.on.done]});ok(r[0]===8&&r[1],'cornhole '+r);
+  ok(await p.evaluate(async()=>{const had=YG.on.bags.length;await new Promise(r=>setTimeout(r,1900));return had>0&&YG.on.bags.length===0}),'bags clear after the last throw');
   {const w0=await p.evaluate(()=>[WALK.x,WALK.y]);await p.keyboard.down('d');await p.waitForTimeout(300);await p.keyboard.up('d');const w1=await p.evaluate(()=>[WALK.x,WALK.y]);ok(w0[0]===w1[0]&&w0[1]===w1[1],'walked while playing')}
   const t0=await p.evaluate(()=>ARC().t);await p.evaluate(()=>ygEnd());ok(await p.evaluate(t0=>ARC().t-t0===16,t0),'tickets');
   await p.evaluate(()=>ygStart(S.yard.it.findIndex(a=>a[0]==='hoop')));on=false;for(let i=0;i<20&&!on;i++){await p.waitForTimeout(400);on=await p.evaluate(()=>!!YG.on)}
@@ -176,6 +177,25 @@ await check('open house: host and guests see each other walk, chat, pets, invite
 await check('slots: cash uses steady income (bursts don’t count) and stops at the daily limit',async()=>{const p=await page(VPS[0][1],save({coins:90000,cc:5000,rate:1000000,rateL:20000}));
   const r=await p.evaluate(()=>{const c0=S.coins;payout(['anchor','anchor','anchor'],5);const a=S.coins-c0;const c1=S.coins,cc=S.cc;payout(['crown','crown','crown'],5);return [a,S.coins-c1,S.cc-cc,slotRate()]});
   ok(r[3]===20000,'steady rate '+r[3]);ok(r[0]===2400000,'anchors capped at 2h of steady income '+r[0]);ok(r[1]===0&&r[2]===100,'over the limit pays casino coins '+r);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('basement: own colors and theme, shared furniture moves downstairs, visitors can go down',async()=>{const p=await page(VPS[0][1],save({sleep:{ph:'awake',t:0,visit:true},cab:{col:{},own:{armchair:1,wheel:1},bed:'cot',rug:'round',lamp:null,wall:[null,null,'wheel'],ex:{}}}));await p.waitForTimeout(600);
+  await p.evaluate(()=>{cabSync();const cb=CAB();cb.fp=[['armchair',300,460,0]];goRoom('basement')});await p.waitForTimeout(300);
+  await p.evaluate(()=>openDeco());ok((await p.textContent('#decoWhere'))==='Your basement','basement decorate');await p.click('[data-bth="naut"]');
+  ok(await p.evaluate(()=>BSD().pat.w==='stripes'&&BSD().col.walls===4&&!CAB().pat.w),'basement theme kept separate from upstairs');
+  await p.click('#decoArr');ok(await p.evaluate(()=>CED.on&&cedStore().f.length===0),'armchair is upstairs, so not in the tray');
+  await p.evaluate(()=>{goRoom('cabin');cedEnter();CED.sel={k:'f',i:CAB().fp.findIndex(a=>a[0]==='armchair')};renderCed()});await p.click('#cedAway');await p.click('#cedDone');
+  await p.evaluate(()=>{goRoom('basement');cedEnter();cedPlace('f','armchair')});ok(await p.evaluate(()=>BSD().fp.some(a=>a[0]==='armchair')&&!CAB().fp.some(a=>a[0]==='armchair')&&CED.on),'armchair placed downstairs');await p.click('#cedDone');
+  const snap=await p.evaluate(()=>JSON.parse(JSON.stringify(mpCabin())));
+  await p.evaluate(c=>{goRoom('cabin');setVT({id:'x',name:'Pal',c,ext:c.ext});S.sleep={ph:'door',at:'friend',t:0,visit:true}},snap);await p.waitForTimeout(1200);await p.evaluate(()=>enterFriend());await p.waitForTimeout(2500);
+  const hs=await p.evaluate(()=>getHits().find(h=>h.kind==='stairs'));const sb=await p.locator('#scene').boundingBox(),k=sb.width/800;await p.mouse.click(sb.x+(hs.x+hs.w/2)*k,sb.y+(hs.y+hs.h/2)*k);await p.waitForTimeout(800);
+  ok(await p.evaluate(()=>ROOM==='basement'&&!!VISIT&&VISIT.S.cab.bs.fp.length===1),'visitor went downstairs');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('smokehouse: cheapest unlocked fish cooked into a meal with hunger and a boost, then a cooldown',async()=>{const p=await page(VPS[0][1],save({hunger:30,sleep:{ph:'awake',t:0,visit:true}}));
+  const r=await p.evaluate(()=>{const cs=FISH.filter(f=>f.r==='C').slice(0,3);S.cooler={};S.cooler[cs[0].id]={n:2,lbs:2,val:20};S.cooler[cs[1].id]={n:2,lbs:2,val:200};S.cooler[cs[2].id]={n:5,lbs:5,val:5};S.locked={[cs[2].id]:1};goRoom('basement');return cs.map(f=>f.id)});
+  await p.waitForTimeout(600);await p.evaluate(()=>smokeUI());ok((await p.textContent('#plotEye'))==='Your basement','smokehouse window');await p.click('[data-smk="fry"]');await p.waitForTimeout(5200);
+  const o=await p.evaluate(ids=>[S.hunger,S.buffs.haste||0,S.cooler[ids[0]]?S.cooler[ids[0]].n:0,S.cooler[ids[1]].n,S.cooler[ids[2]].n,(S.smk||0)>Date.now()],r);
+  ok(o[0]>50&&o[1]>100,'meal effects '+o);ok(o[2]===0&&o[3]===1&&o[4]===5,'cheapest unlocked fish used '+o);ok(o[5],'cooldown');
+  await p.evaluate(()=>smokeUI());ok(await p.evaluate(()=>[...document.querySelectorAll('[data-smk]')].every(b=>b.disabled)),'cooking blocked during cooldown');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));

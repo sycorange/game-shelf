@@ -27,6 +27,8 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - Paths, fences and house paint, and that the visitor snapshot packs and unpacks them correctly
 - Fruit trees, garden plots and the pantry
 - Cabin: old wall spots carry over, crafting and arranging furniture, themes
+- Basement: its own colors and themes, furniture shared with upstairs, visitors can go downstairs
+- Smokehouse: meals use the cheapest unlocked fish, give hunger and a boost, then cool down
 - The “While you were away” summary fits on screen
 - Photo mode hides the UI
 - After Halloween: keepsakes only for owners, costumes in Settings
