@@ -4396,7 +4396,7 @@ function sbPlayoffs(season){const k='po'+season;if(SBC[k])return SBC[k];const se
   const mk=(a,b,best,conf,round)=>({a,b,best,conf,round,wa:0,wb:0,games:[],winner:null});
   let rounds=[[]];for(const c of ['East','West']){const s=seeds[c];for(const [x,y] of [[0,7],[3,4],[2,5],[1,6]])rounds[0].push(mk(s[x],s[y],5,c,0))}
   for(let r=0;r<4;r++){const cur=rounds[r];
-    while(cur.some(s=>!s.winner)){for(const s of cur){if(s.winner)continue;const home=seedOf[s.a]<=seedOf[s.b]?s.a:s.b,away=home===s.a?s.b:s.a,g=sbGame(season,day,home,away),hw=g.hs>g.as,win=hw?home:away;
+    while(cur.some(s=>s.winner==null)){for(const s of cur){if(s.winner!=null)continue;const home=seedOf[s.a]<=seedOf[s.b]?s.a:s.b,away=home===s.a?s.b:s.a,g=sbGame(season,day,home,away),hw=g.hs>g.as,win=hw?home:away;
         if(win===s.a)s.wa++;else s.wb++;s.games.push({day,home,away});(days[day]=days[day]||[]).push([home,away,s]);const need=Math.ceil(s.best/2);if(s.wa>=need)s.winner=s.a;else if(s.wb>=need)s.winner=s.b}day++}
     if(r<3){const nx=[];if(r<2){for(const c of ['East','West']){const cs=cur.filter(s=>s.conf===c);for(let i=0;i<cs.length;i+=2)nx.push(mk(cs[i].winner,cs[i+1].winner,7,c,r+1))}}
       else{nx.push(mk(cur[0].winner,cur[1].winner,7,'Finals',3))}rounds.push(nx)}}
@@ -5398,7 +5398,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:109,n:'Save code fix',items:['Bug fix: on phones, the Your game window was taller than the screen, so the Load save code and Copy save code buttons could be cut off. The window now scrolls.']},
+ {v:110,n:'Big fix for long-time players',items:['Bug fix: for some players around day 310 and later, the game froze while loading. iPhones showed a white screen or “A problem repeatedly occurred”. The cause was the basketball league’s playoffs: when team #1 in the league list won a series, the game never noticed and kept simulating forever. It now loads normally, and nothing in your save was lost.']},
+{v:109,n:'Save code fix',items:['Bug fix: on phones, the Your game window was taller than the screen, so the Load save code and Copy save code buttons could be cut off. The window now scrolls.']},
 {v:108,n:'Smokehouse',items:['The basement pinball machine has moved to the Lantern Pier Arcade for good. Every game there still counts for the daily pinball challenge.','In its place: a Smokehouse! Turn fish from your cooler into a meal. Fish Fry (3 common fish), Smoked Fillets (2 uncommon), a Smokehouse Platter (1 rare) or a Legend’s Feast (1 legendary).','Each meal fills you up and gives a short boost: faster casts, heavier fish, more rare bites or double sale prices. One meal every 15 minutes. The cheapest fish go first, and locked fish are never used.','Bug fix: the Open House, Report and Blocked players windows no longer say “Your garden” at the top.']},
 {v:107,n:'Basement makeover',items:['Decorate your basement! Tap Decorate while you’re downstairs to pick its own wall, floor and rug colors, wallpaper, floor pattern or a whole theme. Original look puts it back the way it was.','Arrange works downstairs too. Your furniture and wall decor are shared between floors: put a piece away upstairs and you can place it in the basement, and the other way around.','Friends visiting your cabin can now head down the stairs to see your basement and your Legends aquarium.']},
 {v:106,n:'Cornhole cleanup',items:['Bug fix: in cornhole, the bags on the board now clear away a moment after your last bag lands, so each round starts with an empty board.']},

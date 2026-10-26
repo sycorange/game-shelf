@@ -197,6 +197,11 @@ await check('smokehouse: cheapest unlocked fish cooked into a meal with hunger a
   ok(o[0]>50&&o[1]>100,'meal effects '+o);ok(o[2]===0&&o[3]===1&&o[4]===5,'cheapest unlocked fish used '+o);ok(o[5],'cooldown');
   await p.evaluate(()=>smokeUI());ok(await p.evaluate(()=>[...document.querySelectorAll('[data-smk]')].every(b=>b.disabled)),'cooking blocked during cooldown');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('basketball league: every playoff series ends, so long-time saves load (team 0 winning used to freeze the game)',async()=>{const p=await page(VPS[0][1],save({}));
+  const r=await p.evaluate(()=>{for(let s=1;s<=60;s++){const P=sbPlayoffs(s);if(P.champ==null||P.endDay>200)return 'season '+s+' end '+P.endDay}return 'ok'});ok(r==='ok',r);
+  const p2=await page(VPS[1][1],save({day:316,sb:{start:316,season:4,seed:20261022,bets:[],champs:[],nid:1}}));ok(await p2.evaluate(()=>S.day===316&&S.sb.season===4),'day 316 save loads');
+  ok(!p.errs.length&&!p2.errs.length,p.errs.concat(p2.errs).join('; '));await p.context().close();await p2.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
