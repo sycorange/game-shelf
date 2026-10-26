@@ -5346,6 +5346,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:96,n:'Collar Check',items:['Bug fix: collars, bandanas and bows now wrap around your pet’s neck, tucked under the ear, instead of sitting on the shoulder.']},
  {v:95,n:'Dressed Right',items:['Bug fix: pet collars, bandanas and bows now sit around the neck instead of over the ear.']},
  {v:94,n:'Good Boy',items:['Removed the “All games” link from the title screen.','Pets have more personality: each one makes its own sound when you tap it, and gets excited when you land a fish.','Daily pet gifts: once a day your pet brings you something (look for the ! bubble). It could be materials, a few coins, fruit or sometimes a potion.','Play fetch: tap 🎾 Fetch in your yard and watch your pet chase the ball and bring it back.','New Pet House for the yard ($2,500, under Fences & hedges) and a Pet Bed for the cabin (at the crafting table). Your pet naps in them.','Next goals: a small card under the scene suggests what to do next. Hide it any time, or turn it back on in Settings.']},
  {v:93,n:'Pocket Lake',items:['Install Lantern Lake as an app: it gets its own icon and opens full screen. Find it in Settings → App and alerts. On iPhone, tap Share, then Add to Home Screen.','Alerts (optional): get a heads-up when your crops are ready or fruit is ripe, when friends visit, like your yard or sign your guestbook, and when you get a text. Turn each kind on or off in Settings.','You won’t get alerts while you’re playing, and visits only alert you once every few hours per friend.']},
@@ -5846,7 +5847,7 @@ function petDraw(c,P,x,y,face,pose,T,s,d){if(!P)return;const K=PETS[P.k],col=K.c
   if(P.coat===2&&P.k==='cat'){c.fillStyle='#f4f2ea';c.beginPath();c.ellipse(L-3,by+1.5,3,2,0,0,7);c.fill()}
   if(P.coat===3&&P.k==='cat'){c.fillStyle='#d8822a';c.beginPath();c.ellipse(-3,by-1,3,2,0,0,7);c.fill();c.fillStyle='#2a2a2a';c.beginPath();c.ellipse(3,by-1.5,2.4,1.6,0,0,7);c.fill()}
   // head (neck accessories go on first so the head and ears sit over them)
-  const hx=nap?L+1:L-1,hy=nap?by-.5:sit?by-6:by-4;if(P.acc!=='hat')petAcc(c,P,hx-2.2,hy+3.6,1);c.fillStyle=col;c.beginPath();c.arc(hx,hy,P.k==='cat'?3.4:3.8,0,7);c.fill();
+  const hx=nap?L+1:L-1,hy=nap?by-.5:sit?by-6:by-4;c.fillStyle=col;c.beginPath();c.arc(hx,hy,P.k==='cat'?3.4:3.8,0,7);c.fill();if(P.acc!=='hat')petNeck(c,P.acc,hx,hy);
   if(P.k==='dog'){c.beginPath();c.ellipse(hx+3.4,hy+1,2.6,1.8,0,0,7);c.fill();c.fillStyle='#1a1a1a';c.beginPath();c.arc(hx+5.6,hy+.4,.9,0,7);c.fill();c.fillStyle=dk;c.beginPath();c.ellipse(hx-1.6,hy+1,1.4,3,.25,0,7);c.fill()}
   else if(P.k==='fox'){c.beginPath();c.moveTo(hx+1,hy-1.6);c.lineTo(hx+7,hy+1);c.lineTo(hx+1,hy+2.6);c.fill();c.fillStyle='#f6f2ea';c.beginPath();c.moveTo(hx+1,hy+.6);c.lineTo(hx+6,hy+1.4);c.lineTo(hx+1,hy+2.6);c.fill();c.fillStyle='#1a1a1a';c.beginPath();c.arc(hx+6.8,hy+1,.7,0,7);c.fill()}
   else if(P.k==='otter'){c.fillStyle=lt;c.beginPath();c.ellipse(hx+2.4,hy+1.2,2.2,1.6,0,0,7);c.fill();c.fillStyle='#1a1a1a';c.beginPath();c.arc(hx+4.2,hy+.6,.7,0,7);c.fill()}
@@ -5856,6 +5857,13 @@ function petDraw(c,P,x,y,face,pose,T,s,d){if(!P)return;const K=PETS[P.k],col=K.c
   c.fillStyle='#111';if(nap){c.strokeStyle='#111';c.lineWidth=.5;c.beginPath();c.moveTo(hx+.6,hy-.6);c.lineTo(hx+2,hy-.4);c.stroke()}else{c.beginPath();c.arc(hx+1.4,hy-.8,.75,0,7);c.fill()}
   if(P.acc==='hat')petAcc(c,P,hx-2,hy+2.6,1);
   if(nap){c.fillStyle='rgba(255,255,255,.7)';c.font='bold 4px sans-serif';const z=(T*.6)%1;c.globalAlpha=1-z;c.fillText('z',hx+2+z*3,hy-4-z*6);c.globalAlpha=1}
+  c.restore()}
+// Collar, bandana and bow for four-legged pets: a band across the neck from under the back of the ear down to the chin.
+// Drawn after the head and before the ears, so the ear hangs over it.
+function petNeck(c,a,hx,hy){if(!a||a==='none')return;const x0=hx-3.1,y0=hy-.4,x1=hx+.2,y1=hy+3.9;c.save();c.lineCap='round';
+  if(a==='collar'){c.strokeStyle='#d8402e';c.lineWidth=1.6;c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo(hx-2.2,hy+2.8,x1,y1);c.stroke();c.fillStyle='#ffd05a';c.beginPath();c.arc(x1+.5,y1+.8,.95,0,7);c.fill()}
+  else if(a==='bandana'){c.strokeStyle='#d83a3a';c.lineWidth=1.4;c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo(hx-2.2,hy+2.8,x1,y1);c.stroke();c.fillStyle='#d83a3a';c.beginPath();c.moveTo(hx-2.2,hy+2.2);c.lineTo(x1+.4,y1+.2);c.lineTo(hx-1.2,hy+6.6);c.closePath();c.fill();c.fillStyle='#fff';c.fillRect(hx-1.3,hy+3.6,.8,.8)}
+  else if(a==='bow'){c.strokeStyle='#e85aa0';c.lineWidth=1;c.beginPath();c.moveTo(x0,y0);c.quadraticCurveTo(hx-2.2,hy+2.8,x1,y1);c.stroke();const bx=hx-.6,by=hy+3.6;c.fillStyle='#e85aa0';c.beginPath();c.moveTo(bx,by);c.lineTo(bx-2.4,by-1.6);c.lineTo(bx-2.2,by+1.4);c.fill();c.beginPath();c.moveTo(bx,by);c.lineTo(bx+2.2,by-1.4);c.lineTo(bx+2.4,by+1.6);c.fill();c.fillStyle='#c83a80';c.beginPath();c.arc(bx,by,.7,0,7);c.fill()}
   c.restore()}
 function petAcc(c,P,x,y,k){const a=P.acc;if(!a||a==='none')return;c.save();c.translate(x,y);c.scale(k,k);
   if(a==='collar'){c.save();c.rotate(-.5);c.fillStyle='#d8402e';c.fillRect(-2.6,-1.2,5.2,1.7);c.restore();c.fillStyle='#ffd05a';c.beginPath();c.arc(.6,1.2,.85,0,7);c.fill()}
