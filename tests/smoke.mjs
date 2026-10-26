@@ -171,6 +171,10 @@ await check('open house: host and guests see each other walk, chat, pets, invite
   await A.evaluate(()=>houseClose());ok(!(await A.evaluate(async()=>{const m=mpS();return (await api('house/list',{id:m.id,key:m.key})).houses.length})),'closed');
   for(const P of [A,B,C]){ok(!P.errs.length,P.errs.join('; '));await P.context().close()}});
 
+await check('slots: cash uses steady income (bursts don’t count) and stops at the daily limit',async()=>{const p=await page(VPS[0][1],save({coins:90000,cc:5000,rate:1000000,rateL:20000}));
+  const r=await p.evaluate(()=>{const c0=S.coins;payout(['anchor','anchor','anchor'],5);const a=S.coins-c0;const c1=S.coins,cc=S.cc;payout(['crown','crown','crown'],5);return [a,S.coins-c1,S.cc-cc,slotRate()]});
+  ok(r[3]===20000,'steady rate '+r[3]);ok(r[0]===2400000,'anchors capped at 2h of steady income '+r[0]);ok(r[1]===0&&r[2]===100,'over the limit pays casino coins '+r);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
