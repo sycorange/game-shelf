@@ -158,7 +158,7 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .aw-new{margin:0;font-size:.88rem}.aw-d{border:1px solid var(--line);border-radius:10px;padding:6px 9px;background:rgba(255,255,255,.03)}.aw-d summary{cursor:pointer;font-weight:700;font-size:.88rem}.aw-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;max-height:180px;overflow:auto}
 .aw-chip{font-size:.76rem;background:rgba(255,255,255,.07);border-radius:999px;padding:2px 8px}.aw-chip b{color:var(--gold)}.aw-notes{margin:0;padding-left:18px;font-size:.82rem;color:var(--muted);display:grid;gap:2px}
 .away p{margin:0;color:var(--muted)}
-.away .box.xfer{max-width:440px;gap:12px}
+.away .box.xfer{max-width:440px;gap:12px;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain}
 .xf-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.xf-h h2{margin:2px 0 0}
 .xf-sec{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}
 .xf-sec h3{margin:0;font-size:1rem}.xf-sec>p{font-size:.88rem}
@@ -5398,7 +5398,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:108,n:'Smokehouse',items:['The basement pinball machine has moved to the Lantern Pier Arcade for good. Every game there still counts for the daily pinball challenge.','In its place: a Smokehouse! Turn fish from your cooler into a meal. Fish Fry (3 common fish), Smoked Fillets (2 uncommon), a Smokehouse Platter (1 rare) or a Legend’s Feast (1 legendary).','Each meal fills you up and gives a short boost: faster casts, heavier fish, more rare bites or double sale prices. One meal every 15 minutes. The cheapest fish go first, and locked fish are never used.','Bug fix: the Open House, Report and Blocked players windows no longer say “Your garden” at the top.']},
+ {v:109,n:'Save code fix',items:['Bug fix: on phones, the Your game window was taller than the screen, so the Load save code and Copy save code buttons could be cut off. The window now scrolls.']},
+{v:108,n:'Smokehouse',items:['The basement pinball machine has moved to the Lantern Pier Arcade for good. Every game there still counts for the daily pinball challenge.','In its place: a Smokehouse! Turn fish from your cooler into a meal. Fish Fry (3 common fish), Smoked Fillets (2 uncommon), a Smokehouse Platter (1 rare) or a Legend’s Feast (1 legendary).','Each meal fills you up and gives a short boost: faster casts, heavier fish, more rare bites or double sale prices. One meal every 15 minutes. The cheapest fish go first, and locked fish are never used.','Bug fix: the Open House, Report and Blocked players windows no longer say “Your garden” at the top.']},
 {v:107,n:'Basement makeover',items:['Decorate your basement! Tap Decorate while you’re downstairs to pick its own wall, floor and rug colors, wallpaper, floor pattern or a whole theme. Original look puts it back the way it was.','Arrange works downstairs too. Your furniture and wall decor are shared between floors: put a piece away upstairs and you can place it in the basement, and the other way around.','Friends visiting your cabin can now head down the stairs to see your basement and your Legends aquarium.']},
 {v:106,n:'Cornhole cleanup',items:['Bug fix: in cornhole, the bags on the board now clear away a moment after your last bag lands, so each round starts with an empty board.']},
 {v:105,n:'Tidy lodge',items:['Bug fix: on the Two-Story Lodge, the stone lines on the ground floor no longer stick out past the right wall.']},
