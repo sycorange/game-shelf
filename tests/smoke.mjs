@@ -202,6 +202,14 @@ await check('basketball league: every playoff series ends, so long-time saves lo
   const p2=await page(VPS[1][1],save({day:316,sb:{start:316,season:4,seed:20261022,bets:[],champs:[],nid:1}}));ok(await p2.evaluate(()=>S.day===316&&S.sb.season===4),'day 316 save loads');
   ok(!p.errs.length&&!p2.errs.length,p.errs.concat(p2.errs).join('; '));await p.context().close();await p2.context().close()});
 
+await check('owner gift: only the owner can send, it arrives in the mailbox and gives income-based coins, potions and the plaque',async()=>{const p=await page(VPS[0][1],save({rate:5000,rateL:3000,pots:{}}));
+  const r=await p.evaluate(async()=>{const R=Math.floor(Math.random()*1e5),O=await api('hello',{name:'sycorange'}).catch(()=>null),G=await api('hello',{name:'Gf'+R}),X=await api('hello',{name:'Gx'+R});
+    const no=await api('owner/gift',{id:X.id,key:X.key,name:G.name,cc:5}).then(()=>'sent',e=>e.message);if(!O||!O.id)return {skip:true,no};
+    await api('owner/gift',{id:O.id,key:O.key,name:G.name,hrs:2,cc:1000,pots:['luck','gold','bogus'],plaque:true,msg:'hi'});
+    const s=await api('sync',{id:G.id,key:G.key,stats:{}}),m=s.mail.find(x=>x.kind==='gift');const cl=await api('claim',{id:G.id,key:G.key,mail:m.id});const c0=S.coins,cc0=S.cc;giveItem(cl.mail.kind,cl.mail.item,cl.mail.n);
+    return {no,coins:S.coins-c0,cc:S.cc-cc0,pots:S.pots.luck===1&&S.pots.gold===1&&!S.pots.bogus,plaque:!!CAB().own.thanks}});
+  ok(r.no!=='sent','non-owner blocked');if(!r.skip){ok(r.coins===360000&&r.cc===1000&&r.pots&&r.plaque,'gift contents '+JSON.stringify(r))}ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

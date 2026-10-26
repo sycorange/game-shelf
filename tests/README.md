@@ -38,6 +38,7 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - Open House: three players at once (host, guest, phone guest) see each other walk and chat, invites, the phone More menu, remove, block, report, close
 - Slots: cash prizes follow steady income and stop at the daily limit
 - Basketball league: every playoff season finishes, so long-time saves still load
+- Owner gifts: only the owner can send; coins scale with the player's steady income
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

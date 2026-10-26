@@ -307,6 +307,12 @@ async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.wai
   if(p==='owner/bugs'){const r=await db.prepare('SELECT id,name,msg,errs,ua,ver,scr,ts FROM bugs ORDER BY id DESC LIMIT 60').all();return json({bugs:r.results})}
   if(p==='owner/pinreset'){const n=clean(b.name,16).toLowerCase();const r=await db.prepare('UPDATE players SET pin=NULL WHERE lname=?').bind(n).run();
     await db.prepare("DELETE FROM pinfail WHERE k LIKE ?").bind('%:'+n+'|%').run();return json({ok:true,found:!!(r.meta&&r.meta.changes)})}
+  // Owner gift: lands in the player's Friends mailbox as one claimable bundle.
+  if(p==='owner/gift'){const n=clean(b.name,16).toLowerCase();const t=await db.prepare('SELECT id,name FROM players WHERE lname=?').bind(n).first();if(!t)return json({found:false});
+    const int=(v,max)=>Math.max(0,Math.min(max,Math.floor(Number(v)||0)));const PK=['luck','haste','gold','magnet','giant','coffee','charm'];
+    const pots=(Array.isArray(b.pots)?b.pots:[]).map(String).filter(k=>PK.includes(k)).slice(0,8);
+    const g=[int(b.coins,50000000),int(b.hrs,12),int(b.cc,10000),pots.join(','),b.plaque?1:0];if(!g[0]&&!g[1]&&!g[2]&&!pots.length&&!g[4])return json({error:'empty'},400);
+    await sysMail(db,t.id,'gift',g.join('|'),clean(b.msg,120)||'A gift from Lantern Lake',now).run();return json({found:true,name:t.name})}
   if(p==='owner/reports'){const r=await db.prepare('SELECT id,from_name,to_pid,to_name,reason,where_ AS wh,ts FROM reports ORDER BY id DESC LIMIT 80').all();return json({reports:r.results||[]})}
   if(p==='owner/repdel'){await db.prepare('DELETE FROM reports WHERE id=?').bind(b.rid|0).run();return json({ok:true})}
   if(p==='owner/bugdel'){await db.prepare('DELETE FROM bugs WHERE id=?').bind(b.bid|0).run();return json({ok:true})}
