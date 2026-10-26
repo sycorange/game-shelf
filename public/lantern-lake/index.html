@@ -13,6 +13,13 @@ body{margin:0;font-size:14px}
 img{max-width:100%}
 </style>
 <title>Lantern Lake</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f2026">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lantern Lake">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script>if(location.hostname==='www.lanternlake.app')location.replace('https://lanternlake.app'+location.pathname+location.search+location.hash)</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sniglet:wght@400;800&family=Figtree:wght@400;600;700&family=Playfair+Display:wght@700;900&family=Press+Start+2P&family=Permanent+Marker&display=swap">
@@ -3863,6 +3870,41 @@ function openFacts(id){const f=FI(id);if(!f)return;$('fcH').textContent=f.n;$('f
     .catch(()=>show(null))}
 $('fcClose').onclick=()=>{$('factModal').hidden=true};$('factModal').onclick=e=>{if(e.target.id==='factModal')$('factModal').hidden=true};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('factModal').hidden)$('factModal').hidden=true});
+// ==APP INSTALL + ALERTS== Install to the home screen, and opt-in alerts (garden ready, yard visitors/likes/guestbook, texts).
+const APP={bip:null,reg:null,busy:false};
+const appStandalone=()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}};
+const appIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const appHost=()=>/(^|\.)lanternlake\.app$|\.workers\.dev$|^127\.0\.0\.1$|^localhost$/.test(location.hostname);
+const pushOK=()=>!!APP.reg&&'PushManager' in window&&'Notification' in window;
+const u8key=s=>{s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const t=atob(s),a=new Uint8Array(t.length);for(let i=0;i<t.length;i++)a[i]=t.charCodeAt(i);return a};
+if(appHost()&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js',{scope:'./'}).then(r=>{APP.reg=r;if(phOpen&&phOpen()&&phView==='settings')renderSettings()}).catch(()=>{})}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();APP.bip=e;try{if(phOpen()&&phView==='settings')renderSettings()}catch(_){}});
+addEventListener('appinstalled',()=>{APP.bip=null;showToast('Lantern Lake is on your home screen','Installed')});
+async function appInstall(){if(!APP.bip)return;const e=APP.bip;APP.bip=null;try{e.prompt();await e.userChoice}catch(_){}renderSettings()}
+const pushPrefs=()=>{const st=SETS();if(!st.pushP||typeof st.pushP!=='object')st.pushP={garden:true,yard:true,texts:true};return st.pushP};
+async function pushSend(sub){const m=mpS();await api('push/sub',{id:m.id,key:m.key,sub:sub.toJSON(),prefs:pushPrefs()})}
+async function pushEnable(){const m=mpS();if(!m.id){showToast('Pick an angler name in Friends first','Alerts');return}if(!pushOK()||APP.busy)return;APP.busy=true;
+  try{const perm=await Notification.requestPermission();if(perm!=='granted'){showToast('Alerts are blocked','Allow notifications for this site in your browser settings');return}
+    const {key}=await api('push/key',{id:m.id,key:m.key});let sub=await APP.reg.pushManager.getSubscription();if(!sub)sub=await APP.reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8key(key)});
+    await pushSend(sub);SETS().push=true;mpS().alSig='';save();showToast('Alerts are on','We’ll send a test one now');setTimeout(()=>api('push/test',{id:m.id,key:m.key}).catch(()=>{}),800)}
+  catch(e){showToast('Couldn’t turn on alerts','Try again in a moment')}finally{APP.busy=false;renderSettings()}}
+async function pushDisable(){const m=mpS();APP.busy=true;try{const sub=APP.reg&&await APP.reg.pushManager.getSubscription();if(sub){try{await api('push/unsub',{id:m.id,key:m.key,endpoint:sub.endpoint})}catch(_){}await sub.unsubscribe()}}catch(_){}
+  SETS().push=false;APP.busy=false;save();renderSettings()}
+async function pushPref(k,on){pushPrefs()[k]=on;save();try{const sub=APP.reg&&await APP.reg.pushManager.getSubscription();if(sub)await pushSend(sub)}catch(_){}}
+// Next times the garden needs you, sent with each sync so the server can alert you while you're away.
+function alertsDue(){const now=Date.now(),L=yardOk(S.yard)?S.yard.it:[];let crop=0,fruit=0;
+  for(const a of L){if(a[0]==='plot'&&CROPS[a[5]]){const r=(+a[4]||0)+CROPS[a[5]].min*6e4;if(r>now&&(!crop||r<crop))crop=r}else if(YI[a[0]]&&YI[a[0]].fruit){const r=(+a[4]||0)+FRUIT_MS;if(r>now&&(!fruit||r<fruit))fruit=r}}
+  return [{k:'crop',due:crop},{k:'fruit',due:pushPrefs().garden===false?0:fruit}]}
+function appSettingsHTML(row,sw){const st=SETS(),inst=appStandalone();let h='';
+  h+=row('Install the app',inst?'Installed. Open it from your home screen':APP.bip?'Opens full screen from your home screen, like any app':appIOS()?'In Safari, tap Share, then “Add to Home Screen”':'Use your browser menu: “Install app” or “Add to Home screen”',inst?'<small class="fr-muted">✓</small>':APP.bip?'<button class="ghost" id="appInst">Install</button>':'');
+  if(!appHost())return h+row('Alerts','Available on lanternlake.app','');
+  if(!pushOK())return h+row('Alerts',appIOS()&&!inst?'On iPhone, install the app first, then turn alerts on from inside it':'This browser can’t show alerts','');
+  const on=!!st.push&&typeof Notification!=='undefined'&&Notification.permission==='granted';
+  h+=row('Alerts',on?'We’ll let you know when something needs you':'Get a heads-up when crops are ready, friends visit or text you',`<input type="checkbox" class="sw2" id="pushSw" ${on?'checked':''} ${APP.busy?'disabled':''} aria-label="Alerts">`);
+  if(on){const P=pushPrefs();h+=row('🌱 Garden','Crops ready and fruit ripe',`<input type="checkbox" class="sw2" data-pp="garden" ${P.garden!==false?'checked':''} aria-label="Garden alerts">`)+row('🏡 Your yard','Visitors, likes and guestbook notes',`<input type="checkbox" class="sw2" data-pp="yard" ${P.yard!==false?'checked':''} aria-label="Yard alerts">`)+row('💬 Texts','New messages from friends',`<input type="checkbox" class="sw2" data-pp="texts" ${P.texts!==false?'checked':''} aria-label="Text alerts">`)+`<div class="row"><span>Send a test alert</span><button class="ghost" id="pushTest">Send</button></div>`}
+  return h}
+function appSettingsBind(b){const i=$('appInst');if(i)i.onclick=appInstall;const s=$('pushSw');if(s)s.onchange=()=>{s.checked?pushEnable():pushDisable()};
+  b.querySelectorAll('[data-pp]').forEach(x=>x.onchange=()=>pushPref(x.dataset.pp,x.checked));const t=$('pushTest');if(t)t.onclick=async()=>{const m=mpS();t.disabled=true;try{const r=await api('push/test',{id:m.id,key:m.key});showToast(r.sent?'Test alert sent':'No devices are set up yet','Alerts')}catch(_){}t.disabled=false}}
 // Photo mode: hides everything over the scene for clean screenshots; the little bar fades out and comes back on a tap or mouse move.
 const PHOTO={on:false,t:null};
 function photoWake(){if(!PHOTO.on)return;const b=$('photoBar');b.classList.remove('fade');clearTimeout(PHOTO.t);PHOTO.t=setTimeout(()=>b.classList.add('fade'),2500)}
@@ -4004,6 +4046,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
     ${row('Buzz and chime','Plays a sound with each notification',sw('nSound',st.nSound,'Notification sound'))}
     ${'vibrate' in navigator?row('Vibrate','On phones that support it',sw('nVib',st.nVib,'Vibrate')):''}
   </div></div>
+  <div><h4>App and alerts</h4><div class="grp">${appSettingsHTML(row,sw)}</div></div>
   <div><h4>Account</h4><div class="grp">
     ${row('Cloud sync',S.mp&&S.mp.id?'Your latest game follows you between devices':'Pick an angler name in Friends to turn this on',sw('cloud',st.cloud,'Cloud sync'))}
     <div class="row"><span>Login PIN<small>${S.mp&&S.mp.id?(MPV.hasPin?`Set. Log in on new devices with “${esc(S.mp.name)}” and your PIN`:'Not set. Set one so you can log in on a new device'):'Pick an angler name in Friends first'}</small></span><button class="ghost" id="setPin" ${S.mp&&S.mp.id?'':'disabled'}>${MPV.hasPin?'Change':'Set PIN'}</button></div>
@@ -4020,6 +4063,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   </div></div>
   <div><h4>Support Lantern Lake</h4><div class="grp"><div class="row col"><span><small style="line-height:1.45">${donateNote()}</small></span><a class="set-donate" href="${DONATE_URL}" target="_blank" rel="noopener">♥ Donate with PayPal</a></div></div></div>
   <p class="set-foot">Lantern Lake · version ${ver}</p>`;
+  appSettingsBind(b);
   b.querySelectorAll('[data-cos]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.cos||null;sfx('click');save();renderSettings()});
   b.querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{let v=x.dataset.sv;if(v==='true')v=true;else if(v==='false')v=false;st[x.dataset.sk]=v;sfx('click');applyDock();applyPhTheme();applyTextSize();save();renderSettings();renderLock();renderVitals&&renderVitals()});
   b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();});
@@ -5301,6 +5345,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:93,n:'Pocket Lake',items:['Install Lantern Lake as an app: it gets its own icon and opens full screen. Find it in Settings → App and alerts. On iPhone, tap Share, then Add to Home Screen.','Alerts (optional): get a heads-up when your crops are ready or fruit is ripe, when friends visit, like your yard or sign your guestbook, and when you get a text. Turn each kind on or off in Settings.','You won’t get alerts while you’re playing, and visits only alert you once every few hours per friend.']},
  {v:92,n:'Best Friends',items:['Pets! Adopt a dog, cat, duck, frog, otter or fox from the new 🐾 Pets section of the Shop, and give them a name.','Your companion naps and wanders in your yard, rides along in your boat, and curls up by the rug in your cabin. Friends see them when they visit.','Tap your pet to give them some love. The first pet each day gives +10 stamina.','Pick each pet’s coat and dress them up with a collar, bandana, bow or tiny hat.']},
  {v:91,n:'Fair Reflection',items:['Bug fix: in Mirror Match, the final round now really is mirrored. It used to also make you answer back to front, which flipped the arrows a second time so the right answer often looked unmirrored.','Mirror Match is easier: shorter rounds (3, 4, 4, 5 and 5 arrows), the arrows play a little slower, and after a mistake your reflection shows the same arrows again instead of new ones.']},
  {v:90,n:'Spring Cleaning',items:['Behind-the-scenes tidy-up: your yard’s paths are now sent to visitors in a much smaller form, so even very decorated yards keep showing up for friends.','Bug fix: a huge yard could quietly stop updating for visitors. If one ever gets too big, the game now trims the path details instead of failing.','Old likes from past weeks are now cleared out on the server, like guestbook entries already are.']},
@@ -8338,7 +8383,7 @@ const XKIND={
   monster:{name:it=>{const [c,n]=String(it).split('|');return `Bounty for beating ${n}: $${money(+c)}`},give:it=>{const [c,n]=String(it).split('|');S.coins+=+c||0;celebrate({lbl:'Monster beaten!',r:'L',name:n,sub:`+$${money(+c)} bounty`,icon:svgI('crown','#ffd05a')});return true}},
   yard:{name:it=>{const [c]=String(it).split('|');return `Best yard of the week: $${money(+c)}`},give:it=>{const [c]=String(it).split('|');S.coins+=+c||0;S.trophies.unshift({name:'Best Yard',water:'pond',type:'big',score:'Most liked',day:S.day});celebrate({lbl:'Best yard!',r:'L',name:'Your yard got the most likes',sub:`+$${money(+c)} and a trophy`,icon:cupSvg});return true}},
   chal:{name:it=>{const [k,c,o,f]=String(it).split('|');const fn=FI(f)?FI(f).n:f;return k==='win'?`Challenge won vs ${o} (${fn}): $${money(+c)}`:k==='tie'?`Challenge tie with ${o}: $${money(+c)} back`:`Challenge refund (${o}): $${money(+c)}`},give:it=>{const [k,c,o]=String(it).split('|');S.coins+=+c||0;if(k==='win')celebrate({lbl:'Challenge won!',r:'R',name:`You beat ${o}`,sub:`+$${money(+c)}`,icon:cupSvg});else showToast(`+$${money(+c)}`,k==='tie'?'Challenge tie':'Challenge refund');return true}}};
-function mpSyncExtras(body){const m=mpS(),h=S.hw;if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
+function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
 function mpSyncDone(body,r){const m=mpS();try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);
   if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;
   if(r.chal){const prev=MPV.chal||[];MPV.chal=r.chal;const newIn=r.chal.filter(c=>c.mine==='b'&&c.st==='pend'&&!(m.chSeen||[]).includes(c.id));if(newIn.length){m.chSeen=(m.chSeen||[]).concat(newIn.map(c=>c.id)).slice(-40);phNotify('friends','Challenge!',`${newIn[0].other} challenges you: biggest ${FI(newIn[0].fish)?FI(newIn[0].fish).n:newIn[0].fish} for $${money(newIn[0].stake)}`)}

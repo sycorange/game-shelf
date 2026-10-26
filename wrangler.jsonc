@@ -4,6 +4,8 @@
   "name": "yellow-salad-fd76",
   "main": "src/worker.js",
   "compatibility_date": "2026-06-01",
+  // Every 15 minutes the server sends any alerts that are due (crops ready, fruit ripe).
+  "triggers": { "crons": ["*/15 * * * *"] },
   "assets": {
     "directory": "./public/",
     "binding": "ASSETS",

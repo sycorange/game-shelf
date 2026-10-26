@@ -1,0 +1,15 @@
+{
+  "name": "Lantern Lake",
+  "short_name": "Lantern Lake",
+  "description": "A cozy idle fishing game. Fish, decorate your yard and visit friends.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f2026",
+  "theme_color": "#0f2026",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

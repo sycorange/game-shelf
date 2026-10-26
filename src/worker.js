@@ -63,6 +63,10 @@ async function init(db){
   try{await db.prepare('CREATE TABLE IF NOT EXISTS pinfail(k TEXT PRIMARY KEY,n INTEGER,ts INTEGER)').run()}catch(e){}
   await db.batch([
     db.prepare(`CREATE TABLE IF NOT EXISTS kvc(k TEXT PRIMARY KEY,v TEXT,ts INTEGER)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS pushsub(endpoint TEXT PRIMARY KEY,pid TEXT,sub TEXT,prefs TEXT,ts INTEGER)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS pushsub_pid ON pushsub(pid)`),
+    db.prepare(`CREATE TABLE IF NOT EXISTS pushq(pid TEXT,k TEXT,due INTEGER)`),
+    db.prepare(`CREATE INDEX IF NOT EXISTS pushq_due ON pushq(due)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS arc(k TEXT,g TEXT,pid TEXT,name TEXT,s REAL,ts INTEGER,PRIMARY KEY(k,g,pid))`),
     db.prepare(`CREATE INDEX IF NOT EXISTS arc_s ON arc(k,g,s)`),
     db.prepare(`CREATE TABLE IF NOT EXISTS hostping(dev TEXT PRIMARY KEY,host TEXT,ts INTEGER)`),
@@ -229,14 +233,16 @@ async function syncExtras(db,me,b,now,wk){const out={};
   try{out.musv=await musVer(db);const n=await db.prepare('SELECT id,body,ts FROM mnote WHERE pid=? AND seen=0 ORDER BY id LIMIT 10').bind(me.id).all();
     if(n.results.length){out.mnotes=n.results;await db.prepare('UPDATE mnote SET seen=1 WHERE pid=? AND id<=?').bind(me.id,n.results[n.results.length-1].id).run()}}catch(e){}
   return out}
-async function extraRoutes(p,db,me,b,now,url){
+async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.waitUntil(f());else return f()};
   if(p==='guest/sign'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);
     const t=await db.prepare('SELECT id FROM players WHERE id=?').bind(to).first();if(!t)return json({error:'no-player'},404);
     const r=await db.prepare('INSERT OR IGNORE INTO guest(to_pid,from_pid,from_name,st,note,day,ts) VALUES(?,?,?,?,?,?,?)').bind(to,me.id,me.name,Math.max(0,Math.min(11,b.st|0)),clean(b.note,80),dayKey(now),now).run();
     if(!(r.meta&&r.meta.changes===1))return json({error:'already-signed'},409);
+    await later(()=>pushTo(db,to,'yard',{title:'📖 New guestbook note',body:`${me.name} signed your guestbook.`,tag:'guest'}));
     if(Math.random()<.05)await db.prepare('DELETE FROM guest WHERE ts<?').bind(now-60*864e5).run();return json({ok:true})}
   if(p==='guest/like'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);const wk=weekKey();
-    await db.prepare('INSERT OR IGNORE INTO likes(week,to_pid,from_pid) VALUES(?,?,?)').bind(wk,to,me.id).run();
+    const li=await db.prepare('INSERT OR IGNORE INTO likes(week,to_pid,from_pid) VALUES(?,?,?)').bind(wk,to,me.id).run();
+    if(li.meta&&li.meta.changes===1)await later(()=>pushTo(db,to,'yard',{title:'❤ Your yard got a like',body:`${me.name} liked your yard.`,tag:'like'}));
     if(Math.random()<.03)await db.prepare('DELETE FROM likes WHERE CAST(week AS INTEGER)<?').bind(+wk-8).run();
     const n=await db.prepare('SELECT COUNT(*) AS c FROM likes WHERE week=? AND to_pid=?').bind(wk,to).first();return json({ok:true,n:n.c|0})}
   if(p==='yard/top'){const wk=weekKey();
@@ -394,6 +400,56 @@ export class LakeRoom{
     await this.maybeRaid()}
 }
 
+// ==PUSH ALERTS== Web Push (RFC 8291 aes128gcm + VAPID). The signing key is made once by the server and kept in D1,
+// so there is nothing secret to paste anywhere. Alerts: timed (crops ready, fruit ripe) via the cron, and social (likes, guestbook, visits, texts).
+const b64u=buf=>{let s='';const a=new Uint8Array(buf);for(let i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const ub64=s=>{s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const t=atob(s),a=new Uint8Array(t.length);for(let i=0;i<t.length;i++)a[i]=t.charCodeAt(i);return a};
+const cat=(...a)=>{const n=a.reduce((s,x)=>s+x.length,0),o=new Uint8Array(n);let i=0;for(const x of a){o.set(x,i);i+=x.length}return o};
+const enc=new TextEncoder();
+let VAPID=null;
+async function vapid(db){if(VAPID)return VAPID;
+  let r=await db.prepare("SELECT v FROM kvc WHERE k='vapid'").first();
+  if(!r){const kp=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);const jwk=await crypto.subtle.exportKey('jwk',kp.privateKey);
+    await db.prepare("INSERT OR IGNORE INTO kvc(k,v,ts) VALUES('vapid',?,?)").bind(JSON.stringify(jwk),9e15).run();r=await db.prepare("SELECT v FROM kvc WHERE k='vapid'").first()}
+  const jwk=JSON.parse(r.v),priv=await crypto.subtle.importKey('jwk',jwk,{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
+  const pub=cat(new Uint8Array([4]),ub64(jwk.x),ub64(jwk.y));VAPID={priv,pub,pubB64:b64u(pub)};return VAPID}
+async function hkdf(salt,ikm,info,len){const k=await crypto.subtle.importKey('raw',ikm,'HKDF',false,['deriveBits']);return new Uint8Array(await crypto.subtle.deriveBits({name:'HKDF',hash:'SHA-256',salt,info},k,len*8))}
+// Encrypts one message for one browser subscription ({endpoint, keys:{p256dh, auth}}). Exported for the tests.
+async function pushEncrypt(sub,payload){const ua=ub64(sub.keys.p256dh),auth=ub64(sub.keys.auth);
+  const eph=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']),asPub=new Uint8Array(await crypto.subtle.exportKey('raw',eph.publicKey));
+  const uaKey=await crypto.subtle.importKey('raw',ua,{name:'ECDH',namedCurve:'P-256'},false,[]),shared=new Uint8Array(await crypto.subtle.deriveBits({name:'ECDH',public:uaKey},eph.privateKey,256));
+  const ikm=await hkdf(auth,shared,cat(enc.encode('WebPush: info\0'),ua,asPub),32),salt=crypto.getRandomValues(new Uint8Array(16));
+  const cek=await hkdf(salt,ikm,enc.encode('Content-Encoding: aes128gcm\0'),16),nonce=await hkdf(salt,ikm,enc.encode('Content-Encoding: nonce\0'),12);
+  const key=await crypto.subtle.importKey('raw',cek,'AES-GCM',false,['encrypt']),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv:nonce},key,cat(enc.encode(payload),new Uint8Array([2]))));
+  const rs=new Uint8Array([0,0,16,0]);return cat(salt,rs,new Uint8Array([asPub.length]),asPub,ct)}
+async function vapidJwt(db,endpoint){const V=await vapid(db),aud=new URL(endpoint).origin,h=b64u(enc.encode(JSON.stringify({typ:'JWT',alg:'ES256'}))),c=b64u(enc.encode(JSON.stringify({aud,exp:Math.floor(Date.now()/1000)+12*3600,sub:'https://lanternlake.app'})));
+  const sig=await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},V.priv,enc.encode(h+'.'+c));return {jwt:h+'.'+c+'.'+b64u(sig),k:V.pubB64}}
+// Sends to every device a player has subscribed, if they want this kind of alert and aren't playing right now.
+async function pushTo(db,pid,kind,msg,opts){try{const rows=(await db.prepare('SELECT endpoint,sub,prefs FROM pushsub WHERE pid=?').bind(pid).all()).results||[];if(!rows.length)return 0;
+  if(!(opts&&opts.evenOnline)){const p=await db.prepare('SELECT seen FROM players WHERE id=?').bind(pid).first();if(p&&Date.now()-(p.seen||0)<150000)return 0}
+  let n=0;for(const r of rows){let pr={};try{pr=JSON.parse(r.prefs||'{}')}catch(e){}if(pr[kind]===false)continue;let sub;try{sub=JSON.parse(r.sub)}catch(e){continue}
+    try{const body=await pushEncrypt(sub,JSON.stringify(msg)),{jwt,k}=await vapidJwt(db,sub.endpoint);
+      const res=await fetch(sub.endpoint,{method:'POST',headers:{'Content-Encoding':'aes128gcm','Content-Type':'application/octet-stream',TTL:'86400',Urgency:'normal',Topic:String(msg.tag||kind).replace(/[^A-Za-z0-9_-]/g,'').slice(0,32)||'ll',Authorization:`vapid t=${jwt}, k=${k}`},body});
+      if(res.status===404||res.status===410)await db.prepare('DELETE FROM pushsub WHERE endpoint=?').bind(r.endpoint).run();else if(res.ok)n++}catch(e){}}
+  return n}catch(e){return 0}}
+async function pushRoutes(p,db,me,b,now){
+  if(p==='push/key'){const V=await vapid(db);return json({key:V.pubB64})}
+  if(p==='push/sub'){const s=b.sub;if(!s||typeof s.endpoint!=='string'||!/^https:\/\//.test(s.endpoint)||s.endpoint.length>800||!s.keys||typeof s.keys.p256dh!=='string'||typeof s.keys.auth!=='string')return json({error:'bad-sub'},400);
+    const prefs={};for(const k of ['garden','yard','texts'])prefs[k]=!(b.prefs&&b.prefs[k]===false);
+    const cnt=await db.prepare('SELECT COUNT(*) AS c FROM pushsub WHERE pid=?').bind(me.id).first();if((cnt.c|0)>=5)await db.prepare('DELETE FROM pushsub WHERE pid=? AND endpoint IN (SELECT endpoint FROM pushsub WHERE pid=? ORDER BY ts LIMIT 1)').bind(me.id,me.id).run();
+    await db.prepare('INSERT INTO pushsub(endpoint,pid,sub,prefs,ts) VALUES(?,?,?,?,?) ON CONFLICT(endpoint) DO UPDATE SET pid=excluded.pid,sub=excluded.sub,prefs=excluded.prefs,ts=excluded.ts').bind(s.endpoint,me.id,JSON.stringify({endpoint:s.endpoint,keys:{p256dh:s.keys.p256dh,auth:s.keys.auth}}),JSON.stringify(prefs),now).run();return json({ok:true})}
+  if(p==='push/unsub'){await db.prepare('DELETE FROM pushsub WHERE pid=? AND endpoint=?').bind(me.id,String(b.endpoint||'')).run();return json({ok:true})}
+  if(p==='push/test'){const n=await pushTo(db,me.id,'test',{title:'Lantern Lake',body:'Alerts are on. We’ll let you know when something needs you. 🎣',tag:'test'},{evenOnline:true});return json({ok:true,sent:n})}
+  return null}
+// Timed alerts the game schedules for itself (crops ready, fruit ripe). Replaces that kind's previous alert.
+async function pushSchedule(db,pid,list){if(!Array.isArray(list))return;const has=await db.prepare('SELECT 1 FROM pushsub WHERE pid=? LIMIT 1').bind(pid).first();if(!has)return;
+  for(const a of list.slice(0,4)){const k=['crop','fruit'].includes(a&&a.k)?a.k:null;if(!k)continue;await db.prepare('DELETE FROM pushq WHERE pid=? AND k=?').bind(pid,k).run();
+    const due=+a.due;if(isFinite(due)&&due>Date.now()&&due<Date.now()+7*864e5)await db.prepare('INSERT INTO pushq(pid,k,due) VALUES(?,?,?)').bind(pid,k,Math.round(due)).run()}}
+const PUSHQ_MSG={crop:{title:'🌱 Your garden is ready',body:'Your crops are ready to harvest.',kind:'garden'},fruit:{title:'🍎 Fruit is ripe',body:'Your trees are full of fruit. Come pick it!',kind:'garden'}};
+async function pushCron(env){const db=env.DB;if(!db)return;await init(db);const now=Date.now();
+  const due=(await db.prepare('SELECT rowid AS id,pid,k FROM pushq WHERE due<=? LIMIT 200').bind(now).all()).results||[];
+  for(const d of due){await db.prepare('DELETE FROM pushq WHERE rowid=?').bind(d.id).run();const M=PUSHQ_MSG[d.k];if(M)await pushTo(db,d.pid,M.kind,{title:M.title,body:M.body,tag:d.k})}}
+
 async function route(req,env,url,ctx){
   const db=env.DB,p=url.pathname.replace(/^\/api\//,''),now=Date.now();
   if(p==='ping')return json({ok:true,week:weekKey(),v:7,live:!!env.LAKE});
@@ -475,7 +531,8 @@ async function route(req,env,url,ctx){
       return json({top,me:mine?{s:mine.s,rank}:null,key:k})}
     if(p==='arcade/champs'){const lw=String(+weekKey()-1),out={};for(const g of ['toss','gar','pin']){const t=(await topOf(lw,g))[0];if(t)out[g]={pid:t.pid,name:t.name,s:t.s,wk:lw}}return json({champs:out})}
     return json({error:'not-found'},404)}
-  {const xr=await extraRoutes(p,db,me,b,now,url);if(xr)return xr}
+  {const pr=await pushRoutes(p,db,me,b,now);if(pr)return pr}
+  {const xr=await extraRoutes(p,db,me,b,now,url,ctx);if(xr)return xr}
   // One session at a time: pressing Play claims the session; saves and syncs from any older session are refused with 'taken'.
   if(p==='sess/claim'){const sid=clean(b.sid,16);if(sid.length<6)return json({error:'bad-request'},400);
     await db.prepare('INSERT INTO sess(pid,sid,kind,ts) VALUES(?,?,?,?) ON CONFLICT(pid) DO UPDATE SET sid=excluded.sid,kind=excluded.kind,ts=excluded.ts').bind(me.id,sid,clean(b.kind,12),now).run();
@@ -539,6 +596,7 @@ async function route(req,env,url,ctx){
   }
   if(p==='sync'){
     const wk=weekKey(),st=[],gi=[];
+    if(Array.isArray(b.alerts)){const al=b.alerts;if(ctx)ctx.waitUntil(pushSchedule(db,me.id,al).catch(()=>{}));else await pushSchedule(db,me.id,al).catch(()=>{})}
     const isBeta=(Number(me.created)||0)<BETA_CUT,isSup=!!me.sup,isAdm=me.lname===OWNER_NAME,so=b.stats&&typeof b.stats==='object'?Object.assign({},b.stats,isBeta?{beta:1}:{},{sup:isSup?1:0,adm:isAdm?1:0}):null;
     const stats=so?JSON.stringify(so).slice(0,4000):me.stats;
     const wkn=String(b.wk)===wk?Math.max(0,Math.min(1e6,b.wkn|0)):0;
@@ -590,6 +648,8 @@ async function route(req,env,url,ctx){
     const t=await db.prepare('SELECT id,name,cabin,COALESCE(pub,1) AS pub FROM players WHERE id=?').bind(String(b.target||'')).first();
     if(!t||!t.cabin)return json({error:'no-cabin'},404);
     if(!t.pub&&t.id!==me.id&&!(await sharesLake(db,me.id,t.id)))return json({error:'private'},403);
+    if(t.id!==me.id&&ctx)ctx.waitUntil((async()=>{const k='pv:'+t.id+':'+me.id,o=await db.prepare('SELECT ts FROM kvc WHERE k=?').bind(k).first();if(o&&now-o.ts<3*36e5)return;
+      await db.prepare('INSERT INTO kvc(k,v,ts) VALUES(?,?,?) ON CONFLICT(k) DO UPDATE SET ts=excluded.ts').bind(k,'1',now).run();await pushTo(db,t.id,'yard',{title:'🏡 You have a visitor',body:`${me.name} is visiting your place.`,tag:'visit'})})());
     const yw=await db.prepare('SELECT (SELECT pid FROM yardwin WHERE week=?) AS champ,(SELECT COUNT(*) FROM yardwin WHERE pid=?) AS wins').bind(String(+weekKey()-1),t.id).first();
     return json({name:t.name,cabin:t.cabin,champ:!!(yw&&yw.champ===t.id),wins:yw?yw.wins|0:0});
   }
@@ -709,6 +769,7 @@ async function route(req,env,url,ctx){
       const pc=photo?await db.prepare('SELECT COUNT(*) AS c FROM texts WHERE a=? AND b=? AND ts>=? AND photo IS NOT NULL').bind(me.id,to.id,since).first():{c:0};
       if(photo&&(pc.c|0)>=PHOTOS_PER_DAY)return json({error:'photo-limit',photos:pc.c|0},429);
       const st=[db.prepare('INSERT INTO texts(a,b,body,photo,ts) VALUES(?,?,?,?,?)').bind(me.id,to.id,text,photo,now)];
+      if(ctx)ctx.waitUntil(pushTo(db,to.id,'texts',{title:`💬 ${me.name}`,body:text?text.slice(0,120):'📷 Sent you a photo',tag:'text-'+me.id}));
       if(Math.random()<.05)st.push(db.prepare('DELETE FROM texts WHERE ts<?').bind(cutoff));
       await db.batch(st);
       const row=await db.prepare('SELECT MAX(id) AS id FROM texts WHERE a=? AND b=?').bind(me.id,to.id).first();
@@ -718,6 +779,7 @@ async function route(req,env,url,ctx){
   return json({error:'not-found'},404);
 }
 export default {
+  async scheduled(ev,env,ctx){ctx.waitUntil(pushCron(env).catch(()=>{}))},
   async fetch(req,env,ctx){
     const url=new URL(req.url);
     if(!url.pathname.startsWith('/api/'))return env.ASSETS.fetch(req);
