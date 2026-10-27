@@ -217,6 +217,15 @@ await check('Deep Sea crate: opens Series 2 items of every kind, equips them, an
   await p.evaluate(()=>{const P=PNT();P.own.kraken=1;P.own.r_chrome=1;P.own.b_crown=1;P.eq='kraken';P.eqR='r_chrome';P.eqB='b_crown';save()});await p.reload();await p.waitForTimeout(900);
   ok(await p.evaluate(()=>{const P=PNT();return P.eq==='kraken'&&P.eqR==='r_chrome'&&P.eqB==='b_crown'&&!!skinEq()}),'equipped Series 2 items kept after reload');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('workbench: trade up uses biggest piles and caps legendary trades; decor upgrades cost materials and reach visitors',async()=>{const p=await page(VPS[0][1],save({coins:2e6,mats:{drift:40,scrap:60,rope:3,moon:30,carbon:10,brass:40,paint:20,glass:20},decor:{campfire:1},
+    cab:{col:{},own:{armchair:1},bed:'cot',rug:'round',lamp:null,wall:[null,null,null],ex:{},wd:[],fp:[['armchair',300,460,0]],gotP:{armchair:1}},sleep:{ph:'awake',t:0,visit:true}}));
+  const r=await p.evaluate(()=>{const b={...S.mats};S.mats.amber=0;S.mats.feather=0;tradeUp('feather',1);const t1=[S.mats.feather,b.scrap-S.mats.scrap];tradeUp('amber',5);const t2=[S.mats.amber,S.tu.n];
+    const nope=(()=>{const m0=S.mats.glass;tradeUp('abyss',1);return S.mats.abyss===undefined&&S.mats.glass===m0})();
+    const c0=S.coins;upgDo('armchair');upgDo('armchair');upgDo('campfire');return {t1,t2,nope,arm:upgOf('armchair'),camp:upgOf('campfire'),spent:c0-S.coins,clean:(()=>{const cb=JSON.parse(JSON.stringify(CAB()));cb.upg.bogus=2;cb.upg.armchair=9;cabClean(cb);return JSON.stringify(cb.upg)})()}});
+  ok(r.t1[0]===1&&r.t1[1]===5,'feather from 5 scrap '+r.t1);ok(r.t2[0]===2&&r.t2[1]===2,'two legendary trades a day '+r.t2);ok(r.nope,'cannot make a material never found');
+  ok(r.arm===2&&r.camp===1&&r.spent>0,'upgrades '+JSON.stringify(r));ok(r.clean==='{"campfire":1}','visitor copy sanitized '+r.clean);
+  await p.evaluate(()=>openCraft('upg'));ok(await p.evaluate(()=>document.querySelectorAll('#craftPane .rcard').length>=2),'upgrade tab lists pieces');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

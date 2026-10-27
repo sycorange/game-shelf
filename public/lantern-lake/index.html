@@ -591,6 +591,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .dchips button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .dnote{color:var(--muted);font-size:.78rem}
 .crafthead{display:grid;gap:2px;margin-top:6px}.crafthead h3{font-size:1.05rem}.crafthead p{margin:0;color:var(--muted);font-size:.84rem}
+.tu-h{margin:14px 0 6px;font-size:.95rem}.tu-h small{display:block;font-weight:400;color:var(--muted);font-size:.78rem}.tu-grid{display:grid;gap:6px}.tu-row{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.03)}.tu-row.ok{border-color:rgba(160,220,120,.45)}.tu-row small{display:block;color:var(--muted);font-size:.76rem}.tu-ic svg{width:24px;height:24px}.tu-btns{display:flex;gap:4px}
 .craftgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
 .craftbox.cbig{max-width:1060px;height:min(800px,calc(100vh - 40px));max-height:none;overflow:hidden;grid-template-rows:auto minmax(0,1fr)}
 .cwrap{display:grid;grid-template-columns:190px minmax(0,1fr);gap:16px;min-height:0}
@@ -2830,7 +2831,7 @@ function refreshGear(){for(const k of ['rod','lure','boat','shack']){const nx=GE
   for(const id in nx.m){const el=$(`gr-${k}-${id}`);if(!el)continue;const have=S.mats[id]||0;el.className='mchip '+(have>=nx.m[id]?'ok':'no');el.lastElementChild.textContent=`${Math.min(have,nx.m[id])}/${nx.m[id]}`}
   const wp=$('gw-'+k);if(wp){const tx=whereTxt(nx);wp.innerHTML=tx;wp.hidden=!tx}}}
 var CRAFT_CAT=null;
-const CRAFT_CATS=[['ready','Ready now'],['gear','Gear'],['bed','Beds'],['rug','Rugs'],['lamp','Lamps'],['wall','Wall decor'],['extra','Extras']];
+const CRAFT_CATS=[['ready','Ready now'],['gear','Gear'],['trade','Trade up'],['upg','Decor upgrades'],['bed','Beds'],['rug','Rugs'],['lamp','Lamps'],['wall','Wall decor'],['extra','Extras']];
 const GEAR_KEYS=['rod','lure','boat','shack'];
 function openCraft(cat){if(cat)CRAFT_CAT=cat;else if(S.pin&&GEAR[S.pin])CRAFT_CAT='gear';renderCraft();$('craftModal').hidden=false;hideTip();$('craftPane').scrollTop=0}
 function craftReady(){return GEAR_KEYS.filter(canCraft).map(k=>({g:k})).concat(COS.filter(z=>canCraftCos(z.id)).map(z=>({z})))}
@@ -2841,6 +2842,8 @@ function renderCraft(){
   $('craftNav').innerHTML=CRAFT_CATS.map(([id,n])=>{let tag='';
     if(id==='ready')tag=ready.length?`<span class="rdy">${ready.length}</span>`:'<small>0</small>';
     else if(id==='gear'){const r=GEAR_KEYS.filter(canCraft).length;tag=r?`<span class="rdy">${r} ready</span>`:`<small>${GEAR_KEYS.filter(k=>GEAR[k].items[S[k]+1]).length} to go</small>`}
+    else if(id==='trade'){const n=tuTargets().filter(m=>tuPay(TU_NEED[m.r][0],TU_NEED[m.r][1],m.id)&&(m.r!=='L'||tuDay().n<TU_LCAP)).length;tag=n?`<span class="rdy">${n} ready</span>`:'<small>new</small>'}
+    else if(id==='upg'){const L=upgList(),n=L.filter(u=>upgCan(u)).length;tag=n?`<span class="rdy">${n} ready</span>`:`<small>${L.filter(u=>upgOf(u.id)===2).length}/${L.length}</small>`}
     else{const zs=COS.filter(z=>z.k===id&&!z.arc),r=zs.filter(z=>canCraftCos(z.id)).length;tag=r?`<span class="rdy">${r} ready</span>`:`<small>${zs.filter(z=>own[z.id]).length}/${zs.length}</small>`}
     return `<button data-cc="${id}" aria-current="${CRAFT_CAT===id}">${n}${tag}</button>`}).join('');
   $('craftNav').querySelectorAll('[data-cc]').forEach(b=>b.onclick=()=>{CRAFT_CAT=b.dataset.cc;renderCraft();$('craftPane').scrollTop=0});
@@ -2860,12 +2863,55 @@ function renderCraft(){
   if(CRAFT_CAT==='gear'){head('Gear upgrades','Each upgrade costs money plus materials you pull up while fishing. Materials live in your Storage tab.');
     const left=GEAR_KEYS.filter(k=>GEAR[k].items[S[k]+1]);for(const k of left)grid.append(gearCard(k));if(left.length)pane.append(grid);
     done('Fully upgraded',GEAR_KEYS.filter(k=>!GEAR[k].items[S[k]+1]).map(k=>[GEAR[k].label,GEAR[k].items[S[k]].n]));bindPins(pane);return}
+  if(CRAFT_CAT==='trade'){tuPane(pane,head);return}
+  if(CRAFT_CAT==='upg'){upgPane(pane,head);return}
   const zs=COS.filter(z=>z.k===CRAFT_CAT&&!z.arc);head(CRAFT_CATS.find(c=>c[0]===CRAFT_CAT)[1],'Cosmetic only. Once crafted, place and recolor them with Decorate. Fabric Scraps and Old Paint turn up while fishing.');
   const todo=zs.filter(z=>!own[z.id]).sort((a,b)=>canCraftCos(b.id)-canCraftCos(a.id)||a.c-b.c);
   for(const z of todo)grid.append(cosCard(z));
   if(todo.length)pane.append(grid);else{const e=document.createElement('div');e.className='cempty';e.textContent='You’ve crafted everything here.';pane.append(e)}
   done('Already crafted',zs.filter(z=>own[z.id]).map(z=>[z.n,'Arrange it with Decorate']));
 }
+// ==WORKBENCH== Trade extra materials up a rarity, and upgrade decor you own to Polished and Gilded.
+const RNAME_M={C:'common',U:'uncommon',R:'rare',L:'legendary'},TU_NEED={U:['C',5],R:['U',5],L:['R',8]},TU_LCAP=2;
+const tuTargets=()=>MATS.filter(m=>TU_NEED[m.r]&&S.mats[m.id]!=null);
+// Pays with your biggest piles of that rarity first.
+function tuPay(r,need,skip){const pool=MATS.filter(m=>m.r===r&&m.id!==skip&&(S.mats[m.id]||0)>0).map(m=>[m.id,S.mats[m.id]]);if(pool.reduce((a,x)=>a+x[1],0)<need)return null;const use={};
+  for(let k=0;k<need;k++){pool.sort((a,b)=>b[1]-a[1]);pool[0][1]--;use[pool[0][0]]=(use[pool[0][0]]||0)+1}return use}
+function tuDay(){const d=localDay();if(!S.tu||S.tu.d!==d)S.tu={d,n:0};return S.tu}
+function tradeUp(id,times){const m=MI(id);if(!m||!TU_NEED[m.r]||S.mats[id]==null)return;let done=0;
+  for(let k=0;k<(times||1);k++){if(m.r==='L'&&tuDay().n>=TU_LCAP)break;const [fr,n]=TU_NEED[m.r],use=tuPay(fr,n,id);if(!use)break;for(const x in use)S.mats[x]-=use[x];S.mats[id]=(S.mats[id]||0)+1;if(m.r==='L')tuDay().n++;done++}
+  if(done){sfx(m.r==='L'?'fanfare':'craft');if(m.r==='L')celebrate({lbl:'Traded up!',r:'L',name:m.n,sub:'A legendary material',icon:svgI(m.ic,m.col)});else showToast(`+${done} ${m.n}`,'Traded up');storeDirty=true;gearDirty=true;save()}renderCraft()}
+function tuPane(pane,head){head('Trade up','Turn extra materials into rarer ones: 5 common → 1 uncommon, 5 uncommon → 1 rare, 8 rare → 1 legendary. You can only make materials you’ve found before. Your biggest piles get used first.');
+  const left=TU_LCAP-tuDay().n,box=document.createElement('div');let h='';
+  for(const r of ['U','R','L']){const [fr,n]=TU_NEED[r],have=MATS.filter(m=>m.r===fr).reduce((a,m)=>a+(S.mats[m.id]||0),0),T=tuTargets().filter(m=>m.r===r);
+    h+=`<h4 class="tu-h">Make ${RNAME_M[r]} <small>${n} ${RNAME_M[fr]} each · you have ${have.toLocaleString()} ${RNAME_M[fr]}${r==='L'?` · ${left} of ${TU_LCAP} left today`:''}</small></h4>`;
+    if(!T.length){h+=`<p class="cempty">You haven’t found any ${RNAME_M[r]} materials yet. Find one while fishing and you can make more here.</p>`;continue}
+    h+=`<div class="tu-grid">${T.map(m=>{const use=tuPay(fr,n,m.id),ok=!!use&&(r!=='L'||left>0),many=Math.min(r==='L'?left:99,Math.floor(have/n));
+      return `<div class="tu-row${ok?' ok':''}"><span class="tu-ic">${svgI(m.ic,m.col)}</span><div><b>${m.n}</b><small>You have ${(S.mats[m.id]||0).toLocaleString()}${use?` · next uses ${Object.entries(use).map(([k,v])=>`${v} ${MI(k).n}`).join(', ')}`:''}</small></div><span class="tu-btns"><button class="fr-mini" data-tu="${m.id}" data-n="1" ${ok?'':'disabled'}>Trade</button>${many>=5?`<button class="fr-mini" data-tu="${m.id}" data-n="5">×5</button>`:''}</span></div>`}).join('')}</div>`}
+  box.innerHTML=h;pane.append(box);box.querySelectorAll('[data-tu]').forEach(b=>b.onclick=()=>tradeUp(b.dataset.tu,+b.dataset.n))}
+// Decor upgrades: one tier per kind of piece, shown wherever it's placed (cabin, basement, yard), for visitors too.
+const UPG_N=['','Polished','Gilded'];
+function upgList(){const cb=CAB(),out=[];for(const z of COS)if(cb.own[z.id]&&(z.k==='wall'||isFree(z.id)))out.push({id:z.id,n:z.n,c:z.c||10000,where:'Cabin'});
+  for(const it of DECOR)if(S.decor[it.id]&&YI[it.id]&&!YI[it.id].unit)out.push({id:it.id,n:it.n,c:it.c||10000,where:'Yard'});return out}
+function upgPrice(c,t){const b=c<5000?0:c<20000?1:2;return t===1?{c:Math.round(c*.2),m:[{scrap:4,paint:2},{scrap:6,brass:4,paint:2},{scrap:8,brass:6,paint:4}][b]}:{c:Math.round(c*.5),m:[{brass:4,glass:2,moon:1},{brass:6,glass:4,moon:2},{brass:8,glass:6,moon:3,amber:1}][b]}}
+function upgOf(id,cb){const src=cb||(VISIT?VISIT.S.cab:CAB()),u=src&&src.upg&&src.upg[id];return u===1||u===2?u:0}
+const yUpgOf=id=>yardCtx()==='friend'?upgOf(id,VT&&VT.c&&VT.c.cab||{}):upgOf(id,CAB());
+function upgCan(u){const t=upgOf(u.id)+1;if(t>2)return false;const P=upgPrice(u.c,t);return S.coins>=P.c&&Object.keys(P.m).every(k=>(S.mats[k]||0)>=P.m[k])}
+function upgDo(id){const u=upgList().find(x=>x.id===id);if(!u||!upgCan(u))return;const t=upgOf(id)+1,P=upgPrice(u.c,t),cb=CAB();S.coins-=P.c;for(const k in P.m)S.mats[k]-=P.m[k];cb.upg=cb.upg||{};cb.upg[id]=t;
+  sfx(t===2?'fanfare':'craft');celebrate({lbl:`${UPG_N[t]}!`,r:t===2?'L':'R',name:u.n,sub:t===2?'Gold trim, sparkles and a warm glow after dark':'It catches the light now',icon:svgI('crown',t===2?'#ffd05a':'#d8e4f0')});storeDirty=true;gearDirty=true;renderCraft();renderAll();save()}
+function upgPane(pane,head){head('Decor upgrades','Make a piece ✨ Polished (it sparkles), then 👑 Gilded (gold sparkles and a warm glow after dark). Upgrades show everywhere that piece is placed, and visitors see them too.');
+  const L=upgList();if(!L.length){const e=document.createElement('div');e.className='cempty';e.textContent='Craft cabin furniture or wall decor, or buy yard decor in the Shop, then upgrade it here.';pane.append(e);return}
+  const grid=document.createElement('div');grid.className='craftgrid';
+  for(const u of L.sort((a,b)=>upgCan(b)-upgCan(a)||upgOf(a.id)-upgOf(b.id)||a.c-b.c)){const cur=upgOf(u.id),t=cur+1,c=document.createElement('div'),ok=t<=2&&upgCan(u);c.className='card rcard'+(ok?' ready':'');
+    c.innerHTML=`<div class="rc-top"><span class="eyebrow">${u.where}${cur?` · ${UPG_N[cur]}`:''}</span>${ok?'<span class="rdy">Ready</span>':''}</div><h3>${cur===2?'👑 ':cur?'✨ ':''}${u.n}</h3>${t<=2?`<p class="rc-sub">Next: <b>${UPG_N[t]}</b></p>${recipeChips(upgPrice(u.c,t),'up-'+u.id)}`:'<p class="rc-sub">Fully gilded.</p>'}`;
+    if(t<=2){const b=document.createElement('button');b.className='buy'+(ok?' ok':'');b.disabled=!ok;b.textContent=ok?`Make it ${UPG_N[t]}`:'Missing materials';b.onclick=()=>upgDo(u.id);c.append(b)}grid.append(c)}
+  pane.append(grid)}
+// Sparkles drawn over an upgraded piece; box is its bounding box in the current drawing space.
+function decoFx(t,x,y,w,h,T,d){if(RM&&t<2)return;ctx.save();const gold=t===2,n=gold?7:4,k=Math.max(.7,Math.min(w,h)/36);
+  if(gold){ctx.globalCompositeOperation='lighter';const a=.1+(1-d)*.16+.04*Math.sin(T*2),g=ctx.createRadialGradient(x+w/2,y+h*.55,2,x+w/2,y+h*.55,Math.max(w,h)*.75);g.addColorStop(0,`rgba(255,196,80,${a})`);g.addColorStop(1,'rgba(255,196,80,0)');ctx.fillStyle=g;ctx.fillRect(x-w*.3,y-h*.3,w*1.6,h*1.6);ctx.globalCompositeOperation='source-over'}
+  for(let i=0;i<n;i++){const ph=(T*(gold?.8:.55)+i/n)%1,a=Math.sin(ph*Math.PI);if(a<.05)continue;const sx=x+w*((i*.618+.13)%1),sy=y+h*((i*.37+.15)%.9);ctx.globalAlpha=a;ctx.fillStyle=gold?'#ffe08a':'#ffffff';star4(ctx,sx,sy,(2+a*4)*k)}
+  if(gold&&!RM)for(let i=0;i<4;i++){const q=(T*.35+i/4)%1;ctx.globalAlpha=.8*(1-q);ctx.fillStyle='#ffd05a';ctx.beginPath();ctx.arc(x+w*((i*.41+.3)%1)+Math.sin(T*2+i)*2*k,y+h-q*h*.9,1.3*k,0,7);ctx.fill()}
+  ctx.restore()}
 function craftGear(k){if(!canCraft(k))return;guideMark('craft');sfx('craft');const nx=GEAR[k].items[S[k]+1];S.coins-=nx.c;for(const id in nx.m)S.mats[id]-=nx.m[id];S[k]++;
   cast.dur=castDur();celebrate({lbl:'Crafted!',r:'L',name:nx.n,sub:GEAR[k].eff(S[k]),icon:svgI(k==='rod'?'lure':k==='lure'?'lure':k==='boat'?'oar':'bell',k==='rod'?'#c8a060':'#ff7a3d')});
   burst(BOB.x,BOB.y-10,['#ffd05a','#ffffff'],30);if(S.pin===k&&!GEAR[k].items[S[k]+1])S.pin=null;pinSig='';renderCraft();renderAll();save()}
@@ -5441,7 +5487,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:112,n:'Deep Sea Expedition',items:['New in Crate Expectations: the 🌊 Deep Sea crate, Series 2! 31 brand-new items in one case: boat paints, rod finishes and bobbers.','Highlights: Kraken paint with wiggling tentacles, Liquid Chrome, Mermaid Scales that shimmer, Bioluminescent jellies that glow at night, a Mini Lighthouse bobber with a sweeping beam, a Jellyfish bobber, a Tiny Kraken and a Crown.','Same odds as the other crates, your free daily crate works on it, and prize tickets open it too. The Series 1 crates are still there.']},
+ {v:113,n:'Workbench',items:['Two new tabs at the crafting table. Trade up: turn extra materials into rarer ones (5 common → 1 uncommon, 5 uncommon → 1 rare, 8 rare → 1 legendary, up to 2 legendary a day).','Decor upgrades: make your cabin furniture, wall decor and yard decorations ✨ Polished (they sparkle) and then 👑 Gilded (gold sparkles and a warm glow after dark). Upgrades show everywhere the piece is placed, and visitors see them too.']},
+{v:112,n:'Deep Sea Expedition',items:['New in Crate Expectations: the 🌊 Deep Sea crate, Series 2! 31 brand-new items in one case: boat paints, rod finishes and bobbers.','Highlights: Kraken paint with wiggling tentacles, Liquid Chrome, Mermaid Scales that shimmer, Bioluminescent jellies that glow at night, a Mini Lighthouse bobber with a sweeping beam, a Jellyfish bobber, a Tiny Kraken and a Crown.','Same odds as the other crates, your free daily crate works on it, and prize tickets open it too. The Series 1 crates are still there.']},
 {v:111,n:'Gifts',items:['The game can now send gifts to your Friends mailbox: coins, casino coins, potions and sometimes a one-of-a-kind keepsake. Claim them like any other mail.']},
 {v:110,n:'Big fix for long-time players',items:['Bug fix: for some players around day 310 and later, the game froze while loading. iPhones showed a white screen or “A problem repeatedly occurred”. The cause was the basketball league’s playoffs: when team #1 in the league list won a series, the game never noticed and kept simulating forever. It now loads normally, and nothing in your save was lost.']},
 {v:109,n:'Save code fix',items:['Bug fix: on phones, the Your game window was taller than the screen, so the Load save code and Copy save code buttons could be cut off. The window now scrolls.']},
@@ -6120,7 +6167,7 @@ function yDraw(id,d,T,night,ph){
   else if(YI[id]&&YI[id].unit)yUnitDraw(id,d,T,ph)}
 // back=true draws what stands behind the house (trees at the back of the lot); the rest draws in front.
 function drawYard(d,T,night,back){const L=yardList(),own=yardCtx()==='home';const idx=L.map((a,i)=>i).filter(i=>(L[i][2]<250)===back&&yHas(L[i][0])).sort((a,b)=>L[a][2]-L[b][2]);
-  for(const i of idx){const [id,x,y,f]=L[i],I=YI[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);ctx.translate(-I.ox,-I.oy);L[i]._i=i;YCUR=L[i];try{yDraw(id,d,T,night,x*.37)}finally{ctx.restore()}
+  for(const i of idx){const [id,x,y,f]=L[i],I=YI[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);ctx.translate(-I.ox,-I.oy);L[i]._i=i;YCUR=L[i];try{yDraw(id,d,T,night,x*.37)}finally{ctx.restore()}{const ut=yUpgOf(id);if(ut){const [bx,by,bw,bh]=yBox(L[i]);decoFx(ut,bx,by,bw,bh,T,d)}}
     if(YED.on&&own&&(YED.tab||'decor')!=='paths'&&YED.tab!=='house'){const [bx,by,bw,bh]=yBox(L[i]),s=i===YED.sel;ctx.save();ctx.setLineDash(s?[3,2]:[2,3]);ctx.lineWidth=s?1.2:.6;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.55)';ctx.strokeRect(bx-1.5,by-1.5,bw+3,bh+3);ctx.restore()}}}
 let YCUR=null;
 function drawLand(d,T,night){drawYard(d,T,night,false)}
@@ -6894,6 +6941,7 @@ function cabClean(cb){// for visited cabins
   const p=cb.pat&&typeof cb.pat==='object'?cb.pat:{};cb.pat={w:WPAT.some(x=>x[0]===p.w)?p.w:undefined,f:FPAT.some(x=>x[0]===p.f)?p.f:undefined};
   {const b0=cb.bs&&typeof cb.bs==='object'?cb.bs:{},bp=b0.pat&&typeof b0.pat==='object'?b0.pat:{},bc=b0.col&&typeof b0.col==='object'?b0.col:{},col={};for(const g of BSPAL)if(Number.isInteger(bc[g])&&bc[g]>=0&&bc[g]<8)col[g]=bc[g];
    cb.bs={col,pat:{w:WPAT.some(x=>x[0]===bp.w)?bp.w:undefined,f:FPAT.some(x=>x[0]===bp.f)?bp.f:undefined},wd:Array.isArray(b0.wd)?b0.wd.filter(okW).slice(0,12).map(a=>[a[0],Math.max(20,Math.min(980,+a[1])),Math.max(30,Math.min(370,+a[2]))]):[],fp:Array.isArray(b0.fp)?b0.fp.filter(okF).slice(0,16).map(a=>[a[0],Math.max(10,Math.min(990,+a[1])),Math.max(150,Math.min(494,+a[2])),a[3]?1:0]):[]}}
+  {const u=cb.upg&&typeof cb.upg==='object'?cb.upg:{},o={};for(const k in u)if((u[k]===1||u[k]===2)&&(CZI(k)||YI[k]))o[k]=u[k];cb.upg=o}
   return cab_sync_visit(cb)}
 function cab_sync_visit(cb){if(!Array.isArray(cb.wd)){cb.wd=[];(cb.wall||[]).forEach((id,i)=>{if(id&&cb.own[id]&&CAB_SLOTS[i])cb.wd.push([id,CAB_SLOTS[i][0],CAB_SLOTS[i][1]])})}
   if(!Array.isArray(cb.fp)){cb.fp=[];if(cb.ex&&cb.ex.fern&&cb.own.fern)cb.fp.push(['fern',270,184,0])}return cb}
@@ -6934,9 +6982,10 @@ function drawFreeItem(id,d,T){const F=CC('furn'),B=CC('bed'),dark=d<.4;
 function drawFreeLayer(d,T,front){const cb=VISIT?VISIT.S.cab:CAB(),R=RD(cb);if(!Array.isArray(R.fp))return;const own=k=>cb.own[k];
   const L=R.fp.map((a,i)=>[a,i]).filter(([a])=>(a[2]>=396)===front&&own(a[0])).sort((p,q)=>p[0][2]-q[0][2]);
   for(const [a,i] of L){const [id,x,y,f]=a,[w,h]=FREE_SZ[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);try{drawFreeItem(id,d,T)}finally{ctx.restore()}
+    {const ut=upgOf(id,cb);if(ut)decoFx(ut,x-w/2,y-h,w,h,T,d)}
     if(CED.on&&!VISIT){const s=CED.sel&&CED.sel.k==='f'&&CED.sel.i===i;ctx.save();ctx.setLineDash(s?[6,4]:[4,5]);ctx.lineWidth=s?2.4:1.2;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.6)';ctx.strokeRect(x-w/2-3,y-h-3,w+6,h+6);ctx.restore()}
     else RH(x-w/2,y-h,w,h,'deco','free')}}
-function drawWallLayer(d,T){const cb=VISIT?VISIT.S.cab:CAB(),R=RD(cb);if(!Array.isArray(R.wd))return;R.wd.forEach((a,i)=>{const [id,x,y]=a;if(!cb.own[id])return;drawWallDeco(id,x,y,-1,d,T);
+function drawWallLayer(d,T){const cb=VISIT?VISIT.S.cab:CAB(),R=RD(cb);if(!Array.isArray(R.wd))return;R.wd.forEach((a,i)=>{const [id,x,y]=a;if(!cb.own[id])return;drawWallDeco(id,x,y,-1,d,T);{const ut=upgOf(id,cb);if(ut)decoFx(ut,x-44,y-34,88,68,T,d)}
   if(CED.on&&!VISIT){const s=CED.sel&&CED.sel.k==='w'&&CED.sel.i===i;ctx.save();ctx.setLineDash(s?[6,4]:[4,5]);ctx.lineWidth=s?2.4:1.2;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.6)';ctx.strokeRect(x-48,y-38,96,76);ctx.restore()}})}
 // ---- arrange mode ----
 const CED={on:false,sel:null,drag:null,skip:false};
