@@ -5487,7 +5487,9 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:113,n:'Workbench',items:['Two new tabs at the crafting table. Trade up: turn extra materials into rarer ones (5 common → 1 uncommon, 5 uncommon → 1 rare, 8 rare → 1 legendary, up to 2 legendary a day).','Decor upgrades: make your cabin furniture, wall decor and yard decorations ✨ Polished (they sparkle) and then 👑 Gilded (gold sparkles and a warm glow after dark). Upgrades show everywhere the piece is placed, and visitors see them too.']},
+ {v:115,n:'Fetch fix',items:['Bug fix: when you play fetch, you now throw the ball from where you’re standing, in the direction you’re facing, and your pet brings it back to you, wherever you’ve walked to. Before, the ball always flew from the front door.']},
+{v:114,n:'Depth fix',items:['Bug fix: pets, you, and visitors at an Open House now walk behind yard decorations when they’re farther back and in front of them when they’re closer, instead of always on top. Name tags and speech bubbles still show above everything.']},
+{v:113,n:'Workbench',items:['Two new tabs at the crafting table. Trade up: turn extra materials into rarer ones (5 common → 1 uncommon, 5 uncommon → 1 rare, 8 rare → 1 legendary, up to 2 legendary a day).','Decor upgrades: make your cabin furniture, wall decor and yard decorations ✨ Polished (they sparkle) and then 👑 Gilded (gold sparkles and a warm glow after dark). Upgrades show everywhere the piece is placed, and visitors see them too.']},
 {v:112,n:'Deep Sea Expedition',items:['New in Crate Expectations: the 🌊 Deep Sea crate, Series 2! 31 brand-new items in one case: boat paints, rod finishes and bobbers.','Highlights: Kraken paint with wiggling tentacles, Liquid Chrome, Mermaid Scales that shimmer, Bioluminescent jellies that glow at night, a Mini Lighthouse bobber with a sweeping beam, a Jellyfish bobber, a Tiny Kraken and a Crown.','Same odds as the other crates, your free daily crate works on it, and prize tickets open it too. The Series 1 crates are still there.']},
 {v:111,n:'Gifts',items:['The game can now send gifts to your Friends mailbox: coins, casino coins, potions and sometimes a one-of-a-kind keepsake. Claim them like any other mail.']},
 {v:110,n:'Big fix for long-time players',items:['Bug fix: for some players around day 310 and later, the game froze while loading. iPhones showed a white screen or “A problem repeatedly occurred”. The cause was the basketball league’s playoffs: when team #1 in the league list won a series, the game never noticed and kept simulating forever. It now loads normally, and nothing in your save was lost.']},
@@ -5778,7 +5780,7 @@ function draw0(now){
   drawGround(d);if(YED.on&&YED.tab==='paths'&&yardCtx()==='home')yGridDraw();drawYard(d,T,night,true);
   drawShack(d,h,T);
   drawDock(d,T);if(loc==='pond'){drawMarina(d,T);drawGateRing(d,T)}if(loc==='friend')drawNameSign(d);
-  drawLand(d,T,night);petYard(d,T);ygDraw(d,T);houseDraw(d,T);
+  YACT=[];yardActors(d,T);try{drawLand(d,T,night)}finally{YACT=null}ygDraw(d,T);houseOverlay(d,T);
   hwDock(d,T);if(CAMT.z>1.3)yardHits();drawBoxes(d,T);scnDraw('yard',d,T,loc);}
   liveDraw(d,T,loc);q4Draw(d,T,loc);hwPumpDraw(d,T,loc);
   // fireflies
@@ -6036,10 +6038,10 @@ function petYard(d,T){const ctxN=yardCtx(),P=ctxN==='friend'?(VT&&VT.ext&&VT.ext
   const lx=Math.max(-800,yardLeft()+14),house=yardList().find(a=>a[0]==='pethouse'),sp0=P.k==='frog'?10:P.k==='duck'?12:18,move=(tx,ty,sp)=>{const dx=tx-R.x,dy=ty-R.y,dd=Math.hypot(dx,dy),st=sp*dt;if(dd<st+.5){R.x=tx;R.y=ty;return true}R.x+=dx/dd*st;R.y+=dy/dd*st;R.face=dx>=0?1:-1;return false};
   let pose;const F=R.fetch;
   if(F&&ctxN==='home'){F.t+=dt;
-    if(F.ph==='fly'){const u=Math.min(1,F.t/.9);F.bx=F.hx+(F.tx-F.hx)*u;F.by=236+(F.ty-236)*u-Math.sin(u*Math.PI)*38;if(u>=1){F.ph='chase';F.bx=F.tx;F.by=F.ty}pose='sit'}
+    if(F.ph==='fly'){const u=Math.min(1,F.t/.9),sy=F.sy??236;F.bx=F.hx+(F.tx-F.hx)*u;F.by=sy+(F.ty-sy)*u-Math.sin(u*Math.PI)*38;if(u>=1){F.ph='chase';F.bx=F.tx;F.by=F.ty}pose='sit'}
     if(F.ph==='chase'){pose='walk';if(move(F.tx,F.ty,sp0*2.4)){F.ph='back';petVoice(P.k)}}
-    else if(F.ph==='back'){pose='walk';F.bx=R.x+R.face*9;F.by=R.y-6;if(move(F.hx-14,F.hy+6,sp0*2)){F.ph='drop';F.t=0}}
-    else if(F.ph==='drop'){pose='sit';R.face=1;F.bx=R.x+12;F.by=R.y;if(F.t>.4){PET_RT.heart=performance.now();R.fetch=null;R.st='sit';R.t=3}}
+    else if(F.ph==='back'){pose='walk';F.bx=R.x+R.face*9;F.by=R.y-6;if(walkCtx()==='home'&&WALK.x!=null){F.hx=WALK.x;F.hy=WALK.y}const bx=F.hx-(F.hx>R.x?14:-14);if(move(bx,F.hy+4,sp0*2)){F.ph='drop';F.t=0}}
+    else if(F.ph==='drop'){pose='sit';R.face=F.hx>=R.x?1:-1;F.bx=R.x+R.face*12;F.by=R.y;if(F.t>.4){PET_RT.heart=performance.now();R.fetch=null;R.st='sit';R.t=3}}
     ctx.fillStyle=rgb(mix([60,70,20],[210,230,60],d));ctx.beginPath();ctx.arc(F.bx,F.by-1.6,1.8,0,7);ctx.fill()}
   else if(ctxN==='home'&&walkCtx()==='home'&&Math.hypot(WALK.x-R.x,WALK.y-R.y)>34&&(WALK.mv>0||R.follow)){R.follow=Math.hypot(WALK.x-R.x,WALK.y-R.y)>16;pose='walk';move(WALK.x-WALK.face*14,WALK.y+3,sp0*(Math.hypot(WALK.x-R.x,WALK.y-R.y)>80?2.6:1.6));R.st='sit';R.t=2+Math.random()*3}
   else{R.t-=dt;R.follow=false;
@@ -6077,8 +6079,11 @@ function petHouseDraw(d){const g=(c,k)=>rgb(mix(c.map(v=>v*(k||.28)),c,d*.8+.2))
   ctx.fillStyle=g([40,28,20]);ctx.beginPath();ctx.moveTo(-6,0);ctx.lineTo(-6,-9);ctx.arc(0,-9,6,Math.PI,0);ctx.lineTo(6,0);ctx.fill();ctx.fillStyle=g([140,96,58]);for(let y=-15;y<0;y+=4)ctx.fillRect(-13,y,26,.6);
   if(P){ctx.fillStyle=g([236,226,200]);ctx.fillRect(-7,-22.5,14,4);ctx.fillStyle=g([60,40,24]);ctx.font='bold 3px sans-serif';ctx.textAlign='center';ctx.fillText(String(P.name).slice(0,10),0,-19.6);ctx.textAlign='left'}}
 function petBedDraw(){const B=CC('bed');ctx.fillStyle=shd(B,-.3);ctx.beginPath();ctx.ellipse(0,-10,40,12,0,0,7);ctx.fill();ctx.fillStyle=B;ctx.beginPath();ctx.ellipse(0,-13,32,8,0,0,7);ctx.fill();ctx.fillStyle=shd(B,.2);ctx.beginPath();ctx.ellipse(-6,-15,10,3,0,0,7);ctx.fill()}
-function petFetch(){if(yardCtx()!=='home'||!curPet()||PET_RT.fetch)return;const G=shackGeo(),hx=G.t===0?78:G.door+7,lx=Math.max(-800,yardLeft()+20),ty=262+Math.random()*90,tx=Math.max(lx,Math.min(yShoreX(ty)-16,hx-60-Math.random()*140));
-  PET_RT.fetch={ph:'fly',t:0,hx,hy:246,bx:hx,by:236,tx,ty};CAM.user='in';sfx('click');petVoice(curPet().k)}
+function petFetch(){if(yardCtx()!=='home'||!curPet()||PET_RT.fetch)return;const G=shackGeo(),walk=walkCtx()==='home'&&WALK.x!=null,lx=Math.max(-800,yardLeft()+20);
+  // thrown from wherever you're standing (the front door if you aren't out walking), off the way you're facing
+  const hx=walk?WALK.x:G.t===0?78:G.door+7,hy=walk?WALK.y:246,k=Math.min(1.08,.66+(hy-242)*.0028),sy=hy-16*k,ty=Math.max(258,Math.min(390,hy+(Math.random()-.4)*70));
+  let dir=walk?WALK.face||1:-1,dist=60+Math.random()*90,tx=hx+dir*dist;const hiX=yShoreX(ty)-16;if(tx>hiX||tx<lx){dir=-dir;tx=hx+dir*dist}tx=Math.max(lx,Math.min(hiX,tx));
+  PET_RT.fetch={ph:'fly',t:0,hx,hy,sy,bx:hx,by:sy,tx,ty};CAM.user='in';sfx('click');petVoice(curPet().k)}
 // ---- Lakeside Rescue (in the Shop) ----
 function petShopHTML(){const ps=petsS();let h='<div class="pj-wrap">';
   h+=`<div class="pj-card"><div class="pj-h"><b>🐾 Lakeside Rescue</b><span>${Object.keys(ps.own).length}/${Object.keys(PETS).length} adopted</span></div><p>Adopt a companion. One follows you at a time: it naps in your yard, rides in your boat and curls up in the cabin. Friends see it when they visit. Pet it once a day for +10 stamina.</p></div>`;
@@ -6166,8 +6171,14 @@ function yDraw(id,d,T,night,ph){
   else if(YGAMES[id])ygItemDraw(id,d,T,YCUR);
   else if(YI[id]&&YI[id].unit)yUnitDraw(id,d,T,ph)}
 // back=true draws what stands behind the house (trees at the back of the lot); the rest draws in front.
+// Pets, people and anything else that walks around get drawn in depth order with the yard items, so they pass behind and in front of them.
+let YACT=null;
+function yardActors(d,T){const A=YACT;if(!A)return;const c=yardCtx();if(c){const P=c==='friend'?(VT&&VT.ext&&VT.ext.pet):curPet();if(P&&!(c==='friend'&&houseHere()&&[...HOUSE.peers.values()].some(p=>p.host&&p.pet)))A.push({y:PET_RT.ctx===c&&PET_RT.y!=null?PET_RT.y:310,fn:()=>petYard(d,T)})}
+  const wc=walkCtx();if(wc)A.push({y:WALK.ctx===wc&&WALK.y!=null?WALK.y:246,fn:()=>{walkDraw(d,T,wc);WALK.drawnT=T}});houseActors(d,T)}
 function drawYard(d,T,night,back){const L=yardList(),own=yardCtx()==='home';const idx=L.map((a,i)=>i).filter(i=>(L[i][2]<250)===back&&yHas(L[i][0])).sort((a,b)=>L[a][2]-L[b][2]);
-  for(const i of idx){const [id,x,y,f]=L[i],I=YI[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);ctx.translate(-I.ox,-I.oy);L[i]._i=i;YCUR=L[i];try{yDraw(id,d,T,night,x*.37)}finally{ctx.restore()}{const ut=yUpgOf(id);if(ut){const [bx,by,bw,bh]=yBox(L[i]);decoFx(ut,bx,by,bw,bh,T,d)}}
+  if(!back&&YACT&&YACT.length){const all=idx.map(i=>({y:L[i][2],i})).concat(YACT.map(a=>({y:a.y+.01,fn:a.fn}))).sort((a,b)=>a.y-b.y);for(const e of all){if(e.fn)e.fn();else drawYardItem(L,e.i,d,T,night,own)}return}
+  for(const i of idx)drawYardItem(L,i,d,T,night,own)}
+function drawYardItem(L,i,d,T,night,own){{const [id,x,y,f]=L[i],I=YI[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);ctx.translate(-I.ox,-I.oy);L[i]._i=i;YCUR=L[i];try{yDraw(id,d,T,night,x*.37)}finally{ctx.restore()}{const ut=yUpgOf(id);if(ut){const [bx,by,bw,bh]=yBox(L[i]);decoFx(ut,bx,by,bw,bh,T,d)}}
     if(YED.on&&own&&(YED.tab||'decor')!=='paths'&&YED.tab!=='house'){const [bx,by,bw,bh]=yBox(L[i]),s=i===YED.sel;ctx.save();ctx.setLineDash(s?[3,2]:[2,3]);ctx.lineWidth=s?1.2:.6;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.55)';ctx.strokeRect(bx-1.5,by-1.5,bw+3,bh+3);ctx.restore()}}}
 let YCUR=null;
 function drawLand(d,T,night){drawYard(d,T,night,false)}
@@ -6691,23 +6702,27 @@ function houseMsg(o){const P=HOUSE.peers,add=a=>{if(!a||!a.cid)return;P.set(a.ci
   HOUSE.n=[...P.values()].filter(p=>!p.host&&!HOUSE.blocked.has(p.pid)).length+(HOUSE.me?0:1);renderVisitBar(true)}
 // Your own position, sent only while it changes (and at most 5 times a second).
 function houseSendMv(){if(HOUSE.st!=='on'||!houseHere())return;const now=performance.now();if(now-HOUSE.lastMv<200)return;const sig=Math.round(WALK.x)+','+Math.round(WALK.y)+','+WALK.face+','+(WALK.mv>0?1:0);if(sig===HOUSE.mvSig)return;HOUSE.lastMv=now;HOUSE.mvSig=sig;hsend({t:'mv',x:Math.round(WALK.x),y:Math.round(WALK.y),f:WALK.face,m:WALK.mv>0?1:0})}
-function houseDraw(d,T){if(!houseHere())return;const now=performance.now(),dt=HOUSE.lt?Math.min(.1,(now-HOUSE.lt)/1000):0;HOUSE.lt=now;const G=shackGeo(),door=[G.t===0?78:G.door+7,246];
-  const ps=[...HOUSE.peers.values()].filter(p=>!HOUSE.blocked.has(p.pid));for(const p of ps){if(p.x==null){p.x=p.tx??door[0];p.y=p.ty??door[1]}if(p.tx==null){p.tx=p.x;p.ty=p.y}}
-  ps.sort((a,b)=>a.y-b.y);const tags=[];
-  for(const p of ps){const dx=p.tx-p.x,dy=p.ty-p.y,dd=Math.hypot(dx,dy),st=60*dt;let mv=0;if(dd>st+.3){p.x+=dx/dd*st;p.y+=dy/dd*st;mv=1}else{p.x=p.tx;p.y=p.ty;mv=p.m&&dd>0?1:0}
-    // pet
+// Open House drawing is split in two: bodies and pets go into the yard's depth order (houseActors), and name tags,
+// speech bubbles and thrown things are drawn on top afterwards (houseOverlay) so they never hide behind decor.
+function houseActors(d,T){if(!houseHere()||!YACT)return;const now=performance.now(),dt=HOUSE.lt?Math.min(.1,(now-HOUSE.lt)/1000):0;HOUSE.lt=now;HOUSE.dt=dt;const G=shackGeo(),door=[G.t===0?78:G.door+7,246];
+  const ps=[...HOUSE.peers.values()].filter(p=>!HOUSE.blocked.has(p.pid));
+  for(const p of ps){if(p.x==null){p.x=p.tx??door[0];p.y=p.ty??door[1]}if(p.tx==null){p.tx=p.x;p.ty=p.y}
+    const dx=p.tx-p.x,dy=p.ty-p.y,dd=Math.hypot(dx,dy),st=60*dt;p.mv=0;if(dd>st+.3){p.x+=dx/dd*st;p.y+=dy/dd*st;p.mv=1}else{p.x=p.tx;p.y=p.ty;p.mv=p.m&&dd>0?1:0}
     if(p.pet&&PETS[p.pet.k]){const P=petParse(p.pet);p.px=p.px??p.x-14;p.py=p.py??p.y+3;const pdx=p.x-p.f*14-p.px,pdy=p.y+3-p.py,pd=Math.hypot(pdx,pdy),pst=45*dt,pm=pd>4;if(pm){p.px+=pdx/pd*Math.min(pd,pst);p.py+=pdy/pd*Math.min(pd,pst)}
-      const k=1.3*Math.min(1.08,.66+(p.py-242)*.0028);petDraw(ctx,P,p.px,p.py,pdx>=0?1:-1,pm?'walk':'sit',T,k,d)}
-    const k=Math.min(1.08,.66+(p.y-242)*.0028),leg=Math.sin(T*13)*3.5*mv,bob=Math.abs(Math.sin(T*13))*1.5*mv;
-    ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.f*k,k);ctx.fillStyle='rgba(0,0,0,.16)';ctx.beginPath();ctx.ellipse(0,0,7,1.6,0,0,7);ctx.fill();ctx.strokeStyle=rgb(mix([20,20,30],[50,60,90],d));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,-8-bob);ctx.lineTo(-2+leg,0);ctx.moveTo(2,-8-bob);ctx.lineTo(2-leg,0);ctx.stroke();
-    LIVE.drawing=true;LIVE.drawWear=p.wear||null;LIVE.drawG=p.g==='f'?'f':'m';try{drawAngler(0,-7-bob,d,T,'clear')}finally{LIVE.drawing=false}ctx.restore();
-    // name tag
+      YACT.push({y:p.py,fn:()=>petDraw(ctx,P,p.px,p.py,pdx>=0?1:-1,pm?'walk':'sit',T,1.3*Math.min(1.08,.66+(p.py-242)*.0028),d)})}
+    YACT.push({y:p.y,fn:()=>{const k=Math.min(1.08,.66+(p.y-242)*.0028),leg=Math.sin(T*13)*3.5*p.mv,bob=Math.abs(Math.sin(T*13))*1.5*p.mv;
+      ctx.save();ctx.translate(p.x,p.y);ctx.scale(p.f*k,k);ctx.fillStyle='rgba(0,0,0,.16)';ctx.beginPath();ctx.ellipse(0,0,7,1.6,0,0,7);ctx.fill();ctx.strokeStyle=rgb(mix([20,20,30],[50,60,90],d));ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-2,-8-bob);ctx.lineTo(-2+leg,0);ctx.moveTo(2,-8-bob);ctx.lineTo(2-leg,0);ctx.stroke();
+      LIVE.drawing=true;LIVE.drawWear=p.wear||null;LIVE.drawG=p.g==='f'?'f':'m';try{drawAngler(0,-7-bob,d,T,'clear')}finally{LIVE.drawing=false}ctx.restore()}})}
+  if(!HOUSE.me&&walkCtx()==='friend'){const P=curPet();if(P){const o=HOUSE.sp||(HOUSE.sp={x:WALK.x-14,y:WALK.y+3});const dx=WALK.x-WALK.face*14-o.x,dy=WALK.y+3-o.y,dd=Math.hypot(dx,dy),m=dd>4;if(m){const st=(dd>80?110:48)*dt;o.x+=dx/dd*Math.min(dd,st);o.y+=dy/dd*Math.min(dd,st);o.f=dx>=0?1:-1}
+    YACT.push({y:o.y,fn:()=>petDraw(ctx,P,o.x,o.y,o.f||1,m?'walk':'sit',T,1.3*Math.min(1.08,.66+(o.y-242)*.0028),d)})}}else HOUSE.sp=null}
+function houseOverlay(d,T){if(!houseHere())return;const now=performance.now(),dt=HOUSE.dt||0;
+  const ps=[...HOUSE.peers.values()].filter(p=>!HOUSE.blocked.has(p.pid)&&p.x!=null).sort((a,b)=>a.y-b.y),tags=[];
+  for(const p of ps){const k=Math.min(1.08,.66+(p.y-242)*.0028);
     ctx.font='bold 5px sans-serif';const nm=(p.host?'🏡 ':'')+p.name,w=ctx.measureText(nm).width+6;let ty=p.y-46*k;for(let g=0;g<4;g++){const hit=tags.find(t=>Math.abs(t[0]-p.x)<(t[1]+w)/2&&Math.abs(t[2]-ty)<8);if(!hit)break;ty=hit[2]-8.5}tags.push([p.x,w,ty]);p.tagY=ty;ctx.fillStyle='rgba(10,22,28,.7)';rrect(p.x-w/2,ty,w,7,3);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(nm,p.x,ty+5);ctx.textAlign='left';
     if(p.bub){p.bub.t+=dt;if(p.bub.t>4)p.bub=null;else{ctx.save();ctx.translate(p.x,Math.min(p.y-58*k,p.tagY-4));ctx.scale(.5,.5);emoBubble(0,0,p.bub.s,p.bub.t);ctx.restore()}}
     for(const q of p.proj){const u=Math.min(1,(now-q.t0)/1000/(q.dur||.8)),x=q.sx+(q.ex-q.sx)*u,y=q.sy+(q.ey-q.sy)*u-Math.sin(u*Math.PI)*(q.h||30);ctx.fillStyle=q.col||'#c83a30';if(q.hoop){ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill()}else ctx.fillRect(x-1.8,y-1.2,3.6,2.4);q.done=u>=1}
     p.proj=p.proj.filter(q=>!q.done);
     if(CAMT.z>1.3&&!YED.on)HITS.push({x:p.x-9*k,y:p.y-44*k,w:18*k,h:44*k,kind:'ypeer',data:p.cid})}
-  if(!HOUSE.me&&walkCtx()==='friend'){const P=curPet();if(P){const o=HOUSE.sp||(HOUSE.sp={x:WALK.x-14,y:WALK.y+3});const dx=WALK.x-WALK.face*14-o.x,dy=WALK.y+3-o.y,dd=Math.hypot(dx,dy),m=dd>4;if(m){const st=(dd>80?110:48)*dt;o.x+=dx/dd*Math.min(dd,st);o.y+=dy/dd*Math.min(dd,st);o.f=dx>=0?1:-1}petDraw(ctx,P,o.x,o.y,o.f||1,m?'walk':'sit',T,1.3*Math.min(1.08,.66+(o.y-242)*.0028),d)}}else HOUSE.sp=null;
   if(HOUSE.bub){HOUSE.bub.t+=dt;if(HOUSE.bub.t>4)HOUSE.bub=null;else{const k=Math.min(1.08,.66+(WALK.y-242)*.0028);ctx.save();ctx.translate(WALK.x,WALK.y-50*k);ctx.scale(.5,.5);emoBubble(0,0,HOUSE.bub.s,HOUSE.bub.t);ctx.restore()}}}
 async function houseOpen(){const m=mpS();if(!m.id){showToast('Pick an angler name in Friends first','Open House');return}try{await api('house/open',{id:m.id,key:m.key});HOUSE.ka=Date.now();HOUSE.name=m.name;houseConnect(m.id,true);sfx('chime','R');showToast('Your house is open!','Anyone on your lake can drop by')}catch(e){showToast('Couldn’t open your house. Try again.')}}
 async function houseClose(quiet){const m=mpS();hsend({t:'close'});houseDrop();HOUSE.me=false;HOUSE.host=null;try{await api('house/close',{id:m.id,key:m.key})}catch(e){}if(!quiet)showToast('Your house is closed','Open House');renderVisitBar(true)}
@@ -6747,7 +6762,7 @@ function showInvites(list){for(const iv of list||[]){if(HOUSE.blocked.has(iv.fro
 async function openHousesHTML(){const m=mpS();let r;try{r=await api('house/list',{id:m.id,key:m.key})}catch(e){return '<p class="fr-muted">Couldn’t load open houses.</p>'}const L=(r.houses||[]).filter(h=>!HOUSE.blocked.has(h.pid));
   return L.length?`<ol class="yw-list">${L.map(h=>`<li><span class="yw-r">🏡</span><b>${esc(h.name)}</b><small>${h.n} guest${h.n===1?'':'s'}</small><button class="fr-mini" data-hj="${esc(h.pid)}">Join</button></li>`).join('')}</ol>`:'<p class="fr-muted">Nobody is hosting right now. Open your own house from your yard!</p>'}
 function drawSleep(d,T){
-  {const wc=walkCtx();if(wc){walkDraw(d,T,wc);return}}
+  {const wc=walkCtx();if(wc){if(WALK.drawnT!==T)walkDraw(d,T,wc);return}}
   const ph=S.sleep.ph;if(ph!=='run'&&ph!=='walkOut'&&ph!=='door'&&ph!=='yard')return;if(dockFishing())return;const st=ph==='door'||ph==='yard';
   const G=shackGeo(),door=G.t===0?[78,242]:[G.door+7,242],start=[dockEnd()-8,246],mid=[150,246];
   let p=st?1:Math.min(1,S.sleep.t/PH_T[ph]);if(ph==='walkOut')p=1-p;

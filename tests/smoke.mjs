@@ -112,6 +112,9 @@ await check('pet fun: one gift a day, fetch round trip, pet house; next goals ca
   ok(await p.evaluate(()=>petGiftReady()),'no gift waiting');await p.evaluate(()=>{petTap();petTap()});ok(await p.evaluate(()=>!petGiftReady()),'gift not taken');
   await p.evaluate(()=>yedEnter());await p.click('[data-yt="build"]');await p.click('[data-yb="pethouse"]');await p.click('#yedDone');ok(await p.evaluate(()=>yardList().some(a=>a[0]==='pethouse')),'pet house');
   await p.click('#vbFetch');let done=false;for(let i=0;i<30&&!done;i++){await p.waitForTimeout(500);done=await p.evaluate(()=>!PET_RT.fetch)}ok(done,'fetch never finished');
+  await p.evaluate(()=>{WALK.x=60;WALK.y=340;WALK.tx=WALK.ty=null;WALK.face=1});await p.waitForTimeout(300);await p.click('#vbFetch');
+  const f=await p.evaluate(()=>PET_RT.fetch&&[Math.round(PET_RT.fetch.hx),Math.round(PET_RT.fetch.hy),Math.abs(PET_RT.fetch.tx-60)>=40]);ok(f&&f[0]===60&&f[1]===340&&f[2],'ball thrown from where you stand '+f);
+  done=false;for(let i=0;i<30&&!done;i++){await p.waitForTimeout(500);done=await p.evaluate(()=>!PET_RT.fetch)}ok(done&&await p.evaluate(()=>Math.hypot(PET_RT.x-WALK.x,PET_RT.y-WALK.y)<30),'pet brings it back to you');
   ok(!p.errs.length,p.errs.join('; '));await p.context().close();
   const q=await page(VPS[1][1],save({coins:3000,total:200}));await q.waitForTimeout(600);const t=await q.evaluate(()=>{const e=document.getElementById('goals');return e.hidden?'':e.textContent});ok(t.includes('Adopt a pet'),'goals: '+t);
   await q.click('[data-gl="pet"]');ok(await q.evaluate(()=>document.getElementById('shopBody').textContent.includes('Lakeside Rescue')),'pet button');await q.evaluate(()=>closePhone());
@@ -225,6 +228,11 @@ await check('workbench: trade up uses biggest piles and caps legendary trades; d
   ok(r.t1[0]===1&&r.t1[1]===5,'feather from 5 scrap '+r.t1);ok(r.t2[0]===2&&r.t2[1]===2,'two legendary trades a day '+r.t2);ok(r.nope,'cannot make a material never found');
   ok(r.arm===2&&r.camp===1&&r.spent>0,'upgrades '+JSON.stringify(r));ok(r.clean==='{"campfire":1}','visitor copy sanitized '+r.clean);
   await p.evaluate(()=>openCraft('upg'));ok(await p.evaluate(()=>document.querySelectorAll('#craftPane .rcard').length>=2),'upgrade tab lists pieces');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('yard depth: pets and the walker are depth-sorted with yard items, with no errors behind or in front',async()=>{const p=await page(VPS[0][1],save({decor:{woodpile:1},pets:{own:{dog:{name:'B',coat:0,acc:'none'}},out:'dog',day:today,gift:today,acc:{}},sleep:{ph:'yard',t:0,visit:true}}));
+  await p.evaluate(()=>{const w=S.yard.it.find(a=>a[0]==='woodpile');w[1]=100;w[2]=330});
+  for(const y of [318,345]){await p.evaluate(y=>{const R=PET_RT;R.x=R.tx=100;R.y=R.ty=y;R.st='sit';R.t=99;WALK.x=128;WALK.y=y;WALK.tx=WALK.ty=null},y);await p.waitForTimeout(400)}
+  ok(await p.evaluate(()=>String(drawYard).includes('YACT')&&WALK.drawnT>0),'actors drawn in the yard pass');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
