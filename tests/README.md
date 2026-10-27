@@ -41,6 +41,8 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - Owner gifts: only the owner can send; coins scale with the player's steady income
 - Deep Sea crate: Series 2 items of every kind open, equip and survive a reload
 - Workbench: trade-up rules and daily legendary cap; decor upgrades and the visitor copy
+- Moon: air runs out while away (unless you have the Moon Base)
+- Casefile: case encounters aren't blocked by an old tournament card; next-weather forecast
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

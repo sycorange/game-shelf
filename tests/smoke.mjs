@@ -234,6 +234,14 @@ await check('yard depth: pets and the walker are depth-sorted with yard items, w
   for(const y of [318,345]){await p.evaluate(y=>{const R=PET_RT;R.x=R.tx=100;R.y=R.ty=y;R.st='sit';R.t=99;WALK.x=128;WALK.y=y;WALK.tx=WALK.ty=null},y);await p.waitForTimeout(400)}
   ok(await p.evaluate(()=>String(drawYard).includes('YACT')&&WALK.drawnT>0),'actors drawn in the yard pass');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('moon: air keeps running out while away, then you come home and keep fishing (Moon Base still unlimited)',async()=>{for(const [gear,want] of [[{tank:1},'deep'],[{tank:1,moonbase:1},'moon']]){const p=await page(VPS[0][1],save({shack:5,boat:5,water:'deep',realm:{gates:{moon:1},gear}}));
+    const r=await p.evaluate(()=>{realmSwap('deep','moon');S.water='moon';S.o2=120;const t0=S.total;offline(3*3600);return [S.water,S.total-t0>100]});ok(r[0]===want&&r[1],'after away '+r+' want '+want);ok(!p.errs.length,p.errs.join('; '));await p.context().close()}});
+
+await check('casefile: an old tournament card or invite no longer blocks the Emerald Wake ghost; only a live tournament does',async()=>{const p=await page(VPS[0][1],save({boat:4,water:'bay',min:22*60,q:{step:7,everSolved:true},q2:{step:6,lantern:true,bell:true,pages:3}}));
+  const r=await p.evaluate(()=>{const roll=()=>{let n=0;for(let i=0;i<300;i++){const x=q2Roll({wx:'fog'},'bay',22*60);if(x&&x.ghost)n++}return n};const o={};
+    S.tour={phase:'done',name:'x',me:1,rivals:[]};o.done=roll();S.tour={phase:'invite',left:40,name:'x',rivals:[]};o.inv=roll();S.tour={phase:'live',left:200,name:'x',rivals:[]};o.live=roll();S.tour=null;o.next=nextWxText(['fog']);return o});
+  ok(r.done>0&&r.inv>0&&r.live===0,'ghost blocking '+JSON.stringify(r));ok(/now|min|at /.test(r.next),'fog forecast '+r.next);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
