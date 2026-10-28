@@ -183,6 +183,9 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .hv-give{list-style:none;margin:0;padding:0;display:grid;gap:6px}.hv-give li{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:6px;align-items:center}.hv-give svg{width:40px;height:20px}.hv-give small{display:block;color:#d8b898;font-size:.74rem}
 .hv-give button,.hv-btn{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:.76rem;cursor:pointer;white-space:nowrap}.hv-btn.hv-main{background:#e8823a;border-color:#e8823a;color:#2a1206;font-weight:800;padding:8px 14px}.hv-give button:disabled,.hv-btn:disabled{opacity:.45;cursor:default}
 .sec-h.hv-sec h3{color:#e8823a}
+.hvf{display:grid;gap:10px}.hvf-c{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}.hvf-c p{margin:0;color:var(--muted);font-size:.86rem}.hvf-c .jig,.hvf-c .ghost{justify-self:start}.hvf-r{font-size:.8rem!important}
+.hvf-res{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}.hvf-res p{margin:2px 0;color:var(--muted)}
+.hvf-rib{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#1a1a1a;background:var(--rc);box-shadow:0 0 0 4px rgba(255,255,255,.15),0 10px 0 -2px var(--rc)}
 #hwBody{display:grid;gap:10px;padding:0 2px 14px}
 .hw-hero{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:linear-gradient(135deg,#ff8a2a,#7a2a9a);color:#fff}.hw-hero svg{width:44px;height:44px}.hw-hero b{font-size:1.1rem;display:block}.hw-hero small{opacity:.9}
 .hw-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;color:#f2eaf6;display:grid;gap:6px}.hw-card p{margin:0;font-size:.82rem;color:#d8c8e2}
@@ -5761,6 +5764,7 @@ function townTo(x,y,after){const B=townBounds();TOWN.tx=Math.max(B[0],Math.min(B
 function townClick(sx,sy,e){const h=hitAt(sx,sy),V=townView(),wx=sx/V.k+TOWN.cam,wy=sy/V.k+V.cy;$('hchat').hidden=true;
   if(h&&h.kind==='tin'){hideTip();townInClick(h.data,e,h);return}
   if(h&&h.kind==='tfount'){hideTip();townTo(FOUNT_X-56,TW_Y0+12,()=>{TOWN.face=1;fountToss()});return}
+  if(h&&h.kind==='thv'){hideTip();townTo(HVF_X,TW_Y0+14,()=>{TOWN.face=1;sfx('click');hvFair()});return}
   if(h&&h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);if(!b)return;hideTip();if(b.inside&&TROOMS[b.id])townTo(b.x,TW_Y0+6,()=>townEnter(b.id));else if(b.open)townTo(b.x,TW_Y0+6,()=>{sfx('click');b.open()});else{townTo(b.x,TW_Y0+14);showTip(h,e)}return}
   if(h&&h.kind==='tnpc'){const n=TNPC[h.data];townTo(n.x+(TOWN.x<n.x?-40:40),n.y);n.bub={s:pick(n.lines),t:0};n.tx=null;n.wait=5;sfx('pop');return}
   if(h&&h.kind==='tpeer'){const p=TOWN.peers.get(h.data);if(p)showToast(p.name,'In town');return}
@@ -5844,7 +5848,7 @@ function drawTown(d,T,top,bot){const nw=performance.now(),dt=TOWN.lt?Math.min(.1
   // the far end: pier over the water
   if(cam+V.VW>2380){ctx.fillStyle=rgb(mix([8,16,28],[60,110,140],d));ctx.fillRect(2600,300,200,210)}
   // buildings (back to front), then street furniture
-  const vis=TBLD.filter(b=>b.x+b.w/2+80>cam&&b.x-b.w/2-80<cam+V.VW);for(const b of vis)drawTB(b,d,T,night,V);
+  const vis=TBLD.filter(b=>b.x+b.w/2+80>cam&&b.x-b.w/2-80<cam+V.VW);for(const b of vis)drawTB(b,d,T,night,V);if(hvOn())hvStreet(d,T,night,V,cam);
   for(const x of TLAMP){if(x<cam-40||x>cam+V.VW+40)continue;ctx.fillStyle=rgb(mix([20,20,24],[60,60,66],d));ctx.fillRect(x-2,TW_Y0-76,4,76);ctx.fillRect(x-8,TW_Y0-80,16,6);ctx.fillStyle=night>.2?'#ffe8a8':rgb(mix([60,60,50],[220,220,200],d));ctx.beginPath();ctx.arc(x,TW_Y0-70,5,0,7);ctx.fill();if(night>.2){ctx.globalCompositeOperation='lighter';glow(x,TW_Y0-70,60,.18*night,'255,210,140');glow(x,TW_Y0+30,80,.06*night,'255,210,140');ctx.globalCompositeOperation='source-over'}}
   RH2(V,FOUNT_X-46,TW_Y0-64,92,70,'tfount',0);
   for(const b of vis){if(!b.inside)continue;const n=[...TOWN.peers.values()].filter(p=>p.z===b.id).length;if(n)townTag(b.x,TW_Y0-128,`${n} inside`,'rgba(30,110,60,.9)')}}
@@ -5876,7 +5880,7 @@ function townBar(){const bar=$('visitBar'),z=TOWN.z,n=z?[...TOWN.peers.values()]
   $('visitTxt').innerHTML=z?`🏘️ <b>${TROOMS[z].n}</b>${TOWN.st==='on'?` · ${n?`${n} other angler${n>1?'s':''} here`:'Nobody else in here right now'}`:''}`:TOWN.st==='on'?`🏘️ <b>Lantern Harbor</b> · ${n?`${n} other angler${n>1?'s':''} in town`:'Just you and the locals right now'}`:TOWN.st==='wait'?'🏘️ <b>Lantern Harbor</b> · Looking for other anglers…':'🏘️ <b>Lantern Harbor</b>';$('visitTxt').hidden=$('scene').clientWidth<560;
   $('visitBtns').innerHTML=(TOWN.st==='on'?'<button class="jig ib" id="tbChat" title="Chat"><span>💬</span><small>Chat</small></button>':'')+(z?'<button class="ghost ib" id="tbOut" title="Back to the street"><span>🚪</span><small>Street</small></button>':'')+'<button class="ghost ib" id="tbLeave" title="Leave town"><span>⛵</span><small>Leave</small></button>';
   const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('tbChat',townChatUI);on('tbLeave',closeTown);on('tbOut',()=>townTo(TROOM_DOOR+20,TW_Y0+6,townExit));bar.classList.add('vb-y');bar.hidden=false}
-function townTip(h){if(h.kind==='tfount'){const st=townDay();return `<b>Wishing fountain</b><small>${st.wish?'You’ve made today’s wish.':`Toss in $${money(fountCost())} and make a wish. Once a day.`}</small>`}if(h.kind==='tin'){const R=TROOMS[TOWN.z];if(h.data==='keeper'&&R)return `<b>${R.keeper.n}</b><small>${{tackle:'Tap to see today’s stock',post:'Tap to send a parcel',station:'Tap to request a song'}[TOWN.z]||'Tap to say hi'}</small>`;const q=TIN_TIP[h.data];return q?`<b>${q[0]}</b><small>${q[1]}</small>`:''}if(h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);return b?`<b>${b.n}</b><small>${b.sub}${b.open||b.inside?' · tap to go in':''}</small>`:''}if(h.kind==='tnpc'){const n=TNPC[h.data];return `<b>${n.n}</b><small>Tap to say hi</small>`}if(h.kind==='tpeer'){const p=TOWN.peers.get(h.data);return p?`<b>${esc(p.name)}</b><small>In town</small>`:''}return ''}
+function townTip(h){if(h.kind==='thv'){const P=HV().pie;return `<b>Harvest Fair</b><small>Apple bobbing for prize tickets and the daily pie contest${P&&P.d===todayKey()?' · you’ve entered today':''}</small>`}if(h.kind==='tfount'){const st=townDay();return `<b>Wishing fountain</b><small>${st.wish?'You’ve made today’s wish.':`Toss in $${money(fountCost())} and make a wish. Once a day.`}</small>`}if(h.kind==='tin'){const R=TROOMS[TOWN.z];if(h.data==='keeper'&&R)return `<b>${R.keeper.n}</b><small>${{tackle:'Tap to see today’s stock',post:'Tap to send a parcel',station:'Tap to request a song'}[TOWN.z]||'Tap to say hi'}</small>`;const q=TIN_TIP[h.data];return q?`<b>${q[0]}</b><small>${q[1]}</small>`:''}if(h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);return b?`<b>${b.n}</b><small>${b.sub}${b.open||b.inside?' · tap to go in':''}</small>`:''}if(h.kind==='tnpc'){const n=TNPC[h.data];return `<b>${n.n}</b><small>Tap to say hi</small>`}if(h.kind==='tpeer'){const p=TOWN.peers.get(h.data);return p?`<b>${esc(p.name)}</b><small>In town</small>`:''}return ''}
 
 // ==TOWN ROOMS== Walk-in interiors. Each room is 1000 wide with the same floor band as the street, so the server's
 // town room carries everyone: a player's zone (z) says which building they're in and you only see people in yours.
@@ -6035,6 +6039,93 @@ function drawRoomPost(d,T,V,top,bot){const R=TROOMS.post;roomShell(V,TOWN.cam,'#
 // ==TOWN SQUARE FOUNTAIN== Toss a coin once a day for a little luck.
 function seedRng(s){return ()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296}}
 const FOUNT_X=1150;
+// ==HARVEST FAIR== the festival on Lantern Harbor's main street: string lights, hay and pumpkins, and a stall in front of the Fish Market.
+const HVF_X=620;
+function hvStreet(d,T,night,V,cam){const Y=TW_Y0;
+  // string lights: festival poles rise from the street lamps so the strings hang above the doorways, not across them
+  const top=Y-124,sag=6;
+  for(const x of TLAMP){if(x<cam-40||x>cam+V.VW+40)continue;ctx.fillStyle=rgb(mix([24,18,12],[120,84,52],d));ctx.fillRect(x-1.5,top-2,3,top<Y-80?(Y-80)-top+2:0);ctx.fillStyle=rgb(mix([40,16,10],[200,70,36],d));ctx.beginPath();ctx.arc(x,top-3,3,0,7);ctx.fill()}
+  for(let i=0;i<TLAMP.length-1;i++){const a=TLAMP[i],b=TLAMP[i+1];if(b-a>420||b<cam-40||a>cam+V.VW+40)continue;
+    ctx.strokeStyle=rgb(mix([20,20,22],[60,56,50],d));ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(a,top);ctx.quadraticCurveTo((a+b)/2,top+sag*2,b,top);ctx.stroke();
+    for(let x=a+12,k=0;x<b-6;x+=18,k++){const t=(x-a)/(b-a),y=top+4*sag*t*(1-t)+3,c=FALL[(k+i)%FALL.length].map(v=>Math.min(255,v+40)),tw=.85+.15*Math.sin(T*2.4+k*1.7+i);
+      ctx.fillStyle=`rgba(${c},${(.22+.3*night)*tw})`;ctx.beginPath();ctx.arc(x,y,9,0,7);ctx.fill();
+      ctx.fillStyle=`rgba(${c},${tw})`;ctx.beginPath();ctx.arc(x,y,3.6,0,7);ctx.fill();ctx.fillStyle=`rgba(255,250,230,${.75*tw})`;ctx.beginPath();ctx.arc(x-.8,y-.8,1.3,0,7);ctx.fill()}}
+  // hay bales and pumpkins at every other lamp
+  TLAMP.forEach((x,i)=>{if(i%2||x<cam-60||x>cam+V.VW+60)return;ctx.fillStyle=rgb(mix([46,40,18],[212,178,92],d));ctx.fillRect(x+8,Y-22,30,16);ctx.fillStyle=rgb(mix([36,30,12],[170,140,60],d));for(const yy of [Y-18,Y-12])ctx.fillRect(x+8,yy,30,1.2);
+    for(const [px,py,r] of [[x+48,Y-9,7],[x+30,Y-27,5]]){ctx.fillStyle=rgb(mix([60,28,10],[236,128,36],d));ctx.beginPath();ctx.ellipse(px,py,r*1.2,r,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([20,30,10],[80,110,40],d));ctx.fillRect(px-.8,py-r-3,1.6,3.4)}});
+  // the fair stall: striped awning, a counter of pies and apples, and a bobbing barrel
+  const x0=HVF_X-62,x1=HVF_X+62;if(x1<cam-40||x0>cam+V.VW+40)return;const wd=rgb(mix([30,22,16],[140,96,58],d));
+  ctx.fillStyle=wd;ctx.fillRect(x0+4,Y-104,5,104);ctx.fillRect(x1-9,Y-104,5,104);
+  for(let i=0;i<8;i++){ctx.fillStyle=i%2?rgb(mix([50,40,30],[246,232,206],d)):rgb(mix([60,20,10],[214,92,40],d));ctx.beginPath();ctx.moveTo(x0+i*15.5,Y-112);ctx.lineTo(x0+(i+1)*15.5,Y-112);ctx.lineTo(x0+(i+1)*15.5,Y-96);ctx.quadraticCurveTo(x0+(i+.5)*15.5,Y-88,x0+i*15.5,Y-96);ctx.fill()}
+  ctx.fillStyle=rgb(mix([40,20,10],[170,70,34],d));ctx.fillRect(x0-2,Y-120,x1-x0+4,9);
+  ctx.fillStyle=rgb(mix([30,20,12],[120,80,46],d));rrect(HVF_X-46,Y-140,92,20,4);ctx.fill();ctx.fillStyle=rgb(mix([80,70,50],[255,236,190],d));ctx.font='800 11px Sniglet, "Trebuchet MS", sans-serif';ctx.textAlign='center';ctx.fillText('HARVEST FAIR',HVF_X,Y-126);ctx.textAlign='left';
+  ctx.fillStyle=wd;ctx.fillRect(x0+2,Y-46,x1-x0-4,8);ctx.fillStyle=rgb(mix([24,16,10],[110,74,44],d));ctx.fillRect(x0+6,Y-38,x1-x0-12,38);
+  ctx.fillStyle=rgb(mix([50,20,10],[200,80,40],d));for(let i=0;i<5;i++)ctx.fillRect(x0+10+i*22,Y-38,10,38);
+  for(const [px,k] of [[HVF_X-40,0],[HVF_X-14,1],[HVF_X+14,2]]){ctx.fillStyle=rgb(mix([50,34,20],[214,160,90],d));ctx.beginPath();ctx.ellipse(px,Y-49,10,3.6,0,Math.PI,0);ctx.fill();ctx.fillRect(px-10.5,Y-50,21,2.4);ctx.fillStyle=rgb(mix([40,26,14],[170,110,56],d));ctx.fillRect(px-6,Y-52,12,1)}
+  for(let i=0;i<5;i++){ctx.fillStyle=rgb(mix([50,10,10],i%2?[200,40,40]:[180,190,60],d));ctx.beginPath();ctx.arc(HVF_X+32+(i%3)*6,Y-49-(i>2?5:0),3.2,0,7);ctx.fill()}
+  // the bobbing barrel
+  const bx=x1+30;ctx.fillStyle=rgb(mix([30,20,12],[130,86,50],d));ctx.beginPath();ctx.moveTo(bx-20,Y);ctx.lineTo(bx-23,Y-34);ctx.lineTo(bx+23,Y-34);ctx.lineTo(bx+20,Y);ctx.fill();ctx.fillStyle=rgb(mix([20,20,24],[70,70,76],d));ctx.fillRect(bx-22,Y-28,44,2.4);ctx.fillRect(bx-21,Y-10,42,2.4);
+  ctx.fillStyle=rgb(mix([10,20,34],[80,140,180],d));ctx.beginPath();ctx.ellipse(bx,Y-34,23,5,0,0,7);ctx.fill();for(let i=0;i<3;i++){const a=T*.8+i*2.1;ctx.fillStyle=rgb(mix([50,10,10],[210,40,40],d));ctx.beginPath();ctx.arc(bx+Math.cos(a)*12,Y-35+Math.sin(a*1.7)*.8,3,0,7);ctx.fill()}
+  if(night>.2)glow(HVF_X,Y-60,70,.25*night,'255,200,120');
+  RH2(V,x0-4,Y-144,x1-x0+70,150,'thv',0)}
+function hvFair(){const B=$('plotBody');$('plotEye').textContent='Lantern Harbor';$('plotTitle').textContent='Harvest Fair';const h=HV(),P=h.pie&&h.pie.d===todayKey()?h.pie:null,R=h.rib||{b:0,r:0,w:0},B2=MPV.hvb;
+  B.innerHTML=`<div class="hvf"><div class="hvf-c"><b>🍎 Apple bobbing</b><p>Dunk for apples! You get 20 seconds. Tap an apple when it bobs up out of the water. Every apple is worth 6 prize tickets for the arcade${h.bob?` · your best is ${h.bob}`:''}.</p><button class="jig" id="hvfBob">Play</button></div>
+    <div class="hvf-c"><b>🥧 Pie contest</b>${P?`<p>You entered a ${esc(P.n)} today and won a <b>${{b:'blue',r:'red',w:'white'}[P.rib]} ribbon</b> (${P.score} points). Come back tomorrow for another try.</p>`:`<p>Bake one pie a day for the judges: pick a fish and a fruit, then pull it out of the oven at just the right moment. Today the judges love <b>${FRUITS[hvJudgeFruit()].one.toLowerCase()} pies</b>.</p><button class="jig" id="hvfPie">Bake a pie</button>`}
+      <p class="hvf-r">Ribbons: 🔵 ${R.b} · 🔴 ${R.r} · ⚪ ${R.w}${R.b<3?` · 3 blue ribbons earn the Blue Ribbon Baker trophy`:''}</p></div>
+    <div class="hvf-c"><b>🧺 The Harvest Basket</b><p>${B2&&B2.goal?`${B2.total.toLocaleString()} of ${B2.goal.toLocaleString()} points so far.`:'Fill one basket with the whole lake.'} Give fish from the Harvest app on your phone.</p><button class="ghost" id="hvfBasket">Open the Harvest app</button></div></div>`;
+  $('plotModal').hidden=false;const bb=$('hvfBob');if(bb)bb.onclick=hvBobOpen;const pb=$('hvfPie');if(pb)pb.onclick=hvPieOpen;$('hvfBasket').onclick=()=>{$('plotModal').hidden=true;openPhone();phShow('hv')}}
+// Apple bobbing: apples drift round the barrel and bob up and down. Tap one while it's up to grab it.
+const ABOB={on:false,t:0,left:20,n:0,a:[],fx:[],raf:0};
+function hvBobOpen(){if(!hvOn())return;const B=$('plotBody');$('plotTitle').textContent='Apple bobbing';
+  B.innerHTML=`<p class="land-d" id="bobMsg">Tap an apple when it pops up out of the water.</p><canvas id="bobCv" width="360" height="300" style="width:100%;max-width:360px;display:block;margin:0 auto;border-radius:12px;background:#3a2412;touch-action:manipulation;cursor:pointer"></canvas><div class="xf-row" style="justify-content:center;margin-top:10px"><button class="sbtn" id="bobGo">Start</button><button class="ghost" id="bobBack">Back to the fair</button></div>`;
+  Object.assign(ABOB,{on:false,t:0,left:20,n:0,fx:[],a:Array.from({length:6},(_,i)=>({r:30+Math.random()*80,a:i/6*7,s:(.4+Math.random()*.5)*(Math.random()<.5?-1:1),p:Math.random()*7,ps:2+Math.random()*1.6}))});
+  const c=$('bobCv');c.onpointerdown=e=>{e.preventDefault();const r=c.getBoundingClientRect();hvBobTap((e.clientX-r.left)*360/r.width,(e.clientY-r.top)*300/r.height)};
+  $('bobGo').onclick=()=>{Object.assign(ABOB,{on:true,left:20,n:0});$('bobGo').hidden=true;$('bobMsg').textContent='Go!';sfx('click')};$('bobBack').onclick=()=>{ABOB.on=false;hvFair()};
+  cancelAnimationFrame(ABOB.raf);let lt=performance.now();const loop=now=>{if($('plotModal').hidden||!$('bobCv')){ABOB.on=false;return}const dt=Math.min(.05,(now-lt)/1000);lt=now;hvBobTick(dt);hvBobDraw();ABOB.raf=requestAnimationFrame(loop)};ABOB.raf=requestAnimationFrame(loop)}
+const bobPos=a=>[180+Math.cos(a.a)*a.r,170+Math.sin(a.a)*a.r*.42],bobUp=a=>Math.sin(a.p)>.45;
+function hvBobTick(dt){ABOB.t+=dt;for(const a of ABOB.a){a.a+=a.s*dt;a.p+=a.ps*dt}ABOB.fx=ABOB.fx.filter(f=>(f.t+=dt)<.8);
+  if(ABOB.on){ABOB.left-=dt;$('bobMsg').textContent=`${Math.ceil(ABOB.left)}s left · ${ABOB.n} apple${ABOB.n===1?'':'s'}`;if(ABOB.left<=0)hvBobEnd()}}
+function hvBobTap(x,y){if(!ABOB.on)return;let best=null,bd=1e9;for(const a of ABOB.a){const [ax,ay]=bobPos(a),dd=Math.hypot(ax-x,ay-y);if(dd<bd){bd=dd;best=a}}if(!best||bd>30)return;const [ax,ay]=bobPos(best);
+  if(bobUp(best)){ABOB.n++;sfx('pop');ABOB.fx.push({x:ax,y:ay,t:0,ok:1});best.r=30+Math.random()*80;best.a=Math.random()*7;best.p=Math.PI*1.3}else{sfx('splash');ABOB.fx.push({x:ax,y:ay,t:0,ok:0});ABOB.left=Math.max(0,ABOB.left-1)}}
+function hvBobEnd(){ABOB.on=false;const h=HV(),tk=ABOB.n*6,got=arcEarn(tk);h.bob=Math.max(h.bob||0,ABOB.n);save();
+  $('bobMsg').innerHTML=`<b>${ABOB.n} apple${ABOB.n===1?'':'s'}!</b> ${got?`+${got} prize tickets`:tk?'You’ve hit today’s ticket limit at the arcade.':'Better luck next dunk.'}${got&&got<tk?' (today’s ticket limit)':''}`;$('bobGo').hidden=false;$('bobGo').textContent='Play again'}
+function hvBobDraw(){const c=$('bobCv');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,360,300);
+  x.fillStyle='#6a4024';x.beginPath();x.ellipse(180,172,160,76,0,0,7);x.fill();x.fillStyle='#2e5e80';x.beginPath();x.ellipse(180,170,146,66,0,0,7);x.fill();
+  x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=1.5;for(let i=0;i<5;i++){x.beginPath();x.ellipse(180,170,40+i*24+Math.sin(ABOB.t*2+i)*3,(40+i*24)*.42,0,0,7);x.stroke()}
+  for(const a of [...ABOB.a].sort((p,q)=>bobPos(p)[1]-bobPos(q)[1])){const [ax,ay]=bobPos(a),up=Math.sin(a.p),r=11+Math.max(0,up)*3,y=ay-Math.max(0,up)*8;
+    x.globalAlpha=up>-.2?1:.45;x.fillStyle=bobUp(a)?'#e0302a':'#8a2a2a';x.beginPath();x.arc(ax,y,r,0,7);x.fill();x.fillStyle='rgba(255,255,255,.4)';x.beginPath();x.arc(ax-r*.35,y-r*.35,r*.25,0,7);x.fill();
+    x.strokeStyle='#4a2a14';x.lineWidth=2;x.beginPath();x.moveTo(ax,y-r);x.lineTo(ax+2,y-r-5);x.stroke();x.fillStyle='#5a9a3a';x.beginPath();x.ellipse(ax+5,y-r-4,4,2,-.5,0,7);x.fill();
+    if(up<.2){x.fillStyle='rgba(46,94,128,.55)';x.fillRect(ax-r-2,ay+2,2*r+4,r)}x.globalAlpha=1}
+  for(const f of ABOB.fx){x.globalAlpha=1-f.t/.8;x.strokeStyle=f.ok?'#ffd05a':'#cfe8ff';x.lineWidth=2;x.beginPath();x.arc(f.x,f.y,8+f.t*30,0,7);x.stroke();if(f.ok){x.fillStyle='#ffd05a';x.font='800 16px Figtree, sans-serif';x.fillText('+1',f.x-8,f.y-14-f.t*20)}x.globalAlpha=1}
+  if(!ABOB.on&&ABOB.left>=20){x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,0,360,300);x.fillStyle='#fff';x.font='800 18px Figtree, sans-serif';x.textAlign='center';x.fillText('Tap Start to dunk',180,154);x.textAlign='left'}}
+// Pie contest: one pie a day. The fish counts by rarity, the judges' fruit of the day scores extra, and the bake meter decides the rest.
+const hvJudgeFruit=()=>{const k=todayKey();let hsh=0;for(const ch of k)hsh=(hsh*31+ch.charCodeAt(0))>>>0;return ['apple','cherry','peach','pear','plum','lemon'][hsh%6]};
+const PIE={fish:null,fruit:null,t:0,on:false,raf:0};
+function hvPieOpen(){if(!hvOn())return;const h=HV();if(h.pie&&h.pie.d===todayKey())return hvFair();const B=$('plotBody'),pan=pantry(),jf=hvJudgeFruit();$('plotTitle').textContent='Bake a pie';
+  const fish=coolerIds().sort((a,b)=>'MLRUC'.indexOf(FI(a).r)-'MLRUC'.indexOf(FI(b).r)).slice(0,24),fr=FIDS.filter(f=>(pan[f]|0)>0);
+  if(!fish.length){B.innerHTML=`<p class="land-d">You need a fish from your cooler for the pie. Catch one and come back!</p><div class="xf-row"><button class="ghost" id="pieBack">Back to the fair</button></div>`;$('pieBack').onclick=hvFair;return}
+  B.innerHTML=`<p class="land-d">Rarer fish score higher, and the judges love <b>${FRUITS[jf].one.toLowerCase()}</b> today.</p>
+    <label class="lg-l">Fish<select id="pieFish" class="lg-in">${fish.map(k=>`<option value="${k}">${FI(k).n} (${RAR[FI(k).r]}) · ${S.cooler[k].n} in cooler</option>`).join('')}</select></label>
+    <label class="lg-l">Fruit<select id="pieFruit" class="lg-in">${fr.map(f=>`<option value="${f}"${f===jf?' selected':''}>${FRUITS[f].n} from your pantry · ${pan[f]}</option>`).join('')}<option value="store">Store-bought apples · $500</option></select></label>
+    <div class="xf-row"><button class="jig" id="pieGo">Into the oven</button><button class="ghost" id="pieBack">Back to the fair</button></div>`;
+  $('pieBack').onclick=hvFair;$('pieGo').onclick=()=>{const f=$('pieFish').value,fu=$('pieFruit').value;if(fu==='store'&&S.coins<500){showToast('You need $500 for the apples');return}if(!S.cooler[f]||(fu!=='store'&&!(pan[fu]>0)))return;PIE.fish=f;PIE.fruit=fu;hvPieBake()}}
+function hvPieBake(){const B=$('plotBody');$('plotTitle').textContent='In the oven';
+  B.innerHTML=`<p class="land-d" id="pieMsg">Watch the crust. Tap <b>Take it out</b> when the needle is in the golden zone.</p><canvas id="pieCv" width="300" height="90" style="width:100%;max-width:300px;display:block;margin:0 auto;border-radius:10px;background:#2a1a10"></canvas><div class="xf-row" style="justify-content:center;margin-top:10px"><button class="jig" id="pieOut">Take it out</button></div>`;
+  Object.assign(PIE,{t:0,on:true});$('pieOut').onclick=hvPieDone;cancelAnimationFrame(PIE.raf);let lt=performance.now();
+  const loop=now=>{if($('plotModal').hidden||!$('pieCv')||!PIE.on){PIE.on=false;return}PIE.t+=Math.min(.05,(now-lt)/1000);lt=now;const c=$('pieCv').getContext('2d'),v=hvPieV();
+    c.clearRect(0,0,300,90);const g=c.createLinearGradient(20,0,280,0);g.addColorStop(0,'#f4e2b0');g.addColorStop(.42,'#e8b060');g.addColorStop(.5,'#ffd05a');g.addColorStop(.58,'#c87830');g.addColorStop(1,'#3a1a08');c.fillStyle=g;c.fillRect(20,30,260,22);
+    c.strokeStyle='#fff';c.lineWidth=2;c.strokeRect(20+260*.44,28,260*.12,26);c.fillStyle='#fff';c.fillRect(20+260*v-2,22,4,38);c.font='700 11px Figtree, sans-serif';c.fillStyle='#e8d2b8';c.fillText('pale',20,76);c.textAlign='right';c.fillText('burnt',280,76);c.textAlign='center';c.fillText('golden',150,76);c.textAlign='left';
+    PIE.raf=requestAnimationFrame(loop)};PIE.raf=requestAnimationFrame(loop)}
+const hvPieV=()=>{const t=PIE.t*.32;return Math.min(1,t<1?t:1)};
+function hvPieDone(){if(!PIE.on)return;PIE.on=false;const h=HV(),v=hvPieV(),f=FI(PIE.fish),jf=hvJudgeFruit(),c=S.cooler[PIE.fish];if(!c||!f)return hvFair();
+  const per=c.val/c.n;c.n-=1;c.val=Math.max(0,c.val-per);if(c.n<=0)delete S.cooler[PIE.fish];coolDirty=true;if(PIE.fruit==='store')S.coins-=500;else pantry()[PIE.fruit]=Math.max(0,(pantry()[PIE.fruit]|0)-1);
+  const fishP={C:10,U:16,R:24,L:32,M:40}[f.r]||10,fruitP=PIE.fruit==='store'?5:PIE.fruit===jf?25:12,bake=Math.round(Math.max(0,35-Math.abs(v-.5)*140)),mood=Math.round(Math.random()*10-5),score=Math.max(1,Math.min(100,fishP+fruitP+bake+mood));
+  const rib=score>=75?'b':score>=55?'r':'w',rate=Math.max(40,estRate()),cash=Math.round(rate*{b:30,r:15,w:5}[rib]/10)*10,fn=PIE.fruit==='store'?'apple':PIE.fruit,name=`${FRUITS[fn].one.toLowerCase()} and ${f.n.toLowerCase()} pie`;
+  S.coins+=cash;h.rib=h.rib||{b:0,r:0,w:0};h.rib[rib]++;h.pie={d:todayKey(),score,rib,n:name};
+  if(rib==='b'&&h.rib.b>=3&&!h.baker){h.baker=1;S.trophies.unshift({name:'Blue Ribbon Baker 2026',water:'pond',type:'species',score:'3 blue ribbons',day:S.day});setTimeout(()=>celebrate({lbl:'Trophy!',r:'L',name:'Blue Ribbon Baker 2026',sub:'Three blue ribbons at the Harvest Fair',icon:svgI('leaf','#4a8ae8')}),900)}
+  renderCooler();save();sfx(rib==='b'?'fanfare':'coin');$('plotTitle').textContent='The judges’ verdict';
+  const B=$('plotBody'),bakeTxt=bake>=30?'Perfectly golden.':v<.5?'A little pale.':'A touch dark around the edges.',col={b:'#4a8ae8',r:'#e0403a',w:'#e8e8e8'}[rib];
+  B.innerHTML=`<div class="hvf-res"><span class="hvf-rib" style="--rc:${col}">${{b:'1st',r:'2nd',w:'3rd'}[rib]}</span><div><b>${{b:'Blue ribbon!',r:'Red ribbon',w:'White ribbon'}[rib]}</b><p>Your ${esc(name)}: ${bakeTxt} ${PIE.fruit===jf?'The judges loved the fruit. ':''}${score} points.</p><p>+$${money(cash)} prize money</p></div></div><div class="xf-row" style="justify-content:center"><button class="ghost" id="pieBack">Back to the fair</button></div>`;$('pieBack').onclick=hvFair}
 function fountCost(){return Math.max(100,Math.round(Math.max(60,S.rate||0)/100)*100)}
 function fountToss(){const st=townDay(),cost=fountCost();if(st.wish){TOWN.bub={s:'Already made a wish today 🤞',t:0};showToast('One wish a day. The fountain needs time to think.','Wishing fountain');return}
   if(S.coins<cost){showToast(`You need $${money(cost)} to toss in`,'Wishing fountain');return}S.coins-=cost;st.wish=1;TOWN.coin={t:0,x:TOWN.x,y:TOWN.y-60};sfx('coin');save();
@@ -6308,6 +6399,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:135,n:'Harvest Fair',items:['During the Harvest Festival (November 2 to 30), Lantern Harbor’s main street is decked out with string lights, hay bales and pumpkins.','A Harvest Fair stall opens in front of the Fish Market. Tap it to play.','Apple bobbing: 20 seconds to grab as many apples as you can, tapping them when they bob up out of the water. Every apple is worth 6 prize tickets for the arcade.','Pie contest: once a day, bake a pie from a fish and a fruit and pull it out of the oven at the right moment. The judges pick a favorite fruit each day. Win a blue, red or white ribbon and prize money. Three blue ribbons earn the Blue Ribbon Baker 2026 trophy.']},
  {v:134,n:'Pet in the boat',items:['Bug fix: your pet now sits down inside the boat with you instead of perched on top of the side.']},
  {v:133,n:'Home on the map',items:['The Map now has a Home pin on your cabin and a Home card in the list, so you can head home from the same place you travel to everywhere else. It works just like the Return home button.']},
  {v:132,n:'Safer cloud saves',items:['Bug fix: switching devices could replace a big game with a smaller one when you tapped “Keep this game”. Now you see both games side by side (fish, species, money and when each was played), the one with more progress is highlighted, and keeping the smaller game takes a second tap.','Your cloud save can no longer be replaced by a game with far less progress unless you confirm it, even from an older copy of the game left open somewhere.','New: Earlier saves. Your cloud keeps your last few saves plus your biggest one. Find them under Your game on the title screen and restore one with two taps if a game ever gets replaced by mistake.']},
@@ -10288,11 +10380,13 @@ function renderHV(){const b=$('hvBody');if(!b)return;const h=HV(),m=mpS(),B=MPV.
     `<ul class="hw-rw">${HVB_T.map(([fr,t,d],i)=>{const hit=goal&&tot>=Math.ceil(goal*fr);return `<li class="${hit?'got':''}"><span>${hit?'✓':Math.round(fr*100)+'%'}</span><div><b>${t}</b><small>${d}${h.tiers[i]?' · yours':hit&&(h.pts||0)<HVB_MIN?' · give a little to claim it':''}</small></div></li>`}).join('')}</ul></div>`;
   if(on&&m.id){const ids=coolerIds().filter(k=>!S.locked[k]).sort((a,b)=>hvPts(FI(b))-hvPts(FI(a)));let allN=0,allP=0;for(const k of ids){allN+=S.cooler[k].n;allP+=S.cooler[k].n*hvPts(FI(k))}
     html+=`<div class="hw-card"><b>Give fish</b>${ids.length?`<p>Fish you give leave your cooler and don’t sell. Locked fish stay put.</p><button class="hv-btn hv-main" id="hvAll">Give all ${allN.toLocaleString()} fish · ${allP.toLocaleString()} points</button><ul class="hv-give">${ids.slice(0,30).map(k=>{const c=S.cooler[k],f=FI(k);return `<li>${fishSvg(f.col||RCOL[f.r])}<div><b class="rar-${f.r}">${f.n}</b><small>×${c.n.toLocaleString()} · ${hvPts(f)} pt${hvPts(f)>1?'s':''} each</small></div><button data-hvg="${k}" data-n="1">Give 1</button><button data-hvg="${k}" data-n="${c.n}">All ${c.n.toLocaleString()}</button></li>`}).join('')}</ul>`:'<p>Your cooler is empty. Go catch something!</p>'}</div>`}
+  if(on)html+=`<div class="hw-card"><b>The Harvest Fair</b><p>Lantern Harbor’s main street is decked out for the festival. Visit the fair stall for apple bobbing and the daily pie contest.</p><button class="hv-btn" id="hvTown">Go to town</button></div>`;
   if(B&&B.top&&B.top.length)html+=`<div class="hw-card"><b>Top helpers</b><ol class="hw-board">${B.top.map((x,i)=>`<li class="${x.me?'me':''}"><span>${i+1}</span><b>${esc(x.name)}</b><em>${(+x.w).toLocaleString()} pts</em></li>`).join('')}</ol></div>`;
   html+=`<div class="hw-card"><b>Festival fish</b><p>${on?'Only biting until November 30.':'Gone until next fall.'}</p><ul class="hw-fish">${EVFISH.filter(f=>f.ev===HV_ID).map(f=>{const w=(h.fish&&h.fish[f.id])||(S.log[f.id]&&S.log[f.id].big);return `<li>${fishSvg(f.col)}<div><b class="rar-${f.r}">${w?f.n:'???'}</b><small>${W(f.at).n} · ${f.t.map(x=>PH[x]).join(', ')}${w?` · best ${(+w).toFixed(2)} lb`:''}</small></div></li>`}).join('')}</ul></div>`;
   html+=`<div class="hw-card"><b>Costume</b><div class="hw-cos">${[['','None'],['flannel','Flannel & knit hat']].map(([k,n])=>`<button data-hvw="${k}" aria-pressed="${(hwWear()||'')===k}" ${k&&!h.flannel?'disabled':''}>${n}</button>`).join('')}</div></div>`;
   b.innerHTML=html;
   b.querySelectorAll('[data-hvg]').forEach(x=>x.onclick=()=>hvbGive(x.dataset.hvg,+x.dataset.n));const ga=$('hvAll');if(ga)ga.onclick=()=>{if(!ga.dataset.arm){ga.dataset.arm=1;ga.textContent='Tap again to give them all';return}hvbGiveAll()};
+  {const tb=$('hvTown');if(tb)tb.onclick=()=>{closePhone();openTown()}}
   b.querySelectorAll('[data-hvw]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.hvw||null;sfx('click');save();renderHV()})}
 function hwLogSection(p){const any=EVFISH.filter(f=>f.ev===HW_ID).some(f=>S.log[f.id]);if(!hwOn()&&!any)return;const ph=phaseOf(S.min);
   const h=document.createElement('div');h.className='sec-h hw-sec';h.innerHTML=`<h3>🎃 Halloween 2026</h3><small>${hwOn()?`Limited time · ${hwDaysLeft()} day${hwDaysLeft()===1?'':'s'} left`:'Event over'}</small>`;p.append(h);
