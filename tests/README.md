@@ -69,6 +69,8 @@ Run the whole suite before every push.
 - Save safety: a much smaller game can't replace a cloud save without confirming, earlier saves are kept and can be restored, and the owner can make a restore code
 - Harvest Fair: the festival stall in town, apple bobbing tickets and the once-a-day pie contest
 - Town jobs and the Fish Market: Notice Board jobs pay and build reputation, the market pays double for wanted fish up to a daily cap
+- Town projects: the bandstand and cannery rebuilds, builder trophies, the evening concert and canning fish
+- Phone controls: the thumbstick walks, the action button enters places, Go to walks you there, and it turns off in Settings
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

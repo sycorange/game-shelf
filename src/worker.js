@@ -259,6 +259,24 @@ async function syncExtras(db,me,b,now,wk){const out={};
     if(n.results.length){out.mnotes=n.results;await db.prepare('UPDATE mnote SET seen=1 WHERE pid=? AND id<=?').bind(me.id,n.results[n.results.length-1].id).run()}}catch(e){}
   return out}
 async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.waitUntil(f());else return f()};
+  // Town projects: the whole lake rebuilds the bandstand, then the old cannery. Points: $1,000 = 1, materials by rarity.
+  if(p==='tp'){const PJ=['band','cannery'],state={};
+    const goalOf=async k=>{let g=await db.prepare('SELECT v FROM cfg WHERE k=?').bind('tp:'+k+':goal').first();
+      if(!g){const n=await db.prepare('SELECT COUNT(*) AS c FROM players WHERE seen>?').bind(now-7*864e5).first();const goal=Math.max(k==='band'?10000:15000,Math.round((n.c|0)*(k==='band'?600:900)/500)*500);
+        await db.prepare('INSERT OR IGNORE INTO cfg(k,v) VALUES(?,?)').bind('tp:'+k+':goal',String(goal)).run();g=await db.prepare('SELECT v FROM cfg WHERE k=?').bind('tp:'+k+':goal').first()}return +g.v};
+    const doneOf=async k=>{const r=await db.prepare('SELECT v FROM cfg WHERE k=?').bind('tp:'+k+':done').first();return r?+r.v:0};
+    let cur=null;for(const k of PJ){const dn=await doneOf(k);state[k]={done:dn};if(!dn&&!cur)cur=k}
+    const give=b.give&&typeof b.give==='object'?b.give:null;
+    if(give&&give.p===cur){const pts=Math.min(5000,Math.max(0,Math.floor(+give.pts||0)));
+      if(pts>0)await db.batch([db.prepare('INSERT INTO evbest(ev,pid,name,w,ts) VALUES(?,?,?,?,?) ON CONFLICT(ev,pid) DO UPDATE SET w=evbest.w+excluded.w,name=excluded.name,ts=excluded.ts').bind('tp:'+cur,me.id,me.name,pts,now),db.prepare('DELETE FROM kvc WHERE k=?').bind('tp:tot:'+cur)])}
+    for(const k of PJ){if(state[k].done||k!==cur){if(state[k].done)state[k].goal=await goalOf(k);continue}
+      const goal=await goalOf(k),[tot,top]=await Promise.all([cached(db,'tp:tot:'+k,MIN,async()=>await db.prepare('SELECT COALESCE(SUM(w),0) AS s,COUNT(*) AS n FROM evbest WHERE ev=?').bind('tp:'+k).first()),
+        cached(db,'tp:top:'+k,2*MIN,async()=>({results:(await db.prepare('SELECT e.pid,e.name,e.w,COALESCE(p.pub,1) AS pub FROM evbest e LEFT JOIN players p ON p.id=e.pid WHERE e.ev=? ORDER BY e.w DESC,e.ts ASC LIMIT 5').bind('tp:'+k).all()).results}))]);
+      let done=0;if((+tot.s||0)>=goal){await db.prepare('INSERT OR IGNORE INTO cfg(k,v) VALUES(?,?)').bind('tp:'+k+':done',String(now)).run();done=await doneOf(k)}
+      Object.assign(state[k],{goal,total:Math.round(+tot.s||0),n:tot.n|0,done,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:Math.round(x.w),me:x.pid===me.id}))})}
+    for(const k of PJ){const m=await db.prepare('SELECT w FROM evbest WHERE ev=? AND pid=?').bind('tp:'+k,me.id).first();state[k].mine=Math.round(m?m.w:0)}
+    if(state.band.done&&!state.cannery.done&&cur!=='cannery')cur='cannery';
+    return json({cur:state.band.done?(state.cannery.done?null:'cannery'):'band',...state})}
   if(p==='guest/sign'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);
     const t=await db.prepare('SELECT id FROM players WHERE id=?').bind(to).first();if(!t)return json({error:'no-player'},404);
     const r=await db.prepare('INSERT OR IGNORE INTO guest(to_pid,from_pid,from_name,st,note,day,ts) VALUES(?,?,?,?,?,?,?)').bind(to,me.id,me.name,Math.max(0,Math.min(11,b.st|0)),clean(b.note,80),dayKey(now),now).run();
@@ -530,7 +548,7 @@ export class YardRoom{
     const reqs=town?((await this.ctx.storage.get('reqs'))||[]):undefined;server.send(JSON.stringify({t:'hello',me:me.cid,peers:this.socks(server).map(w=>this.att(w)).filter(a=>a&&a.pid!==pid),reqs}));
     this.bcast({t:'join',p:me},server);await this.count();return new Response(null,{status:101,webSocket:client})}
   async webSocketMessage(ws,msg){if(typeof msg!=='string'||msg.length>500)return;let o;try{o=JSON.parse(msg)}catch(e){return}const a=this.att(ws);if(!a)return;
-    if(o.t==='mv'){const now=Date.now();if(a.lt&&now-a.lt<120&&!(a.town&&String(o.z||'')!==(a.z||'')))return;a.lt=now;a.x=a.town?Math.max(0,Math.min(2600,+o.x||0)):Math.max(-830,Math.min(400,+o.x||0));a.y=a.town?Math.max(380,Math.min(490,+o.y||0)):Math.max(230,Math.min(400,+o.y||0));a.f=o.f<0?-1:1;if(a.town)a.z=/^[a-z]{0,10}$/.test(String(o.z||''))?String(o.z||''):'';ws.serializeAttachment(a);const mv={t:'mv',cid:a.cid,x:a.x,y:a.y,f:a.f,m:o.m?1:0};if(a.town)mv.z=a.z;this.bcast(mv,ws)}
+    if(o.t==='mv'){const now=Date.now();if(a.lt&&now-a.lt<120&&!(a.town&&String(o.z||'')!==(a.z||'')))return;a.lt=now;a.x=a.town?Math.max(0,Math.min(2900,+o.x||0)):Math.max(-830,Math.min(400,+o.x||0));a.y=a.town?Math.max(380,Math.min(490,+o.y||0)):Math.max(230,Math.min(400,+o.y||0));a.f=o.f<0?-1:1;if(a.town)a.z=/^[a-z]{0,10}$/.test(String(o.z||''))?String(o.z||''):'';ws.serializeAttachment(a);const mv={t:'mv',cid:a.cid,x:a.x,y:a.y,f:a.f,m:o.m?1:0};if(a.town)mv.z=a.z;this.bcast(mv,ws)}
     else if(o.t==='req'&&a.town){const now=Date.now();if(a.rq&&now-a.rq<55000)return;const i=o.i|0,j=o.j|0;if(i<0||i>=12||j<0||j>=10)return;a.rq=now;ws.serializeAttachment(a);let toName='';if(o.to){const t=this.socks().map(x=>this.att(x)).find(x=>x&&x.cid===String(o.to));if(t)toName=t.name}
       const r={t:'req',name:a.name,toName,i,j,ts:now};const L=((await this.ctx.storage.get('reqs'))||[]).concat([r]).slice(-5);await this.ctx.storage.put('reqs',L);this.bcast(r)}
     else if(o.t==='emo'){const e=o.e|0;if(e>=0&&e<12)this.bcast({t:'emo',cid:a.cid,e},ws)}

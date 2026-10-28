@@ -183,6 +183,15 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .hv-give{list-style:none;margin:0;padding:0;display:grid;gap:6px}.hv-give li{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:6px;align-items:center}.hv-give svg{width:40px;height:20px}.hv-give small{display:block;color:#d8b898;font-size:.74rem}
 .hv-give button,.hv-btn{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:.76rem;cursor:pointer;white-space:nowrap}.hv-btn.hv-main{background:#e8823a;border-color:#e8823a;color:#2a1206;font-weight:800;padding:8px 14px}.hv-give button:disabled,.hv-btn:disabled{opacity:.45;cursor:default}
 .sec-h.hv-sec h3{color:#e8823a}
+.joy{position:fixed;left:14px;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:112px;height:112px;border-radius:50%;background:rgba(15,32,38,.55);border:2px solid rgba(255,255,255,.22);z-index:16;touch-action:none;display:grid;place-items:center;backdrop-filter:blur(2px)}
+.joy[hidden]{display:none}.joy-k{width:48px;height:48px;border-radius:50%;background:rgba(237,242,234,.85);box-shadow:0 2px 8px rgba(0,0,0,.4);pointer-events:none;transition:transform .08s}.joy.on .joy-k{transition:none;background:#ffd05a}
+.actb{position:fixed;right:14px;bottom:calc(110px + env(safe-area-inset-bottom,0px));z-index:16;max-width:min(220px,48vw);min-height:52px;padding:8px 16px;border-radius:999px;border:0;background:var(--buoy);color:var(--buoy-ink);font-weight:800;font-size:.92rem;box-shadow:0 4px 14px rgba(0,0,0,.4);line-height:1.15}
+.actb[hidden]{display:none}
+@media (min-width:701px){.joy{bottom:24px;left:24px}.actb{bottom:30px;right:400px}}
+.go-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}.go-list button{min-height:44px}
+.tp-prog{display:grid;gap:6px;margin:6px 0}.tp-prog small{color:var(--muted)}.tp-done{padding:10px 12px;border-radius:12px;background:rgba(188,208,107,.12);border:1px solid var(--reed);color:var(--reed);font-weight:700;font-size:.9rem;margin-bottom:8px}
+.tp-sec{display:grid;gap:6px;margin-top:10px}.tp-sec>b{font-size:.95rem}.tp-mats{list-style:none;margin:0;padding:0;display:grid;gap:6px}.tp-mats li{display:grid;grid-template-columns:32px minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:6px 8px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.tp-mats svg{width:30px;height:24px}.tp-mats small{display:block;color:var(--muted);font-size:.76rem}.tp-mats button{padding:4px 10px;font-size:.78rem;white-space:nowrap}
+.tp-top{color:var(--fg)}
 .tq-rep{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);margin-bottom:10px}.tq-rep b{font-size:1.05rem;color:var(--gold)}.tq-rep small{color:var(--muted);font-size:.8rem}.tq-rep small b{font-size:inherit}.tq-rep>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .tq-bar i{background:linear-gradient(90deg,#c8a868,#ffd05a)!important}
 .tq-list{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:8px}.tq-list li{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 12px 10px 14px;border-radius:6px;background:#f4ecd8;color:#2a2018;transform:rotate(-.4deg)}.tq-list li:nth-child(2n){transform:rotate(.5deg)}
@@ -1641,6 +1650,7 @@ body:not([data-mt="catch"]) .main .tabs{display:none}
   </div>
 </div>
 
+<div class="joy" id="joy" hidden aria-label="Thumbstick: drag to walk"><div class="joy-k"></div></div><button class="actb" id="actBtn" hidden></button>
 <div class="ach-wrap" id="achWrap" aria-live="polite"></div>
 <div class="invcard" id="invCard" hidden role="status"></div>
 <div class="newver" id="newVer" role="status" hidden><span class="nv-ic" aria-hidden="true">✨</span><div><b id="nvT">A new update is ready</b><small>Refresh to get it. Your game is saved first.</small></div><button class="jig" id="nvGo">Refresh</button><button class="ghost" id="nvNo" aria-label="Remind me later">Later</button></div>
@@ -4474,6 +4484,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   const ver=UPDATES.reduce((m,u)=>Math.max(m,u.v),0);
   b.innerHTML=`
   <div><h4>Appearance</h4><div class="grp">
+    ${row('Thumbstick on phones','Walk in town and around houses with a thumbstick, plus a button for whatever’s nearby',sw('joy',st.joy!==false,'Thumbstick on phones'))}
     ${row('Hide the phone','Tucks it off the screen. New messages still show a red badge',sw('phHide',!!st.phHide,'Hide the phone'))}
     ${row('Next goals card','Suggestions for what to do next, under the scene',sw('goals',st.goals!==false,'Next goals card'))}
     ${row('Dark mode',st.dark==='auto'?'Auto: follows your device':'Dark backgrounds for the phone’s apps',seg('dark',[['off','Off'],['on','On'],['auto','Auto']]))}
@@ -5092,8 +5103,7 @@ let HITS=[];
 function scenePt(e){const r=cv.getBoundingClientRect(),px=(e.clientX-r.left)/r.width*cv.width,py=(e.clientY-r.top)/r.height*cv.height,x=(px-BASE.ox)/BASE.s,y=(py-BASE.oy)/BASE.s;return [(x-CAMT.ox)/CAMT.z,(y-CAMT.oy)/CAMT.z]}
 function hitAt(x,y){for(let i=HITS.length-1;i>=0;i--){const h=HITS[i];if(x>=h.x&&x<=h.x+h.w&&y>=h.y&&y<=h.y+h.h)return h}return null}
 function hideTip(){$('stip').hidden=true}
-function showTip(h,e){
-  const tip=$('stip');let html='';
+function tipHTML(h){let html='';
   if(h.kind==='tank'){const tf=topFish();html=`<b>Record tank</b>`+(tf.length?tf.map(o=>`<div class="row">${fishSvg(RCOL[o.f.r])}<div><b class="rar-${o.f.r}">${o.f.n}</b><br><small>${o.w.toFixed(2)} lb · ${W(o.f.at).n}</small></div></div>`).join(''):'<small>Catch some fish and your three biggest records will swim here.</small>')}
   else if(h.kind==='trophy'){const t=h.data;html=`<div class="tro">${trophySvg(t)}<div><b>${t.name}</b><br><small>Won with ${t.score} · Day ${t.day}</small></div></div>`}
   else if(h.kind==='coll'){const c=h.data;html=`<b class="rar-${c.r}">${c.n}</b><small>${RAR[c.r]} · tap to inspect</small>`}
@@ -5123,8 +5133,10 @@ function showTip(h,e){
   if(h.kind==='gate')html=`<b>Portal ring</b><small>${REALMS.filter(r=>gateOwned(r.id)).map(r=>r.gate).join(' · ')} · tap to travel</small>`;if(h.kind==='updraft')html='<b>Updraft!</b><small>Tap to scoop up the whole school</small>';
   if(h.kind==='peer')html=h.data&&h.data.q4?'<b>…you?</b><small>Tap them</small>':peerTip(h.data);if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
   if(h.kind==='door'&&TOT.inside)html='<b>Trick or treat!</b><small>Tap the door to hand out candy</small>';
-  if(TOWN.on){html=townTip(h);if(!html){tip.hidden=true;return}}
+  if(TOWN.on)html=townTip(h)||'';
   if(h.kind==='wlight')html=`<b>Light bar</b><small>Tap to turn the reds and blues ${WDB().lit?'off':'on'}</small>`;
+  return html}
+function showTip(h,e){const tip=$('stip'),html=tipHTML(h);if(!html){tip.hidden=true;return}
   tip.innerHTML=html;tip.hidden=false;
   const r=$('scene').getBoundingClientRect();let x=e.clientX-r.left+14,y=e.clientY-r.top+14;
   const w=tip.offsetWidth,hh=tip.offsetHeight;if(x+w>r.width-8)x=Math.max(8,e.clientX-r.left-w-14);if(y+hh>r.height-8)y=Math.max(8,r.height-hh-8);if(h.kind[0]==='y'&&r.width<560){x=Math.max(6,(r.width-w)/2);y=6}
@@ -5715,8 +5727,8 @@ function renderVisitBar(){if(YG.on){$('visitBar').hidden=true;return}if(TOWN.on)
   $('visitTxt').textContent='';$('visitTxt').innerHTML=txt;$('visitBtns').innerHTML=btns;bar.hidden=false;
   const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('vbEnter',enterFriend);on('vbLeave',leaveFriendDoor);on('vbSign',openGuestbook);on('vbLike',likeYard);if(sl.ph==='door'&&!VT.museum&&!VT.arcade)vtLikeState();on('vbOut',exitFriend);on('vbPick',openPicker);on('vbChat',houseChatUI);on('vbGuests',houseGuestsUI);if(sl.ph==='door')vbFinish(houseHere()?'guest':'friend')}
 // ==TOWN== Lantern Harbor: a walkable town square that ties the game's places together, with everyone in town shown live.
-// World space is 2600 × 500 (street at the bottom). Built from a list so new buildings slot into the empty lots later.
-const TW_W=2600,TW_Y0=404,TW_Y1=476;
+// World space is 2900 × 500 (street at the bottom). Built from a list so new buildings slot into the empty lots later.
+const TW_W=2900,TW_Y0=404,TW_Y1=476;
 var TOWN={on:false,z:'',fade:0,x:170,y:440,tx:null,ty:null,face:1,mv:0,cam:0,ws:null,st:'off',peers:new Map(),me:null,room:1,lt:0,bub:null,after:null,sig:'',sent:0,px:null,py:null,retry:0};
 const TBLD=[
   {id:'ferry',x:150,w:180,kind:'soon',n:'Ferry Landing',sub:'The ferry is out of service. Someday it might take you somewhere new.'},
@@ -5730,6 +5742,7 @@ const TBLD=[
   {id:'bar',nc:'#ff6ae0',flick:1,x:1930,w:200,n:'Murphy’s',sub:'Darts, the LLBA game and a seat at the bar',inside:1,col:'#5a3a2a',roof:'#2a1a12',sign:'Murphy’s'},
   {id:'news',nc:'#7aff9a',x:2110,w:130,n:'Newsstand',sub:'Today’s Lantern Ledger, with a fishing tip and a boost',col:'#2e6a3a',roof:'#1a3a20',sign:'NEWS',kiosk:1,open:()=>ledgerUI()},
   {id:'arcade',x:2320,w:230,n:'Lantern Pier Arcade',sub:'Games, tickets and prizes',col:'#4a2a7a',roof:'#2a1640',sign:'ARCADE',marquee:1,open:()=>openArcade()},
+  {id:'green',x:2760,w:250,kind:'green',n:'Harbor Green',sub:'A grassy lot at the end of the street. The Harvest Fair sets up here every November.'},
   {id:'cannery',x:2520,w:150,kind:'soon',n:'Old Cannery',sub:'Boarded up since 1961. The town wants to bring it back.'}];
 const TLAMP=[270,510,720,950,1300,1590,1810,2030,2180,2430];
 const TNPC=[{n:'Dot',ov:'windy',home:830,x:860,y:450,lines:['Mail’s running late. The gulls got into the sorting room again.','Somebody keeps mailing fish to Old Pete. Fresh ones, at least.','Twelve laps of this street a day. Keeps me young.','Marge put out something shiny on her counter today.']},
@@ -5737,7 +5750,7 @@ const TNPC=[{n:'Dot',ov:'windy',home:830,x:860,y:450,lines:['Mail’s running la
   {n:'Harbormaster Hollis',ov:'fog',home:1150,x:1120,y:446,lines:['That bandstand used to fill up every Saturday.','The cannery could run again, with enough hands.','Old Pete says the ferry just needs a new engine. And a hull.','Someday this square will have a festival again.']}];
 function townOK(){return !TRV.on&&!isRealm(S.water)&&!VISIT&&!VT&&!titleOn}
 function townCan(){return townOK()&&!YG.on&&(!S.sleep||['awake','yard'].includes(S.sleep.ph))}
-function openTown(){if(TOWN.on)return;if(!townCan()){showToast(isRealm(S.water)?'Come back to Lantern Lake first':TRV.on?'Wait until the boat stops':VT||VISIT?'You’re already out visiting':'Wait until you’re up and about');return}$('tripModal').hidden=true;
+function openTown(){if(TOWN.on)return;setTimeout(()=>tpLoad().catch(()=>{}),400);if(!townCan()){showToast(isRealm(S.water)?'Come back to Lantern Lake first':TRV.on?'Wait until the boat stops':VT||VISIT?'You’re already out visiting':'Wait until you’re up and about');return}$('tripModal').hidden=true;
   try{yedExit();cedExit()}catch(e){}closePhone();hideTip();Object.assign(TOWN,{on:true,z:'',fade:1,cam:0,x:170,y:440,tx:null,ty:null,face:1,mv:0,bub:null,after:null,px:null,py:null});
   for(const n of TNPC){n.x=n.home+(Math.random()-.5)*80;n.y=440+Math.random()*24;n.tx=null;n.bub=null}
   $('scene').classList.add('town');sfx('whoosh');townConnect();renderVisitBar(true);if(!S.townSeen){S.townSeen=1;setTimeout(()=>showToast('Welcome to Lantern Harbor! Tap a door to go in.','Town'),600)}save()}
@@ -5771,13 +5784,14 @@ function townTo(x,y,after){const B=townBounds();TOWN.tx=Math.max(B[0],Math.min(B
 function townClick(sx,sy,e){const h=hitAt(sx,sy),V=townView(),wx=sx/V.k+TOWN.cam,wy=sy/V.k+V.cy;$('hchat').hidden=true;
   if(h&&h.kind==='tin'){hideTip();townInClick(h.data,e,h);return}
   if(h&&h.kind==='tfount'){hideTip();townTo(FOUNT_X-56,TW_Y0+12,()=>{TOWN.face=1;fountToss()});return}
+  if(h&&(h.kind==='tband'||h.kind==='tcan')){hideTip();const k=h.kind==='tband'?'band':'cannery';townTo(h.kind==='tband'?1030:2520,TW_Y0+14,()=>{TOWN.face=1;sfx('click');if(k==='cannery'&&tpDone('cannery'))canneryUI();else tpPanel(k)});return}
   if(h&&h.kind==='thv'){hideTip();townTo(HVF_X,TW_Y0+14,()=>{TOWN.face=1;sfx('click');hvFair()});return}
   if(h&&h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);if(!b)return;hideTip();if(b.inside&&TROOMS[b.id])townTo(b.x,TW_Y0+6,()=>townEnter(b.id));else if(b.open)townTo(b.x,TW_Y0+6,()=>{sfx('click');b.open()});else{townTo(b.x,TW_Y0+14);showTip(h,e)}return}
   if(h&&h.kind==='tnpc'){const n=TNPC[h.data];townTo(n.x+(TOWN.x<n.x?-40:40),n.y);n.bub={s:pick(n.lines),t:0};n.tx=null;n.wait=5;sfx('pop');return}
   if(h&&h.kind==='tpeer'){const p=TOWN.peers.get(h.data);if(p)showToast(p.name,'In town');return}
   hideTip();townTo(wx,wy)}
 function townTick(dt){if(!TOWN.on)return;if(TOWN.ws&&TOWN.ws.readyState===1&&performance.now()-(TOWN.ka||0)>25000){TOWN.ka=performance.now();try{TOWN.ws.send('ping')}catch(e){}}if(!townOK()){closeTown();return}
-  const K=WALK.keys,kx=(K.right?1:0)-(K.left?1:0),ky=(K.down?1:0)-(K.up?1:0),sp=150;let moving=false;
+  const K=WALK.keys,J=joyVec(),kx=(K.right?1:0)-(K.left?1:0)||J[0],ky=(K.down?1:0)-(K.up?1:0)||J[1],sp=150*(J[2]&&!(K.right||K.left||K.up||K.down)?J[2]:1);let moving=false;
   const BB=townBounds();if(kx||ky){const n=Math.hypot(kx,ky);TOWN.x=Math.max(BB[0],Math.min(BB[1],TOWN.x+kx/n*sp*dt));TOWN.y=Math.max(BB[2],Math.min(BB[3],TOWN.y+ky/n*sp*.6*dt));if(kx)TOWN.face=kx>0?1:-1;TOWN.tx=null;TOWN.after=null;moving=true}
   else if(TOWN.tx!=null){const dx=TOWN.tx-TOWN.x,dy=TOWN.ty-TOWN.y,dd=Math.hypot(dx,dy),st=sp*dt;if(dd<=st+.5){TOWN.x=TOWN.tx;TOWN.y=TOWN.ty;TOWN.tx=null;const a=TOWN.after;TOWN.after=null;if(a)setTimeout(a,0)}else{TOWN.x+=dx/dd*st;TOWN.y+=dy/dd*st;if(Math.abs(dx)>.5)TOWN.face=dx>0?1:-1;moving=true}}
   TOWN.mv=moving?Math.min(1,TOWN.mv+dt*6):Math.max(0,TOWN.mv-dt*6);
@@ -5797,14 +5811,21 @@ function townPerson(x,y,f,mv,T,d,ov,wear,g,s){const leg=Math.sin(T*11)*3.5*mv,bo
 function townTag(x,y,txt,col){ctx.font='bold 9px sans-serif';const w=ctx.measureText(txt).width+10;ctx.fillStyle=col||'rgba(10,22,28,.72)';rrect(x-w/2,y,w,13,6);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.fillText(txt,x,y+9.5);ctx.textAlign='left'}
 function townBubble(x,y,s,t){ctx.save();ctx.translate(x,y);ctx.scale(.85,.85);emoBubble(0,0,s,t);ctx.restore()}
 function drawTB(b,d,T,night,V){const L=b.x-b.w/2,base=TW_Y0,lit=night>.3,win=lit?'#ffd88a':rgb(mix([40,50,60],[150,190,210],d)),dim=c=>rgb(mix(hex(c).map(v=>v*.35),hex(c),d*.8+.2));
+  if(b.kind==='green'){const L=b.x-b.w/2,base=TW_Y0;ctx.fillStyle=dim('#5a8a4a');ctx.beginPath();ctx.moveTo(L,base);ctx.lineTo(L,base-26);ctx.quadraticCurveTo(b.x,base-40,L+b.w,base-24);ctx.lineTo(L+b.w,base);ctx.fill();ctx.fillStyle=dim('#4a7a3c');for(let i=0;i<14;i++)ctx.fillRect(L+8+i*17,base-24-((i*7)%5),2,6);
+    const tree=(x,s,c)=>{ctx.fillStyle=dim('#5a3a22');ctx.fillRect(x-3*s,base-60*s,6*s,40*s);ctx.fillStyle=dim(c);for(const [dx,dy,r] of [[0,-74,22],[-16,-60,16],[16,-62,17]]){ctx.beginPath();ctx.arc(x+dx*s,base+dy*s,r*s,0,7);ctx.fill()}};
+    const fall=hvOn();tree(L+28,1.1,fall?'#d8502e':'#3e7a3a');tree(L+b.w-24,1.25,fall?'#e8a03a':'#4a8a40');
+    if(!hvOn()){ctx.fillStyle=dim('#7a5a3a');ctx.fillRect(b.x-30,base-20,60,5);ctx.fillRect(b.x-26,base-15,4,12);ctx.fillRect(b.x+22,base-15,4,12);ctx.fillRect(b.x-30,base-32,60,4);
+      ctx.save();ctx.translate(b.x+70,base-40);ctx.fillStyle=dim('#5a3a22');ctx.fillRect(-2,0,4,40);ctx.fillStyle=dim('#e8d8a8');ctx.fillRect(-34,-14,68,18);ctx.fillStyle=dim('#3a2a14');ctx.font='bold 10px Georgia,serif';ctx.textAlign='center';ctx.fillText('HARBOR GREEN',0,-1);ctx.restore();ctx.textAlign='left'}
+    RH2(V,L,base-120,b.w,120,'tbld',b.id);return}
   if(b.kind==='soon'||b.kind==='square'){// boarded lots and the square: a fence, a sign, and room to grow
     if(b.stall){ctx.fillStyle=dim('#7a5a3a');ctx.fillRect(L+10,base-90,b.w-20,90);for(let i=0;i<6;i++){ctx.fillStyle=i%2?dim('#f4f0e8'):dim('#3a8ac8');ctx.fillRect(L+6+i*(b.w-12)/6,base-112,(b.w-12)/6,24)}ctx.fillStyle=dim('#5a3a22');ctx.fillRect(L+16,base-44,b.w-32,8);ctx.fillStyle=dim('#c8c0b0');for(let i=0;i<5;i++){ctx.beginPath();ctx.ellipse(L+30+i*24,base-48,8,3,0,0,7);ctx.fill()}}
     else if(b.id==='ferry'){ctx.fillStyle=dim('#6a4a30');ctx.fillRect(L,base-8,b.w,8);for(let i=0;i<4;i++)ctx.fillRect(L+10+i*50,base-8,6,40);ctx.fillStyle=dim('#e8e0d0');ctx.fillRect(L+30,base-150,90,60);ctx.fillStyle=dim('#5a3a22');ctx.fillRect(L+72,base-90,6,82);ctx.fillStyle=dim('#3a2a20');ctx.font='bold 11px Georgia,serif';ctx.textAlign='center';ctx.fillText('FERRY',L+75,base-128);ctx.fillStyle=dim('#c8281a');ctx.fillText('CLOSED',L+75,base-108);ctx.textAlign='left'}
-    else if(b.kind==='square'){ctx.fillStyle=dim('#8a8070');ctx.beginPath();ctx.ellipse(b.x-30,base-6,70,10,0,0,7);ctx.fill();ctx.fillStyle=dim('#6a5a48');for(let i=0;i<5;i++)ctx.fillRect(b.x-90+i*30,base-70,6,64);ctx.fillStyle=dim('#7a5a3a');ctx.fillRect(b.x-96,base-74,130,8);ctx.save();ctx.translate(b.x-30,base-56);ctx.rotate(-.08);ctx.fillStyle=dim('#c8a868');ctx.fillRect(-46,-12,92,24);ctx.fillStyle=dim('#3a2a14');ctx.font='bold 10px Georgia,serif';ctx.textAlign='center';ctx.fillText('BANDSTAND · COMING BACK',0,4);ctx.restore();ctx.textAlign='left';
+    else if(b.kind==='square'){if(tpDone('band'))bandDraw(b,dim,d,T,night);else{ctx.fillStyle=dim('#8a8070');ctx.beginPath();ctx.ellipse(b.x-30,base-6,70,10,0,0,7);ctx.fill();ctx.fillStyle=dim('#6a5a48');for(let i=0;i<5;i++)ctx.fillRect(b.x-90+i*30,base-70,6,64);ctx.fillStyle=dim('#7a5a3a');ctx.fillRect(b.x-96,base-74,130,8);ctx.save();ctx.translate(b.x-30,base-56);ctx.rotate(-.08);ctx.fillStyle=dim('#c8a868');ctx.fillRect(-46,-12,92,24);ctx.fillStyle=dim('#3a2a14');ctx.font='bold 10px Georgia,serif';ctx.textAlign='center';ctx.fillText(tpActive('band')?'BANDSTAND · HELP REBUILD':'BANDSTAND · COMING BACK',0,4);ctx.restore();ctx.textAlign='left'}
       // fountain
       ctx.fillStyle=dim('#9aa0a8');ctx.beginPath();ctx.ellipse(b.x+70,base-4,40,9,0,0,7);ctx.fill();ctx.fillStyle=dim('#5a8ab0');ctx.beginPath();ctx.ellipse(b.x+70,base-8,32,6,0,0,7);ctx.fill();ctx.fillStyle=dim('#b0b8c0');ctx.fillRect(b.x+66,base-40,8,32);ctx.strokeStyle=`rgba(200,230,255,${.6*(d*.6+.4)})`;ctx.lineWidth=1.5;for(let i=0;i<5;i++){const a=(i-2)*.5,q=(T*.8+i*.2)%1;ctx.beginPath();ctx.moveTo(b.x+70,base-42);ctx.quadraticCurveTo(b.x+70+a*30,base-60,b.x+70+a*36*q*1.4,base-42+q*30);ctx.stroke()}}
+    else if(b.id==='cannery'&&tpDone('cannery'))canneryDraw(b,dim,d,T,night);
     else{ctx.fillStyle=dim('#5a4a3a');ctx.fillRect(L+10,base-150,b.w-20,150);ctx.fillStyle=dim('#7a6a50');for(let i=0;i<6;i++){ctx.save();ctx.translate(L+20+i*((b.w-40)/5),base-80);ctx.rotate((i%2?.2:-.2));ctx.fillRect(-30,-4,60,8);ctx.restore()}ctx.fillStyle=dim('#3a2a20');ctx.fillRect(L,base-160,b.w,12);
-      ctx.save();ctx.translate(b.x,base-40);ctx.rotate(.06);ctx.fillStyle=dim('#e8d8a8');ctx.fillRect(-50,-12,100,24);ctx.fillStyle=dim('#8a2a1a');ctx.font='bold 10px Georgia,serif';ctx.textAlign='center';ctx.fillText('COMING SOON',0,4);ctx.restore();ctx.textAlign='left'}
+      ctx.save();ctx.translate(b.x,base-40);ctx.rotate(.06);ctx.fillStyle=dim('#e8d8a8');ctx.fillRect(-50,-12,100,24);ctx.fillStyle=dim('#8a2a1a');ctx.font='bold 10px Georgia,serif';ctx.textAlign='center';ctx.fillText(b.id==='cannery'&&tpActive('cannery')?'HELP REOPEN IT':'COMING SOON',0,4);ctx.restore();ctx.textAlign='left'}
     RH2(V,L,base-170,b.w,170,'tbld',b.id);return}
   if(b.kind==='board'){ctx.fillStyle=dim('#5a3a22');ctx.fillRect(b.x-26,base-80,4,80);ctx.fillRect(b.x+22,base-80,4,80);ctx.fillStyle=dim('#8a6a42');ctx.fillRect(b.x-32,base-100,64,46);ctx.fillStyle=dim('#f4ecd8');ctx.fillRect(b.x-24,base-94,22,16);ctx.fillRect(b.x+2,base-90,20,14);ctx.fillStyle=dim('#c8281a');ctx.beginPath();ctx.arc(b.x-13,base-93,1.6,0,7);ctx.arc(b.x+12,base-89,1.6,0,7);ctx.fill();RH2(V,b.x-34,base-102,68,102,'tbld',b.id);return}
   const H=b.cols?210:b.kiosk?178:270,top=base-H,nc=b.nc||'#ffd05a';
@@ -5853,19 +5874,20 @@ function drawTown(d,T,top,bot){const nw=performance.now(),dt=TOWN.lt?Math.min(.1
   if(cam<300){ctx.fillStyle=rgb(mix([8,16,28],[60,110,140],d));ctx.fillRect(-10,300,250,210);ctx.strokeStyle=`rgba(255,255,255,${.12+.1*d})`;ctx.lineWidth=1;for(let i=0;i<6;i++){const y=330+i*28,o=Math.sin(T+i)*10;ctx.beginPath();ctx.moveTo(10+o,y);ctx.lineTo(60+o,y);ctx.stroke()}
     ctx.fillStyle=rgb(mix([30,20,14],[120,86,52],d));ctx.fillRect(40,TW_Y0+30,200,10);ctx.save();ctx.translate(90,TW_Y0+60+Math.sin(T*1.4)*1.5);const P=PNT(),sk=P.eq&&SKIN_BY[P.eq];if(sk)drawPaint(ctx,-40,-10,80,Math.min(4,S.boat),d,T,sk);else{ctx.fillStyle=rgb(mix([40,30,24],[170,110,60],d));ctx.beginPath();ctx.moveTo(-40,-10);ctx.lineTo(40,-10);ctx.lineTo(28,4);ctx.lineTo(-30,4);ctx.fill()}ctx.restore()}
   // the far end: pier over the water
-  if(cam+V.VW>2380){ctx.fillStyle=rgb(mix([8,16,28],[60,110,140],d));ctx.fillRect(2600,300,200,210)}
+  if(cam+V.VW>2680){ctx.fillStyle=rgb(mix([8,16,28],[60,110,140],d));ctx.fillRect(2900,300,200,210)}
   // buildings (back to front), then street furniture
   const vis=TBLD.filter(b=>b.x+b.w/2+80>cam&&b.x-b.w/2-80<cam+V.VW);for(const b of vis)drawTB(b,d,T,night,V);if(hvOn())hvStreet(d,T,night,V,cam);
   for(const x of TLAMP){if(x<cam-40||x>cam+V.VW+40)continue;ctx.fillStyle=rgb(mix([20,20,24],[60,60,66],d));ctx.fillRect(x-2,TW_Y0-76,4,76);ctx.fillRect(x-8,TW_Y0-80,16,6);ctx.fillStyle=night>.2?'#ffe8a8':rgb(mix([60,60,50],[220,220,200],d));ctx.beginPath();ctx.arc(x,TW_Y0-70,5,0,7);ctx.fill();if(night>.2){ctx.globalCompositeOperation='lighter';glow(x,TW_Y0-70,60,.18*night,'255,210,140');glow(x,TW_Y0+30,80,.06*night,'255,210,140');ctx.globalCompositeOperation='source-over'}}
   RH2(V,FOUNT_X-46,TW_Y0-64,92,70,'tfount',0);
   for(const b of vis){if(!b.inside)continue;const n=[...TOWN.peers.values()].filter(p=>p.z===b.id).length;if(n)townTag(b.x,TW_Y0-128,`${n} inside`,'rgba(30,110,60,.9)')}
+  tpStreet(vis,d,T,night,V);
   if(vis.some(b=>b.id==='board')){const o=TQ().jobs.filter(j=>!j.done).length;if(o)townTag(1240,TW_Y0-114,`${o} job${o>1?'s':''}`,'rgba(170,60,30,.9)')}
   if(vis.some(b=>b.id==='market'))townTag(620,TW_Y0-126,'Wanted: '+marketWants().map(f=>f.n).join(', '),'rgba(30,80,120,.88)')}
   // people: you, your pet, other anglers and townsfolk, in depth order
   const A=[];const s0=2.05;
-  A.push({y:TOWN.y,fn:()=>townPerson(TOWN.x,TOWN.y,TOWN.face,TOWN.mv,T,d,undefined,undefined,undefined,s0)});
+  A.push({y:TOWN.y,fn:()=>{const dc=!here&&danceAt(TOWN.x,TOWN.mv);townPerson(TOWN.x,TOWN.y-(dc?Math.abs(Math.sin(T*6))*6:0),dc?(Math.sin(T*3)>0?1:-1):TOWN.face,TOWN.mv,T,d,undefined,undefined,undefined,s0)}});
   {const P=curPet();if(P){if(TOWN.px==null){TOWN.px=TOWN.x-30;TOWN.py=TOWN.y+4}const tx=TOWN.x-TOWN.face*34,ty=TOWN.y+4,dx=tx-TOWN.px,dy=ty-TOWN.py,dd=Math.hypot(dx,dy),m=dd>6;if(m){const st=Math.min(dd,(dd>120?260:120)*(1/60));TOWN.px+=dx/dd*st;TOWN.py+=dy/dd*st}A.push({y:TOWN.py,fn:()=>petDraw(ctx,P,TOWN.px,TOWN.py,dx>=0?1:-1,m?'walk':'sit',T,2.6,d)})}}
-  for(const p of TOWN.peers.values()){if(p.x==null||(p.z||'')!==here)continue;A.push({y:p.y,fn:()=>{townPerson(p.x,p.y,p.f||1,p.mv,T,d,'clear',p.wear,p.g,s0);if(p.pet&&PETS[p.pet.k]){const P2=petParse(p.pet);petDraw(ctx,P2,p.x-(p.f||1)*34,p.y+4,p.f||1,p.mv?'walk':'sit',T,2.6,d)}}})}
+  for(const p of TOWN.peers.values()){if(p.x==null||(p.z||'')!==here)continue;A.push({y:p.y,fn:()=>{const dc=!here&&danceAt(p.x,p.mv);townPerson(p.x,p.y-(dc?Math.abs(Math.sin(T*6+p.x))*6:0),dc?(Math.sin(T*3+p.x)>0?1:-1):(p.f||1),p.mv,T,d,'clear',p.wear,p.g,s0);if(p.pet&&PETS[p.pet.k]){const P2=petParse(p.pet);petDraw(ctx,P2,p.x-(p.f||1)*34,p.y+4,p.f||1,p.mv?'walk':'sit',T,2.6,d)}}})}
   if(!here)TNPC.forEach((n,i)=>A.push({y:n.y,fn:()=>townPerson(n.x,n.y,n.f||1,n.mv,T,d,n.ov,null,'m',s0)}));
   A.sort((a,b)=>a.y-b.y);for(const a of A)a.fn();
   // labels and bubbles on top
@@ -5887,9 +5909,9 @@ function drawTown(d,T,top,bot){const nw=performance.now(),dt=TOWN.lt?Math.min(.1
   ctx.restore();l7Ticker(V)}
 function townBar(){const bar=$('visitBar'),z=TOWN.z,n=z?[...TOWN.peers.values()].filter(p=>p.z===z).length:TOWN.peers.size,sig='town|'+z+TOWN.st+n+'|'+($('scene').clientWidth<560);if(bar.dataset.sig===sig&&!bar.hidden)return;bar.dataset.sig=sig;
   $('visitTxt').innerHTML=z?`🏘️ <b>${TROOMS[z].n}</b>${TOWN.st==='on'?` · ${n?`${n} other angler${n>1?'s':''} here`:'Nobody else in here right now'}`:''}`:TOWN.st==='on'?`🏘️ <b>Lantern Harbor</b> · ${n?`${n} other angler${n>1?'s':''} in town`:'Just you and the locals right now'}`:TOWN.st==='wait'?'🏘️ <b>Lantern Harbor</b> · Looking for other anglers…':'🏘️ <b>Lantern Harbor</b>';$('visitTxt').hidden=$('scene').clientWidth<560;
-  $('visitBtns').innerHTML=(TOWN.st==='on'?'<button class="jig ib" id="tbChat" title="Chat"><span>💬</span><small>Chat</small></button>':'')+(z?'<button class="ghost ib" id="tbOut" title="Back to the street"><span>🚪</span><small>Street</small></button>':'')+'<button class="ghost ib" id="tbLeave" title="Leave town"><span>⛵</span><small>Leave</small></button>';
-  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('tbChat',townChatUI);on('tbLeave',closeTown);on('tbOut',()=>townTo(TROOM_DOOR+20,TW_Y0+6,townExit));bar.classList.add('vb-y');bar.hidden=false}
-function townTip(h){if(h.kind==='thv'){const P=HV().pie;return `<b>Harvest Fair</b><small>Apple bobbing for prize tickets and the daily pie contest${P&&P.d===todayKey()?' · you’ve entered today':''}</small>`}if(h.kind==='tfount'){const st=townDay();return `<b>Wishing fountain</b><small>${st.wish?'You’ve made today’s wish.':`Toss in $${money(fountCost())} and make a wish. Once a day.`}</small>`}if(h.kind==='tin'){const R=TROOMS[TOWN.z];if(h.data==='keeper'&&R)return `<b>${R.keeper.n}</b><small>${{tackle:'Tap to see today’s stock',post:'Tap to send a parcel',station:'Tap to request a song'}[TOWN.z]||'Tap to say hi'}</small>`;const q=TIN_TIP[h.data];return q?`<b>${q[0]}</b><small>${q[1]}</small>`:''}if(h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);return b?`<b>${b.n}</b><small>${b.sub}${b.open||b.inside?' · tap to go in':''}</small>`:''}if(h.kind==='tnpc'){const n=TNPC[h.data];return `<b>${n.n}</b><small>Tap to say hi</small>`}if(h.kind==='tpeer'){const p=TOWN.peers.get(h.data);return p?`<b>${esc(p.name)}</b><small>In town</small>`:''}return ''}
+  $('visitBtns').innerHTML=(TOWN.st==='on'?'<button class="jig ib" id="tbChat" title="Chat"><span>💬</span><small>Chat</small></button>':'')+'<button class="ghost ib" id="tbGo" title="Go to a place in town"><span>📍</span><small>Go to</small></button>'+(z?'<button class="ghost ib" id="tbOut" title="Back to the street"><span>🚪</span><small>Street</small></button>':'')+'<button class="ghost ib" id="tbLeave" title="Leave town"><span>⛵</span><small>Leave</small></button>';
+  const on=(id,f)=>{const b=$(id);if(b)b.onclick=e=>{e.stopPropagation();f()}};on('tbChat',townChatUI);on('tbGo',townGoUI);on('tbLeave',closeTown);on('tbOut',()=>townTo(TROOM_DOOR+20,TW_Y0+6,townExit));bar.classList.add('vb-y');bar.hidden=false}
+function townTip(h){if(h.kind==='tband'||h.kind==='tcan'){const k=h.kind==='tband'?'band':'cannery',D=TPK[k];return tpDone(k)?`<b>${D.n2}</b><small>${D.done}</small>`:`<b>${D.n}</b><small>${tpActive(k)?'A lake-wide rebuild. Tap to chip in.':'Opens after the bandstand is rebuilt.'}</small>`}if(h.kind==='thv'){const P=HV().pie;return `<b>Harvest Fair</b><small>Apple bobbing for prize tickets and the daily pie contest${P&&P.d===todayKey()?' · you’ve entered today':''}</small>`}if(h.kind==='tfount'){const st=townDay();return `<b>Wishing fountain</b><small>${st.wish?'You’ve made today’s wish.':`Toss in $${money(fountCost())} and make a wish. Once a day.`}</small>`}if(h.kind==='tin'){const R=TROOMS[TOWN.z];if(h.data==='keeper'&&R)return `<b>${R.keeper.n}</b><small>${{tackle:'Tap to see today’s stock',post:'Tap to send a parcel',station:'Tap to request a song'}[TOWN.z]||'Tap to say hi'}</small>`;const q=TIN_TIP[h.data];return q?`<b>${q[0]}</b><small>${q[1]}</small>`:''}if(h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);return b?`<b>${b.n}</b><small>${b.sub}${b.open||b.inside?' · tap to go in':''}</small>`:''}if(h.kind==='tnpc'){const n=TNPC[h.data];return `<b>${n.n}</b><small>Tap to say hi</small>`}if(h.kind==='tpeer'){const p=TOWN.peers.get(h.data);return p?`<b>${esc(p.name)}</b><small>In town</small>`:''}return ''}
 
 // ==TOWN ROOMS== Walk-in interiors. Each room is 1000 wide with the same floor band as the street, so the server's
 // town room carries everyone: a player's zone (z) says which building they're in and you only see people in yours.
@@ -6049,7 +6071,7 @@ function drawRoomPost(d,T,V,top,bot){const R=TROOMS.post;roomShell(V,TOWN.cam,'#
 function seedRng(s){return ()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296}}
 const FOUNT_X=1150;
 // ==HARVEST FAIR== the festival on Lantern Harbor's main street: string lights, hay and pumpkins, and a stall in front of the Fish Market.
-const HVF_X=2445;
+const HVF_X=2745;
 function hvStreet(d,T,night,V,cam){const Y=TW_Y0;
   // string lights: festival poles rise from the street lamps so the strings hang above the doorways, not across them
   const top=Y-124,sag=6;
@@ -6241,6 +6263,59 @@ function marketUI(){const st=townDay(),B=$('plotBody');st.mk=st.mk||{};$('plotEy
   B.innerHTML=`<p class="land-d">“Fresh fish wanted! Today we’re paying double for these. Same list for everyone in town, and it changes at midnight.”</p><div class="mk-list">${marketWants().map(f=>{const c=S.cooler[f.id],have=c?c.n:0,lk=!!S.locked[f.id],sold=st.mk[f.id]|0,cap=mkCap(f),left=Math.max(0,cap-sold),per=c?c.val/c.n:saleValue(f,(f.w[0]+f.w[1])/2);
     return `<div class="mk-c">${fishSvg(RCOL[f.r])}<div><b class="rar-${f.r}">${f.n}</b><small>${RAR[f.r]} · ${W(f.at)?W(f.at).n:''} · about $${money(Math.round(per*2))} each</small><small>${left?`Buying ${left} more today`:'Bought all they need today'} · you have ${have}${lk?' (locked)':''}</small></div><div class="mk-b"><button class="ghost" data-mk="${f.id}" data-n="1" ${!have||!left||lk?'disabled':''}>Sell 1</button><button class="jig" data-mk="${f.id}" data-n="${Math.min(have,left)}" ${!have||!left||lk?'disabled':''}>Sell ${Math.min(have,left)||''}</button></div></div>`}).join('')}</div>${repLv()>=3?'<p class="own-note">Friend of the Harbor: the market buys 50% more from you.</p>':''}`;
   $('plotModal').hidden=false;B.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>marketSell(b.dataset.mk,+b.dataset.n))}
+// ==TOWN PROJECTS== the whole lake rebuilds the bandstand, then reopens the old cannery. Coins and materials count as points.
+const TPK={band:{n:'Rebuild the Bandstand',n2:'The Bandstand',d:'The old bandstand in the Town Square has been boarded up for years. Rebuild it together and the band plays every evening, and anyone nearby dances.',done:'The band plays every evening from 6 PM. Stand close to dance.',tro:'Bandstand Builder'},
+  cannery:{n:'Reopen the Old Cannery',n2:'Lantern Cannery',d:'Boarded up since 1961. Reopen it together and you can can your fish: canned fish sells for 50% more, or makes a full meal.',done:'Can up to 20 fish a day. Cans sell for 50% more, or eat one for a full meal.',tro:'Cannery Builder'}};
+let TPS=null;const tpState=()=>TPS;
+const tpDone=k=>!!(TPS&&TPS[k]&&TPS[k].done),tpActive=k=>!!(TPS&&TPS.cur===k);
+const TP_MIN=25,TP_MATP={C:2,U:6,R:15,L:40,M:80};
+async function tpLoad(give){const m=mpS();if(!m.id)return null;const r=await api('tp',Object.assign({id:m.id,key:m.key},give?{give}:{}));TPS=r;tpClaim();return r}
+setInterval(()=>{if(TOWN.on&&!document.hidden)tpLoad().catch(()=>{})},90000);
+function tpClaim(){if(!TPS)return;S.tp=S.tp||{};for(const k of ['band','cannery']){const P=TPS[k];if(P&&P.done&&(P.mine|0)>=TP_MIN&&!S.tp[k]){S.tp[k]=1;S.rep=repPts()+50;S.trophies.unshift({name:TPK[k].tro,water:'pond',type:'count',score:`${P.mine.toLocaleString()} points`,day:S.day});save();
+  setTimeout(()=>celebrate({lbl:k==='band'?'The bandstand is back!':'The cannery is open!',r:'L',name:TPK[k].tro,sub:'A trophy for your case and +50 town reputation',icon:svgI('crown','#ffd05a')}),800)}}}
+async function tpGive(k,pts,apply,btn){if(btn){btn.disabled=true}try{const was=TPS&&TPS[k]?TPS[k].total:0;await tpLoad({p:k,pts});apply();const st=townDay();st.tpr=st.tpr|0;const rg=Math.min(60-st.tpr,Math.floor(pts/10));if(rg>0){st.tpr+=rg;S.rep=repPts()+rg}
+    sfx('coin');showToast(`+${pts.toLocaleString()} point${pts>1?'s':''} for the ${k==='band'?'bandstand':'cannery'}`,rg>0?`+${rg} reputation`:'Thank you!');try{renderCooler()}catch(e){}storeDirty=true;save();tpPanel(k)}
+  catch(e){showToast('Couldn’t reach the town. Try again.');if(btn)btn.disabled=false}}
+function tpPanel(k){const B=$('plotBody'),D=TPK[k],m=mpS(),P=TPS&&TPS[k];$('plotEye').textContent='Lantern Harbor · town project';$('plotTitle').textContent=tpDone(k)?D.n2:D.n;
+  if(!m.id){B.innerHTML=`<p class="land-d">${D.d}</p><p class="fr-muted">Pick an angler name in the Friends app to help rebuild.</p>`;$('plotModal').hidden=false;return}
+  if(!P||P.goal==null&&!P.done){B.innerHTML=`<p class="land-d">${D.d}</p><p class="fr-muted">${TPS&&TPS.cur&&TPS.cur!==k?'The town is rebuilding the bandstand first.':'Loading…'}</p>`;$('plotModal').hidden=false;if(!TPS)tpLoad().then(()=>tpPanel(k)).catch(()=>{});return}
+  const pc=P.goal?Math.min(100,P.total/P.goal*100):100,mats=Object.keys(S.mats||{}).filter(id=>(S.mats[id]|0)>0&&MI(id)).sort((a,b)=>TP_MATP[MI(b).r]-TP_MATP[MI(a).r]);
+  B.innerHTML=`<p class="land-d">${D.d}</p>${P.done?`<div class="tp-done">✓ Finished, thanks to everyone who helped! ${D.done}</div>`:`<div class="tp-prog"><div class="hw-bar tq-bar"><i style="width:${pc.toFixed(1)}%"></i></div><small><b>${(P.total|0).toLocaleString()}</b> of ${P.goal.toLocaleString()} points · ${(P.n|0).toLocaleString()} builder${P.n===1?'':'s'} · you’ve given ${(P.mine|0).toLocaleString()}</small></div>
+    <p class="own-note">$1,000 = 1 point. Everyone who gives ${TP_MIN}+ points gets the ${D.tro} trophy and +50 reputation when it’s finished, and every 10 points you give earns 1 reputation (up to 60 a day).</p>
+    <div class="tp-sec"><b>Give money</b><div class="xf-row">${[[10000,10],[100000,100],[1000000,1000]].map(([c,pt])=>`<button class="${S.coins>=c?'jig':'ghost'}" data-tpc="${c}" data-pt="${pt}" ${S.coins>=c?'':'disabled'}>$${money(c)} · ${pt} pts</button>`).join('')}</div></div>
+    <div class="tp-sec"><b>Give materials</b>${mats.length?`<ul class="tp-mats">${mats.slice(0,12).map(id=>{const t=MI(id),pt=TP_MATP[t.r]||2,n=S.mats[id]|0;return `<li>${svgI(t.ic,t.col)}<div><b>${t.n}</b><small>×${n} · ${pt} pt${pt>1?'s':''} each</small></div><button class="ghost" data-tpm="${id}" data-n="1">Give 1</button><button class="ghost" data-tpm="${id}" data-n="${n}">All · ${(pt*n).toLocaleString()}</button></li>`}).join('')}</ul>`:'<p class="own-note">No materials in Storage right now.</p>'}</div>`}
+    ${P.top&&P.top.length?`<div class="tp-sec"><b>Top builders</b><ol class="hw-board tp-top">${P.top.map((x,i)=>`<li class="${x.me?'me':''}"><span>${i+1}</span><b>${esc(x.name)}</b><em>${x.w.toLocaleString()} pts</em></li>`).join('')}</ol></div>`:''}`;
+  $('plotModal').hidden=false;
+  B.querySelectorAll('[data-tpc]').forEach(b=>b.onclick=()=>{const c=+b.dataset.tpc,pt=+b.dataset.pt;if(S.coins<c)return;tpGive(k,pt,()=>{S.coins-=c},b)});
+  B.querySelectorAll('[data-tpm]').forEach(b=>b.onclick=()=>{const id=b.dataset.tpm,n=Math.min(+b.dataset.n,S.mats[id]|0);if(n<=0)return;const pt=n*(TP_MATP[MI(id).r]||2);tpGive(k,pt,()=>{S.mats[id]-=n;gearDirty=true},b)})}
+const concertOn=()=>tpDone('band')&&(S.min>=1080||S.min<120);
+const danceAt=(x,mv)=>concertOn()&&!mv&&Math.abs(x-1030)<190;
+function bandDraw(b,dim,d,T,night){const cx=1030,base=TW_Y0;ctx.fillStyle=dim('#9a8e78');ctx.beginPath();ctx.ellipse(cx,base-4,82,11,0,0,7);ctx.fill();ctx.fillStyle=dim('#b8a888');ctx.fillRect(cx-74,base-22,148,16);ctx.fillStyle=dim('#8a7a60');ctx.fillRect(cx-74,base-8,148,4);
+  ctx.fillStyle=dim('#f4f0e6');for(let i=0;i<5;i++)ctx.fillRect(cx-68+i*33,base-100,6,80);
+  ctx.fillStyle=dim('#c8402e');ctx.beginPath();ctx.moveTo(cx-86,base-98);ctx.lineTo(cx,base-150);ctx.lineTo(cx+86,base-98);ctx.closePath();ctx.fill();ctx.fillStyle=dim('#f4f0e6');ctx.fillRect(cx-88,base-102,176,6);for(let i=0;i<8;i++){ctx.beginPath();ctx.arc(cx-77+i*22,base-96,6,0,Math.PI);ctx.fill()}
+  ctx.fillStyle=dim('#ffd05a');ctx.beginPath();ctx.arc(cx,base-152,4,0,7);ctx.fill();
+  for(let i=0;i<9;i++){const x=cx-80+i*20,y=base-98,on=night>.2?.7+.3*Math.sin(T*3+i):.6;ctx.fillStyle=`rgba(255,226,140,${on})`;ctx.beginPath();ctx.arc(x,y,2.4,0,7);ctx.fill()}
+  if(night>.2)glow(cx,base-60,110,.3*night,'255,210,130');
+  if(concertOn()){for(const [x,ov,ins] of [[cx-44,'clear','sax'],[cx,'windy','mic'],[cx+44,'fog','bass']]){townPerson(x,base-22,x<cx?1:-1,0,T,d,ov,null,'m',1.3);ctx.fillStyle=ins==='sax'?'#e8b030':ins==='bass'?'#8a4a24':'#cfd4da';if(ins==='mic')ctx.fillRect(x+6,base-62,2,40);else ctx.fillRect(x+(x<cx?6:-14),base-60,8,22)}
+    for(let i=0;i<5;i++){const q=(T*.35+i/5)%1;ctx.fillStyle=`rgba(255,240,200,${1-q})`;ctx.font='16px serif';ctx.fillText(i%2?'♪':'♫',cx-50+i*24+Math.sin(T+i)*6,base-110-q*60)}}}
+function canneryDraw(b,dim,d,T,night){const L=b.x-b.w/2,base=TW_Y0,lit=night>.25;ctx.fillStyle=dim('#8a4a3a');ctx.fillRect(L+6,base-170,b.w-12,170);ctx.fillStyle=dim('#6a3428');for(let y=base-166;y<base;y+=8)for(let x=L+8+(((y/8)|0)%2)*8;x<L+b.w-8;x+=16)ctx.fillRect(x,y,14,1.2);
+  ctx.fillStyle=dim('#4a2a20');ctx.fillRect(L+b.w-36,base-230,18,62);smoke(L+b.w-27,base-232,T,1.4);
+  ctx.fillStyle=dim('#2a3a4a');ctx.fillRect(b.x-34,base-74,68,74);ctx.fillStyle=lit?'#ffd88a':dim('#8aa0b0');ctx.fillRect(b.x-30,base-70,28,66);ctx.fillRect(b.x+2,base-70,28,66);
+  ctx.fillStyle=lit?'#ffd88a':dim('#8aa0b0');for(const x of [L+16,L+b.w-40])for(const y of [base-150,base-110])ctx.fillRect(x,y,24,22);
+  ctx.fillStyle=dim('#1e2a34');rrect(b.x-62,base-140,124,26,4);ctx.fill();ctx.fillStyle=lit?'#ffcf6a':dim('#e8d8b0');ctx.font='800 13px Georgia,serif';ctx.textAlign='center';ctx.fillText('LANTERN CANNERY',b.x,base-122);ctx.font='bold 9px Georgia,serif';ctx.fillText('EST. 1961 · REOPENED',b.x,base-104);ctx.textAlign='left'}
+function tpStreet(vis,d,T,night,V){const sq=vis.find(b=>b.id==='square'),cn=vis.find(b=>b.id==='cannery');
+  if(sq){RH2(V,940,TW_Y0-160,160,160,'tband',0);if(tpActive('band')&&TPS.band.goal)townTag(1000,TW_Y0-118,`Rebuild: ${Math.min(100,Math.floor(TPS.band.total/TPS.band.goal*100))}%`,'rgba(170,90,30,.9)');if(concertOn())townTag(1030,TW_Y0-178,'♪ Now playing: '+L7_SONGS[(Math.floor(S.min/30)+S.day)%L7_SONGS.length][0],'rgba(90,40,120,.9)')}
+  if(cn&&(tpActive('cannery')||tpDone('cannery'))){RH2(V,cn.x-cn.w/2,TW_Y0-180,cn.w,180,'tcan',0);if(tpActive('cannery')&&TPS.cannery.goal)townTag(cn.x,TW_Y0-190,`Reopen: ${Math.min(100,Math.floor(TPS.cannery.total/TPS.cannery.goal*100))}%`,'rgba(170,90,30,.9)')}}
+// The cannery: up to 20 fish a day become cans worth 50% more. Sell them here or eat one for a full meal.
+const CANS=()=>{if(!S.cans||typeof S.cans!=='object')S.cans={n:0,v:0};return S.cans};
+function canFish(id,n){const st=townDay(),c=S.cooler[id];st.can=st.can|0;if(!c||S.locked[id])return;n=Math.min(n,c.n,20-st.can);if(n<=0)return;const per=c.val/c.n,K=CANS();tqTake(S.cooler,id,n);K.n+=n;K.v+=per*n*1.5;st.can+=n;sfx('pop');showToast(`Canned ${n} ${FI(id).n}`,`${K.n} can${K.n>1?'s':''} on the shelf`);try{renderCooler()}catch(e){}save();canneryUI()}
+function canneryUI(){const st=townDay(),K=CANS(),B=$('plotBody'),left=20-(st.can|0),ids=coolerIds().filter(k=>!S.locked[k]).sort((a,b)=>S.cooler[b].val/S.cooler[b].n-S.cooler[a].val/S.cooler[a].n).slice(0,20);$('plotEye').textContent='Lantern Harbor';$('plotTitle').textContent='Lantern Cannery';
+  B.innerHTML=`<p class="land-d">“Bring us fish and we’ll can ’em. Canned fish sells for half again what fresh does, and a can makes a fine meal.”</p>
+    <div class="tp-sec"><b>Your cans: ${K.n.toLocaleString()}</b><small class="own-note">Worth $${money(Math.round(K.v))} in all</small><div class="xf-row"><button class="jig" id="canSell" ${K.n?'':'disabled'}>Sell all cans · $${money(Math.round(K.v))}</button><button class="ghost" id="canEat" ${K.n?'':'disabled'}>Eat a can (full meal)</button></div></div>
+    <div class="tp-sec"><b>Can fish · ${left} left today</b>${ids.length?`<ul class="tp-mats">${ids.map(k=>{const c=S.cooler[k],f=FI(k);return `<li>${fishSvg(RCOL[f.r])}<div><b>${f.n}</b><small>×${c.n} · a can is worth $${money(Math.round(c.val/c.n*1.5))}</small></div><button class="ghost" data-can="${k}" data-n="1" ${left?'':'disabled'}>Can 1</button><button class="ghost" data-can="${k}" data-n="${Math.min(c.n,left)}" ${left?'':'disabled'}>Can ${Math.min(c.n,left)||''}</button></li>`}).join('')}</ul>`:'<p class="own-note">Your cooler is empty. Locked fish stay put.</p>'}</div>`;
+  $('plotModal').hidden=false;B.querySelectorAll('[data-can]').forEach(b=>b.onclick=()=>canFish(b.dataset.can,+b.dataset.n));
+  $('canSell').onclick=()=>{const K=CANS(),v=Math.round(K.v);if(!K.n)return;S.coins+=v;K.n=0;K.v=0;bountyEvent('sell',v);sfx('coin');showToast('Sold your cans',`+$${money(v)}`);save();canneryUI()};
+  $('canEat').onclick=()=>{const K=CANS();if(!K.n)return;K.v-=K.v/K.n;K.n--;S.hunger=100;sfx('pop');showToast('Canned fish. Filling!','Hunger full');try{renderVitals()}catch(e){}save();canneryUI()}}
 function townSeed(){let h=0;for(const c of todayKey())h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
 function margeStock(){const s=townSeed(),r=Math.max(60,S.rate||0),pot=PKEYS[s%PKEYS.length],bob=T_BOBS[(s>>3)%T_BOBS.length],bm={U:[60,20000],R:[150,50000],E:[400,150000]}[bob.t]||[100,40000];
   const k=repLv()>=3?.9:1;return {pot,potC:Math.round(Math.max(3000,Math.round(r*15/100)*100)*k),bob,bobC:Math.round(Math.max(bm[1],Math.round(r*bm[0]/1000)*1000)*k),bagC:Math.round(Math.max(8000,Math.round(r*35/100)*100)*k)}}
@@ -6456,6 +6531,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:139,n:'Phone controls',items:['New for phones and tablets: a thumbstick for walking around town, your yard and friends’ houses. Push it a little to stroll or all the way to walk faster. Tapping to walk still works too.','An action button appears when you’re near something you can use, like “Enter Bait & Tackle”, “Talk to Old Pete” or “Notice Board”. One tap and you’re in.','New “Go to” button in the town bar: pick any place on the street and you walk there.','Prefer tapping? Turn the thumbstick off under Settings on your phone.']},
+ {v:138,n:'Rebuild the town',items:['Town projects! The whole lake rebuilds Lantern Harbor together. First up: the old bandstand in the Town Square. Tap it to chip in money or materials ($1,000 is 1 point, materials count by rarity).','When the bandstand is rebuilt, the band plays every evening from 6 PM, the street shows what’s playing, and anyone standing nearby dances.','Next, the Old Cannery reopens. Can up to 20 fish a day: canned fish sells for 50% more, or eat a can for a full meal.','Give 25 points or more to a project and you get its Builder trophy and +50 town reputation when it’s finished. Every 10 points you give also earns reputation (up to 60 a day).','Lantern Harbor is longer: a new grassy lot, Harbor Green, sits at the east end of the street past the cannery, with a bench and a couple of trees. The Harvest Fair stall sets up there in November.']},
  {v:137,n:'Town jobs and the Fish Market',items:['The Notice Board in Lantern Harbor is up! Three jobs a day from the townsfolk: bring fish, a rare catch, fruit or materials, or catch fish at a certain water or after dark. New jobs go up at midnight.','Jobs pay $15,000 to $25,000 each depending on how hard they are, and finishing every job in a day adds a $30,000 board bonus. They also build your town reputation. Climb from Newcomer to Regular, Local, Friend of the Harbor and Pillar of the Harbor for better pay, a fourth daily job, 10% off at Marge’s and a trophy.','The Fish Market is open. Every day it posts three wanted fish, the same for everyone in town, and pays double for them up to a daily amount.','The Harvest Fair stall moves to the east end of the street by the Old Cannery, so it doesn’t block the market.']},
  {v:136,n:'Harvest app fix',items:['Bug fix: the Harvest app was missing from the phone’s home screen. It now shows up next to the other apps when the festival starts on November 2.']},
  {v:135,n:'Harvest Fair',items:['During the Harvest Festival (November 2 to 30), Lantern Harbor’s main street is decked out with string lights, hay bales and pumpkins.','A Harvest Fair stall opens in front of the Fish Market. Tap it to play.','Apple bobbing: 20 seconds to grab as many apples as you can, tapping them when they bob up out of the water. Every apple is worth 6 prize tickets for the arcade.','Pie contest: once a day, bake a pie from a fish and a fruit and pull it out of the oven at the right moment. The judges pick a favorite fruit each day. Win a blue, red or white ribbon and prize money. Three blue ribbons earn the Blue Ribbon Baker 2026 trophy.']},
@@ -7950,7 +8027,36 @@ const ease=x=>{x=Math.max(0,Math.min(1,x));return x<.5?2*x*x:1-Math.pow(-2*x+2,2
 function boatK(){const sl=S.sleep;if(!sl||sl.ph==='pick')return 0;if(sl.ph==='boatIn')return ease(sl.t/PH_T.boatIn);if(sl.ph==='boatOut')return 1-ease(sl.t/PH_T.boatOut);return 1}
 // (walking is drawn here too, so it layers exactly like the old standing figure)
 // ==WALKING== In your yard (or a friend's), tap the ground or use WASD / arrow keys to walk around. Your pet tags along.
-const WALK={x:0,y:0,tx:null,ty:null,face:1,mv:0,ctx:'',keys:{},after:null,door:[78,246],last:0};
+const WALK={x:0,y:0,tx:null,ty:null,face:1,mv:0,ctx:'',keys:{},after:null,door:[78,246],last:0,joy:null};
+// ==PHONE CONTROLS== a thumbstick, an action button for whatever's nearby, and "Go to…" in town. Phones only (coarse pointer).
+const joyVec=()=>{const j=WALK.joy;if(!j)return [0,0,0];const m=Math.min(1,Math.hypot(j.x,j.y));return m<.18?[0,0,0]:[j.x,j.y,Math.max(.35,m)]};
+const coarse=()=>matchMedia('(pointer:coarse)').matches;
+const joyOn=()=>coarse()&&SETS().joy!==false&&(TOWN.on||!!walkCtx())&&!document.querySelector('.away:not([hidden])')&&!document.body.classList.contains('photo-mode')&&!document.body.classList.contains('sheet-on')&&!(typeof PDK!=='undefined'&&$('phoneDock').classList.contains('open'));
+(()=>{const el=$('joy'),kn=el.querySelector('.joy-k');let id=null;const R=44;
+  const set=e=>{const r=el.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const m=Math.hypot(dx,dy);if(m>R){dx=dx/m*R;dy=dy/m*R}kn.style.transform=`translate(${dx}px,${dy}px)`;WALK.joy={x:dx/R,y:dy/R}};
+  const end=e=>{if(e.pointerId!==id)return;id=null;WALK.joy=null;kn.style.transform='';el.classList.remove('on')};
+  el.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();id=e.pointerId;try{el.setPointerCapture(id)}catch(_){}el.classList.add('on');hideTip();set(e)});
+  el.addEventListener('pointermove',e=>{if(e.pointerId===id){e.preventDefault();set(e)}});el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('click',e=>e.stopPropagation())})();
+// The nearest thing you can use, from what the scene drew this frame.
+const ACT_SKIP=['peer','tpeer','yland','wlight','trophy','tank','coll','collv'];
+function actNear(){if(!HITS.length)return null;let px,py,lim;
+  if(TOWN.on){const V=townView();px=(TOWN.x-TOWN.cam)*V.k;py=(TOWN.y-40-V.cy)*V.k;lim=70*V.k}else if(walkCtx()){px=WALK.x;py=WALK.y-6;lim=24}else return null;
+  let best=null,bd=1e9;for(const h of HITS){if(ACT_SKIP.includes(h.kind))continue;if(h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);if(!b||!(b.inside||b.open))continue}
+    const dx=Math.max(h.x-px,0,px-(h.x+h.w)),dy=Math.max(h.y-py,0,py-(h.y+h.h)),dd=Math.hypot(dx,dy);if(dd<lim&&dd<bd){const t=tipHTML(h);if(!t)continue;bd=dd;best={h,t}}}
+  if(!best)return null;const nm=(best.t.match(/<b[^>]*>(.*?)<\/b>/)||[])[1]||'';const name=nm.replace(/<[^>]+>/g,'').trim();if(!name)return null;
+  if(best.h.kind==='yhouse'||best.h.kind==='ydoor')return {h:HITS.find(x=>x.kind==='ydoor')||best.h,label:'Go inside',inside:1};
+  const h=best.h,b=h.kind==='tbld'&&TBLD.find(x=>x.id===h.data);const verb=b&&b.inside?'Enter':h.kind==='tnpc'?'Talk to':h.kind==='ydoor'||h.kind==='door'?'Go inside:':'';return {h,label:(verb?verb+' ':'')+name}}
+function actDo(){const a=ACT.cur;if(!a)return;if(a.go){sfx('click');townGoUI();return}if(a.inside&&walkCtx()==='home'){sfx('click');walkThen(yardIn);return}const h=a.h,cx=h.x+h.w/2,cy=h.y+h.h/2,r=cv.getBoundingClientRect();
+  const x=cx*CAMT.z+CAMT.ox,y=cy*CAMT.z+CAMT.oy,px=x*BASE.s+BASE.ox,py=y*BASE.s+BASE.oy;const ev={clientX:r.left+px/cv.width*r.width,clientY:r.top+py/cv.height*r.height,target:cv,preventDefault(){},stopPropagation(){}};
+  sfx('click');try{$('scene').onclick(ev)}catch(e){}}
+const ACT={cur:null,sig:''};
+setInterval(()=>{const on=joyOn(),j=$('joy'),ab=$('actBtn');if(j.hidden===on)j.hidden=!on;if(!on&&WALK.joy){WALK.joy=null;j.querySelector('.joy-k').style.transform=''}
+  let a=on?actNear():null;if(on&&!a&&TOWN.on&&!TOWN.z&&TOWN.tx==null)a={go:1,label:'📍 Go to…'};ACT.cur=a;const sig=a?a.label:'';if(sig!==ACT.sig){ACT.sig=sig;ab.textContent=sig;ab.hidden=!a}},200);
+$('actBtn').onclick=e=>{e.stopPropagation();actDo()};
+// "Go to…": every place on Lantern Harbor's street, and your character walks there.
+function townGoUI(){const B=$('plotBody'),P=[...TBLD.filter(b=>b.kind!=='soon'||b.open||(b.id==='cannery'&&(tpActive('cannery')||tpDone('cannery')))).map(b=>[b.n,b.x]),['Town Square fountain',FOUNT_X-40],['Bandstand',1030],...(hvOn()?[['Harvest Fair',HVF_X]]:[])].sort((a,b)=>a[1]-b[1]);
+  $('plotEye').textContent='Lantern Harbor';$('plotTitle').textContent='Go to…';B.innerHTML=`<div class="go-list">${P.map(([n,x],i)=>`<button class="ghost" data-go="${x}">${esc(n)}</button>`).join('')}</div>`;$('plotModal').hidden=false;
+  B.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{$('plotModal').hidden=true;if(TOWN.z){townExit();setTimeout(()=>townTo(+b.dataset.go,TW_Y0+16),300)}else townTo(+b.dataset.go,TW_Y0+16);sfx('click')})}
 function walkCtx(){const c=yardCtx();if(!c||YED.on||dockFishing()||!S.sleep)return '';const ph=S.sleep.ph;return (c==='home'&&ph==='yard')||(c==='friend'&&ph==='door')?c:''}
 function walkClamp(x,y){y=Math.max(244,Math.min(396,y));const e=dockEnd(),sx=yShoreX(y)-4;
   if(x>sx&&y<262)return [Math.max(136,Math.min(e-6,x)),246];
@@ -7960,7 +8066,7 @@ function walkThen(act){const [dx,dy]=WALK.door;if(!walkCtx()||Math.hypot(WALK.x-
 function walkDraw(d,T,wc){const now=performance.now(),dt=WALK.last?Math.min(.1,(now-WALK.last)/1000):0;WALK.last=now;
   const G=shackGeo();WALK.door=[G.t===0?78:G.door+7,246];
   if(WALK.ctx!==wc){WALK.ctx=wc;WALK.sit=null;WALK.up=null;[WALK.x,WALK.y]=WALK.door;if(wc==='friend'){WALK.x+=Math.round(Math.random()*36-18);WALK.y+=Math.round(4+Math.random()*16)}WALK.tx=WALK.ty=null;WALK.after=null;WALK.face=1}
-  const K=WALK.keys,kx=(K.right?1:0)-(K.left?1:0),ky=(K.down?1:0)-(K.up?1:0),sp=52;let moving=false;
+  const K=WALK.keys,J=joyVec(),kx=(K.right?1:0)-(K.left?1:0)||J[0],ky=(K.down?1:0)-(K.up?1:0)||J[1],sp=52*(J[2]&&!(K.right||K.left||K.up||K.down)?J[2]:1);let moving=false;
   if(kx||ky){const n=Math.hypot(kx,ky);[WALK.x,WALK.y]=walkClamp(WALK.x+kx/n*sp*dt,WALK.y+ky/n*sp*.75*dt);if(kx)WALK.face=kx>0?1:-1;WALK.tx=WALK.ty=null;WALK.after=null;moving=true}
   else if(WALK.tx!=null){const [tx,ty]=walkClamp(WALK.tx,WALK.ty),dx=tx-WALK.x,dy=ty-WALK.y,dd=Math.hypot(dx,dy),st=sp*dt;
     if(dd<=st+.4){WALK.x=tx;WALK.y=ty;WALK.tx=WALK.ty=null;const a=WALK.after;WALK.after=null;if(a)setTimeout(a,0)}else{WALK.x+=dx/dd*st;WALK.y+=dy/dd*st;if(Math.abs(dx)>.5)WALK.face=dx>0?1:-1;moving=true}}

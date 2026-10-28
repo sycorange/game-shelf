@@ -12,7 +12,7 @@ const results=[];let fails=0;
 // (__pushes, __cron, __seen) run one at a time after the rest. Pass words to run only matching checks:
 //   node tests/smoke.mjs harvest save      (any check whose name contains "harvest" or "save")
 // Checks that play real-time minigames or walk characters around get flaky when the CPU is shared, so they run alone too.
-const SOLO=['horseshoes','yard games','open house','case 5','hangouts','pet','mirror match','town','harvest basket','harvest fair'];
+const SOLO=['horseshoes','yard games','open house','case 5','hangouts','pet','mirror match','town','harvest basket','harvest fair','phone controls'];
 const ONLY=process.argv.slice(2).map(s=>s.toLowerCase()),CONC=Math.max(1,+process.env.CONC||2),JOBS=[];
 function check(name,fn){if(ONLY.length&&!ONLY.some(w=>name.toLowerCase().includes(w)))return Promise.resolve();JOBS.push({name,fn,solo:/__pushes|__cron|__seen/.test(fn.toString())||SOLO.some(w=>name.toLowerCase().includes(w))});return Promise.resolve()}
 async function runCheck({name,fn}){const t0=Date.now();try{const r=await Promise.race([fn(),new Promise((_,bad)=>setTimeout(()=>bad(new Error('timed out after 150s')),150000))]);if(r===false)throw new Error('returned false');results.push(['PASS',name]);console.log('✔ PASS  '+name+` (${((Date.now()-t0)/1000).toFixed(1)}s)`)}catch(e){fails++;const m=name+' — '+String(e.message||e).split('\n').slice(0,3).join(' | ');results.push(['FAIL',m]);console.log('✘ FAIL  '+m)}}
@@ -388,7 +388,7 @@ await check('Harvest Fair: festival stall in town, apple bobbing tickets, the da
   await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({sleep:{ph:'yard',t:0,visit:true},cooler:{walleye:{n:3,val:300}},pantry:{peach:2}}));
   const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(URL0.replace('season=off','season=hv'));await p.waitForTimeout(800);await p.evaluate(()=>{if(!document.getElementById('titleScreen').hidden)document.getElementById('tGo').click()});await p.waitForTimeout(800);
   await p.evaluate(async()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);const r=await api('hello',{name:'Fa'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});openTown()});await p.waitForTimeout(1500);
-  await p.evaluate(()=>{TOWN.x=2445;TOWN.cam=2100});await p.waitForTimeout(800);ok(await p.evaluate(()=>HITS.some(h=>h.kind==='thv')),'no fair stall hit area');await p.evaluate(()=>hvFair());ok(await p.isVisible('#hvfBob')&&await p.isVisible('#hvfPie'),'fair panel');
+  await p.evaluate(()=>{TOWN.x=2745;TOWN.cam=2400});await p.waitForTimeout(800);ok(await p.evaluate(()=>HITS.some(h=>h.kind==='thv')),'no fair stall hit area');await p.evaluate(()=>hvFair());ok(await p.isVisible('#hvfBob')&&await p.isVisible('#hvfPie'),'fair panel');
   await p.click('#hvfBob');await p.click('#bobGo');await p.evaluate(()=>{ABOB.a[0].p=Math.PI/2;ABOB.a[0].ps=0});const pos=await p.evaluate(()=>{const a=ABOB.a[0],c=document.getElementById('bobCv').getBoundingClientRect();return [c.left+(180+Math.cos(a.a)*a.r)*c.width/360,c.top+(170+Math.sin(a.a)*a.r*.42)*c.height/300]});
   await p.evaluate(()=>{ABOB.a.forEach((a,i)=>{if(i){a.r=200}a.s=0})});await p.mouse.click(pos[0],pos[1]);ok(await p.evaluate(()=>ABOB.n===1),'grab an apple');await p.evaluate(()=>{ABOB.left=.01});await p.waitForTimeout(300);ok(await p.evaluate(()=>ARC().t>=6&&HV().bob===1),'bobbing tickets');
   await p.click('#bobBack');await p.click('#hvfPie');await p.click('#pieGo');await p.evaluate(()=>{PIE.t=.5/.32});await p.click('#pieOut');
@@ -400,6 +400,27 @@ await check('town jobs and Fish Market: Notice Board jobs hand in for pay and re
   const id=await p.evaluate(()=>{const f=marketWants()[0];S.cooler[f.id]={n:40,val:400};return f.id});await p.evaluate(()=>marketUI());const c1=await p.evaluate(()=>S.coins);
   await p.click(`[data-mk="${id}"].jig`);ok(await p.evaluate(({id,c1})=>{const sold=townDay().mk[id],left=S.cooler[id].n;return sold>0&&left===40-sold&&S.coins===c1+Math.round(10*sold*2)},{id,c1}),'market double price');
   await p.evaluate(()=>marketUI());ok(await p.evaluate(id=>document.querySelector(`[data-mk="${id}"].jig`).disabled,id),'daily cap');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('town projects: rebuild the bandstand and reopen the cannery together, builder rewards, evening concert, canning fish',async()=>{const p=await page(VPS[0][1],save({coins:3000000,min:1140,mats:{drift:12},cooler:{walleye:{n:30,val:3000}}}));
+  const me=await p.evaluate(async()=>{const r=await api('hello',{name:'Tp'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});await tpLoad();return r});
+  ok(await p.evaluate(()=>tpState().cur==='band'&&tpState().band.goal>=10000),'bandstand project first');await p.evaluate(()=>tpPanel('band'));await p.click('[data-tpc="1000000"]');await p.waitForTimeout(600);
+  ok(await p.evaluate(()=>S.coins===2000000&&tpState().band.mine===1000&&S.rep===60),'give money: points and capped reputation');
+  await p.evaluate(async me=>{const g=(await api('tp',{id:me.id,key:me.key})).band.goal;for(let left=g;left>0;left-=5000)await api('tp',{id:me.id,key:me.key,give:{p:'band',pts:5000}});await tpLoad()},me);
+  ok(await p.evaluate(()=>tpState().band.done>0&&tpState().cur==='cannery'&&S.trophies.some(t=>t.name==='Bandstand Builder')&&concertOn()),'bandstand rebuilt, builder trophy, concert tonight');
+  await p.evaluate(async me=>{const g=(await api('tp',{id:me.id,key:me.key})).cannery.goal;for(let left=g;left>0;left-=5000)await api('tp',{id:me.id,key:me.key,give:{p:'cannery',pts:5000}});await tpLoad()},me);
+  ok(await p.evaluate(()=>tpState().cannery.done>0&&S.trophies.some(t=>t.name==='Cannery Builder')),'cannery reopened');
+  await p.evaluate(()=>canneryUI());await p.click('[data-can="walleye"][data-n="20"]');ok(await p.evaluate(()=>CANS().n===20&&Math.round(CANS().v)===3000&&S.cooler.walleye.n===10),'canning: 20 a day, 50% more');
+  const c0=await p.evaluate(()=>S.coins);await p.click('#canSell');ok(await p.evaluate(c0=>S.coins===c0+3000&&CANS().n===0,c0),'sell cans');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('phone controls: thumbstick walks, action button enters places, Go to walks you there, off in Settings',async()=>{const c=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({sleep:{ph:'yard',t:0,visit:true}}));const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+  await p.goto(URL0);await p.waitForTimeout(800);await p.evaluate(()=>{if(!document.getElementById('titleScreen').hidden)document.getElementById('tGo').click()});await p.waitForTimeout(900);await p.evaluate(()=>document.querySelectorAll('.away').forEach(m=>m.hidden=true));await p.waitForTimeout(400);
+  ok(await p.isVisible('#joy'),'thumbstick in the yard');const jb=await p.locator('#joy').boundingBox(),x0=await p.evaluate(()=>WALK.x);await p.mouse.move(jb.x+56,jb.y+56);await p.mouse.down();await p.mouse.move(jb.x+106,jb.y+56,{steps:4});await p.waitForTimeout(800);await p.mouse.up();
+  ok(await p.evaluate(x0=>WALK.x-x0>20,x0),'thumbstick walks');await p.evaluate(()=>{WALK.x=WALK.door[0];WALK.y=WALK.door[1]+4});await p.waitForTimeout(500);ok((await p.textContent('#actBtn'))==='Go inside','action: Go inside');
+  await p.evaluate(async()=>{const r=await api('hello',{name:'Jy'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});openTown()});await p.waitForTimeout(1200);
+  await p.evaluate(()=>{TOWN.x=395;TOWN.y=420});await p.waitForTimeout(500);ok((await p.textContent('#actBtn'))==='Enter Bait & Tackle','action: Enter');await p.click('#actBtn');await p.waitForTimeout(2500);ok(await p.evaluate(()=>TOWN.z==='tackle'),'entered the shop');
+  await p.evaluate(()=>townGoUI());await p.click('[data-go="1240"]');await p.waitForTimeout(6000);ok(await p.evaluate(()=>!TOWN.z&&Math.abs(TOWN.x-1240)<4),'Go to walks there');
+  await p.evaluate(()=>{SETS().joy=false});await p.waitForTimeout(400);ok(!(await p.isVisible('#joy')),'thumbstick off in Settings');ok(!errs.length,errs.join('; '));await c.close()});
 
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
