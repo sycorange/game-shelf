@@ -744,7 +744,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .case-step .need{color:#8a3a10;font-style:italic}
 .ev{display:flex;flex-wrap:wrap;gap:6px}
 .ev span{border:1px solid #1e1a14;border-radius:4px;padding:2px 7px;font-size:.74rem;background:#fffbe8}
-.chk{display:grid;gap:2px;margin-top:4px;font-size:.78rem}.case-wx{margin:6px 0 0;font-size:.78rem;padding:6px 8px;border-radius:8px;background:rgba(122,138,216,.14)}
+.chk{display:grid;gap:2px;margin-top:4px;font-size:.78rem}.q5dead{display:grid;gap:8px;place-items:center;text-align:center;min-height:150px;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 2px,transparent 2px 4px),#07080c;border-radius:6px;padding:12px;color:#d8ffe8;font-family:monospace}.q5dead small{opacity:.7}.q5lines p{margin:2px 0;letter-spacing:.12em;opacity:0;animation:q5in .6s forwards}@keyframes q5in{to{opacity:1}}.q5logo{color:#9fe8c8;letter-spacing:.3em}
+.q5bars{display:grid;gap:6px;font-size:.82rem}.q5bars span{display:grid;gap:3px}.q5bars i{display:block;height:8px;border-radius:4px;background:#7affc8;width:0;transition:width .1s}.q5bars span:last-child i{background:#e8e8ee}
+.case-wx{margin:6px 0 0;font-size:.78rem;padding:6px 8px;border-radius:8px;background:rgba(122,138,216,.14)}
 .beastbox{max-width:440px;width:100%;display:grid;gap:12px;border:2px solid var(--r-m)}
 .bwater{height:120px;border-radius:12px;background:linear-gradient(#0e2a3a,#02080e);position:relative;overflow:hidden}
 .bwater::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 14px,rgba(140,200,255,.06) 14px 15px)}
@@ -974,7 +976,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .sb-champ{text-align:center;font-family:var(--font-display);font-size:1rem;color:#ffd05a;background:#1a2a14;border:1px solid #ffd05a;border-radius:12px;padding:10px}
 .sb-head{font-family:"Playfair Display",Georgia,serif;font-weight:900;font-size:.95rem;line-height:1.15;margin:2px 0 6px}
 .sbt td{font-size:.74rem}
-.case-tabs{display:flex;gap:6px;margin-bottom:8px}
+.case-tabs{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.case-tabs::-webkit-scrollbar{display:none}.case-tabs button{flex:1 0 auto;min-width:96px;max-width:150px}
 .case-tabs button{flex:1;border:1px solid #c8b890;background:#f4ecd8;color:#3a2a14;border-radius:8px;padding:6px 8px;font-weight:700;font-size:.74rem;font-family:Georgia,serif}
 .case-tabs button[aria-selected="true"]{background:#2a1e10;color:#f4ecd8;border-color:#2a1e10}
 .rp-note{flex-basis:100%;font-size:.72rem;color:#6a6050;font-style:italic}
@@ -2516,10 +2518,11 @@ function rollPull(m,water,minute){
   {const r2=q2Roll(m,water,minute);if(r2)return r2}
   {const r3=q3Roll(m,water,minute);if(r3)return r3}
   {const r4=q4Roll(m,water,minute);if(r4)return r4}
+  {const r5=q5Roll(m,water,minute);if(r5)return r5}
   if(q.step===2&&water==='lake'&&qph==='night'&&Math.random()<1/50)return {qi:'photo'};
   if(q.step===3&&water==='river'&&['fog','drizzle','rain','storm'].includes(m.wx)&&Math.random()<1/30)return {qi:'scale'};
   if(q.step===4&&!S.tapes.beast&&Math.random()<1/60)return {tape:'beast'};
-  const lost=Object.keys(TAPES).filter(k=>!S.tapes[k]);if(lost.length&&Math.random()<.0012*(m.magnet?2:1))return {tape:pickW(lost.map(k=>({k,w:{C:10,U:6,R:3,L:1}[TAPES[k].r]}))).k};
+  const lost=Object.keys(TAPES).filter(k=>!S.tapes[k]&&!TAPES[k].quest);if(lost.length&&Math.random()<.0012*(m.magnet?2:1))return {tape:pickW(lost.map(k=>({k,w:{C:10,U:6,R:3,L:1}[TAPES[k].r]}))).k};
   if(Math.random()<.09*(m.magnet?2:1)*(1+.1*projLv('barn'))){const pool=MATS.filter(x=>(x.at==='any'||x.at.split(' ').includes(water))&&(!x.night||qph==='night'));return {mat:pickW(pool.map(x=>({x,w:{C:70,U:22,R:7,L:1}[x.r]}))).x}}
   const X=WX[m.wx]||{};
   if(Math.random()<.10*(m.magnet?3:1)*(X.junkX||1)){
@@ -2594,6 +2597,7 @@ function doCatch(){
   if(r.q2){q2Item(r.q2,true);return}
   if(r.q3){q3Item(r.q3,true);return}
   if(r.q4){q4Item(r.q4,true);return}
+  if(r.q5){q5Item(r.q5,true);return}
   if(r.ghost){startGhost();return}
   if(r.mat){sfx('pop');startCatchAnim(1,r.mat.col,true);addMat(r.mat,true);return}
   if(r.beast){openBeast();return}
@@ -2601,7 +2605,7 @@ function doCatch(){
   const val=Math.round(saleValue(f,w)*(m.gold?2:1)*(WX[S.wx.id].sellX||1)*(vr?VAR[vr].mult:1));
   const L=S.log[f.id]||(S.log[f.id]={n:0,big:0});
   const isNew=L.n===0, isRec=!isNew&&w>L.big;
-  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);q4OnCatch(f,w,vr);chalOnCatch(f,w);monOnCatch(w);liveOnCatch(f,w,vr);realmOnCatch(f);
+  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);q4OnCatch(f,w,vr);q5OnCatch(f);chalOnCatch(f,w);monOnCatch(w);liveOnCatch(f,w,vr);realmOnCatch(f);
   let newVar=false;if(vr){L.v=L.v||{};newVar=!L.v[vr];L.v[vr]=(L.v[vr]||0)+1}
   bountyEvent('catch',{f,w,water:S.water,ph:phaseOf(S.min)});
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
@@ -2632,6 +2636,7 @@ function offline(sec){
     if(r.q2){q2Item(r.q2,false);cols.push(r.q2==='bell'?'an old ship’s bell':'a soggy logbook page');continue}
     if(r.q3){if(r.q3!=='keeper'){q3Item(r.q3,false);cols.push(r.q3==='key'?'the keeper’s key':'a letter in a bottle')}continue}
     if(r.q4){if(r.q4==='shard'){q4Item('shard',false);cols.push('a mirror shard')}continue}
+    if(r.q5){q5Item(r.q5,false);cols.push('a radio part');continue}
     if(r.ghost)continue;
     if(r.beast)continue;
     const c=r.fish,vr=rollVariant({});if(vr==='giant')c.w=+(c.f.w[1]*rnd(1.2,1.6)).toFixed(2);
@@ -3346,7 +3351,7 @@ const SKINS=[
   SK('frost','Frostbite','E','#bfe6ff','ice','#ffffff','#6ab8f0','sparkle'),
   SK('gold','Solid Gold','L','#d8a828','gold','#fff2b0','#8a6410','sparkle'),SK('prism','Prismatic','L','#ff3a3a','prism','#ffffff','#ffffff','sparkle')];
 // Case rewards: never in crates, shown in the Locker once owned
-const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true},{...SK('bit8','8-Bit','E','#2a2a6a','pixel','#ff3a6a','#3affb0'),quest:true},{...SK('pinneon','Pinball Neon','E','#140c24','pinball','#ff3ad8','#ffd23a','glow'),quest:true},{...SK('testpat','Test Pattern','E','#c0c0c0','testpat','#ffffff','#000000'),quest:true}];
+const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true},{...SK('bit8','8-Bit','E','#2a2a6a','pixel','#ff3a6a','#3affb0'),quest:true},{...SK('pinneon','Pinball Neon','E','#140c24','pinball','#ff3ad8','#ffd23a','glow'),quest:true},{...SK('testpat','Test Pattern','E','#c0c0c0','testpat','#ffffff','#000000'),quest:true},{...SK('deadch','Dead Channel','E','#16161c','static','#e8e8ee','#7affc8','glow'),quest:true}];
 // Series 2: Deep Sea Expedition (a mixed case: paints, rod finishes and bobbers)
 const DS_PAINTS=[SK('varnish','Varnished Wood','C','#a8703a','wood','#7a4a22'),SK('seafoam','Seafoam','C','#8fd8c0'),SK('coralpink','Coral Pink','C','#ff8a80'),
   SK('retro','Retro ’70s','U','#f2e2c0','retro','#e8742a','#8a3a1a'),SK('melonhull','Watermelon','U','#3a8a3a','melon','#ff5a6a','#1a1a1a'),SK('treasure','Treasure Map','U','#e8d4a0','map','#8a5a2a','#c83a2a'),
@@ -3397,6 +3402,7 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
     c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=.8;c.beginPath();c.moveTo(x,y+7);c.lineTo(x+L,y+7-(b>=3?3:0));c.stroke()}
   else if(p==='prism'){const g=c.createLinearGradient(x,0,x+L,0);for(let i=0;i<=6;i++)g.addColorStop(i/6,`hsl(${(i*60+T*60)%360},90%,60%)`);c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     c.fillStyle='rgba(255,255,255,.35)';c.fillRect(x-4,top-2,L+8,3)}
+  else if(p==='static'){for(let i=0;i<L*H/9;i++){const v=Math.floor(R()*160+60+Math.random()*60);c.fillStyle=`rgba(${v},${v},${v+8},${.35+Math.random()*.4})`;c.fillRect(x-4+Math.random()*(L+8),top-2+Math.random()*(H+4),1.6,1.2)}const ry=top-2+((T*.4)%1)*(H+6);c.fillStyle='rgba(255,255,255,.18)';c.fillRect(x-4,ry,L+8,2.2);if(Math.sin(T*1.3)>.96){c.fillStyle=sk.c3;c.font='bold 6px monospace';c.fillText('3:33',x+L*.45,top+H*.6)}}
   else if(p==='wood'){c.strokeStyle=sk.c2;c.lineWidth=.7;c.globalAlpha=.6;for(let j=0;j<5;j++){c.beginPath();for(let i=0;i<=L+8;i+=4){const yy=top+2+j*(H/5)+Math.sin(i/13+j*1.7)*1.2;i?c.lineTo(x+i,yy):c.moveTo(x,yy)}c.stroke()}c.globalAlpha=1;c.fillStyle='rgba(255,255,255,.18)';c.fillRect(x-4,top-2,L+8,2)}
   else if(p==='retro'){for(const [col,o] of [[sk.c2,0],['#f4b02a',3],[sk.c3,6]]){c.fillStyle=col;c.fillRect(x-4,y-1+o,L+8,2.6)}}
   else if(p==='melon'){c.fillStyle='#8cd06a';c.fillRect(x-4,y+6,L+8,2);c.fillStyle=sk.c2;c.fillRect(x-4,top-2,L+8,y+6-top+2);c.fillStyle=sk.c3;for(let i=0;i<L/9;i++){c.beginPath();c.ellipse(x+5+i*9+R()*3,top+2+R()*(y+3-top),.8,1.4,0,0,7);c.fill()}}
@@ -3444,6 +3450,7 @@ const DS_RODS=[RSK('bamboo','Bamboo','C','#c8b060'),RSK('cork','Classic Cork','C
   RSK('kelp','Kelp Forest','R','#2a5a2a','#7ad06a','bubbles'),
   RSK('moonlight','Moonlight','E','#1a2040','#dfe8ff','stars','#cfe0ff'),RSK('dragon','Dragon Scale','E','#5a0e0e','#ffb02a','sparks','#ff5a1a'),
   RSK('kraken','Kraken Rod','L','#3a1a5a','#c87aff','bubbles','#b05aff'),RSK('chrome','Chrome Rod','L','#c8d0d8','#ffffff','stars','#ffffff')].map(x=>({...x,ds:1}));
+const Q_BOBS=[{...BSK('antenna','Antenna Bobber','L','antenna','#2a2a30','#d8dde6'),quest:true}];
 const DS_BOBS=[BSK('melon','Watermelon','C','melon','#ff5a6a','#3a8a3a'),BSK('beach','Beach Ball','C','beach','#ffffff','#e83a3a'),
   BSK('straw','Strawberry','U','straw','#e8303a','#3a9a3a'),BSK('donut','Donut','U','donut','#e8b070','#ff8ac0'),BSK('bball','Basketball','U','bball','#e8742a','#1a1a1a'),
   BSK('lighthouse','Mini Lighthouse','R','lighthouse','#f4f4f0','#d83a3a'),
@@ -3455,7 +3462,7 @@ const CRATES={paint:{n:'Paint',noun:'boat paint',items:SKINS,eq:'eq',verb:'Paint
   deep:{n:'Deep Sea',noun:'Deep Sea item',items:[...DS_PAINTS.map(x=>({...x,kind:'paint'})),...DS_RODS,...DS_BOBS],mixed:true}};
 // Locker and odds lists for each kind include the Series 2 items of that kind
 const crItems=k=>k==='deep'?CRATES.deep.items:k==='paint'?SKINS.concat(DS_PAINTS):k==='rod'?ROD_SKINS.concat(DS_RODS):BOB_SKINS.concat(DS_BOBS);
-const ITEM_BY=Object.fromEntries([...[...SKINS,...QSKINS,...DS_PAINTS].map(s=>[s.id,{...s,kind:'paint'}]),...ROD_SKINS.concat(DS_RODS).map(s=>[s.id,s]),...BOB_SKINS.concat(DS_BOBS).map(s=>[s.id,s])]);
+const ITEM_BY=Object.fromEntries([...[...SKINS,...QSKINS,...DS_PAINTS].map(s=>[s.id,{...s,kind:'paint'}]),...ROD_SKINS.concat(DS_RODS).map(s=>[s.id,s]),...BOB_SKINS.concat(DS_BOBS,Q_BOBS).map(s=>[s.id,s])]);
 const kindOf=id=>(ITEM_BY[id]||{}).kind||'paint';
 const rodEq=()=>{const id=PNT().eqR;return id&&ITEM_BY[id]?ITEM_BY[id]:null},bobEq=()=>{const id=PNT().eqB;return id&&ITEM_BY[id]?ITEM_BY[id]:null};
 function itemRoll(kind){let r=Math.random()*100,t='C';for(const k of SK_ORDER){r-=SK_TIERS[k].w;if(r<0){t=k;break}}const pool=CRATES[kind].items.filter(s=>s.t===t);return pool[Math.floor(Math.random()*pool.length)]}
@@ -3490,6 +3497,7 @@ function drawBobber(c,x,y,sk,d,T,r){r=r||4.5;const on=lit(d);c.save();
     const a=(Math.sin(T*3)+1)/2;c.fillStyle=`rgba(255,250,220,${a})`;star4(c,x+r*.9,y-r*.9,r*.5*a+.5)}
   else if(p==='lantern'){if(on||d<.7){c.globalAlpha=.35;c.fillStyle='#ffcf70';c.beginPath();c.arc(x,y,r*3,0,7);c.fill();c.globalAlpha=1}
     c.fillStyle=sk.c2;c.fillRect(x-r*.7,y-r*1.1,r*1.4,r*.3);c.fillRect(x-r*.7,y+r*.8,r*1.4,r*.3);c.fillStyle=sk.col;c.fillRect(x-r*.55,y-r*.8,r*1.1,r*1.6);c.strokeStyle=sk.c2;c.lineWidth=.5;c.beginPath();c.arc(x,y-r*1.3,r*.35,Math.PI,0);c.stroke()}
+  else if(p==='antenna'){const w=Math.sin(T*6)*.12;c.strokeStyle=sk.c2;c.lineWidth=Math.max(.6,r*.12);c.lineCap='round';c.beginPath();c.moveTo(x-r*.2,y-r*.6);c.lineTo(x-r*1.1+w*r,y-r*2.1);c.moveTo(x+r*.2,y-r*.6);c.lineTo(x+r*1.1+w*r,y-r*2.1);c.stroke();c.fillStyle='#ff4a3a';c.beginPath();c.arc(x-r*1.1+w*r,y-r*2.1,r*.16,0,7);c.arc(x+r*1.1+w*r,y-r*2.1,r*.16,0,7);c.fill();half(sk.col,'#4a4a52');c.fillStyle='#7affc8';c.globalAlpha=.5+.5*Math.sin(T*4);c.fillRect(x-r*.5,y-r*.25,r,r*.2);c.globalAlpha=1}
   else if(p==='melon'){half(sk.col,sk.c2);c.fillStyle='#bfe8a0';c.fillRect(x-r,y-.4,r*2,.8);c.fillStyle='#1a1a1a';for(const dx of [-.45,0,.45])c.fillRect(x+dx*r-.4,y-r*.5,.8,1.2)}
   else if(p==='beach'){c.save();c.beginPath();c.arc(x,y,r,0,7);c.clip();const cols=[sk.c2,'#ffffff','#2a7ad8','#ffffff','#f4c82a','#ffffff'];for(let i=0;i<6;i++){c.fillStyle=cols[i];c.beginPath();c.moveTo(x,y);c.arc(x,y,r,i*Math.PI/3+T*.5,(i+1)*Math.PI/3+T*.5);c.fill()}c.restore();c.fillStyle='#fff';c.beginPath();c.arc(x,y,r*.22,0,7);c.fill()}
   else if(p==='straw'){c.fillStyle=sk.col;c.beginPath();c.moveTo(x-r,y-r*.3);c.quadraticCurveTo(x,y-r*1.1,x+r,y-r*.3);c.quadraticCurveTo(x+r*.6,y+r*.9,x,y+r*1.1);c.quadraticCurveTo(x-r*.6,y+r*.9,x-r,y-r*.3);c.fill();c.fillStyle='#ffe4a0';for(const [dx,dy] of [[-.4,0],[.35,-.1],[0,.45],[-.1,-.35],[.4,.4]])c.fillRect(x+dx*r-.3,y+dy*r-.3,.6,.8);c.fillStyle=sk.c2;c.beginPath();c.moveTo(x-r*.7,y-r*.6);c.lineTo(x,y-r*1.1);c.lineTo(x+r*.7,y-r*.6);c.lineTo(x,y-r*.8);c.fill()}
@@ -3536,7 +3544,7 @@ function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crate
       <p class="cr-note">${K.mixed?`<b>New: Series 2.</b> Deep Sea crates hold one boat paint, rod finish or bobber from ${K.items.length}, all brand new.`:`${K.n} crates hold one ${K.noun} from ${K.items.length}.`}${CR.kind==='rod'?' Rare and better finishes add an effect when you land a fish.':CR.kind==='paint'?' Paint fits every boat.':''} Duplicates sell back for cash. ${free?'Your free crate for today is ready, any type.':'Next free crate tomorrow.'}</p>
       ${eq?`<div class="cr-eq"><img alt="" src="${itemThumb(eq.id,96,44)}"><div><small>${K.on}</small><b style="color:${SK_TIERS[eq.t].col}">${eq.n}</b></div></div>`:''}`}
   else if(CR.tab==='locker'){const L=CRATES[CR.lk];
-    body=`${kinds(CR.lk,'crl')}<p class="cr-note">Tap something you own to use it. Tap it again to go back to the stock one.${CR.lk==='deep'?' These are also in the Paint, Rod and Bobber lists.':''}</p>${CR.lk==='paint'&&S.boat<1?'<p class="cr-note warn">You need a boat to show paint off. Buy one in Gear.</p>':''}<div class="cr-grid">${(CR.lk==='paint'?crItems('paint').concat(QSKINS.filter(q=>p.own[q.id])):crItems(CR.lk)).map(s=>{const n=p.own[s.id]||0,on=p[CRATES[kindOf(s.id)].eq]===s.id;
+    body=`${kinds(CR.lk,'crl')}<p class="cr-note">Tap something you own to use it. Tap it again to go back to the stock one.${CR.lk==='deep'?' These are also in the Paint, Rod and Bobber lists.':''}</p>${CR.lk==='paint'&&S.boat<1?'<p class="cr-note warn">You need a boat to show paint off. Buy one in Gear.</p>':''}<div class="cr-grid">${(CR.lk==='paint'?crItems('paint').concat(QSKINS.filter(q=>p.own[q.id])):CR.lk==='bob'?crItems('bob').concat(Q_BOBS.filter(q=>p.own[q.id])):crItems(CR.lk)).map(s=>{const n=p.own[s.id]||0,on=p[CRATES[kindOf(s.id)].eq]===s.id;
       return `<button class="cr-item t-${s.t}${n?'':' locked'}${on?' on':''}" data-skin="${s.id}" ${n?'':'disabled'} aria-label="${n?s.n:'Locked '+SK_TIERS[s.t].n+' '+L.noun}">${n?`<img alt="" src="${itemThumb(s.id,96,44)}">`:'<span class="q">?</span>'}<b>${n?s.n:'???'}</b><small>${SK_TIERS[s.t].n}${n>1?' · ×'+n:''}${on?' · On':''}</small></button>`}).join('')}</div>`}
   else{const L=CRATES[CR.lk];body=`${kinds(CR.lk,'crl')}<p class="cr-note">Every crate rolls a tier first, then a random ${L.noun} from that tier. All crates use the same odds.</p><ul class="cr-odds">${SK_ORDER.map(t=>{const T0=SK_TIERS[t],n=L.items.filter(s=>s.t===t).length,got=L.items.filter(s=>s.t===t&&p.own[s.id]).length;
       return `<li style="--tc:${T0.col}"><b>${T0.n}</b><span>${T0.w}%</span><small>${n} ${L.noun}s · ${got} found · duplicate sells for ${Math.round(SK_REFUND[t]*100)}% of a crate</small></li>`}).join('')}</ul><p class="cr-note">Crates opened: ${p.opened}</p>`}
@@ -4633,6 +4641,7 @@ function renderHelp(){
    ['Cabin TV',`<p>Tap the TV in your cabin and use CH ▲▼ to flip channels. Channel 3 is Lake 7 (forecast and tournaments). Channel 4 is LLNN with news from around the lake. Channel 5 is Fish or Fake?, a daily quiz show: is each fish real or made up for Lantern Lake? It pays 5 prize tickets per right answer. Channel 6 is LLBA Tonight, with live scores, last night’s results and standings. Channel 8 is the Lake Shopping Channel, with one deal a day and the occasional TV-exclusive boat paint.</p>`],
    ['Fishdle',`<p>A daily puzzle in the Fishdle phone app: guess today’s mystery fish in 6 tries. Each guess shows whether its water, rarity, max size, bite times and weather match today’s fish (green), are close (yellow) or don’t (grey), with arrows pointing higher or lower. Everyone gets the same fish each day. Solving it pays 60 prize tickets for a first-try guess, down to 10 for a sixth. Tap Copy result to share your squares.</p>`],
    ['Lantern Pier Arcade',`<p>Visit the arcade from the Waters tab or when you leave your cabin. Play Bobber Toss, Whack-a-Gar and Pinball to win prize tickets (up to 600 a day), try the Claw Machine (30 tickets) for plushies, and take your 3 daily tries at Putt of the Day, the same hole for everyone. Spend tickets at the Prize Counter on crates, plushies, a neon sign and arcade-only boat paints. Tickets never cost cash and prices never change. Weekly high-score boards crown a champion for each cabinet with a trophy.</p>`],
+   ['The 3:33 Broadcast',`<p>A fifth case opens after you close The Angler Who Isn’t There. Your cabin TV turns itself on between 3 and 5 AM in game time. Be home and awake to record what it says, one broadcast a night. Then catch the fish it names in the right water at the right time of day, play the unlabeled tape it leaves you, pull up three radio parts at night and build a shortwave receiver. To finish, tune in at 3 AM: drag the dial to keep the needle on the drifting signal until it locks, three times.</p>`],
    ['The Angler Who Isn’t There',`<p>A fourth case opens after you close the Keeper’s Light. Someone on Reed Lake is wearing your face. Follow the leads (a text from your own number, a figure on the far water at dusk, lies in your own records, mirror shards at night) and craft a Silvered Lantern. The finale is Mirror Match on a clear night at Reed Lake: your reflection flashes a row of arrows and you press the opposite of each one in order (◀ becomes ▶, ▲ stays ▲). Tap the buttons or use the arrow keys. Win five rounds before three mistakes. The lies are only on your screen: your real stats, plaques and what friends see never change.</p>`],
    ['The Keeper’s Light',`<p>A third case opens after you close the Emerald Wake. Its finale is a storm rescue: when the lighthouse beam crosses the lost rowboat, tap Signal (or press Space). Three good signals bring the keeper home.</p>`],
    ['Lake monster, challenges and guestbooks',`<p>Open the <b>Together</b> tab in the Friends app. Every week a lake monster appears and every pound anyone lands hits it; beat it together for a $20,000 bounty each. Challenge a friend from their contact card: biggest fish of one kind in 24 hours, winner takes both stakes. When you visit a friend you can sign their guestbook and like their yard; the most-liked yard each week wins $25,000.</p>`],
@@ -5490,7 +5499,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:117,n:'Casefile weather fix',items:['Bug fix: a finished tournament’s results card, or a tournament invitation, no longer stops the Emerald Wake ghost (and the lighthouse keeper and your reflection) from showing up. Only a tournament you’re playing in holds them back.','Casefile: the final step of each case now shows when the weather it needs is coming next (fog, storms), so you know when to be out on the water.']},
+ {v:118,n:'The 3:33 Broadcast',items:['A fifth mystery for the Casefile app, unlocked by closing The Angler Who Isn’t There. Your cabin TV keeps turning itself on at 3:33 AM, and the voice on the dead channel knows things.','Record the late-night broadcasts, catch the fish the voice names, play a tape nobody made, and build a shortwave receiver from parts you pull up at night.','The finale is Tune In: hold the dial on a drifting signal before the static swallows it. Win a trophy, $300,000, the Dead Channel boat paint (flickering static) and the Antenna Bobber.']},
+{v:117,n:'Casefile weather fix',items:['Bug fix: a finished tournament’s results card, or a tournament invitation, no longer stops the Emerald Wake ghost (and the lighthouse keeper and your reflection) from showing up. Only a tournament you’re playing in holds them back.','Casefile: the final step of each case now shows when the weather it needs is coming next (fog, storms), so you know when to be out on the water.']},
 {v:116,n:'Moon air fix',items:['Bug fix: leaving the game while on the Moon no longer lets you fish there forever. Your air keeps running out while you’re away. When it does, you head back through the Lunar Gate and keep fishing at home water, and the away summary tells you.']},
 {v:115,n:'Fetch fix',items:['Bug fix: when you play fetch, you now throw the ball from where you’re standing, in the direction you’re facing, and your pet brings it back to you, wherever you’ve walked to. Before, the ball always flew from the front door.']},
 {v:114,n:'Depth fix',items:['Bug fix: pets, you, and visitors at an Open House now walk behind yard decorations when they’re farther back and in front of them when they’re closer, instead of always on top. Name tags and speech bubbles still show above everything.']},
@@ -7607,6 +7617,7 @@ const TAPES={
   frogrobics:{n:'Frog-robics',sub:'Workout video',r:'R',col:'#ff9ad8',dur:28,draw:tapeAerobics,d:'Three frogs in leg warmers want you to feel the burn.'},
   beast:{n:'In Search of the Lake Beast',sub:'Documentary',r:'L',col:'#d8c8a0',dur:32,draw:tapeBeast,d:'Grainy photos, a sightings map and a 1989 sonar contact. The truth is down there.'},
   slam:{n:"Lake Slam '91",sub:'Wrestling',r:'C',col:'#ffd05a',dur:32,draw:tapeWrestle,d:'The Bass Crusher takes on El Lucio, live from the Reed Lake Fairgrounds.'},
+  signal:{n:'(unlabeled)',sub:'Lake 7 recording',r:'L',col:'#9fe8c8',dur:30,draw:tapeSignal,quest:true,d:'Somebody taped the Lake 7 sign-off on Oct 27, 1987. It doesn’t sign off.'},
 };
 const cassSvg=`<svg viewBox="0 0 44 26" aria-hidden="true"><rect x="1" y="2" width="42" height="22" rx="1.5" fill="#121216"/><rect x="3" y="4" width="38" height="2" fill="#2a2a30"/><rect x="5" y="8" width="15" height="10" rx=".5" fill="#efe6d6"/><rect x="22" y="9" width="17" height="9" rx="1" fill="#3a3a46"/><circle cx="26.5" cy="13.5" r="3.2" fill="#1a1a1a" stroke="#aaa" stroke-width=".6"/><circle cx="34.5" cy="13.5" r="2" fill="#1a1a1a" stroke="#aaa" stroke-width=".6"/><rect x="1" y="20" width="42" height="4" fill="#0a0a0c"/></svg>`;
 function addTape(k,live){if(S.tapes[k])return;S.tapes[k]=S.day;if(k==='beast'&&S.q.step===4)setTimeout(()=>showToast('Watch it on the cabin VCR','Mystery lead'),4500);if(!live)return;const tp=TAPES[k];pushRecent({tape:k});
@@ -7644,7 +7655,7 @@ $('vPlay').onclick=()=>{if(VHS.mode==='play')VHS.mode='pause';else{VHS.mode='pla
 $('vRew').onclick=()=>{if(VHS.t>0){VHS.mode='rew';VHS.osdT=0}};
 $('vEject').onclick=()=>{sfx('clunk');const n=S.tape&&TAPES[S.tape]?TAPES[S.tape].n:'';S.tape=null;VHS.t=0;VHS.mode='stop';stopVHS();applyInput();save();if(n)showToast(`Ejected ${n}`)};
 function closeTV(){$('tvModal').hidden=true;stopVHS()}
-function loadTape(k){sfx('clunk');if(!S.tapes[k]||!TAPES[k])return;if(k==='beast'&&S.q.step===4)questAdvance(5);if(S.tape!==k){VHS.t=0}S.tape=k;S.tvInput='vhs';VHS.mode='play';VHS.osdT=0;$('gamesModal').hidden=true;stopVHS();VHS.mode='play';save();openTV()}
+function loadTape(k){sfx('clunk');if(!S.tapes[k]||!TAPES[k])return;if(k==='beast'&&S.q.step===4)questAdvance(5);if(k==='signal'&&S.q5&&S.q5.step===3)setTimeout(()=>q5Advance(4),20000);if(S.tape!==k){VHS.t=0}S.tape=k;S.tvInput='vhs';VHS.mode='play';VHS.osdT=0;$('gamesModal').hidden=true;stopVHS();VHS.mode='play';save();openTV()}
 function tapeCover(k){
   const T0=(bg,body,title,tc,band)=>`<svg viewBox="0 0 62 93" aria-hidden="true"><rect width="62" height="93" fill="${bg}"/>${body}<rect y="80" width="62" height="13" fill="${band||'#111'}"/><text x="5" y="89.5" font-family="Arial Black,Impact,sans-serif" font-size="7" fill="#fff" font-weight="900">VHS</text><text x="57" y="89.5" text-anchor="end" font-family="Arial,sans-serif" font-size="5" fill="#bbb">HI-FI</text>${title}</svg>`;
   const tt=(lines,y,size,col,font='Georgia,serif',w=700)=>lines.map((l,i)=>`<text x="31" y="${y+i*(size+2)}" text-anchor="middle" font-family="${font}" font-weight="${w}" font-size="${size}" fill="${col}">${l}</text>`).join('');
@@ -7654,11 +7665,12 @@ function tapeCover(k){
   if(k==='frogrobics')return T0('#2a0a5a',`<circle cx="31" cy="64" r="16" fill="#ffd05a"/><rect y="64" width="62" height="16" fill="#120a2a"/><ellipse cx="31" cy="50" rx="7" ry="9" fill="#4ab83a"/><ellipse cx="31" cy="38" rx="8" ry="5" fill="#4ab83a"/><rect x="23" y="36" width="16" height="2" fill="#ff5ac8"/><circle cx="27" cy="34" r="2.6" fill="#fff"/><circle cx="35" cy="34" r="2.6" fill="#fff"/><path d="M24 46l-8-8M38 46l8-8" stroke="#3aa83a" stroke-width="2.4"/>`,tt(['FROG-ROBICS'],18,8.5,'#ff5ac8','Impact,Arial Black,sans-serif',900),'#120a2a');
   if(k==='beast')return T0('#2a2218',`<rect x="6" y="28" width="50" height="42" fill="#c8b890"/><rect x="9" y="31" width="44" height="30" fill="#6a6050"/><path d="M12 58q6-4 10-1 3-10 6-14 2-2 4 0-1 4-3 6 1 5 2 9 4-2 7 0 4-2 8 0" stroke="#1a1610" stroke-width="2" fill="none"/>`,tt(['IN SEARCH OF','THE LAKE','BEAST'],10,6.5,'#f0e0b8'),'#1a140c');
   if(k==='slam')return T0('#140808',`<path d="M31 22l-6 14h5l-4 12 10-16h-5l4-10z" fill="#ffd05a"/><g fill="#d03a2a"><circle cx="17" cy="48" r="5"/><rect x="11" y="53" width="12" height="16" rx="3"/></g><g fill="#3a7ad0"><circle cx="45" cy="48" r="5"/><rect x="39" y="53" width="12" height="16" rx="3"/></g><rect x="0" y="70" width="62" height="2" fill="#ddd"/><rect x="0" y="74" width="62" height="2" fill="#ddd"/>`,tt(['LAKE',"SLAM '91"],13,10,'#ffd05a','Impact,Arial Black,sans-serif',900),'#3a0a0a');
+  if(k==='signal')return T0('#e8e4d8','<rect x="8" y="14" width="46" height="50" fill="#f4f0e2" stroke="#c8c0a8"/><text x="31" y="44" text-anchor="middle" font-family="monospace" font-size="13" fill="#3a3a3a">3:33</text>','<text x="31" y="74" text-anchor="middle" font-family="monospace" font-size="6" fill="#6a6a6a">DO NOT ERASE</text>');
   return T0('#2a2a30','<rect x="8" y="10" width="46" height="62" fill="#3a3a42"/>','<text x="31" y="48" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#5a5a66">?</text>');
 }
 function openTapes(){
   const g=$('cartGrid');g.innerHTML='';
-  for(const k of Object.keys(TAPES)){const tp=TAPES[k],own=!!S.tapes[k];const b=document.createElement('button');b.className='trow'+(own?'':' locked')+(S.tape===k?' inslot':'');b.disabled=!own;
+  for(const k of Object.keys(TAPES)){const tp=TAPES[k],own=!!S.tapes[k];if(tp.quest&&!own)continue;const b=document.createElement('button');b.className='trow'+(own?'':' locked')+(S.tape===k?' inslot':'');b.disabled=!own;
     b.innerHTML=`${tapeCover(own?k:'')}<div style="min-width:0"><b>${own?tp.n:'Undiscovered tape'}</b><p>${own?tp.d:'Still lost somewhere in the lake. Keep fishing.'}</p><div class="tmeta"><span class="rar-${tp.r}">${RAR[tp.r]}</span>${own?`<span>${tp.sub}</span><span>${Math.floor(tp.dur/60)}:${String(tp.dur%60).padStart(2,'0')}</span>${S.tape===k?'<span class="play">In the VCR</span>':'<span class="play">Watch</span>'}`:''}</div></div>`;
     if(own)b.onclick=()=>loadTape(k);g.append(b)}
   $('gamesModal').hidden=false;
@@ -7702,11 +7714,12 @@ function tapeWrestle(x,t){
 }
 // ---------- TV news ----------
 const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-function openTV(){ensureFc();ensureSched();renderTV();setTimeout(tvBug,50);hideTip();$('tvModal').hidden=false;applyInput();$('tvInput').focus()}
+function openTV(){ensureFc();ensureSched();if(q5Dead()&&S.tvInput==='vhs'){S.tvInput='tv';try{stopVHS()}catch(e){}}renderTV();setTimeout(tvBug,50);hideTip();$('tvModal').hidden=false;applyInput();$('tvInput').focus()}
 // The TV screen has a fixed size. Channels with more to show split it into pages that rotate every few seconds.
 const TVP={i:0,t:null,n:1};
 function renderTV(keep){const ch=TVCH[TVS().ch];$('tvCh').textContent=`CH ${ch.n}`;$('tvChName').textContent=ch.nm;
-  const P=ch.id==='news'?tvNewsParts():ch.id==='quiz'?tvQuizParts():ch.id==='sports'?tvSportsParts():ch.id==='shop'?tvShopParts():tvLake7Parts();
+  const dead=q5Dead();if(dead){$('tvCh').textContent='CH 0';$('tvChName').textContent='· · ·'}
+  const P=dead?tvDeadParts():ch.id==='news'?tvNewsParts():ch.id==='quiz'?tvQuizParts():ch.id==='sports'?tvSportsParts():ch.id==='shop'?tvShopParts():tvLake7Parts();
   const pages=P.pages.filter(Boolean);if(!keep||TVP.ch!==ch.id)TVP.i=0;TVP.ch=ch.id;TVP.n=pages.length;if(TVP.i>=pages.length)TVP.i=0;
   $('tvInner').innerHTML=`${P.head}<div class="tv-pages">${pages.map((h,i)=>`<div class="tv-page${i===TVP.i?' on':''}">${h}</div>`).join('')}</div>${pages.length>1?`<div class="tv-dots">${pages.map((_,i)=>`<i class="${i===TVP.i?'on':''}"></i>`).join('')}</div>`:''}${P.foot||''}`;
   tvBind();clearInterval(TVP.t);if(pages.length>1)TVP.t=setInterval(tvNextPage,7000)}
@@ -7800,7 +7813,7 @@ const QSTEPS=[null,
   {t:'Beast bait',d:'Nothing ordinary will tempt it. Craft a Beast Lure from 3 strange scales, one Legendary fish from your cooler, and $25,000.'},
   {t:'The showdown',d:'The sonar contact was 212 feet down in Deepwater Basin. Fish there at night during a thunderstorm or fog (check the TV forecast). When it bites, hold on.',w:'deep'},
   {t:'Case closed',d:'You landed the Lake Beast. Old Pete Dunmore owes you an apology.'}];
-function qStart(){q2Start();q3Start();q4Start();if(S.q.step===0&&S.total>=25){S.q.step=1;S.q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Lake Beast',sub:'Open the Casefile app on your phone',icon:magSvg});save()}}
+function qStart(){q2Start();q3Start();q4Start();q5Start();if(S.q.step===0&&S.total>=25){S.q.step=1;S.q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Lake Beast',sub:'Open the Casefile app on your phone',icon:magSvg});save()}}
 function questAdvance(n,quiet){if(S.q.step>=n)return;S.q.step=n;if(n===7)caseSolved(S.q);const st=QSTEPS[n];if(st&&!quiet)celebrate({lbl:n===7?'Case closed!':'Mystery updated',r:'M',name:st.t,sub:n===7?'The Lake Beast is yours':'New lead in your Casefile',icon:magSvg});save()}
 function questItem(k,live){
   if(k==='photo'){S.q.photo=true;if(live){celebrate({lbl:'Clue found!',r:'M',name:'A torn photograph',sub:'Huge scales on a riverbank…',icon:photoSvg});burst(BOB.x,BOB.y-10,['#ff8fb8','#fff'],30)}questAdvance(3,live)}
@@ -7809,13 +7822,13 @@ function questItem(k,live){
 }
 function craftLure(){const lg=coolerIds().find(k=>FI(k).r==='L');if(S.q.step!==5||S.q.scales<3||!lg||S.coins<25000)return;
   S.coins-=25000;S.q.scales-=3;const e=S.cooler[lg];e.val-=e.val/e.n;e.lbs-=e.lbs/e.n;e.n--;if(e.n<=0)delete S.cooler[lg];coolDirty=true;S.q.lure=true;questAdvance(6);renderCase()}
-function caseTabs(){const L=caseList();if(!CASEV)CASEV=c3Solved()&&Q4().step>0&&Q4().step<7?4:c2Solved()&&Q3().step>0&&Q3().step<7?3:c1Solved()&&Q2().step>0&&Q2().step<7?2:1;return `<div class="case-tabs" role="tablist">${L.map(c=>`<button role="tab" data-case="${c.id}" aria-selected="${CASEV===c.id}" class="${c.open?'':'locked'}">${c.open?'':'🔒 '}${c.n}${c.done?' ✓':''}</button>`).join('')}</div>`}
+function caseTabs(){const L=caseList();if(!CASEV)CASEV=c4Solved()&&Q5().step>0&&Q5().step<7?5:c3Solved()&&Q4().step>0&&Q4().step<7?4:c2Solved()&&Q3().step>0&&Q3().step<7?3:c1Solved()&&Q2().step>0&&Q2().step<7?2:1;return `<div class="case-tabs" role="tablist">${L.map(c=>`<button role="tab" data-case="${c.id}" aria-selected="${CASEV===c.id}" class="${c.open?'':'locked'}">${c.open?'':'🔒 '}${c.n}${c.done?' ✓':''}</button>`).join('')}</div>`}
 function bindCaseTabs(){document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{CASEV=+b.dataset.case;renderCase()})}
 // When the weather a case needs comes next. Weather runs on the real clock in 12-minute spells, the same for everyone.
 function nextWxText(ids){const k0=wxBlock();if(ids.includes(wxOfBlock(k0)))return 'right now';for(let k=k0+1;k<k0+360;k++)if(ids.includes(wxOfBlock(k))){const t=k*WXB_MS,m=Math.round((t-Date.now())/60000),tm=new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});return m<60?`in ${m} min (${tm})`:`at ${tm}${new Date(t).getDate()!==new Date().getDate()?' tomorrow':''}`}return 'not in the next 3 days'}
 const caseWxTip=(ids,label)=>`<p class="case-wx">🔮 Next ${label}: <b>${nextWxText(ids)}</b>, for about 12 minutes. Turn on ${label} alerts in Settings → App and alerts to get a heads-up.${tourLive()?' <b>Finish your tournament first:</b> nothing from this case shows up during one.':''}</p>`;
 function renderCase(){
-  const tabs=caseTabs();if(CASEV===4){const p=$('caseBody');p.innerHTML=tabs+renderCase4();bindCaseTabs();bindRestart();const lb=$('lanternBtn');if(lb)lb.onclick=craftLantern;return}if(CASEV===3){const p=$('caseBody');p.innerHTML=tabs+renderCase3();bindCaseTabs();bindRestart();const ob=$('oilBtn');if(ob)ob.onclick=craftOil;return}if(CASEV===2){const p=$('caseBody');p.innerHTML=tabs+renderCase2();bindCaseTabs();bindRestart();const sb=$('spiritBtn');if(sb)sb.onclick=craftSpirit;return}
+  const tabs=caseTabs();if(CASEV===5){const p=$('caseBody');p.innerHTML=tabs+renderCase5();bindCaseTabs();bindRestart();const rb=$('radioBtn');if(rb)rb.onclick=craftReceiver;return}if(CASEV===4){const p=$('caseBody');p.innerHTML=tabs+renderCase4();bindCaseTabs();bindRestart();const lb=$('lanternBtn');if(lb)lb.onclick=craftLantern;return}if(CASEV===3){const p=$('caseBody');p.innerHTML=tabs+renderCase3();bindCaseTabs();bindRestart();const ob=$('oilBtn');if(ob)ob.onclick=craftOil;return}if(CASEV===2){const p=$('caseBody');p.innerHTML=tabs+renderCase2();bindCaseTabs();bindRestart();const sb=$('spiritBtn');if(sb)sb.onclick=craftSpirit;return}
   const q=S.q;q.seen=q.step;const p=$('caseBody');
   const ok=v=>v?'✓':'✗';
   let html=`<div class="paper"><div class="mast"><h2>THE LAKE BEAST</h2><small><span>Case no. 1974-LB</span><span>${q.step===7?'Closed':q.step?'Open':'Rumor'}</span></small></div>`;
@@ -7889,10 +7902,11 @@ function drawGhostWake(d,T){const q=S.q2;if(!q||!q.ghost)return;const now=perfor
   ctx.restore()}
 var CASEV=0;
 const c1Solved=()=>!!(S.q&&(S.q.everSolved||S.q.step===7));
-function caseList(){return [{id:1,n:'The Lake Beast',open:true,done:S.q.step===7},{id:2,n:'The Emerald Wake',open:c1Solved(),done:Q2().step===7},{id:3,n:'The Keeper’s Light',open:c2Solved(),done:Q3().step===7},{id:4,n:'The Angler Who Isn’t There',open:c3Solved(),done:Q4().step===7}]}
+function caseList(){return [{id:1,n:'The Lake Beast',open:true,done:S.q.step===7},{id:2,n:'The Emerald Wake',open:c1Solved(),done:Q2().step===7},{id:3,n:'The Keeper’s Light',open:c2Solved(),done:Q3().step===7},{id:4,n:'The Angler Who Isn’t There',open:c3Solved(),done:Q4().step===7},{id:5,n:'The 3:33 Broadcast',open:c4Solved(),done:Q5().step===7}]}
 function caseSolved(q){q.everSolved=true;q.runs=(q.runs||0)+1;if(q.startDay==null){q.last=null;return}const days=Math.max(1,S.day-q.startDay+1);q.last=days;
   if(q.best==null||days<q.best){const had=q.best!=null;q.best=days;if(had)setTimeout(()=>showToast(`New case record: ${days} day${days>1?'s':''}!`,'Casefile'),2500)}}
 function caseRestart(id){if(id===1){const o=S.q;S.q={step:1,startDay:S.day,scales:0,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=1}
+  else if(id===5){const o=Q5();S.q5={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true,clues:q5Clues(S.day),got:{},parts:{}};CASEV=5}
   else if(id===4){const o=Q4();S.q4={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true,msgs:[],lies:{}};CASEV=4;setTimeout(()=>q4Text(1),3000)}
   else if(id===3){const o=Q3();S.q3={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=3}
   else{const o=Q2();S.q2={step:1,startDay:S.day,pages:0,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=2}
@@ -8409,6 +8423,102 @@ function q4Solve(){const q=Q4();const prize=Math.round(250000*caseReplayMult(q))
   if(!q.replay){S.trophies.unshift({name:'Mirror Match Champion',water:'lake',type:'big',score:'Beat your reflection',day:S.day});const P=PNT();P.own.reflection=(P.own.reflection||0)+1}
   q.doneDay=S.day;q4Advance(7,true);sfx('fanfare');Q4R.p=null;
   celebrate({lbl:'You beat your reflection!',r:'M',name:'The water lets go',sub:q.replay?`+$${money(prize)} · solved in ${q.last||'?'} day${q.last===1?'':'s'}`:`+$${money(prize)}, a trophy and the Reflection boat paint (find it in Crate Expectations, Locker)`,icon:magSvg});save()}
+// ==CASE 5== The 3:33 Broadcast. Opens after The Angler Who Isn't There.
+const Q5STEPS=[null,
+  {t:'Dead air',d:'Your TV keeps switching itself on in the middle of the night. Be inside your cabin, awake, between 3 and 5 AM and watch it. Record three broadcasts, one per night.'},
+  {t:'The numbers',d:'Each broadcast named a water, a fish and a time of day. Catch each one where and when the voice said.'},
+  {t:'A tape that wasn’t there',d:'An unlabeled tape has turned up in the drawer under your TV. Play it in the VCR.'},
+  {t:'Parts for a receiver',d:'The tape was a recipe. Fish at night in any water to pull up a vacuum tube, a copper coil and an antenna rod.'},
+  {t:'Build the receiver',d:'Wire the parts into a shortwave receiver: the 3 parts, 8 Scrap Metal, 4 Sea Glass and $150,000.'},
+  {t:'Tune in',d:'Back home between 3 and 5 AM, turn on the TV and tune the receiver to the dead channel. Hold the signal before the static swallows it, three times.'},
+  {t:'Case closed',d:'The broadcasts have stopped. The last thing the voice said was “thank you for listening.”'}];
+const Q5PARTS=[['tube','Vacuum tube','Still warm, somehow.'],['coil','Copper coil','Wound by hand, very neatly.'],['rod','Antenna rod','Bent toward the lake.']];
+const Q5WORDS=['THE STATION','NEVER','SIGNED OFF'];
+function Q5(){if(!S.q5||typeof S.q5!=='object')S.q5={step:0};const q=S.q5;q.got=q.got||{};q.parts=q.parts||{};return q}
+const c4Solved=()=>!!(S.q4&&(S.q4.everSolved||S.q4.step===7));
+const c5Solved=()=>!!(S.q5&&(S.q5.everSolved||S.q5.step===7));
+// three fish the voice names: no special weather, reachable with your boat, no two from the same water
+function q5Clues(seed){const R=tvSeed('q5'+seed),ws=WATERS.filter(w=>S.boat>=w.boat&&w.id!=='pond').map(w=>w.id),out=[],used=new Set();
+  for(let i=0;i<3;i++){const w=ws.filter(x=>!used.has(x));const water=w.length?w[Math.floor(R()*w.length)]:ws[Math.floor(R()*ws.length)];used.add(water);
+    const pool=FISH.filter(f=>f.at===water&&!f.wx&&!f.quest&&(f.r==='C'||f.r==='U')&&f.t&&f.t[0]);const f=pool[Math.floor(R()*pool.length)]||FISH.find(x=>x.at===water);out.push({w:water,f:f.id,ph:f.t[Math.floor(R()*f.t.length)]})}
+  return out}
+function q5Start(){const q=Q5();if(q.step===0&&c4Solved()){q.step=1;q.startDay=S.day;q.clues=q5Clues(S.day);celebrate({lbl:'New mystery!',r:'M',name:'The 3:33 Broadcast',sub:'A fifth case is open in the Casefile app',icon:magSvg});CASEV=5;
+  setTimeout(()=>{if(typeof phNotify==='function')phNotify('case','Lake 7','Your TV turned itself on last night. Nobody was watching.')},4000);save()}}
+function q5Advance(n,quiet){const q=Q5();if(q.step>=n)return;q.step=n;if(n===7)caseSolved(q);const st=Q5STEPS[n];
+  if(n===3&&!S.tapes.signal){S.tapes.signal=S.day;setTimeout(()=>showToast('An unlabeled tape is in the drawer under your TV','The 3:33 Broadcast'),2500)}
+  if(st&&!quiet)celebrate({lbl:n===7?'Case closed!':'Mystery updated',r:'M',name:st.t,sub:n===7?'The dead channel goes quiet':'New lead in your Casefile',icon:magSvg});save()}
+// the dead channel only airs 3:00–4:59 AM, while you're home and awake
+const q5Window=()=>S.min>=180&&S.min<300;
+function q5Dead(){const q=S.q5;return !!(q&&(q.step===1||q.step===6)&&q5Window()&&S.sleep&&S.sleep.ph==='awake'&&!S.sleep.at&&!VISIT)}
+function q5Broadcast(){const q=Q5(),i=Math.min(2,q.rec||0),c=(q.clues||[])[i];if(!c)return {lines:['. . .']};return {lines:['THIS IS LAKE 7.','THIS IS NOT A TEST.',`${W(c.w).n.toUpperCase()}.`,`${FI(c.f).n.toUpperCase()}.`,`${PH[c.ph].toUpperCase()}.`,`${i+1} . . . OF . . . 3`]}}
+function q5Heard(){const q=Q5();if(q.step!==1||q.recDay===S.day)return;q.rec=(q.rec||0)+1;q.recDay=S.day;sfx('ominous');const c=q.clues[q.rec-1];
+  celebrate({lbl:'Broadcast recorded',r:'M',name:`${q.rec} of 3: ${FI(c.f).n} · ${W(c.w).n} · ${PH[c.ph]}`,sub:q.rec<3?'The next one airs tomorrow night at 3:33':'That’s all three',icon:magSvg});if(q.rec>=3)setTimeout(()=>q5Advance(2),1600);save()}
+function q5Next(){const m=S.min<180?180-S.min:S.min<300?0:1440-S.min+180;return m?`in about ${Math.ceil(m)} real seconds (game time 3:00 AM)`.replace(/in about (\d+) real seconds/,(a,s)=>+s>=90?`in about ${Math.round(s/60)} min`:`in ${s} seconds`):'on now'}
+function q5OnCatch(f){const q=S.q5;if(!q||q.step!==2||!q.clues)return;q.clues.forEach((c,i)=>{if(!q.got[i]&&f.id===c.f&&S.water===c.w&&phaseOf(S.min)===c.ph){q.got[i]=1;sfx('ominous');
+  setTimeout(()=>celebrate({lbl:'The numbers line up',r:'M',name:`“${Q5WORDS[i]}”`,sub:`${FI(c.f).n} at ${W(c.w).n}, ${PH[c.ph].toLowerCase()} (${Object.keys(q.got).length} of 3)`,icon:magSvg}),900)}});
+  if(Object.keys(q.got).length>=3)setTimeout(()=>q5Advance(3),2600);save()}
+function q5Roll(m,water,minute){const q=S.q5;if(!q||q.step!==4)return null;if(isRealm(water)||phaseOf(minute)!=='night')return null;const left=Q5PARTS.filter(p=>!q.parts[p[0]]);if(left.length&&Math.random()<1/25)return {q5:left[Math.floor(Math.random()*left.length)][0]};return null}
+function q5Item(k,live){const q=Q5();if(q.step!==4||q.parts[k])return;q.parts[k]=1;const P=Q5PARTS.find(p=>p[0]===k),n=Object.keys(q.parts).length;
+  if(live){celebrate({lbl:'Clue found!',r:'M',name:`${P[1]} (${n} of 3)`,sub:P[2],icon:svgI('nut','#d8a840')});burst(BOB.x,BOB.y-10,['#ffd05a','#ffffff'],20)}if(n>=3)q5Advance(5,!live);save()}
+function craftReceiver(){const q=Q5();if(q.step!==5||Object.keys(q.parts).length<3||(S.mats.scrap||0)<8||(S.mats.glass||0)<4||S.coins<150000)return;S.mats.scrap-=8;S.mats.glass-=4;S.coins-=150000;q.radio=true;storeDirty=true;sfx('craft');q5Advance(6);renderCase()}
+// TV: during the window every channel shows the dead channel
+function tvDeadParts(){const q=Q5(),b=q5Broadcast(),fin=q.step===6;
+  const head=`<div class="tv-top"><span class="tv-logo q5logo">· · ·</span><span class="tv-clock">3:33 AM</span></div>`;
+  const body=fin?`<div class="q5dead"><div class="q5lines"><p>THIS IS LAKE 7.</p><p>${q.radio?'WE CAN HEAR YOU NOW.':'WE CANNOT HEAR YOU.'}</p><p>TUNE IN.</p></div>${q.radio?'<button class="jig" id="q5Tune">Tune the receiver</button>':''}</div>`
+    :`<div class="q5dead"><div class="q5lines">${b.lines.map((l,i)=>`<p style="animation-delay:${i*1.1}s">${esc(l)}</p>`).join('')}</div>${q.recDay===S.day?'<small>Recorded. The next broadcast airs tomorrow night.</small>':'<small>Recording…</small>'}</div>`;
+  return {head,pages:[body]}}
+// Finale: hold the dial on a drifting signal until it locks, before the static fills up. Three rounds.
+const Q5T={on:false};
+function q5TuneOpen(){const q=Q5();if(q.step!==6||!q.radio)return;$('tvModal').hidden=true;Object.assign(Q5T,{on:true,round:0,f:20,target:60,lock:0,stat:0,t:0,last:performance.now(),fails:0});
+  const B=$('plotBody');$('plotEye').textContent='The 3:33 Broadcast';$('plotTitle').textContent='Tune in';
+  B.innerHTML=`<p class="land-d" id="q5Msg">Round 1 of 3. Keep the needle on the signal until it locks.</p><canvas id="q5Cv" width="640" height="220" style="width:100%;border-radius:10px;background:#0a0c10"></canvas>
+    <input type="range" id="q5Dial" min="0" max="100" step="0.1" value="20" aria-label="Frequency dial" style="width:100%;margin:10px 0"><div class="q5bars"><span>Signal lock <i id="q5L"></i></span><span>Static <i id="q5S"></i></span></div>`;
+  $('plotModal').hidden=false;const d=$('q5Dial');d.oninput=()=>{Q5T.f=+d.value};
+  const kd=e=>{if(!Q5T.on)return;if(e.key==='ArrowLeft'||e.key==='a'){Q5T.f=Math.max(0,Q5T.f-1.5);d.value=Q5T.f}if(e.key==='ArrowRight'||e.key==='d'){Q5T.f=Math.min(100,Q5T.f+1.5);d.value=Q5T.f}};addEventListener('keydown',kd);Q5T.kd=kd;
+  cancelAnimationFrame(Q5T.raf);Q5T.raf=requestAnimationFrame(q5TuneLoop)}
+function q5TuneStop(){Q5T.on=false;cancelAnimationFrame(Q5T.raf);if(Q5T.kd)removeEventListener('keydown',Q5T.kd)}
+function q5TuneLoop(now){if(!Q5T.on)return;if($('plotModal').hidden){q5TuneStop();return}const dt=Math.min(.05,(now-Q5T.last)/1000);Q5T.last=now;Q5T.t+=dt;const r=Q5T.round,sp=[.35,.55,.8][r],band=[9,7,5.5][r];
+  Q5T.target=50+Math.sin(Q5T.t*sp*1.3)*28+Math.sin(Q5T.t*sp*2.9+1)*12;const off=Math.abs(Q5T.f-Q5T.target),on=off<band;
+  if(on){Q5T.lock=Math.min(1,Q5T.lock+dt/3.2);Q5T.stat=Math.max(0,Q5T.stat-dt*.25)}else{Q5T.stat=Math.min(1,Q5T.stat+dt*(.16+r*.05)*(off>band*2?1.4:1));Q5T.lock=Math.max(0,Q5T.lock-dt*.12)}
+  const cv=$('q5Cv'),c=cv.getContext('2d'),W0=640,H0=220;c.fillStyle='#0a0c10';c.fillRect(0,0,W0,H0);
+  for(let i=0;i<900*(.15+Q5T.stat*.85);i++){c.fillStyle=`rgba(255,255,255,${Math.random()*.5})`;c.fillRect(Math.random()*W0,Math.random()*H0,2,2)}
+  const sig=Math.max(0,1-off/(band*2.2));c.strokeStyle=`rgba(120,255,200,${.25+.75*sig})`;c.lineWidth=2;c.beginPath();for(let x=0;x<=W0;x+=4){const y=H0/2+Math.sin(x*.05+Q5T.t*8)*30*sig+(Math.random()-.5)*40*(1-sig);x?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+  const tx=Q5T.target/100*W0,fx=Q5T.f/100*W0;c.fillStyle='rgba(120,255,200,.12)';c.fillRect(tx-band/100*W0,0,band/50*W0,H0);c.fillStyle='#ff5a3a';c.fillRect(fx-2,0,4,H0);
+  if(sig>.6){c.fillStyle=`rgba(230,255,240,${(sig-.6)*2})`;c.font='bold 22px monospace';c.textAlign='center';c.fillText(['. . . 3 . . .','. . . 3 . . 3 . . .','THANK YOU FOR LISTENING'][r],W0/2,34)}
+  $('q5L').style.width=Math.round(Q5T.lock*100)+'%';$('q5S').style.width=Math.round(Q5T.stat*100)+'%';
+  if(Q5T.lock>=1){sfx('chime','R');Q5T.round++;Q5T.lock=0;Q5T.stat=0;Q5T.t=0;if(Q5T.round>=3){q5TuneStop();$('plotModal').hidden=true;q5Solve();return}$('q5Msg').textContent=`Locked! Round ${Q5T.round+1} of 3. The signal drifts faster now.`}
+  if(Q5T.stat>=1){sfx('miss');Q5T.fails++;Q5T.lock=0;Q5T.stat=0;Q5T.t=0;$('q5Msg').textContent=`The static swallowed it. Round ${Q5T.round+1} of 3: try again.`}
+  Q5T.raf=requestAnimationFrame(q5TuneLoop)}
+function q5Solve(){const q=Q5();const prize=Math.round(300000*caseReplayMult(q));S.coins+=prize;
+  if(!q.replay){S.trophies.unshift({name:'Signal Found',water:'lake',type:'big',score:'Tuned in at 3:33',day:S.day});const P=PNT();P.own.deadch=(P.own.deadch||0)+1;P.own.b_antenna=(P.own.b_antenna||0)+1}
+  q.doneDay=S.day;q5Advance(7,true);sfx('fanfare');
+  celebrate({lbl:'Signal found!',r:'M',name:'The dead channel signs off',sub:q.replay?`+$${money(prize)} · solved in ${q.last||'?'} day${q.last===1?'':'s'}`:`+$${money(prize)}, a trophy, the Dead Channel boat paint and the Antenna Bobber (Crate Expectations, Locker)`,icon:magSvg});save()}
+function renderCase5(){const q=Q5();q.seen=q.step;const ok=v=>v?'✓':'✗';
+  let html=`<div class="paper"><div class="mast"><h2>THE 3:33 BROADCAST</h2><small><span>Case no. 1987-L7</span><span>${q.step===7?'Closed':q.step?'Open':'Locked'}</span></small></div>`;
+  if(!q.step)return html+`<p style="font-size:.84rem;line-height:1.45;margin:0">Sealed. Close The Angler Who Isn’t There first.</p></div>`;
+  html+=caseRecordHTML(q,5)+`<div class="ptitle">Leads</div>`;const home=S.sleep&&S.sleep.ph==='awake'&&!S.sleep.at,win=q5Window();
+  for(let i=1;i<=7;i++){const st=Q5STEPS[i],done=q.step>i||(i===7&&q.step===7),cur=q.step===i&&i<7;if(i===7&&q.step<7)continue;let extra='';
+    if(cur&&(i===1||i===6))extra+=`<div class="chk"><span>${ok(home)} Inside your cabin, awake</span><span>${ok(win)} 3:00–5:00 AM (now ${fmtClock(S.min)})</span>${i===1?`<span>${ok((q.rec||0)>=3)} Broadcasts recorded: ${q.rec||0} of 3${q.recDay===S.day?' (next one tomorrow night)':''}</span>`:'<span>✓ Shortwave receiver</span>'}</div><p class="case-wx">📺 Next broadcast: <b>${q5Next()}</b>. Head home a little before 3 AM.</p>`;
+    if(cur&&i===2)extra+=`<div class="chk">${(q.clues||[]).map((c,k)=>`<span>${ok(q.got[k])} ${FI(c.f).n} · ${W(c.w).n} · ${PH[c.ph]}${S.boat<W(c.w).boat?' (needs a bigger boat)':''}</span>`).join('')}</div>`;
+    if(cur&&i===3)extra+=`<div class="chk"><span>${ok(S.tape==='signal')} Play the unlabeled tape (tape drawer under the TV)</span></div>`;
+    if(cur&&i===4){const ph=phaseOf(S.min);extra+=`<div class="chk">${Q5PARTS.map(p=>`<span>${ok(q.parts[p[0]])} ${p[1]}</span>`).join('')}<span>${ok(ph==='night')} Night (now ${PH[ph].toLowerCase()})</span></div>`}
+    if(cur&&i===5){const can=Object.keys(q.parts).length>=3&&(S.mats.scrap||0)>=8&&(S.mats.glass||0)>=4&&S.coins>=150000;extra+=`<div class="chk"><span>✓ Vacuum tube, copper coil, antenna rod</span><span>${ok((S.mats.scrap||0)>=8)} 8 Scrap Metal (${S.mats.scrap||0})</span><span>${ok((S.mats.glass||0)>=4)} 4 Sea Glass (${S.mats.glass||0})</span><span>${ok(S.coins>=150000)} $150,000</span></div><button class="sbtn" id="radioBtn" ${can?'':'disabled'}>Build the receiver</button>`}
+    if(cur&&i===6)extra+=`<p>Tune in: drag the dial (or use ◀ ▶) to keep the red needle inside the green band. Hold it there until the signal locks. If the static fills up first, try the round again.</p>`;
+    html+=`<div class="case-step${cur?' cur':''}${!done&&!cur?' lock':''}"><span class="mk">${done?'✓':cur?'➤':'?'}</span><div><b>${done||cur?st.t:'Unknown lead'}</b>${done||cur?`<p>${st.d}</p>`:''}${extra}</div></div>`}
+  const ev=[];if((q.rec||0)>0||q.step>=2)ev.push(`Broadcast recordings ×${q.step>=2?3:q.rec}`);const ng=Object.keys(q.got||{}).length;if(ng||q.step>=3)ev.push(`Decoded words ×${q.step>=3?3:ng}`);if(q.step>=4)ev.push('Unlabeled tape');const np=Object.keys(q.parts||{}).length;if(np)ev.push(`Radio parts ×${np}`);if(q.radio)ev.push('Shortwave receiver');if(q.step===7)ev.push('A thank-you from nobody');
+  const words=Q5WORDS.filter((w,k)=>q.step>=3||(q.got||{})[k]);
+  return html+`<div class="ptitle">Evidence</div><div class="ev">${ev.map(e=>`<span>${e}</span>`).join('')}</div>${words.length?`<div class="ptitle">The message so far</div><div style="font-size:.86rem;letter-spacing:.06em;font-family:monospace">${words.join(' · ')}${words.length<3?' · …':''}</div>`:''}</div>`}
+// the tape: a 1987 Lake 7 late-night sign-off that doesn't sign off
+function tapeSignal(x,t){x.fillStyle='#0a0c14';x.fillRect(0,0,320,240);
+  if(t<6){x.fillStyle='#1a2a5a';x.fillRect(0,0,320,240);x.fillStyle='#ffffff';x.font='bold 30px Georgia,serif';x.textAlign='center';x.fillText('LAKE 7',160,104);x.font='14px Georgia,serif';x.fillText('NIGHTWATCH WEATHER',160,128);x.font='11px monospace';x.fillText('OCT 27 1987  2:58 AM',160,170);x.textAlign='left';return}
+  if(t<18){x.fillStyle='#2a3a6a';x.fillRect(0,0,320,240);x.fillStyle='#4a7ab0';x.beginPath();x.ellipse(200,120,90,70,0,0,7);x.fill();x.fillStyle='#e8eef8';x.font='bold 12px sans-serif';x.fillText('FOG ADVISORY',150,60);
+    x.fillStyle='#d8b890';x.beginPath();x.arc(80,120,22,0,7);x.fill();x.fillStyle='#3a2a20';x.fillRect(58,142,44,70);x.fillStyle='#1a1a1a';x.fillRect(70,112,6,3);x.fillRect(86,112,6,3);
+    const frozen=t>12;if(!frozen){x.fillStyle='#8a4a3a';x.fillRect(74,128+Math.sin(t*12)*1.5,12,2)}
+    x.fillStyle='rgba(0,0,0,.6)';x.fillRect(0,196,320,36);x.fillStyle='#fff';x.font='12px sans-serif';x.fillText(frozen?'...':t<9?'"...and that\'s the weather. Lake 7 signs off at three."':'"Stay off the water tonight, folks."',12,218);
+    if(frozen){x.fillStyle=`rgba(255,255,255,${Math.random()*.15})`;x.fillRect(0,0,320,240)}return}
+  for(let i=0;i<1400;i++){x.fillStyle=`rgba(255,255,255,${Math.random()*.6})`;x.fillRect(Math.random()*320,Math.random()*240,2,2)}
+  if(t>21){x.fillStyle='rgba(0,0,0,.65)';x.fillRect(30,60,260,120);x.fillStyle='#d8ffe8';x.font='bold 15px monospace';x.textAlign='center';
+    const L=['3:33','VACUUM TUBE.','COPPER COIL.','ANTENNA.','FISH FOR THEM AT NIGHT.','THEN TUNE IN.'];L.forEach((l,i)=>{if(t>21+i*1.3)x.fillText(l,160,84+i*17)});x.textAlign='left'}}
 // Messages: a thread from "you" (local only, never sent to the server)
 const q4Av=()=>`<span class="tx-av q4av"><img alt="" src="${portraitURL(lookOf(S.look))}"></span>`;
 function q4InboxRow(){const q=S.q4;if(!q||!q.msgs||!q.msgs.length)return '';const last=q.msgs[q.msgs.length-1];
@@ -8833,7 +8943,7 @@ function tvShopParts(){const t=TVS(),it=tvDeal(),bought=t.shop===arcUTC();
     <div class="s8-price">${it.was?`<s>$${money(it.was)}</s> `:''}<b>$${money(it.c)}</b></div>
     <button class="jig" id="s8Buy" ${bought||S.coins<it.c?'disabled':''}>${bought?'Sold to you!':S.coins<it.c?'Not enough cash':'Buy now'}</button></div>
     <p class="fof-note">One deal a day · next deal in ${tvUntil()}</p></div>`]}}
-function tvBind(){document.querySelectorAll('[data-fof]').forEach(b=>b.onclick=()=>tvAnswer(b.dataset.fof==='1'));const sb=$('s8Buy');if(sb)sb.onclick=tvBuy}
+function tvBind(){{const tb=$('q5Tune');if(tb)tb.onclick=q5TuneOpen;clearTimeout(Q5T.heard);if(q5Dead()&&S.q5.step===1&&S.tvInput!=='vhs')Q5T.heard=setTimeout(()=>{if(!$('tvModal').hidden&&q5Dead())q5Heard();if(!$('tvModal').hidden)renderTV(true)},7000)}document.querySelectorAll('[data-fof]').forEach(b=>b.onclick=()=>tvAnswer(b.dataset.fof==='1'));const sb=$('s8Buy');if(sb)sb.onclick=tvBuy}
 
 // ==FRIENDS EXTRAS== lake monster, challenges, guestbooks and yard likes
 const GB_ST=['🎃','🐟','⭐','👻','🏆','🌲','❤️','🎣','🦆','🌙','🍂','🔥'];

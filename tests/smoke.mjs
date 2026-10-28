@@ -242,6 +242,18 @@ await check('casefile: an old tournament card or invite no longer blocks the Eme
     S.tour={phase:'done',name:'x',me:1,rivals:[]};o.done=roll();S.tour={phase:'invite',left:40,name:'x',rivals:[]};o.inv=roll();S.tour={phase:'live',left:200,name:'x',rivals:[]};o.live=roll();S.tour=null;o.next=nextWxText(['fog']);return o});
   ok(r.done>0&&r.inv>0&&r.live===0,'ghost blocking '+JSON.stringify(r));ok(/now|min|at /.test(r.next),'fog forecast '+r.next);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('case 5, The 3:33 Broadcast: opens after case 4 and plays through to the rewards',async()=>{const p=await page(VPS[0][1],save({coins:5e5,boat:4,min:190,day:40,mats:{scrap:20,glass:10},q:{step:7,everSolved:true},q2:{step:7,everSolved:true},q3:{step:7,everSolved:true},q4:{step:7,everSolved:true,msgs:[],lies:{}},sleep:{ph:'awake',t:0,visit:true},tapes:{}}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);qStart()});ok(await p.evaluate(()=>Q5().step===1&&Q5().clues.length===3),'case opens');
+  await p.evaluate(()=>{const q=Q5();for(let n=0;n<3;n++){S.day=40+n;q.rec=n;q.recDay=null;openTV();document.getElementById('tvModal').hidden=true}});
+  ok(await p.evaluate(()=>{S.day=50;S.min=190;openTV();return document.querySelector('.q5dead')!==null}),'dead channel shows 3–5 AM at home');await p.waitForTimeout(7600);
+  ok(await p.evaluate(()=>{document.getElementById('tvModal').hidden=true;return Q5().rec>=1}),'broadcast recorded');
+  const r=await p.evaluate(()=>{const q=Q5();q.rec=3;q.step=2;for(const c of q.clues){S.water=c.w;S.min={dawn:330,day:600,dusk:1150,night:1300}[c.ph];q5OnCatch(FI(c.f))}return Object.keys(q.got).length});ok(r===3,'all three fish decode');await p.waitForTimeout(3000);
+  ok(await p.evaluate(()=>Q5().step===3&&!!S.tapes.signal),'tape appears');
+  await p.evaluate(()=>{Q5().step=4;q5Item('tube',false);q5Item('coil',false);q5Item('rod',false);craftReceiver()});ok(await p.evaluate(()=>Q5().step===6&&Q5().radio),'receiver built');
+  await p.evaluate(()=>{S.min=200;S.sleep={ph:'awake',t:0,visit:true};openTV()});await p.click('#q5Tune');await p.evaluate(()=>{window.__t=setInterval(()=>{Q5T.f=Q5T.target},30)});await p.waitForTimeout(13000);
+  ok(await p.evaluate(()=>Q5().step===7&&!!PNT().own.deadch&&!!PNT().own.b_antenna&&S.trophies[0].name==='Signal Found'),'solved with rewards');
+  ok(await p.evaluate(()=>{const L=[];for(let i=0;i<4000;i++){const x=rollPull({wx:'clear'},'lake',600);if(x&&x.tape)L.push(x.tape)}return !L.includes('signal')}),'quest tape never drops randomly');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

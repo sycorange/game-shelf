@@ -43,6 +43,7 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - Workbench: trade-up rules and daily legendary cap; decor upgrades and the visitor copy
 - Moon: air runs out while away (unless you have the Moon Base)
 - Casefile: case encounters aren't blocked by an old tournament card; next-weather forecast
+- Case 5 (The 3:33 Broadcast): full play-through to the rewards
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.
