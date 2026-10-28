@@ -443,6 +443,11 @@ await check('big yards: visitors get every placed thing and the ground, even pas
     const len=JSON.stringify(mpCabin()).length;MPV.last=0;await mpSync(true);const c=await api('cabin',{id:r.id,key:r.key,target:r.id}),y=yardParse(JSON.parse(c.cabin).ext.yard);return {len,n:y.it.length,g:Object.keys(y.g).length}});
   ok(r.len>19500,'snapshot is past the old limit ('+r.len+')');ok(r.n===600,'all 600 things shared ('+r.n+')');ok(r.g>0,'ground shared');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('big games move: transfer codes and cloud saves take big saves, and a failed move offers the save code',async()=>{const p=await page(VPS[1][1],save({}));
+  ok(await p.evaluate(async()=>{const r=await api('xfer/put',{data:'LL2.'+'A'.repeat(400000)});return /^[A-Z0-9]{6}$/.test(r.code)}),'400 KB transfer code');
+  await p.evaluate(()=>{const f=window.fetch;window.fetch=(u,o)=>String(u).includes('xfer/put')?Promise.resolve(new Response('{"error":"bad-save"}',{status:400})):String(u).includes('lanternlake.app')?Promise.resolve(new Response('{}')):f(u,o);const b=document.createElement('button');b.id='mvGo';document.body.append(b);return moveGame('mvGo')});
+  await p.waitForTimeout(800);ok(await p.evaluate(()=>{const g=i=>document.getElementById(i);return !g('saveModal').hidden&&g('xfOff').open&&g('saveTxt').value.length>50}),'save code offered instead');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
