@@ -976,6 +976,19 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .sb-champ{text-align:center;font-family:var(--font-display);font-size:1rem;color:#ffd05a;background:#1a2a14;border:1px solid #ffd05a;border-radius:12px;padding:10px}
 .sb-head{font-family:"Playfair Display",Georgia,serif;font-weight:900;font-size:.95rem;line-height:1.15;margin:2px 0 6px}
 .sbt td{font-size:.74rem}
+.case-back{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}.case-back button{border:1px solid #c8b890;background:#f4ecd8;color:#3a2a14;border-radius:8px;padding:6px 12px;font:700 .8rem Georgia,serif;cursor:pointer}.case-back span{font:italic .75rem Georgia,serif;color:#8a7a5a}
+.cf-head{display:flex;justify-content:space-between;align-items:baseline;margin:2px 2px 10px;font-family:Georgia,serif;color:#3a2a14}.cf-head b{letter-spacing:.2em}.cf-head small{color:#8a7a5a;font-style:italic}
+.cf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:18px 10px;padding-top:10px}
+.cf-folder{position:relative;text-align:left;display:grid;gap:4px;align-content:start;min-height:118px;padding:14px 10px 10px;border:1px solid #b89a5a;border-radius:0 8px 8px 8px;background:linear-gradient(#ead29a,#dcbf7e);color:#3a2a14;font-family:Georgia,serif;cursor:pointer;box-shadow:0 3px 0 #b89a5a,0 6px 12px rgba(0,0,0,.25)}
+.cf-folder:hover{transform:translateY(-2px)}.cf-folder:active{transform:translateY(1px)}
+.cf-tab{position:absolute;left:-1px;top:-17px;padding:2px 10px;border:1px solid #b89a5a;border-bottom:0;border-radius:6px 6px 0 0;background:#ead29a;font:600 .62rem 'Courier New',monospace;letter-spacing:.06em;color:#6a5030}
+.cf-folder b{font-size:.92rem;line-height:1.2;padding-right:4px}.cf-folder small{font-size:.72rem;color:#6a5030;line-height:1.3}
+.cf-prog{display:block;height:5px;border-radius:3px;background:rgba(90,60,20,.18);overflow:hidden;margin-top:auto}.cf-prog i{display:block;height:100%;background:#8a3a1a}
+.cf-stamp{justify-self:end;font:800 .7rem 'Courier New',monospace;letter-spacing:.12em;padding:2px 6px;border:2px solid currentColor;border-radius:4px;transform:rotate(-8deg);margin-top:4px;opacity:.85}
+.cf-stamp.s-closed{color:#a8281a}.cf-stamp.s-open{color:#2a5a2a}.cf-stamp.s-rumor{color:#6a5030}.cf-stamp.s-sealed{color:#5a5a5a}
+.cf-folder.sealed{filter:grayscale(.85);opacity:.7;cursor:not-allowed}.cf-folder.closed{background:linear-gradient(#e2cfa4,#d2bb88)}
+.cf-new{position:absolute;right:-6px;top:-10px;background:#c8281a;color:#fff;font:700 .62rem sans-serif;padding:2px 7px;border-radius:999px;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.cf-note{font:italic .74rem Georgia,serif;color:#8a7a5a;text-align:center;margin:14px 0 2px}
 .case-tabs{display:flex;gap:6px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.case-tabs::-webkit-scrollbar{display:none}.case-tabs button{flex:1 0 auto;min-width:96px;max-width:150px}
 .case-tabs button{flex:1;border:1px solid #c8b890;background:#f4ecd8;color:#3a2a14;border-radius:8px;padding:6px 8px;font-weight:700;font-size:.74rem;font-family:Georgia,serif}
 .case-tabs button[aria-selected="true"]{background:#2a1e10;color:#f4ecd8;border-color:#2a1e10}
@@ -3276,7 +3289,7 @@ const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
   $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='discord'?'v-dc':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
-  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case')renderCase();if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='fishdle')renderFishdle();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
+  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case'){CASEV=0;renderCase()}if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='fishdle')renderFishdle();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin)CR.tab=CR.tab||'open';renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
   const sec=v==='lock'?$('phLock'):v==='home'?$('phApps'):$('app-'+v);if(sec)sec.scrollTop=0;
 }
 
@@ -5499,7 +5512,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
- {v:118,n:'The 3:33 Broadcast',items:['A fifth mystery for the Casefile app, unlocked by closing The Angler Who Isn’t There. Your cabin TV keeps turning itself on at 3:33 AM, and the voice on the dead channel knows things.','Record the late-night broadcasts, catch the fish the voice names, play a tape nobody made, and build a shortwave receiver from parts you pull up at night.','The finale is Tune In: hold the dial on a drifting signal before the static swallows it. Win a trophy, $300,000, the Dead Channel boat paint (flickering static) and the Antenna Bobber.']},
+ {v:119,n:'Case folders',items:['The Casefile app now opens on a shelf of case folders, one per mystery, each showing whether it’s open, closed or still sealed, how far along you are, and a “New lead” tag when something changed. Tap a folder to open it and ‹ All cases to go back.']},
+{v:118,n:'The 3:33 Broadcast',items:['A fifth mystery for the Casefile app, unlocked by closing The Angler Who Isn’t There. Your cabin TV keeps turning itself on at 3:33 AM, and the voice on the dead channel knows things.','Record the late-night broadcasts, catch the fish the voice names, play a tape nobody made, and build a shortwave receiver from parts you pull up at night.','The finale is Tune In: hold the dial on a drifting signal before the static swallows it. Win a trophy, $300,000, the Dead Channel boat paint (flickering static) and the Antenna Bobber.']},
 {v:117,n:'Casefile weather fix',items:['Bug fix: a finished tournament’s results card, or a tournament invitation, no longer stops the Emerald Wake ghost (and the lighthouse keeper and your reflection) from showing up. Only a tournament you’re playing in holds them back.','Casefile: the final step of each case now shows when the weather it needs is coming next (fog, storms), so you know when to be out on the water.']},
 {v:116,n:'Moon air fix',items:['Bug fix: leaving the game while on the Moon no longer lets you fish there forever. Your air keeps running out while you’re away. When it does, you head back through the Lunar Gate and keep fishing at home water, and the away summary tells you.']},
 {v:115,n:'Fetch fix',items:['Bug fix: when you play fetch, you now throw the ball from where you’re standing, in the direction you’re facing, and your pet brings it back to you, wherever you’ve walked to. Before, the ball always flew from the front door.']},
@@ -7822,12 +7836,20 @@ function questItem(k,live){
 }
 function craftLure(){const lg=coolerIds().find(k=>FI(k).r==='L');if(S.q.step!==5||S.q.scales<3||!lg||S.coins<25000)return;
   S.coins-=25000;S.q.scales-=3;const e=S.cooler[lg];e.val-=e.val/e.n;e.lbs-=e.lbs/e.n;e.n--;if(e.n<=0)delete S.cooler[lg];coolDirty=true;S.q.lure=true;questAdvance(6);renderCase()}
-function caseTabs(){const L=caseList();if(!CASEV)CASEV=c4Solved()&&Q5().step>0&&Q5().step<7?5:c3Solved()&&Q4().step>0&&Q4().step<7?4:c2Solved()&&Q3().step>0&&Q3().step<7?3:c1Solved()&&Q2().step>0&&Q2().step<7?2:1;return `<div class="case-tabs" role="tablist">${L.map(c=>`<button role="tab" data-case="${c.id}" aria-selected="${CASEV===c.id}" class="${c.open?'':'locked'}">${c.open?'':'🔒 '}${c.n}${c.done?' ✓':''}</button>`).join('')}</div>`}
-function bindCaseTabs(){document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{CASEV=+b.dataset.case;renderCase()})}
+// Casefile: a landing page of case folders; inside a case, a back button returns to it.
+function caseTabs(){const L=caseList(),i=L.findIndex(c=>c.id===CASEV);return `<div class="case-back"><button data-case="0">‹ All cases</button><span>Case ${i+1} of ${L.length}</span></div>`}
+const CASE_NO={1:'1974-LB',2:'1952-EW',3:'1986-KL',4:'2026-AW',5:'1987-L7'},CASE_Q=id=>id===1?S.q:id===2?Q2():id===3?Q3():id===4?Q4():Q5();
+const CASE_LOCK={2:'Close The Lake Beast first',3:'Close The Emerald Wake first',4:'Close The Keeper’s Light first',5:'Close The Angler Who Isn’t There first'};
+function caseLanding(){const L=caseList();
+  return `<div class="cf-head"><b>CASEFILE</b><small>${L.filter(c=>c.done).length} of ${L.length} closed</small></div><div class="cf-grid">${L.map(c=>{const q=CASE_Q(c.id)||{},st=q.step||0,news=c.open&&st>0&&st<7&&(q.seen||0)<st;
+    const status=!c.open?'SEALED':st===7?'CLOSED':st===0?'RUMOR':'OPEN',line=!c.open?CASE_LOCK[c.id]:st===7?(q.last?`Solved in ${q.last} day${q.last>1?'s':''}`:'Solved')+(q.best!=null?` · best ${q.best}`:''):st===0?`Catch ${Math.max(0,25-S.total)} more fish to hear the rumor`:`Lead ${st} of 6`;
+    return `<button class="cf-folder${c.open?'':' sealed'}${st===7?' closed':''}" data-case="${c.id}" ${c.open?'':'disabled'} aria-label="${esc(c.n)}, ${status.toLowerCase()}"><span class="cf-tab">No. ${CASE_NO[c.id]}</span><b>${esc(c.n)}</b><small>${line}</small>${st>0&&st<7?`<i class="cf-prog"><i style="width:${Math.round((st-1)/6*100)}%"></i></i>`:''}<em class="cf-stamp s-${status.toLowerCase()}">${status}</em>${news?'<span class="cf-new">New lead</span>':''}</button>`}).join('')}</div><p class="cf-note">Tap a folder to open the case.</p>`}
+function bindCaseTabs(){document.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{CASEV=+b.dataset.case;sfx('click');renderCase();const p=$('caseBody');if(p)p.scrollTop=0})}
 // When the weather a case needs comes next. Weather runs on the real clock in 12-minute spells, the same for everyone.
 function nextWxText(ids){const k0=wxBlock();if(ids.includes(wxOfBlock(k0)))return 'right now';for(let k=k0+1;k<k0+360;k++)if(ids.includes(wxOfBlock(k))){const t=k*WXB_MS,m=Math.round((t-Date.now())/60000),tm=new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});return m<60?`in ${m} min (${tm})`:`at ${tm}${new Date(t).getDate()!==new Date().getDate()?' tomorrow':''}`}return 'not in the next 3 days'}
 const caseWxTip=(ids,label)=>`<p class="case-wx">🔮 Next ${label}: <b>${nextWxText(ids)}</b>, for about 12 minutes. Turn on ${label} alerts in Settings → App and alerts to get a heads-up.${tourLive()?' <b>Finish your tournament first:</b> nothing from this case shows up during one.':''}</p>`;
 function renderCase(){
+  if(!CASEV||!caseList().find(c=>c.id===CASEV&&c.open)){CASEV=0;$('caseBody').innerHTML=caseLanding();bindCaseTabs();return}
   const tabs=caseTabs();if(CASEV===5){const p=$('caseBody');p.innerHTML=tabs+renderCase5();bindCaseTabs();bindRestart();const rb=$('radioBtn');if(rb)rb.onclick=craftReceiver;return}if(CASEV===4){const p=$('caseBody');p.innerHTML=tabs+renderCase4();bindCaseTabs();bindRestart();const lb=$('lanternBtn');if(lb)lb.onclick=craftLantern;return}if(CASEV===3){const p=$('caseBody');p.innerHTML=tabs+renderCase3();bindCaseTabs();bindRestart();const ob=$('oilBtn');if(ob)ob.onclick=craftOil;return}if(CASEV===2){const p=$('caseBody');p.innerHTML=tabs+renderCase2();bindCaseTabs();bindRestart();const sb=$('spiritBtn');if(sb)sb.onclick=craftSpirit;return}
   const q=S.q;q.seen=q.step;const p=$('caseBody');
   const ok=v=>v?'✓':'✗';

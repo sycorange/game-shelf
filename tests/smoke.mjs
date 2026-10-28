@@ -254,6 +254,12 @@ await check('case 5, The 3:33 Broadcast: opens after case 4 and plays through to
   ok(await p.evaluate(()=>Q5().step===7&&!!PNT().own.deadch&&!!PNT().own.b_antenna&&S.trophies[0].name==='Signal Found'),'solved with rewards');
   ok(await p.evaluate(()=>{const L=[];for(let i=0;i<4000;i++){const x=rollPull({wx:'clear'},'lake',600);if(x&&x.tape)L.push(x.tape)}return !L.includes('signal')}),'quest tape never drops randomly');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('casefile: opens on a shelf of case folders; a folder opens its case and All cases goes back',async()=>{const p=await page(VPS[1][1],save({q:{step:7,everSolved:true,seen:7},q2:{step:3,startDay:30,seen:2}}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);openPhone();phShow('case')});
+  ok(await p.evaluate(()=>document.querySelectorAll('.cf-folder').length===5&&document.querySelectorAll('.cf-folder.sealed').length===3&&!!document.querySelector('.cf-new')),'folders, sealed cases and a new-lead tag');
+  await p.click('[data-case="2"]');ok(await p.evaluate(()=>/EMERALD WAKE/.test(document.getElementById('caseBody').textContent)),'folder opens the case');
+  await p.click('[data-case="0"]');ok(await p.evaluate(()=>!!document.querySelector('.cf-grid')&&!document.querySelector('.cf-new')),'back to the shelf, lead marked seen');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
