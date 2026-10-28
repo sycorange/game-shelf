@@ -765,7 +765,7 @@ async function route(req,env,url,ctx){
     const isBeta=(Number(me.created)||0)<BETA_CUT,isSup=!!me.sup,isAdm=me.lname===OWNER_NAME,so=b.stats&&typeof b.stats==='object'?Object.assign({},b.stats,isBeta?{beta:1}:{},{sup:isSup?1:0,adm:isAdm?1:0}):null;
     const stats=so?JSON.stringify(so).slice(0,4000):me.stats;
     const wkn=String(b.wk)===wk?Math.max(0,Math.min(1e6,b.wkn|0)):0;
-    const hasCab=typeof b.cabin==='string'&&b.cabin.length<20000;
+    const hasCab=typeof b.cabin==='string'&&b.cabin.length<160000;
     st.push(db.prepare('UPDATE players SET stats=?,wk=?,wkn=?,seen=?,host=?,hts=?'+(hasCab?',cabin=?':'')+' WHERE id=?').bind(...[stats,wk,wkn,now,clean(url.hostname,40),now].concat(hasCab?[b.cabin]:[]),me.id));
     for(const c of (Array.isArray(b.catches)?b.catches:[]).slice(0,20)){
       const w=+c.w;if(!(w>0&&w<5000)||typeof c.fish!=='string')continue;

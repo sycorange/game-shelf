@@ -436,6 +436,13 @@ await check('Phoenix Collection: Mythic set in Crate Expectations, two-tap buy, 
   ok(await p.evaluate(()=>phxBuy('r_phoenix')&&phxBuy('b_phoenix')&&!phxBuy('b_phoenix')&&phxSet()&&S.coins===5),'whole set, no double buy');await p.evaluate(()=>document.querySelectorAll('.phx-show').forEach(e=>e.remove()));
   await p.evaluate(()=>phxBird());await p.waitForTimeout(800);ok(await p.evaluate(()=>performance.now()/1000-PHXB.t0<3.4),'firebird flying');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('big yards: visitors get every placed thing and the ground, even past the old size limit',async()=>{const p=await page(VPS[0][1],save({}));
+  const r=await p.evaluate(async()=>{const r=await api('hello',{name:'Yd'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});
+    yardSync();const ids=['hedge','picket'];S.yard.it=[];for(let i=0;i<600;i++)S.yard.it.push([ids[i%2],-800+i*1.7,240+(i%15)*10,i%2,100+i%90]);S.yard.g={};const gt=Object.keys(YGT);for(let i=0;i<700;i++)S.yard.g[(i%44)+','+Math.floor(i/44)]=gt[(i*7)%gt.length];
+    for(let i=0;i<80;i++)S.trophies.push({name:'Trophy number '+i,water:'pond',type:'count',score:'$1,000,000',day:i});
+    const len=JSON.stringify(mpCabin()).length;MPV.last=0;await mpSync(true);const c=await api('cabin',{id:r.id,key:r.key,target:r.id}),y=yardParse(JSON.parse(c.cabin).ext.yard);return {len,n:y.it.length,g:Object.keys(y.g).length}});
+  ok(r.len>19500,'snapshot is past the old limit ('+r.len+')');ok(r.n===600,'all 600 things shared ('+r.n+')');ok(r.g>0,'ground shared');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

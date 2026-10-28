@@ -71,6 +71,7 @@ Run the whole suite before every push.
 - Town jobs and the Fish Market: Notice Board jobs pay and build reputation, the market pays double for wanted fish up to a daily cap
 - Town projects: the bandstand and cannery rebuilds, builder trophies, the evening concert and canning fish
 - Phone controls: the thumbstick walks, the action button enters places, Go to walks you there, and it turns off in Settings
+- Big yards: visitors get every placed thing and the ground, even when the shared snapshot is past the old size limit
 - The Phoenix Collection: the Mythic set in Crate Expectations, the two-tap buy, the unveil, equipping, and the set-bonus firebird
 - Prestige: the preview, the reset keeps your house and pets, the Legacy rod, costume and trophy, the next cost doubles, and old retirees convert
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
