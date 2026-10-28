@@ -46,6 +46,9 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - Case 5 (The 3:33 Broadcast): full play-through to the rewards
 - Casefile shelf: folders open cases, back button, new-lead tags
 - Crate Expectations landing page: four crates, your look, locker and odds from the main page
+- Homestead: greenhouse, beehive, chicken coop and drying rack produce; bait gives a boost
+- Hangouts: sit and roast at the fire pit, log a constellation, treehouse lookout, movie screen film
+- Yard batch 3: horseshoes, putting, koi pond, statue, snowman
 - Owner's Game Warden boat: draws, light bar toggles, shared with the live lake
 - Supporter kit: the Mythic Lantern Keeper set is granted once, hung in the cabin, and can't be mailed
 - Lantern Harbor town: two anglers see each other on the street and inside shops, Marge’s Counter sales, a round of darts, a Lake 7 song request, a Post Office parcel, the wishing fountain, the daily paper, trivia night, Leave returns home

@@ -303,6 +303,30 @@ await check('owner: the Game Warden boat draws, its light bar toggles, and the l
   ok(await p.evaluate(()=>{wardenLights();return WDB().lit===1&&liveSig().startsWith('2|')}),'lights on and shared with the live lake');
   await p.evaluate(()=>{wardenToggle(false)});ok(await p.evaluate(()=>!wardenOn()&&WDB().lit===0),'put away');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('homestead: greenhouse, beehive, coop and drying rack produce, and greenhouse bait gives a boost',async()=>{const p=await page(VPS[0][1],save({sleep:{ph:'yard',t:0,visit:true},decor:{flowers:1},cooler:{bluegill:{n:7,lbs:3,val:70}}}));
+  const r=await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);const Y=S.yard,ago=h=>Date.now()-h*36e5;Y.inv=Y.inv||{};for(const k of ['greenhouse','beehive','coop','dryrack'])Y.inv[k]=1;
+    Y.it.push(['greenhouse',150,300,0,ago(3),'grub'],['beehive',200,290,0,ago(2)],['coop',60,286,0,ago(2)],['dryrack',110,325,0,ago(3),'bluegill|5|50']);const L=yardList(),ix=id=>L.findIndex(a=>a[0]===id);
+    farmTap(ix('beehive'));farmTap(ix('coop'));openGreenhouse(ix('greenhouse'));document.getElementById('ghGo').click();const c0=S.coins;openRack(ix('dryrack'));document.getElementById('rkGo').click();const jerky=S.coins-c0;
+    openRack(ix('dryrack'));const opts=document.querySelectorAll('[data-rk]').length;document.getElementById('plotModal').hidden=true;pantryAct('b','grub');const P=pantry();return [P.honey>0,P.egg>0,P.grub===1,jerky===90,opts===1,S.buffs.giant>0]});
+  ok(r.every(Boolean),'homestead loop '+JSON.stringify(r));await p.waitForTimeout(600);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('hangouts: sit by the fire and roast, log a constellation, climb the treehouse, change the film',async()=>{const p=await page(VPS[0][1],save({sleep:{ph:'yard',t:0,visit:true},min:1320}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);const Y=S.yard;Y.inv=Y.inv||{};for(const k of ['firepit','gazebo','treehouse','screen'])Y.inv[k]=1;Y.it.push(['firepit',70,300,0],['gazebo',190,300,0],['treehouse',-10,290,0],['screen',130,272,0]);hangTap(yardList().findIndex(a=>a[0]==='firepit'))});
+  await p.waitForFunction(()=>!!WALK.sit,null,{timeout:10000});ok(true,'sat by the fire');
+  await p.evaluate(()=>{hangTap(yardList().findIndex(a=>a[0]==='firepit'));ROAST.heat=.65;roastDone()});ok(await p.evaluate(()=>/golden/.test(document.getElementById('rsMsg').textContent)&&YH().mm===1),'perfect marshmallow');
+  await p.evaluate(()=>{document.getElementById('plotModal').hidden=true;scopeOpen();SCOPE.vx=CON_POS[2][0]-160;SCOPE.vy=CON_POS[2][1]-120});await p.waitForFunction(()=>Object.keys(YH().stars).length===1,null,{timeout:8000});ok(true,'logged a constellation');
+  ok(await p.evaluate(()=>{document.getElementById('plotModal').hidden=true;WALK.sit=null;const L=yardList(),i=L.findIndex(a=>a[0]==='treehouse');treeUp(i,L[i]);const up=!!WALK.up&&S.buffs.magnet>0;const s=L.findIndex(a=>a[0]==='screen');hangTap(s);return up&&filmOf(L[s])===1}),'treehouse lookout and film change');
+  await p.waitForTimeout(500);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('yard batch 3: horseshoes, putting, koi pond, statue, seasonal items',async()=>{const p=await page(VPS[0][1],save({sleep:{ph:'yard',t:0,visit:true}}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);const Y=S.yard;Y.inv=Y.inv||{};for(const k of ['horseshoes','putting','pond','statue','vane','leaves','snowman'])Y.inv[k]=1;
+    Y.it.push(['horseshoes',90,330,0],['putting',200,320,0],['pond',60,300,0,Date.now(),JSON.stringify([{k:'koi',g:3,fd:''},{k:'gold',g:1,fd:''}])],['statue',150,290,0],['vane',-20,300,0],['leaves',170,345,0],['snowman',230,300,0])});
+  await p.evaluate(()=>shoeOpen());for(let k=0;k<4;k++){await p.click('#hsGo');await p.waitForTimeout(1300)}ok(await p.evaluate(()=>SHOE.throws.length===4&&/points/.test(document.getElementById('hsMsg').textContent)),'a round of horseshoes');
+  ok(await p.evaluate(()=>{document.getElementById('plotModal').hidden=true;puttOpen();const H=HOLES[0];PUTT.ball=[H.h[0]-3,H.h[1]];PUTT.v=[20,0];PUTT.moving=true;PUTT.strokes=1;for(let k=0;k<30;k++)puttTick(.03);return PUTT.hole===1&&PUTT.total===1}),'sinks a putt');
+  ok(await p.evaluate(()=>{document.getElementById('plotModal').hidden=true;const L=yardList(),i=L.findIndex(a=>a[0]==='pond');openPond(i);const c0=S.coins;document.querySelector('[data-psell]').click();const sold=S.coins-c0;document.getElementById('pdFeed').click();const P=pondOf(L[i]);return sold>0&&P.length===1&&P[0].g===2}),'pond sell and feed');
+  ok(await p.evaluate(()=>{document.getElementById('plotModal').hidden=true;const L=yardList(),s=L.findIndex(a=>a[0]==='snowman');showTap(s);showTap(s);showTap(s);return +L[s][5]===3&&typeof seasonOk('leaves')==='boolean'}),'snowman built');
+  await p.waitForTimeout(500);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
