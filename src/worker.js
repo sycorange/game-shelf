@@ -116,6 +116,7 @@ async function pinRoute(req,db,b,now){
   if(Math.random()<.05)await db.prepare('DELETE FROM pinfail WHERE ts<?').bind(now-2*864e5).run();
   return json({error:'bad-pin:'+Math.max(0,PIN_TRIES-nN-1)},401)}
 const clean=(s,max)=>String(s||'').replace(/[\u0000-\u001f<>]/g,'').trim().slice(0,max);
+const prOf=me=>{try{return Math.max(0,Math.min(10,(JSON.parse(me.stats||'{}').pr|0)))}catch(e){return 0}};
 async function auth(db,b){
   if(!b||typeof b.id!=='string'||typeof b.key!=='string')throw new Error('auth');
   const p=await db.prepare('SELECT * FROM players WHERE id=?').bind(b.id).first();
@@ -259,6 +260,16 @@ async function syncExtras(db,me,b,now,wk){const out={};
     if(n.results.length){out.mnotes=n.results;await db.prepare('UPDATE mnote SET seen=1 WHERE pid=? AND id<=?').bind(me.id,n.results[n.results.length-1].id).run()}}catch(e){}
   return out}
 async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.waitUntil(f());else return f()};
+  // Mythic purchases: announce each piece once on Discord.
+  if(p==='mythbuy'){const N={phoenix:'Phoenix Prow',r_phoenix:'Flame Feather rod',b_phoenix:'Phoenix Egg bobber'},it=String(b.item||'');if(!N[it])return json({error:'item'},400);
+    const ins=await db.prepare('INSERT OR IGNORE INTO cfg(k,v) VALUES(?,?)').bind('mb:'+me.id+':'+it,String(now)).run();
+    if(ins.meta&&ins.meta.changes===1&&(me.pub??1)!==0)await later(async()=>{const c=await dcCfg(db);await dcPost(db,'catches',{embeds:[{color:0xff5a1a,title:`🔥 ${me.name} bought the ${N[it]}!`,description:`A Mythic piece of the Phoenix Collection.`+dcLink(c)}]})});
+    return json({ok:true})}
+  // Prestige: announce each new level once on Discord.
+  if(p==='prestige'){const lv=Math.max(1,Math.min(10,b.lv|0)),R=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+    const ins=await db.prepare('INSERT OR IGNORE INTO cfg(k,v) VALUES(?,?)').bind('pr:'+me.id+':'+lv,String(now)).run();
+    if(ins.meta&&ins.meta.changes===1&&(me.pub??1)!==0)await later(async()=>{const c=await dcCfg(db);await dcPost(db,'catches',{embeds:[{color:lv>=10?0xc070e0:lv>=7?0xffd05a:lv>=4?0xdfe8f4:0xe0904a,title:`★ ${me.name} reached Prestige ${R[lv]}!`,description:`A fresh lake and a ${lv>=10?'rainbow':lv>=7?'gold':lv>=4?'silver':'bronze'} star. Every sale is worth +${lv*10}% for good.`+dcLink(c)}]})});
+    return json({ok:true})}
   // Town projects: the whole lake rebuilds the bandstand, then the old cannery. Points: $1,000 = 1, materials by rarity.
   if(p==='tp'){const PJ=['band','cannery'],state={};
     const goalOf=async k=>{let g=await db.prepare('SELECT v FROM cfg WHERE k=?').bind('tp:'+k+':goal').first();
@@ -403,7 +414,7 @@ async function liveRoute(req,env,url,db){
   let sc;try{sc=await scopeOf(db,me,q.get('lake'))}catch(e){sc=await scopeOf(db,me,'all')}
   const room=`${sc.code}:${water}`,stub=env.LAKE.get(env.LAKE.idFromName(room));
   const fw=new URL('https://lake/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('water',water);
-  fw.searchParams.set('boat',String(Math.max(0,Math.min(7,q.get('boat')|0))));fw.searchParams.set('wear',clean(q.get('wear'),8));fw.searchParams.set('cid',clean(q.get('cid'),12));fw.searchParams.set('g',q.get('g')==='f'?'f':'m');fw.searchParams.set('pt',clean(q.get('pt'),12));fw.searchParams.set('rd',clean(q.get('rd'),14));fw.searchParams.set('bb',clean(q.get('bb'),14));fw.searchParams.set('room',room);
+  fw.searchParams.set('boat',String(Math.max(0,Math.min(7,q.get('boat')|0))));fw.searchParams.set('wear',clean(q.get('wear'),8));fw.searchParams.set('cid',clean(q.get('cid'),12));fw.searchParams.set('g',q.get('g')==='f'?'f':'m');fw.searchParams.set('pt',clean(q.get('pt'),12));fw.searchParams.set('rd',clean(q.get('rd'),14));fw.searchParams.set('bb',clean(q.get('bb'),14));fw.searchParams.set('pr',String(prOf(me)));fw.searchParams.set('room',room);
   return stub.fetch(new Request(fw.toString(),{headers:req.headers}));
 }
 export class LakeRoom{
@@ -413,7 +424,7 @@ export class LakeRoom{
   async fetch(req){const u=new URL(req.url),q=u.searchParams;
     // a call for help from a raid in another spot on the same lake: pass it to everyone fishing here
     if(u.pathname==='/help'){let o={};try{o=await req.json()}catch(e){}const n=this.ctx.getWebSockets().length;if(n)this.bcast({t:'help',...o});return new Response(JSON.stringify({n}))}
-    const me={pid:q.get('pid'),name:q.get('name'),boat:q.get('boat')|0,wear:q.get('wear')||'',g:q.get('g')==='f'?'f':'m',pt:String(q.get('pt')||'').slice(0,12),rd:String(q.get('rd')||'').replace(/[^a-z0-9_]/g,'').slice(0,14),bb:String(q.get('bb')||'').replace(/[^a-z0-9_]/g,'').slice(0,14),cid:q.get('cid')||Math.random().toString(36).slice(2,8),at:Date.now()};
+    const me={pid:q.get('pid'),name:q.get('name'),boat:q.get('boat')|0,wear:q.get('wear')||'',g:q.get('g')==='f'?'f':'m',pt:String(q.get('pt')||'').slice(0,12),rd:String(q.get('rd')||'').replace(/[^a-z0-9_]/g,'').slice(0,14),bb:String(q.get('bb')||'').replace(/[^a-z0-9_]/g,'').slice(0,14),pr:Math.max(0,Math.min(10,q.get('pr')|0)),cid:q.get('cid')||Math.random().toString(36).slice(2,8),at:Date.now()};
     for(const w of this.ctx.getWebSockets()){let a=null;try{a=w.deserializeAttachment()}catch(e){}if(a&&a.pid===me.pid){try{w.close(4000,'replaced')}catch(e){}}}
     const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(me);
     const water=q.get('water');if(water)await this.ctx.storage.put('water',water);const room=q.get('room');if(room)await this.ctx.storage.put('room',room);
@@ -522,7 +533,7 @@ async function houseRoute(req,env,url,db){
   const h=await db.prepare('SELECT pid,ts FROM houses WHERE pid=?').bind(host).first();
   if(host!==me.id){if(!h||Date.now()-h.ts>HOUSE_TTL)return json({error:'closed'},404);if(!(await canSee(db,me,host)))return json({error:'private'},403);if(await blockedEither(db,me.id,host))return json({error:'blocked'},403)}
   const fw=new URL('https://yard/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('host',host);
-  for(const k of ['wear','g','pet'])fw.searchParams.set(k,String(q.get(k)||'').slice(0,120));
+  for(const k of ['wear','g','pet'])fw.searchParams.set(k,String(q.get(k)||'').slice(0,120));fw.searchParams.set('pr',String(prOf(me)));
   return env.YARD.get(env.YARD.idFromName('house:'+host)).fetch(new Request(fw.toString(),{headers:req.headers}))}
 // Lantern Harbor: the shared town. Rooms hold up to 30 anglers; the client tries room 1, then 2, and so on.
 async function townRoute(req,env,url,db){
@@ -530,7 +541,7 @@ async function townRoute(req,env,url,db){
   if(!env.YARD)return json({error:'no-live'},503);
   const q=url.searchParams,me=await auth(db,{id:q.get('id')||'',key:q.get('key')||''}),room=Math.max(1,Math.min(20,parseInt(q.get('room')||'1',10)||1));
   const fw=new URL('https://yard/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('host','town'+room);
-  for(const k of ['wear','g','pet'])fw.searchParams.set(k,String(q.get(k)||'').slice(0,120));
+  for(const k of ['wear','g','pet'])fw.searchParams.set(k,String(q.get(k)||'').slice(0,120));fw.searchParams.set('pr',String(prOf(me)));
   return env.YARD.get(env.YARD.idFromName('town:'+room)).fetch(new Request(fw.toString(),{headers:req.headers}))}
 export class YardRoom{
   constructor(ctx,env){this.ctx=ctx;this.env=env;try{ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping','pong'))}catch(e){}}
@@ -543,7 +554,7 @@ export class YardRoom{
     for(const w of this.socks()){const a=this.att(w);if(a&&a.pid===pid){try{w.close(4000,'replaced')}catch(e){}}}
     const guests=this.socks().map(w=>this.att(w)).filter(a=>a&&!a.host&&a.pid!==pid).length;if(!isHost&&guests>=(town?30:HOUSE_CAP))return new Response(JSON.stringify({error:'full'}),{status:409});
     let pet=null;try{const p=JSON.parse(q.get('pet')||'null');if(p&&typeof p.k==='string')pet={k:String(p.k).slice(0,8),coat:p.coat|0,acc:String(p.acc||'').slice(0,8),name:String(p.name||'').slice(0,16)}}catch(e){}
-    const me={pid,name:String(q.get('name')||'').slice(0,20),host:isHost,cid:Math.random().toString(36).slice(2,8),wear:String(q.get('wear')||'').slice(0,8),g:q.get('g')==='f'?'f':'m',pet,x:town?160:isHost?null:140,y:town?440:246,f:-1,at:Date.now(),town,z:''};
+    const me={pid,name:String(q.get('name')||'').slice(0,20),host:isHost,cid:Math.random().toString(36).slice(2,8),wear:String(q.get('wear')||'').slice(0,8),g:q.get('g')==='f'?'f':'m',pet,pr:Math.max(0,Math.min(10,q.get('pr')|0)),x:town?160:isHost?null:140,y:town?440:246,f:-1,at:Date.now(),town,z:''};
     const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(me);
     const reqs=town?((await this.ctx.storage.get('reqs'))||[]):undefined;server.send(JSON.stringify({t:'hello',me:me.cid,peers:this.socks(server).map(w=>this.att(w)).filter(a=>a&&a.pid!==pid),reqs}));
     this.bcast({t:'join',p:me},server);await this.count();return new Response(null,{status:101,webSocket:client})}

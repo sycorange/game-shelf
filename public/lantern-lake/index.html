@@ -183,6 +183,32 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .hv-give{list-style:none;margin:0;padding:0;display:grid;gap:6px}.hv-give li{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:6px;align-items:center}.hv-give svg{width:40px;height:20px}.hv-give small{display:block;color:#d8b898;font-size:.74rem}
 .hv-give button,.hv-btn{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:.76rem;cursor:pointer;white-space:nowrap}.hv-btn.hv-main{background:#e8823a;border-color:#e8823a;color:#2a1206;font-weight:800;padding:8px 14px}.hv-give button:disabled,.hv-btn:disabled{opacity:.45;cursor:default}
 .sec-h.hv-sec h3{color:#e8823a}
+.prb{display:inline-flex;align-items:center;gap:2px;margin-left:5px;padding:0 6px;border-radius:999px;font-size:.68rem;font-weight:800;line-height:1.6;color:#2a1606;vertical-align:1px;white-space:nowrap;background-size:200% 100%;animation:prShine 2.6s linear infinite}
+.prb.big{font-size:.74rem;padding:1px 8px;margin-left:0}
+.prb.pt1{background-image:linear-gradient(110deg,#c87838,#f0b070 45%,#c87838 60%);box-shadow:0 0 6px rgba(224,144,74,.5)}
+.prb.pt2{background-image:linear-gradient(110deg,#b8c4d4,#ffffff 45%,#b8c4d4 60%);box-shadow:0 0 8px rgba(220,232,250,.6)}
+.prb.pt3{background-image:linear-gradient(110deg,#e8b030,#fff2a0 45%,#e8b030 60%);box-shadow:0 0 10px rgba(255,208,90,.75)}
+.prb.pt4{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);background-image:linear-gradient(110deg,#ff5a5a,#ffd05a,#7ad06a,#5aa8ff,#c070e0,#ff5a5a);background-size:300% 100%;box-shadow:0 0 12px rgba(255,255,255,.6);animation-duration:3s}
+@keyframes prShine{to{background-position:-200% 0}}
+.pr-card.pt1{border-color:#e0904a}.pr-card.pt2{border-color:#dfe8f4}.pr-card.pt3{border-color:#ffd05a;box-shadow:0 0 14px rgba(255,208,90,.25)}.pr-card.pt4{border-color:#c070e0;box-shadow:0 0 16px rgba(192,112,224,.35)}
+.pr-prev h2{margin:2px 0 10px}.pr-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pr-cols ul,.pr-gets ul{margin:4px 0 0;padding-left:16px;font-size:.86rem;color:var(--muted)}.pr-gets{margin:10px 0;padding:10px 12px;border-radius:12px;border:1px solid #ffd05a;background:rgba(255,208,90,.08)}.pr-gets li{color:var(--fg)}.pr-cost{font-weight:800;color:var(--gold)}
+.pr-show{position:fixed;inset:0;z-index:70;display:grid;place-items:center;background:radial-gradient(circle at 50% 45%,rgba(60,40,10,.55),rgba(5,8,14,.92));overflow:hidden;animation:prIn .4s ease-out}
+.pr-rays{position:absolute;left:50%;top:45%;width:200vmax;height:200vmax;margin:-100vmax 0 0 -100vmax;background:repeating-conic-gradient(rgba(255,220,140,.14) 0 8deg,transparent 8deg 20deg);animation:prSpin 18s linear infinite}
+.pr-show.pt4 .pr-rays{background:repeating-conic-gradient(rgba(255,120,120,.16) 0 8deg,transparent 8deg 16deg,rgba(120,200,255,.16) 16deg 24deg,transparent 24deg 32deg)}
+.pr-box{position:relative;text-align:center;max-width:min(420px,90vw);padding:20px;color:#fff}.pr-box h2{font-family:var(--font-display);font-size:2.2rem;margin:6px 0;text-shadow:0 0 18px rgba(255,208,90,.8)}.pr-box p{margin:4px 0;color:#f2e6c8}.pr-box ul{list-style:none;padding:0;margin:12px 0;display:grid;gap:4px;font-weight:700;color:#ffe8a8}.pr-sub{font-size:.85rem;opacity:.85}
+.pr-star{position:relative;font-size:7rem;line-height:1;color:#ffd05a;text-shadow:0 0 30px rgba(255,208,90,.9);animation:prPop 1s cubic-bezier(.2,1.6,.4,1) both}.pr-star b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.6rem;color:#3a1a00;padding-top:12px}
+.pr-show.pt1 .pr-star{color:#f0a060}.pr-show.pt2 .pr-star{color:#eef4ff}.pr-show.pt4 .pr-star{animation:prPop 1s cubic-bezier(.2,1.6,.4,1) both,prHue 3s linear infinite}
+.pr-show>i{position:absolute;top:-10px;width:8px;height:14px;border-radius:2px;animation:prFall 3.2s linear infinite}
+@keyframes prIn{from{opacity:0}}@keyframes prSpin{to{transform:rotate(360deg)}}@keyframes prPop{from{transform:scale(.2) rotate(-40deg);opacity:0}}@keyframes prHue{to{filter:hue-rotate(360deg)}}@keyframes prFall{to{transform:translateY(110vh) rotate(720deg)}}
+@media (prefers-reduced-motion:reduce){.prb,.pr-rays,.pr-star,.pr-show>i{animation:none}}
+.phx-card{margin:10px 0;padding:12px;border-radius:14px;background:linear-gradient(150deg,#3a0a04,#1a0806 55%,#3a1a04);box-shadow:0 0 0 1px rgba(255,120,40,.6) inset,0 0 18px rgba(255,90,20,.35);animation:phxGlow 2.6s ease-in-out infinite}
+.phx-h{display:grid;gap:2px}.phx-h span{font:800 .62rem system-ui;letter-spacing:.14em;text-transform:uppercase;color:#ffb02a}.phx-h b{font-size:1.05rem;color:#fff2d8}
+.phx-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.phx-it{display:grid;justify-items:center;gap:4px;text-align:center;min-width:0}.phx-it img{width:100%;max-width:96px;height:auto}.phx-it b{font-size:.72rem;color:#ffe8c8}.phx-it button{font-size:.72rem;padding:5px 6px;width:100%}
+.phx-set{margin:8px 0 0;font-size:.72rem;color:#ffcf9a}@keyframes phxGlow{50%{box-shadow:0 0 0 1px rgba(255,170,60,.85) inset,0 0 26px rgba(255,110,30,.55)}}
+.phx-show{background:radial-gradient(circle at 50% 45%,rgba(90,22,4,.94),rgba(10,4,2,.98))}.phx-show .pr-rays{background:repeating-conic-gradient(rgba(255,120,40,.16) 0 8deg,transparent 8deg 20deg)}
+.phx-show canvas{width:min(440px,86vw);height:auto;filter:drop-shadow(0 0 18px rgba(255,110,30,.6))}.phx-eye{font:800 .75rem system-ui;letter-spacing:.2em;text-transform:uppercase;color:#ff9a3a}.phx-show .pr-box h2{text-shadow:0 0 20px rgba(255,120,40,.9)}.phx-done{color:#ffd23a!important;font-weight:800}
+.phx-show>i{top:auto;bottom:-10px;width:6px;height:6px;border-radius:50%;animation-name:phxRise}@keyframes phxRise{to{transform:translateY(-110vh);opacity:0}}
+@media (prefers-reduced-motion:reduce){.phx-card,.phx-show>i{animation:none}}
 .joy{position:fixed;left:14px;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:112px;height:112px;border-radius:50%;background:rgba(15,32,38,.55);border:2px solid rgba(255,255,255,.22);z-index:16;touch-action:none;display:grid;place-items:center;backdrop-filter:blur(2px)}
 .joy[hidden]{display:none}.joy-k{width:48px;height:48px;border-radius:50%;background:rgba(237,242,234,.85);box-shadow:0 2px 8px rgba(0,0,0,.4);pointer-events:none;transition:transform .08s}.joy.on .joy-k{transition:none;background:#ffd05a}
 .actb{position:fixed;right:14px;bottom:calc(110px + env(safe-area-inset-bottom,0px));z-index:16;max-width:min(220px,48vw);min-height:52px;padding:8px 16px;border-radius:999px;border:0;background:var(--buoy);color:var(--buoy-ink);font-weight:800;font-size:.92rem;box-shadow:0 4px 14px rgba(0,0,0,.4);line-height:1.15}
@@ -2480,9 +2506,18 @@ function hvHouse(G,wins,d,T){
   if(has('sillpie')&&wins&&wins.length){const [wx,wy]=wins[0],by=wy+(wy===212?12:10),px=wx+7;ctx.fillStyle=rgb(mix([46,32,20],[206,150,82],d));ctx.beginPath();ctx.ellipse(px,by-1.4,5.4,2,0,Math.PI,0);ctx.fill();ctx.fillRect(px-5.6,by-1.6,11.2,1.6);
     ctx.fillStyle=rgb(mix([36,24,14],[160,102,50],d));ctx.fillRect(px-3,by-2.6,6,.7);for(let i=0;i<3;i++){const q=(T*.35+i/3)%1;ctx.fillStyle=`rgba(236,236,240,${.4*(1-q)})`;ctx.beginPath();ctx.arc(px-2+i*2+Math.sin(q*6+i)*1.5,by-4-q*12,1+q*1.6,0,7);ctx.fill()}}}
 // Costumes from holiday events. Earned ones stay wearable after the event; pick None in Settings to take it off.
-const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')},{k:'flannel',n:'Flannel & knit hat',ev:'Harvest',own:()=>!!(S.hv&&S.hv.flannel)}];
+const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')},{k:'flannel',n:'Flannel & knit hat',ev:'Harvest',own:()=>!!(S.hv&&S.hv.flannel)},{k:'pcap',n:'Captain’s cap',ev:'Prestige I',own:()=>prLv()>=1},{k:'psweat',n:'Fisherman’s sweater',ev:'Prestige III',own:()=>prLv()>=3},{k:'pkeep',n:'Lighthouse keeper’s coat',ev:'Prestige VI',own:()=>prLv()>=6},{k:'pgold',n:'Golden captain’s hat',ev:'Prestige X',own:()=>prLv()>=10}];
 const hwWear=()=>{const w=S.hw&&S.hw.wear,c=w&&COSTUMES.find(x=>x.k===w);return c&&c.own()?w:null};
 function drawCostume(ax,ay,d,T,k){const sh=c=>rgb(mix(c.map(v=>v*.3),c,d*.8+.2));
+  const twinkle=(x,y,ph)=>{const a=Math.max(0,Math.sin(T*2.4+ph));if(a<.2)return;ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#fff8d0';ctx.beginPath();for(let i=0;i<8;i++){const an=i*Math.PI/4,r=i%2?.6:2.6*a;ctx.lineTo(x+Math.cos(an)*r,y+Math.sin(an)*r)}ctx.fill();ctx.restore()};
+  if(k==='pcap'||k==='pgold'){const g=k==='pgold',top=g?[255,208,90]:[236,236,232],band=g?[255,240,180]:[24,34,64];if(g){ctx.save();ctx.shadowColor='#ffd05a';ctx.shadowBlur=10+4*Math.sin(T*3)}
+    ctx.fillStyle=sh(band);ctx.fillRect(ax-6.6,ay-34,13.2,3.4);ctx.fillStyle=sh(top);ctx.beginPath();ctx.ellipse(ax,ay-35,7.6,3.4,0,Math.PI,0);ctx.fill();ctx.fillRect(ax-7,ay-36,14,2);ctx.fillStyle=sh(g?[200,140,20]:[20,24,30]);ctx.beginPath();ctx.ellipse(ax+5,ay-31,5,1.6,0,0,Math.PI);ctx.fill();
+    ctx.fillStyle=g?'#fff':'#ffd05a';ctx.beginPath();ctx.arc(ax,ay-33,1.4,0,7);ctx.fill();if(g){ctx.restore();ctx.fillStyle=sh([255,208,90]);ctx.fillRect(ax-8,ay-22,4,2.4);ctx.fillRect(ax+4,ay-22,4,2.4);for(let i=0;i<3;i++){const a=T*1.6+i*2.1;twinkle(ax+Math.cos(a)*11,ay-36+Math.sin(a)*4,i)}}else twinkle(ax+1,ay-33,0);return}
+  if(k==='psweat'){ctx.fillStyle=sh([232,224,204]);ctx.fillRect(ax-6,ay-22,12,20);ctx.fillStyle=sh([200,190,166]);for(let i=0;i<3;i++)ctx.fillRect(ax-4.5+i*3.6,ay-21,1,18);ctx.fillRect(ax-6,ay-4,12,2);ctx.fillStyle=sh([214,204,180]);ctx.beginPath();ctx.ellipse(ax,ay-22,5.6,2.2,0,0,7);ctx.fill();
+    ctx.fillStyle=sh([40,60,96]);ctx.beginPath();ctx.arc(ax,ay-31,6.2,Math.PI,0);ctx.fill();ctx.fillRect(ax-6.4,ay-32,12.8,2.4);return}
+  if(k==='pkeep'){ctx.fillStyle=sh([244,200,40]);ctx.fillRect(ax-7,ay-22,14,22);ctx.fillStyle=sh([200,160,20]);ctx.fillRect(ax-.7,ay-22,1.4,22);for(let i=0;i<3;i++)ctx.fillRect(ax-2.5,ay-18+i*5,1.6,1.6);
+    ctx.fillStyle=sh([244,200,40]);ctx.beginPath();ctx.arc(ax,ay-32,6.4,Math.PI,0);ctx.fill();ctx.beginPath();ctx.ellipse(ax-1,ay-31,10,2.4,-.08,0,7);ctx.fill();
+    const lx=ax-11,ly=ay-12+Math.sin(T*2)*.8;ctx.fillStyle='#2a2a30';ctx.fillRect(lx-2.2,ly-4,4.4,1.2);ctx.fillStyle='#ffe8a8';ctx.fillRect(lx-2,ly-3,4,5);glow(lx,ly-1,16,.55+.15*Math.sin(T*5),'255,220,140');return}
   if(k==='flannel'){ctx.fillStyle=sh([176,44,40]);ctx.fillRect(ax-6,ay-22,12,20);ctx.fillStyle=sh([60,20,22]);for(let i=0;i<4;i++)ctx.fillRect(ax-6,ay-20+i*5,12,1.3);for(const xx of [-3.5,1.5])ctx.fillRect(ax+xx,ay-22,1.3,20);
     ctx.fillStyle=sh([236,226,206]);ctx.beginPath();ctx.moveTo(ax-3,ay-22);ctx.lineTo(ax,ay-18);ctx.lineTo(ax+3,ay-22);ctx.fill();
     ctx.fillStyle=sh([214,140,40]);ctx.beginPath();ctx.arc(ax,ay-31,6.4,Math.PI,0);ctx.fill();ctx.fillRect(ax-6.6,ay-32,13.2,2.6);ctx.fillStyle=sh([150,80,30]);for(let i=0;i<5;i++)ctx.fillRect(ax-5.6+i*2.6,ay-36,1,4);
@@ -2874,7 +2909,7 @@ function doCatch(){
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
   const t=S.tour; if(t&&t.phase==='live'&&S.water===t.water) t.me=scoreAdd(t,t.me,f,w);
   rollDay();S.today.n++;if(!S.today.best||w>S.today.best.w)S.today.best={id:f.id,w};if(S.today.n>S.st.best.n)S.st.best={n:S.today.n,day:S.day};
-  pushRecent({id:f.id,w,val,v:vr,mus:mKept||undefined});
+  pushRecent({id:f.id,w,val,v:vr,mus:mKept||undefined});if(f.r==='L'&&phxSet())phxBird();
   if(vr){celebrate({lbl:`${VAR[vr].n} ${f.n}!`,r:vr==='golden'?'L':'R',name:newVar?`New ${VAR[vr].n.toLowerCase()} variant for your logbook`:`${VAR[vr].n} variant`,sub:`${w} lb · worth $${money(val)}`,icon:fishSvg(vr==='giant'?RCOL[f.r]:VAR[vr].col)});burst(BOB.x,BOB.y-10,[VAR[vr].col,'#ffffff'],60)}
   else if(f.r==='R'||f.r==='L'){celebrate({lbl:`${RAR[f.r]} catch!`,r:f.r,name:f.n,sub:`${w} lb · worth $${money(val)}${isNew?' · New species':isRec?' · New record':''}`,icon:fishSvg(RCOL[f.r])});burst(BOB.x,BOB.y-10,[RCOL[f.r],'#ffffff','#ff7a3d'],f.r==='L'?70:35)}
   else sfx('splash'),showToast(`${w} lb ${f.n} · $${money(val)} to the cooler`,isNew?'New species!':isRec?'New record!':'');
@@ -3653,6 +3688,8 @@ const SKINS=[
 const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff','#7a8ea0','sparkle'),quest:true},{...SK('bit8','8-Bit','E','#2a2a6a','pixel','#ff3a6a','#3affb0'),quest:true},{...SK('pinneon','Pinball Neon','E','#140c24','pinball','#ff3ad8','#ffd23a','glow'),quest:true},{...SK('testpat','Test Pattern','E','#c0c0c0','testpat','#ffffff','#000000'),quest:true},{...SK('deadch','Dead Channel','E','#16161c','static','#e8e8ee','#7affc8','glow'),quest:true}];
 // The Lantern Keeper kit (Mythic): a thank-you for Lantern Lake supporters. Looks only, never in crates, can't be mailed.
 QSKINS.push({...SK('leviathan','Aurora Leviathan','M','#081430','leviathan','#5affc8','#b07aff','glow'),quest:true,sup:true});
+// The Phoenix Collection (Mythic): bought outright in Crate Expectations, never in crates, can't be mailed.
+QSKINS.push({...SK('phoenix','Phoenix Prow','M','#5a0e08','phoenix','#ff5a1a','#ffd23a','glow'),quest:true,phx:1});
 // Series 2: Deep Sea Expedition (a mixed case: paints, rod finishes and bobbers)
 const DS_PAINTS=[SK('varnish','Varnished Wood','C','#a8703a','wood','#7a4a22'),SK('seafoam','Seafoam','C','#8fd8c0'),SK('coralpink','Coral Pink','C','#ff8a80'),
   SK('retro','Retro ’70s','U','#f2e2c0','retro','#e8742a','#8a3a1a'),SK('melonhull','Watermelon','U','#3a8a3a','melon','#ff5a6a','#1a1a1a'),SK('treasure','Treasure Map','U','#e8d4a0','map','#8a5a2a','#c83a2a'),
@@ -3727,6 +3764,9 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
   else if(p==='stained'){const cols=['#d83a3a','#3a8ad8','#f4c02a','#3ab06a','#a05ad8','#ff8a2a'];for(let i=0;i*9<L+8;i++)for(let j=0;j*6<H+4;j++){c.fillStyle=cols[Math.floor(R()*6)];c.globalAlpha=.85;c.fillRect(x-4+i*9,top-2+j*6,9,6)}c.globalAlpha=1;c.strokeStyle='#141414';c.lineWidth=1;for(let i=0;i*9<L+8;i++){c.beginPath();c.moveTo(x-4+i*9,top-2);c.lineTo(x-4+i*9,y+16);c.stroke()}for(let j=0;j*6<H+4;j++){c.beginPath();c.moveTo(x-4,top-2+j*6);c.lineTo(x+L+4,top-2+j*6);c.stroke()}}
   else if(p==='kraken'){for(let i=0;i<4;i++){const bx=x+L*(.15+i*.22),w=Math.sin(T*1.6+i*1.4)*3;c.strokeStyle=sk.c2;c.lineWidth=2.6;c.lineCap='round';c.beginPath();c.moveTo(bx,y+16);c.bezierCurveTo(bx+4+w,y+6,bx-6-w,top+4,bx+3+w,top-1);c.stroke();c.fillStyle=sk.c3;for(let k=0;k<4;k++){const q=.2+k*.2;c.beginPath();c.arc(bx+(w*q)-1+k*.3,y+14-(y+15-top)*q,.7,0,7);c.fill()}}c.lineCap='butt'}
   else if(p==='chrome'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#f4f8ff');g.addColorStop(.3,'#9ab0c8');g.addColorStop(.5,'#e8eef6');g.addColorStop(.62,'#6a7a8a');g.addColorStop(1,'#d8e0ea');c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4)}
+  else if(p==='phoenix'){const g=c.createLinearGradient(x,0,x+L,0);g.addColorStop(0,'#3a0604');g.addColorStop(.45,'#a0180a');g.addColorStop(.8,'#ff5a1a');g.addColorStop(1,'#ffc23a');c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
+    for(let j=0;j*3.4<H+4;j++)for(let i=0;i*5.5<L+10;i++){const u=i*5.5/L,fl=.5+.5*Math.sin(T*3+i*.7-j*1.3),fx0=x+i*5.5+(j%2)*2.75,fy=top+j*3.4;c.fillStyle=`hsla(${8+u*36+fl*10},100%,${34+u*22+fl*10}%,.75)`;c.beginPath();c.moveTo(fx0-2.6,fy);c.quadraticCurveTo(fx0,fy+4.2,fx0+2.6,fy);c.fill()}
+    c.fillStyle='#ffd23a';c.fillRect(x-4,top-2,L+8,1.6);c.globalAlpha=.6;c.fillRect(x-4,y+9,L+8,.8);c.globalAlpha=1}
   // a sweeping highlight on the fancy tiers
   if(p==='gold'||p==='ice'||p==='prism'||p==='mirror'||p==='chrome'||p==='mermaid'){const sx=x-20+((T*.35)%1.6)*(L+40);const g=c.createLinearGradient(sx-10,0,sx+10,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.save();c.transform(1,0,-.6,1,0,0);c.fillRect(sx+top*.6-10,top-2,20,H+4);c.restore()}
   // night dims the paint, but glowing paints keep shining through
@@ -3736,6 +3776,7 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
   if(sk.fx==='glow'){c.save();c.globalAlpha=.25+.15*Math.sin(T*3);c.strokeStyle=sk.c2;c.lineWidth=1.5;c.shadowColor=sk.c2;c.shadowBlur=12;hullPath(c,x,y,L,b);c.stroke();c.restore()}
   if(sk.fx==='sparkle'&&!RM){c.save();const n=sk.t==='L'||sk.t==='M'?7:4;for(let i=0;i<n;i++){const ph=(T*.8+i/n)%1,a=Math.sin(ph*Math.PI);const sx=x+((i*0.618+.1)%1)*L,sy=top-2+((i*0.37)%1)*(H+2);
       c.globalAlpha=a;c.fillStyle=sk.p==='prism'?`hsl(${(i*50+T*90)%360},100%,80%)`:sk.p==='frost'||sk.p==='ice'?'#ffffff':'#fff6c8';star4(c,sx,sy,1.5+a*2.5)}c.restore()}
+  if(sk.p==='phoenix')phxParts(c,x,y,L,b,d,T)
 }
 const SKTH={};
 function skinThumb(id,w,h){const k=id+'|'+(w||120);if(SKTH[k])return SKTH[k];const W=w||120,Hh=h||56,cv=document.createElement('canvas');cv.width=W*2;cv.height=Hh*2;const c=cv.getContext('2d');c.scale(2,2);
@@ -3765,7 +3806,10 @@ const DS_RODS=[RSK('bamboo','Bamboo','C','#c8b060'),RSK('cork','Classic Cork','C
   RSK('kraken','Kraken Rod','L','#3a1a5a','#c87aff','bubbles','#b05aff'),RSK('chrome','Chrome Rod','L','#c8d0d8','#ffffff','stars','#ffffff')].map(x=>({...x,ds:1}));
 const Q_BOBS=[{...BSK('antenna','Antenna Bobber','L','antenna','#2a2a30','#d8dde6'),quest:true}];
 Q_BOBS.push({...BSK('sun','Pocket Sun','M','sun','#ffd84a','#ff8a2a'),quest:true,sup:true});
-const Q_RODS=[{...RSK('starforged','Starforged','M','#1a1440','#ffe8a8','starforge','#ffd870'),quest:true,sup:true}];
+Q_BOBS.push({...BSK('phoenix','Phoenix Egg','M','phoenix','#d8301a','#ffc23a'),quest:true,phx:1});
+const Q_RODS=[{...RSK('starforged','Starforged','M','#1a1440','#ffe8a8','starforge','#ffd870'),quest:true,sup:true},
+  {...RSK('legacy','Legacy','L','#5a3a22','#e8b030','legacy','#e8b030'),quest:true,pr:1},{...RSK('legacylit','Lit Legacy','M','#3a2418','#7affe0','legacy','#7affe0'),quest:true,pr:5},{...RSK('legacygold','Golden Legacy','M','#ffd05a','#ffffff','legacy','#fff2a0'),quest:true,pr:10}];
+Q_RODS.push({...RSK('phoenix','Flame Feather','M','phoenix','#ffd23a','phoenix','#ff7a2a'),quest:true,phx:1});
 // Town-only bobbers from Marge's Counter (shown in the locker once owned)
 const T_BOBS=[BSK('neonpink','Neon Pink','U','glow','#ff6ae0','#ffd0f4'),BSK('neoncyan','Neon Cyan','U','glow','#4ae0ff','#d0f8ff'),BSK('harbor','Harbor Buoy','R','buoy','#1e3a5a','#e8b030'),BSK('hlight','Harbor Light','R','lighthouse','#c8281a','#f4f0e8'),BSK('slamp','Streetlamp','E','lantern','#2a2a30','#ffe8a8')].map(b=>({...b,quest:true,town:true}));
 Q_BOBS.push(...T_BOBS);
@@ -3787,6 +3831,8 @@ function itemRoll(kind){let r=Math.random()*100,t='C';for(const k of SK_ORDER){r
 // --- drawing: rods and bobbers on any canvas context
 function rodStroke(c,path,sk,d,T){c.save();c.lineCap='round';
   if(!sk){c.strokeStyle=rgb(mix([60,60,60],[60,40,24],d));c.lineWidth=2.5;path();c.stroke();c.restore();return}
+  if(sk.col==='phoenix'){c.shadowColor='#ff5a1a';c.shadowBlur=8+4*Math.sin(T*5);c.strokeStyle=`hsl(${12+8*Math.sin(T*3)},95%,${40+10*d}%)`;c.lineWidth=2.8;path();c.stroke();c.shadowBlur=0;
+    c.setLineDash([4,5]);c.lineDashOffset=-T*30;c.strokeStyle='#ffc23a';c.lineWidth=1.7;path();c.stroke();c.setLineDash([1.2,9]);c.lineDashOffset=-T*55;c.strokeStyle='#fff6d0';c.lineWidth=1.2;path();c.stroke();c.setLineDash([]);c.restore();return}
   if(sk.glow){c.shadowColor=sk.glow;c.shadowBlur=(sk.t==='L'?7:5)+3*Math.sin(T*3)}
   if(sk.col==='prism'){c.strokeStyle=`hsl(${(T*80)%360},90%,60%)`}else c.strokeStyle=rgb(mix(hexRgb(sk.col).map(v=>v*.35),hexRgb(sk.col),d*.8+.2));
   c.lineWidth=2.6;path();c.stroke();c.shadowBlur=0;
@@ -3829,6 +3875,9 @@ function drawBobber(c,x,y,sk,d,T,r){r=r||4.5;const on=lit(d);c.save();
   else if(p==='sun'){const pu=.8+.2*Math.sin(T*4);c.save();c.translate(x,y);c.rotate(T*.6);c.strokeStyle=sk.c2;c.lineWidth=r*.18;c.lineCap='round';for(let k=0;k<12;k++){const a=k*Math.PI/6,l=r*(1.5+.35*Math.sin(T*5+k*1.7));c.beginPath();c.moveTo(Math.cos(a)*r*1.12,Math.sin(a)*r*1.12);c.lineTo(Math.cos(a)*l,Math.sin(a)*l);c.stroke()}c.restore();
     c.shadowColor='#ffb030';c.shadowBlur=r*2.4*pu;const g=c.createRadialGradient(x-r*.25,y-r*.25,r*.1,x,y,r);g.addColorStop(0,'#ffffff');g.addColorStop(.45,sk.col);g.addColorStop(1,sk.c2);c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.shadowBlur=0}
   else if(p==='krakenb'){c.fillStyle=sk.col;c.lineWidth=r*.28;c.strokeStyle=sk.col;c.lineCap='round';for(let k=0;k<5;k++){const ax=x-r*.8+k*r*.4,w=Math.sin(T*3+k)*r*.35;c.beginPath();c.moveTo(ax,y+r*.2);c.quadraticCurveTo(ax+w,y+r*.9,ax-w*.5,y+r*1.5);c.stroke()}c.beginPath();c.ellipse(x,y-r*.1,r*.9,r*1.05,0,0,7);c.fill();c.fillStyle='#fff';for(const dx of [-.32,.32]){c.beginPath();c.arc(x+dx*r,y-r*.15,r*.22,0,7);c.fill()}c.fillStyle='#1a0a2a';for(const dx of [-.3,.34]){c.beginPath();c.arc(x+dx*r,y-r*.12,r*.1,0,7);c.fill()}c.fillStyle=sk.c2;c.beginPath();c.arc(x,y+r*.25,r*.12,0,Math.PI);c.fill()}
+  else if(p==='phoenix'){const g=c.createLinearGradient(x,y-r*1.2,x,y+r);g.addColorStop(0,'#ffd23a');g.addColorStop(.5,sk.col);g.addColorStop(1,'#5a0e08');c.shadowColor='#ff6a1a';c.shadowBlur=on?r*2:r;c.fillStyle=g;c.beginPath();c.ellipse(x,y-r*.1,r*.85,r*1.15,0,0,7);c.fill();c.shadowBlur=0;
+    c.strokeStyle='#ffe08a';c.lineWidth=Math.max(.4,r*.09);c.globalAlpha=.6+.4*Math.sin(T*4);c.beginPath();c.moveTo(x-r*.7,y-r*.2);c.lineTo(x-r*.3,y+r*.1);c.lineTo(x,y-r*.3);c.lineTo(x+r*.35,y+r*.05);c.lineTo(x+r*.75,y-r*.25);c.stroke();c.globalAlpha=1;
+    for(const [col,s] of [['#ff5a1a',1],['#ffd23a',.6]]){const fl=Math.sin(T*9)*r*.12;c.fillStyle=col;c.beginPath();c.moveTo(x-r*.35*s,y-r*1.05);c.quadraticCurveTo(x-r*.4*s+fl,y-r*(1.5+.5*s),x+fl*1.5,y-r*(1.75+.55*s));c.quadraticCurveTo(x+r*.4*s+fl,y-r*(1.5+.5*s),x+r*.35*s,y-r*1.05);c.fill()}}
   else half(sk.col,sk.c2);
   c.restore()}
 // --- catch effects for Rare and up rod finishes
@@ -3837,14 +3886,15 @@ function sunFlare(x,y,bite,T,d){ctx.save();ctx.globalCompositeOperation='lighter
   if(bite){const f=.6+.4*Math.sin(T*22);glow(x,y,90,.45*f,'255,210,120');ctx.strokeStyle=`rgba(255,240,200,${.5*f})`;ctx.lineWidth=1.4;for(let k=0;k<8;k++){const a=k*Math.PI/4+T;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*8,y+Math.sin(a)*8);ctx.lineTo(x+Math.cos(a)*(26+f*14),y+Math.sin(a)*(26+f*14));ctx.stroke()}}ctx.restore()}
 function rodFx(x,y){const sk=rodEq();if(!sk||!sk.fx||RM)return;const c2=sk.c2,col=sk.col==='prism'?'#ff3a3a':sk.col;
   if(sk.fx==='splash')burst(x,y-6,[c2,'#ffffff',col],26);else if(sk.fx==='sparks')burst(x,y-6,['#ff7a2a','#ffd02a','#ff3a1a'],30);else if(sk.fx==='snow')burst(x,y-6,['#ffffff','#bfe6ff'],26);
-  else if(sk.fx==='stars')burst(x,y-10,['#ffffff','#c8b0ff','#7ac8ff'],40);else if(sk.fx==='coins')burst(x,y-10,['#ffd05a','#fff2b0','#e8b830'],50);else if(sk.fx==='starforge')burst(x,y-10,['#ffffff','#ffe8a8','#ffd870','#9ad8ff','#c8a0ff'],90);else if(sk.fx==='rainbow')burst(x,y-10,['#ff3a3a','#ffa02a','#ffe24a','#3ad06a','#3a8aff','#a05aff'],60);
+  else if(sk.fx==='stars')burst(x,y-10,['#ffffff','#c8b0ff','#7ac8ff'],40);else if(sk.fx==='coins')burst(x,y-10,['#ffd05a','#fff2b0','#e8b830'],50);else if(sk.fx==='starforge')burst(x,y-10,['#ffffff','#ffe8a8','#ffd870','#9ad8ff','#c8a0ff'],90);else if(sk.fx==='phoenix')burst(x,y-10,['#ff3a1a','#ff8a2a','#ffd23a','#fff2b0'],80);else if(sk.fx==='rainbow')burst(x,y-10,['#ff3a3a','#ffa02a','#ffe24a','#3ad06a','#3a8aff','#a05aff'],60);
   RFX.push({k:sk.fx,x,y,t0:performance.now()/1000,c:c2,c1:col});if(RFX.length>6)RFX.shift()}
-function drawRodFx(){const now=performance.now()/1000;for(let i=RFX.length-1;i>=0;i--){const f=RFX[i];const q=now-f.t0;if(q>1.6){RFX.splice(i,1);continue}ctx.save();
+function drawRodFx(){const now=performance.now()/1000;try{phxBirdDraw(now)}catch(e){}for(let i=RFX.length-1;i>=0;i--){const f=RFX[i];const q=now-f.t0;if(q>1.6){RFX.splice(i,1);continue}ctx.save();
   if(f.k==='neon'){for(const [col,dl] of [[f.c1,0],[f.c,.15]]){const p=Math.max(0,q-dl);if(p>1)continue;ctx.strokeStyle=col;ctx.globalAlpha=1-p;ctx.lineWidth=2;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(f.x,f.y,8+p*60,3+p*16,0,0,7);ctx.stroke()}}
   else if(f.k==='thunder'&&q<.45){ctx.globalAlpha=1-q/.45;ctx.strokeStyle='#fff8c0';ctx.lineWidth=2.4;ctx.shadowColor='#ffe24a';ctx.shadowBlur=12;ctx.beginPath();let bx=f.x+6,by=0;ctx.moveTo(bx,by);while(by<f.y-6){by+=18;bx+=(Math.random()-.5)*18;ctx.lineTo(bx,Math.min(by,f.y-6))}ctx.stroke();if(q<.12){ctx.fillStyle='rgba(255,250,210,.25)';ctx.fillRect(0,0,800,400)}}
   else if(f.k==='starforge'){for(let j=0;j<6;j++){const p=q*1.1-j*.06;if(p<0||p>1)continue;const a=-Math.PI/2+(j-2.5)*.38,dd=p*170,hx=f.x+Math.cos(a)*dd,hy=f.y+Math.sin(a)*dd;ctx.globalAlpha=1-p;ctx.strokeStyle='#ffe8a8';ctx.lineWidth=1.6;ctx.shadowColor='#ffd870';ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(hx,hy);ctx.lineTo(hx-Math.cos(a)*34,hy-Math.sin(a)*34);ctx.stroke();ctx.fillStyle='#fff';star4(ctx,hx,hy,3+2*(1-p))}}
   else if(f.k==='bubbles'){for(let j=0;j<8;j++){const p=q-j*.08;if(p<0||p>1)continue;ctx.strokeStyle=f.c;ctx.globalAlpha=1-p;ctx.lineWidth=1;ctx.beginPath();ctx.arc(f.x+Math.sin(j*2.3)*10,f.y-p*40,2+j%3,0,7);ctx.stroke()}}
   else if(f.k==='rainbow'&&q<1.4){const cols=['#ff3a3a','#ffa02a','#ffe24a','#3ad06a','#3a8aff','#a05aff'];ctx.globalAlpha=Math.min(1,(1.4-q)*1.5)*.8;ctx.lineWidth=2.4;cols.forEach((col,j)=>{ctx.strokeStyle=col;ctx.beginPath();ctx.arc(f.x,f.y+4,26+j*3,Math.PI,Math.PI+Math.PI*Math.min(1,q*2));ctx.stroke()})}
+  else if(f.k==='phoenix'){const sp=Math.min(1,q*2.2);ctx.globalCompositeOperation='lighter';ctx.lineCap='round';for(const sd of [-1,1])for(let j=0;j<7;j++){const a=-Math.PI/2+sd*(.25+j*.17)*sp,len=(26+j*5)*Math.min(1,q*3),ex=f.x+Math.cos(a)*len,ey=f.y-8+Math.sin(a)*len;ctx.globalAlpha=Math.max(0,1-q/1.6);ctx.strokeStyle=j<3?'#ffd23a':'#ff6a1a';ctx.lineWidth=2.4-j*.2;ctx.beginPath();ctx.moveTo(f.x,f.y-8);ctx.quadraticCurveTo(f.x+Math.cos(a)*len*.5+sd*4,f.y-14+Math.sin(a)*len*.5,ex,ey);ctx.stroke()}}
   else if(f.k==='coins'){for(let j=0;j<7;j++){const p=q*1.2,vx=(j-3)*14,vy=-70-(j%3)*14,cx=f.x+vx*p,cy=f.y+vy*p+90*p*p;if(p>1.4)continue;ctx.fillStyle='#ffd05a';ctx.globalAlpha=Math.max(0,1-p/1.4);ctx.beginPath();ctx.ellipse(cx,cy,3,3*Math.abs(Math.cos(q*12+j)),0,0,7);ctx.fill()}}
   ctx.restore()}}
 // --- thumbnails for the reel and locker
@@ -3854,6 +3904,52 @@ function itemThumb(id,w,h){const it=ITEM_BY[id];if(!it)return '';if(it.kind==='p
   if(it.kind==='rod'){rodStroke(c,()=>{c.beginPath();c.moveTo(w*.1,h*.85);c.quadraticCurveTo(w*.45,h*.4,w*.92,h*.14)},it,1,1.2);c.fillStyle='#5a5e66';c.fillRect(w*.18,h*.66,7,6);c.fillStyle='#3a2414';c.save();c.translate(w*.12,h*.82);c.rotate(-.75);c.fillRect(-2,-8,4,14);c.restore()}
   else{c.fillStyle='rgba(90,150,190,.35)';c.fillRect(0,h*.58,w,h*.42);c.strokeStyle='rgba(255,255,255,.5)';c.lineWidth=1;c.beginPath();c.ellipse(w/2,h*.6,h*.42,h*.08,0,0,7);c.stroke();drawBobber(c,w/2,h*.5,it,1,1.2,h*.22)}
   return ITH[k]=cv.toDataURL('image/png')}
+// ==PHOENIX== The Phoenix Collection: a Mythic boat, rod and bobber bought outright for $100M in all.
+// Wear all three for the set bonus: heat shimmer on the water and a firebird across the sky on a legendary.
+const PHX_ITEMS=[['phoenix','Phoenix Prow','A firebird of a boat: a carved head on the bow, wings that beat, a trailing tail and embers rising. It glows like a bonfire after dark.',5e7],['r_phoenix','Flame Feather','A rod like a burning tail feather, with sparks off the tip. Wings of flame open over every fish you land.',3e7],['b_phoenix','Phoenix Egg','A smoldering egg with a flame on top. It bursts into fire when a fish bites.',2e7]];
+const phxSet=()=>{const p=PNT();return p.eq==='phoenix'&&p.eqR==='r_phoenix'&&p.eqB==='b_phoenix'};
+function phxParts(c,x,y,L,b,d,T){const k=Math.max(.7,Math.min(1.5,L/95)),bow=b>=3?6:0;c.save();c.lineCap='round';
+  if(c===ctx){c.globalCompositeOperation='lighter';glow(x+L/2,y+6,L*.75+20,.02+.32*Math.pow(1-d,1.5),'255,110,40');c.globalCompositeOperation='source-over'}
+  for(let i=0;i<3;i++){const w=Math.sin(T*2.2+i)*3*k,ex=x-(20+i*7)*k,ey=y-(8-i*7)*k+w,g=c.createLinearGradient(x,y,ex,ey);g.addColorStop(0,'#ff5a1a');g.addColorStop(1,'#ffd23a');c.strokeStyle=g;c.lineWidth=(3.2-i*.5)*k;c.beginPath();c.moveTo(x+2,y+3+i*2);c.quadraticCurveTo(x-10*k,y-2*k+i*3*k+w*.5,ex,ey);c.stroke();c.fillStyle='#fff2b0';c.beginPath();c.arc(ex,ey,1.4*k,0,7);c.fill()}
+  {const sx=x+L*.52,sy=y+2,a=-.05+.3*(.5+.5*Math.sin(T*1.6)),wl=Math.min(L*.5,70*k);c.save();c.translate(sx,sy);c.rotate(a);
+    for(let j=0;j<5;j++){const len=wl*(1-j*.03),hy=-2+j*2.2*k,g=c.createLinearGradient(0,0,-len,0);g.addColorStop(0,j%2?'#c8200e':'#ff5a1a');g.addColorStop(1,'#ffd23a');c.fillStyle=g;c.beginPath();c.moveTo(2,hy-2*k);c.quadraticCurveTo(-len*.5,hy-5*k,-len,hy-k+Math.sin(T*3+j)*1.2);c.quadraticCurveTo(-len*.5,hy+3*k,2,hy+2*k);c.fill()}
+    c.fillStyle='#ffd23a';c.beginPath();c.arc(0,0,2.6*k,0,7);c.fill();c.restore()}
+  const bx=x+L-2,by=y-bow,hx=bx+7*k,hy=by-17*k+Math.sin(T*1.3)*1.2,ng=c.createLinearGradient(bx,by,hx,hy);ng.addColorStop(0,'#c8200e');ng.addColorStop(1,'#ffb02a');
+  c.strokeStyle=ng;c.lineWidth=5*k;c.beginPath();c.moveTo(bx-6*k,by+4*k);c.quadraticCurveTo(bx+9*k,by-4*k,hx,hy);c.stroke();
+  for(let i=0;i<3;i++){const fl=Math.sin(T*7+i*2)*1.5*k;c.fillStyle=i===1?'#ffd23a':'#ff7a1a';c.beginPath();c.moveTo(hx-k,hy-2*k);c.quadraticCurveTo(hx-6*k-i*2*k,hy-8*k-i*2*k+fl,hx-12*k-i*3*k,hy-6*k-i*4*k+fl);c.quadraticCurveTo(hx-5*k,hy-3*k,hx-k,hy);c.fill()}
+  const hg=c.createRadialGradient(hx-k,hy-1.5*k,.5,hx,hy,4.5*k);hg.addColorStop(0,'#fff2b0');hg.addColorStop(1,'#ff8a1a');c.fillStyle=hg;c.beginPath();c.ellipse(hx,hy,4.6*k,3.8*k,-.3,0,7);c.fill();
+  c.fillStyle='#ffd23a';c.beginPath();c.moveTo(hx+3.6*k,hy-1.6*k);c.lineTo(hx+9*k,hy+.6*k);c.lineTo(hx+3.4*k,hy+1.6*k);c.fill();
+  c.fillStyle='#2a0a04';c.beginPath();c.arc(hx+1.2*k,hy-.8*k,k,0,7);c.fill();
+  if(c===ctx&&lit(d)){c.globalCompositeOperation='lighter';glow(hx+1.2*k,hy-.8*k,6*k,.6,'255,200,90');c.globalCompositeOperation='source-over'}
+  if(!RM)for(let i=0;i<10;i++){const q=(T*.45+i/10)%1,ex=x+((i*.618)%1)*L+Math.sin(T*2+i)*4,ey=y+6-q*48*k;c.globalAlpha=(1-q)*.9;c.fillStyle=q<.4?'#fff2b0':q<.7?'#ffb02a':'#ff4a1a';c.beginPath();c.arc(ex,ey,(1.4-q)*k,0,7);c.fill()}
+  c.restore()}
+function phxTip(c,x,y,T,d){c.save();const fl=Math.sin(T*8)*1.2;c.translate(x,y);c.rotate(-.55);
+  for(const [col,s] of [['#ff4a1a',1],['#ffb02a',.7],['#fff2b0',.4]]){c.fillStyle=col;c.beginPath();c.moveTo(-2*s,0);c.quadraticCurveTo(-3*s,-6*s,fl*.6,-12*s-Math.abs(fl));c.quadraticCurveTo(3*s,-6*s,2*s,0);c.fill()}c.restore();
+  if(!RM){c.save();for(let i=0;i<5;i++){const q=(T*.9+i/5)%1;c.globalAlpha=1-q;c.fillStyle=q<.5?'#ffd23a':'#ff5a1a';c.beginPath();c.arc(x+Math.sin(T*3+i*2)*3+q*4,y-4-q*22,1.3*(1-q)+.3,0,7);c.fill()}c.restore()}
+  if(c===ctx&&d<.8){ctx.save();ctx.globalCompositeOperation='lighter';glow(x,y-4,22,.35*(1-d)+.1,'255,140,50');ctx.restore()}}
+function phxFlare(x,y,bite,T,d){ctx.save();ctx.globalCompositeOperation='lighter';glow(x,y+5,36,.12+.2*(1-d),'255,120,40');
+  if(bite){const f=.6+.4*Math.sin(T*20);glow(x,y-10,70,.45*f,'255,140,50');ctx.globalCompositeOperation='source-over';ctx.globalAlpha=.85;
+    for(let i=0;i<7;i++){const ph=T*10+i*1.7,h=(16+10*Math.abs(Math.sin(ph)))*(i===3?1.6:1-Math.abs(i-3)*.12),bx=x+(i-3)*3.2;ctx.fillStyle=['#ff3a1a','#ff7a1a','#ffb02a','#fff2b0','#ffb02a','#ff7a1a','#ff3a1a'][i];ctx.beginPath();ctx.moveTo(bx-3,y);ctx.quadraticCurveTo(bx-2+Math.sin(ph)*2,y-h*.6,bx+Math.sin(ph*1.3)*3,y-h);ctx.quadraticCurveTo(bx+2+Math.sin(ph)*2,y-h*.6,bx+3,y);ctx.fill()}}
+  ctx.restore()}
+function phxHeat(x,y,L,T,d){ctx.save();ctx.globalCompositeOperation='lighter';glow(x+L/2,y+18,L*.8,.03+.17*(1-d),'255,110,40');ctx.strokeStyle=`rgba(255,150,70,${.22+.12*(1-d)})`;ctx.lineWidth=1;
+  for(let j=0;j<4;j++){ctx.beginPath();for(let i=0;i<=L*1.3;i+=4){const xx=x-L*.15+i,yy=y+19+j*3+Math.sin(i/6+T*4+j*1.7)*1.2;i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)}ctx.stroke()}ctx.restore()}
+const PHXB={t0:-99};function phxBird(){PHXB.t0=performance.now()/1000;try{sfx('chime','L')}catch(e){}}
+function phxBirdDraw(now){const q=(now-PHXB.t0)/3.4;if(q<0||q>1||RM)return;const P=t=>[-80+t*960,150-Math.sin(t*Math.PI)*95];ctx.save();ctx.globalCompositeOperation='lighter';
+  for(let i=24;i>=1;i--){const t=q-i*.012;if(t<0)continue;const [tx,ty]=P(t);ctx.globalAlpha=(1-i/24)*.7;ctx.fillStyle=i<8?'#ffd23a':i<16?'#ff7a1a':'#ff3a1a';ctx.beginPath();ctx.arc(tx,ty+Math.sin(i+now*6)*2,(1-i/24)*9+1.5,0,7);ctx.fill()}
+  const [x,y]=P(q),[x2,y2]=P(Math.min(1,q+.01)),fl=Math.sin(now*9);ctx.globalAlpha=1;glow(x,y,80,.5,'255,150,60');ctx.translate(x,y);ctx.rotate(Math.atan2(y2-y,x2-x));ctx.scale(1.9,1.9);
+  for(const w of [1,0]){ctx.fillStyle=w?'#ff7a1a':'#ffb02a';ctx.beginPath();ctx.moveTo(-2,0);ctx.quadraticCurveTo(-8-w*4,-(4+16*fl),-16-w*6,-(6+22*fl)+w*4);ctx.quadraticCurveTo(-12,-2,-10,0);ctx.fill()}
+  ctx.fillStyle='#ffd23a';ctx.beginPath();ctx.ellipse(0,0,14,4.5,0,0,7);ctx.fill();ctx.fillStyle='#fff2b0';ctx.beginPath();ctx.arc(12,-1,4,0,7);ctx.fill();ctx.fillStyle='#ffb02a';ctx.beginPath();ctx.moveTo(15,-2);ctx.lineTo(21,0);ctx.lineTo(15,1.5);ctx.fill();ctx.restore()}
+function phxCard(){const p=PNT(),n=PHX_ITEMS.filter(([id])=>p.own[id]).length;
+  return `<div class="phx-card"><div class="phx-h"><span>Mythic · never in crates</span><b>🔥 The Phoenix Collection</b></div><div class="phx-row">${PHX_ITEMS.map(([id,nm,,c])=>{const own=!!p.own[id];return `<div class="phx-it"><img alt="" src="${itemThumb(id,96,44)}"><b>${nm}</b>${own?'<button class="ghost" disabled>Owned</button>':`<button class="jig" data-phx="${id}" ${S.coins<c?'disabled':''}>$${money(c)}</button>`}</div>`}).join('')}</div>
+    <p class="phx-set">${n===3&&phxSet()?'✦ Set bonus on: heat shimmer around your boat, and a firebird crosses the sky when you land a legendary.':n===3?'✦ You own the whole set. Wear all three for the set bonus.':'✦ Set bonus for wearing all three: heat shimmer around your boat, and a firebird crosses the sky when you land a legendary.'}</p></div>`}
+function phxBuyTap(b){const id=b.dataset.phx,it=PHX_ITEMS.find(x=>x[0]===id);if(!it||S.coins<it[3]||PNT().own[id])return;if(!b.dataset.arm){b.dataset.arm=1;b.textContent='Tap again to buy';return}phxBuy(id)}
+function phxBuy(id){const it=PHX_ITEMS.find(x=>x[0]===id),p=PNT();if(!it||S.coins<it[3]||p.own[id])return false;S.coins-=it[3];p.own[id]=1;p[CRATES[kindOf(id)].eq]=id;storeDirty=true;save();liveLastStReset();
+  try{renderAll()}catch(e){}if(phView==='crate')renderCrate();phxShow(id);const m=mpS();if(m.id)api('mythbuy',{id:m.id,key:m.key,item:id}).catch(()=>{});return true}
+function phxShow(id){const it=ITEM_BY[id],row=PHX_ITEMS.find(x=>x[0]===id),all=PHX_ITEMS.every(([k])=>PNT().own[k]),el=document.createElement('div');el.className='pr-show phx-show';
+  el.innerHTML=`<div class="pr-rays"></div><div class="pr-box"><span class="phx-eye">Mythic</span><canvas width="440" height="180"></canvas><h2>${it.n}</h2><p>${row[2]}</p>${all?'<p class="phx-done">✦ The Phoenix Collection is complete. Wear all three and a firebird crosses the sky on every legendary.</p>':''}<p class="pr-sub">It’s on now. Swap it any time in the Crate Expectations locker.</p><button class="jig" id="phxOk">Wonderful</button></div>`;
+  for(let i=0;i<50;i++){const c=document.createElement('i');c.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*2.4}s;background:${['#ff3a1a','#ff7a1a','#ffb02a','#ffd23a','#fff2b0'][i%5]}`;el.append(c)}
+  document.body.append(el);sfx('fanfare');const cv=el.querySelector('canvas'),c=cv.getContext('2d'),loop=now=>{if(!cv.isConnected)return;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,440,180);c.scale(2,2);drawItemPrev(c,it,now/1000);requestAnimationFrame(loop)};requestAnimationFrame(loop);
+  el.querySelector('#phxOk').onclick=()=>el.remove()}
 // --- the app
 const CR={tab:'home',kind:'deep',lk:'paint',spin:null,raf:0,prevRaf:0};
 function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crateCost(),free=crateFree(),K=CRATES[CR.kind],all=Object.values(ITEM_BY).filter(s=>!s.quest||p.own[s.id]),own=all.filter(s=>p.own[s.id]).length;
@@ -3863,7 +3959,7 @@ function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crate
   if(CR.tab==='home'){const ico={paint:'🎨',rod:'🎣',bob:'🎈',deep:'🌊'},box=crateArt;
     const _x=k=>{return `<svg viewBox="0 0 64 56"><path d="M6 18l26-12 26 12v24L32 54 6 42z" fill="${a}"/><path d="M6 18l26 12 26-12M32 30v24" stroke="rgba(0,0,0,.35)" stroke-width="2" fill="none"/><path d="M6 18l26-12 26 12-26 12z" fill="${b2}"/><path d="M14 22l26-12M24 26l26-12" stroke="rgba(0,0,0,.3)" stroke-width="1.5"/><path d="M28 31l8-4v9l-8 4z" fill="${c3}"/><circle cx="32" cy="34" r="1.6" fill="rgba(0,0,0,.5)"/></svg>`};
     const eqs=[['eq','paint','Boat'],['eqR','rod','Rod'],['eqB','bob','Bobber']].map(([f,k,n])=>{const it=p[f]&&ITEM_BY[p[f]];return `<button class="cr-look" data-crgo="${k}" title="${n}">${it?`<img alt="" src="${itemThumb(it.id,96,44)}">`:'<span class="q">—</span>'}<small>${n}</small><b${it?` style="color:${SK_TIERS[it.t].col}"`:''}>${it?esc(it.n):'Stock'}</b></button>`}).join('');
-    body=`${free?'<div class="cr-free">🎁 Your free crate for today is ready. Pick any crate.</div>':''}<div class="cr-shelf">${Object.entries(CRATES).map(([k,c])=>{const got=c.items.filter(s=>p.own[s.id]).length;return `<button class="cr-box${k==='deep'?' deep':''}" data-crgo-open="${k}"><div class="cr-box-art">${box(k)}</div><b>${ico[k]} ${c.n} crate</b><small>${got}/${c.items.length} found</small><span class="cr-price">${free?'Free today':'$'+money(cost)}</span>${k==='deep'?'<i class="cr-tag">Series 2</i>':''}</button>`}).join('')}</div>
+    body=`${free?'<div class="cr-free">🎁 Your free crate for today is ready. Pick any crate.</div>':''}${phxCard()}<div class="cr-shelf">${Object.entries(CRATES).map(([k,c])=>{const got=c.items.filter(s=>p.own[s.id]).length;return `<button class="cr-box${k==='deep'?' deep':''}" data-crgo-open="${k}"><div class="cr-box-art">${box(k)}</div><b>${ico[k]} ${c.n} crate</b><small>${got}/${c.items.length} found</small><span class="cr-price">${free?'Free today':'$'+money(cost)}</span>${k==='deep'?'<i class="cr-tag">Series 2</i>':''}</button>`}).join('')}</div>
       <div class="cr-sub"><b>Your look</b><button class="cr-link" data-crt="locker">🔒 Open locker · ${own}/${all.length}</button></div><div class="cr-looks">${eqs}</div>
       <div class="cr-home-btns"><button class="ghost" data-crt="locker">🔒 Locker</button><button class="ghost" data-crt="odds">📊 Odds</button></div><p class="cr-note">Crates opened: ${p.opened} · Duplicates sell back for cash.</p>`}
   else if(CR.tab==='open'){const eqId=p[K.eq],eq=eqId&&ITEM_BY[eqId];
@@ -3885,7 +3981,7 @@ function renderCrate(){const b=$('crBody');if(!b)return;const p=PNT(),cost=crate
   b.querySelectorAll('[data-crgo]').forEach(x=>x.onclick=()=>{CR.lk=x.dataset.crgo;CR.tab='locker';sfx('click');renderCrate()});
   const on=(id,f)=>{const e=$(id);if(e)e.onclick=f};on('crFree',()=>crateOpen(true));on('crBuy',()=>crateOpen(false));on('crTix',()=>crateOpen(false,true));
   if(CR.tab==='open'&&CR.last){const e=$('crEquip');if(e)e.onclick=()=>{const it=CR.last.win;p[CRATES[it.kind].eq]=it.id;save();liveLastStReset();sfx('click');showToast(`${it.n}: ${CRATES[it.kind].on.toLowerCase()}`,'Equipped');renderCrate()};const a=$('crAgain');if(a)a.onclick=()=>{CR.last=null;renderCrate()};crPrevLoop()}
-  b.querySelectorAll('[data-skin]').forEach(x=>x.onclick=()=>{const id=x.dataset.skin,f=CRATES[kindOf(id)].eq;p[f]=p[f]===id?null:id;sfx('click');save();renderCrate();liveLastStReset()})}
+  b.querySelectorAll('[data-skin]').forEach(x=>x.onclick=()=>{const id=x.dataset.skin,f=CRATES[kindOf(id)].eq;p[f]=p[f]===id?null:id;sfx('click');save();renderCrate();liveLastStReset()});b.querySelectorAll('[data-phx]').forEach(x=>x.onclick=()=>phxBuyTap(x))}
 const deepSvg='<svg viewBox="0 0 64 56"><path d="M6 18l26-12 26 12v24L32 54 6 42z" fill="#1a4a6a"/><path d="M6 18l26 12 26-12M32 30v24" stroke="#0c2a40" stroke-width="2" fill="none"/><path d="M6 18l26-12 26 12-26 12z" fill="#2a7aa0"/><path d="M14 22l26-12M24 26l26-12" stroke="#0c2a40" stroke-width="1.5"/><path d="M12 36c4-3 8 3 12 0M40 44c4-3 8 3 12 0" stroke="#7ad6e0" stroke-width="1.4" fill="none"/><path d="M28 31l8-4v9l-8 4z" fill="#7ad6e0"/><circle cx="32" cy="34" r="1.6" fill="#0c2a40"/></svg>';
 const crateSvg='<svg viewBox="0 0 64 56"><path d="M6 18l26-12 26 12v24L32 54 6 42z" fill="#8a5a2a"/><path d="M6 18l26 12 26-12M32 30v24" stroke="#5a3814" stroke-width="2" fill="none"/><path d="M6 18l26-12 26 12-26 12z" fill="#b07a3a"/><path d="M14 22l26-12M24 26l26-12" stroke="#5a3814" stroke-width="1.5"/><path d="M28 31l8-4v9l-8 4z" fill="#ffc23a"/><circle cx="32" cy="34" r="1.6" fill="#5a3814"/></svg>';
 const CRATE_TINT={paint:['#8a5a2a','#b07a3a','#ffc23a'],rod:['#3a4a7a','#5a6aa8','#7ad0ff'],bob:['#8a2a4a','#b84a6a','#ffd0e0'],deep:['#1a4a6a','#2a7aa0','#7ad6e0']};
@@ -3909,12 +4005,14 @@ function crateLand(){const {win}=CR.spin,T0=SK_TIERS[win.t];CR.last=CR.spin;CR.s
   if(win.t==='L'){sfx('fanfare');celebrate({lbl:`Legendary ${CRATES[win.kind].noun}!`,r:'L',name:win.n,sub:'One of the rarest finds in the crates',icon:svgI('crown','#ffc23a')});burst(400,200,['#ffd05a','#ffffff','#ff8a3a'],90)}
   else if(win.t==='E'){sfx('chime','L');burst(400,220,[T0.col,'#ffffff'],50)}else if(win.t==='R')sfx('chime','R');else sfx('pop')}
 function crPrevLoop(){cancelAnimationFrame(CR.prevRaf);const cv=$('crPrev');if(!cv)return;const c=cv.getContext('2d'),it=ITEM_BY[cv.dataset.pv];if(!it)return;
-  const draw=now=>{if(!cv.isConnected)return;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,440,180);c.scale(2,2);const T=now/1000,bob=Math.sin(T*1.6)*2;
-    if(it.kind==='paint'){c.fillStyle='rgba(0,0,0,.2)';c.beginPath();c.ellipse(110,64+bob,92,6,0,0,7);c.fill();drawPaint(c,25,46+bob,170,5,1,T,it)}
-    else if(it.kind==='rod'){const bend=Math.max(0,Math.sin(T*1.4))*10;rodStroke(c,()=>{c.beginPath();c.moveTo(30,80);c.quadraticCurveTo(90,40+bend*.5,180+0*bend,12+bend)},it,1,T);c.fillStyle='#5a5e66';c.fillRect(44,66,10,8);
+  const draw=now=>{if(!cv.isConnected)return;c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,440,180);c.scale(2,2);drawItemPrev(c,it,now/1000);CR.prevRaf=requestAnimationFrame(draw)};CR.prevRaf=requestAnimationFrame(draw)}
+// One item, animated, on a 220x90 stage (crate results and the Mythic unveil)
+function drawItemPrev(c,it,T){const bob=Math.sin(T*1.6)*2;
+    if(it.kind==='paint'){const ph=it.p==='phoenix',px=ph?42:25,pl=ph?146:170;c.fillStyle='rgba(0,0,0,.2)';c.beginPath();c.ellipse(px+pl/2,64+bob,pl*.54,6,0,0,7);c.fill();drawPaint(c,px,46+bob+(ph?6:0),pl,5,1,T,it)}
+    else if(it.kind==='rod'){const bend=Math.max(0,Math.sin(T*1.4))*10;rodStroke(c,()=>{c.beginPath();c.moveTo(30,80);c.quadraticCurveTo(90,40+bend*.5,180+0*bend,12+bend)},it,1,T);c.fillStyle='#5a5e66';c.fillRect(44,66,10,8);if(it.col==='phoenix')phxTip(c,180,12+bend,T,1);
       if(it.glow){c.globalAlpha=.35+.25*Math.sin(T*3);c.fillStyle=it.glow==='#ffffff'?`hsl(${(T*80)%360},90%,70%)`:it.glow;c.beginPath();c.arc(180,12+bend,5,0,7);c.fill();c.globalAlpha=1}}
     else{c.fillStyle='rgba(90,150,190,.35)';c.fillRect(0,52,220,40);for(let i=0;i<3;i++){const q=((T*.6)+i/3)%1;c.strokeStyle=`rgba(255,255,255,${.6*(1-q)})`;c.lineWidth=1;c.beginPath();c.ellipse(110,54,10+q*50,2+q*8,0,0,7);c.stroke()}drawBobber(c,110,46+bob,it,1,T,14)}
-    CR.prevRaf=requestAnimationFrame(draw)};CR.prevRaf=requestAnimationFrame(draw)}
+}
 
 
 
@@ -4766,7 +4864,7 @@ const fem=L.g==='f';
 
 function contactHTML(p,mine){const st=p.stats||{},L=lookOf(st.look),db=st.today&&st.today.d===localDay()&&FI(st.today.f)?st.today:null,big=st.big&&FI(st.big.fish)?st.big:null;
   const lie=mine&&q4LieOn('card'),pic=`<img class="ct-pic${st.mir?' ct-flick':''}" src="${portraitURL(L)}" alt="${esc(p.name)} in a ${LOOK_BODY.find(b=>b[0]===L.b)[1].toLowerCase()}">`;
-  return `<div class="ct-card">${st.beta?betaFrame(pic):pic}<div class="ct-name"><b>${esc(p.name)}</b>${st.adm||st.beta||st.sup?`<span class="ctb-row">${st.adm?'<span class="ctb-chip adm" title="Runs Lantern Lake">⚑ Admin</span>':''}${st.beta?'<span class="ctb-chip" title="Played Lantern Lake before it moved to lanternlake.app">★ Beta</span>':''}${st.sup?'<span class="ctb-chip sup" title="Helped keep the lake lit with a donation">♥ Supporter</span>':''}</span>`:''}${p.seen&&!mine?`<small>Fished ${ago(p.seen)}</small>`:mine?'<small>This is how friends see you</small>':''}</div>
+  return `<div class="ct-card">${st.beta?betaFrame(pic):pic}<div class="ct-name"><b>${esc(p.name)}</b>${st.adm||st.beta||st.sup||st.pr?`<span class="ctb-row">${st.pr?prBadge(Math.min(10,st.pr|0),true):''}${st.adm?'<span class="ctb-chip adm" title="Runs Lantern Lake">⚑ Admin</span>':''}${st.beta?'<span class="ctb-chip" title="Played Lantern Lake before it moved to lanternlake.app">★ Beta</span>':''}${st.sup?'<span class="ctb-chip sup" title="Helped keep the lake lit with a donation">♥ Supporter</span>':''}</span>`:''}${p.seen&&!mine?`<small>Fished ${ago(p.seen)}</small>`:mine?'<small>This is how friends see you</small>':''}</div>
     <dl class="ct-facts"><div><dt>Best catch today</dt><dd>${lie?`<button class="q4lie" data-lie="card">${q4FakeW()} lb Glass Perch</button>`:db?`${(+db.w).toFixed(2)} lb ${db.v&&VAR[db.v]?VAR[db.v].n+' ':''}${FI(db.f).n}`:'Nothing yet today'}</dd></div>
     <div><dt>Pinball high score</dt><dd>${st.pin?Number(st.pin).toLocaleString():'No games yet'}</dd></div>
     <div><dt>FinDuel record</dt><dd>${st.bet&&(st.bet.w||st.bet.l)?`${st.bet.w}-${st.bet.l} · <span class="${st.bet.net>=0?'ct-up':'ct-down'}">${st.bet.net>=0?'+':'−'}$${money(Math.abs(st.bet.net))}</span>`:'No bets yet'}</dd></div>
@@ -4977,7 +5075,7 @@ function renderHelp(){
    ['Spooky sights and lake life',`<p>Little moments happen around the lake now: deer drinking on the far shore, an eagle snatching a fish, a loon family paddling by, hot air balloons, planes towing banners, rainbows after rain and the northern lights on clear nights. During Halloween, look for ghosts, bats, a witch crossing the moon and a drifting jack-o’-lantern boat.</p>`],
    ['First day guide',`<p>Brand-new players get a short checklist under the cast bar that walks through catching, selling, the paper, grilling, upgrading and sleeping, with a small reward for each step. Phone apps unlock one at a time as they play. You can skip it any time.</p>`],
    ['Lake projects',`<p>Open the Shop app and tap <b>Projects</b>. Fund big builds in stages with money and materials. Each stage finishes the next morning and gives a permanent bonus: the Marina makes fish sell for more, the Fish Hatchery brings more Rare and Legendary bites, and the Salvage Barn turns up more materials.</p>`],
-   ['Retiring',`<p>Once you have $5,000,000 you can retire from the Projects tab. You start over with a lean-to and a stick rod but keep your logbook, trophies, collectibles, tapes, decor, cases and projects, and every fish you sell is worth 10% more for good each time you retire.</p>`],
+   ['Prestige',`<p>Once you have $10,000,000 you can prestige from the Projects tab. Each level costs twice the last, up to Prestige X. Your money, gear and catch reset, but your house, yard, pets, decor, logbook, collection, trophies and cosmetics stay. Every level adds 10% to every fish you sell, for good, and puts a star by your name and a flag on your boat that everyone can see. Some levels unlock Legacy rods and costumes.</p>`],
    ['Logbook sets',`<p>Catch every species in a water to claim a set reward and a Master trophy from the Logbook: $5,000 for Dock Pond up to $500,000 for Misty Bay.</p>`],
    ['Cabin TV',`<p>Tap the TV in your cabin and use CH ▲▼ to flip channels. Channel 3 is Lake 7 (forecast and tournaments). Channel 4 is LLNN with news from around the lake. Channel 5 is Fish or Fake?, a daily quiz show: is each fish real or made up for Lantern Lake? It pays 5 prize tickets per right answer. Channel 6 is LLBA Tonight, with live scores, last night’s results and standings. Channel 8 is the Lake Shopping Channel, with one deal a day and the occasional TV-exclusive boat paint.</p>`],
    ['Fishdle',`<p>A daily puzzle in the Fishdle phone app: guess today’s mystery fish in 6 tries. Each guess shows whether its water, rarity, max size, bite times and weather match today’s fish (green), are close (yellow) or don’t (grey), with arrows pointing higher or lower. Everyone gets the same fish each day. Solving it pays 60 prize tickets for a first-try guess, down to 10 for a sixth. Tap Copy result to share your squares.</p>`],
@@ -5522,7 +5620,7 @@ async function api(path,body){const r=await fetch('/api/'+path,body?{method:'POS
   let j=null;try{j=await r.json()}catch(e){throw new Error('offline')}if(!r.ok||j.error){const er=new Error(j.error||('HTTP '+r.status));er.j=j;throw er}return j}
 async function mpCheck(){if(MPV.online!==null)return MPV.online;try{await api('ping');MPV.online=true}catch(e){MPV.online=e.message==='no-db'?'nodb':false}return MPV.online}
 function mpStats(){const _mus=musMine();let big=null;for(const [id,L] of Object.entries(S.log))if(L&&L.big>0&&FI(id)&&(!big||L.big>big.w))big={fish:id,w:+L.big.toFixed(2)};
-  return {arc:S.arc&&S.arc.best?{toss:S.arc.best.toss||0,gar:S.arc.best.gar||0,pin:S.arc.best.pin||0}:null,mir:S.q4&&S.q4.everSolved?1:0,beta:S.beta?1:0,sup:S.sup?1:0,adm:MPV.owner?1:0,mus:_mus,day:S.day,coins:Math.floor(S.coins),total:S.total,species:Object.keys(S.log).filter(k=>S.log[k].n>0).length,coll:COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,trophies:S.trophies.length,variants:varN(),big,look:lookOf(S.look),pin:S.pinHi||0,bet:S.sb&&S.sb.rec?{w:S.sb.rec.w,l:S.sb.rec.l,net:S.sb.rec.net}:null,today:(()=>{const d=dayBest();return d?{f:d.f,w:d.w,v:d.v,d:d.d}:null})()}}
+  return {pr:prLv(),arc:S.arc&&S.arc.best?{toss:S.arc.best.toss||0,gar:S.arc.best.gar||0,pin:S.arc.best.pin||0}:null,mir:S.q4&&S.q4.everSolved?1:0,beta:S.beta?1:0,sup:S.sup?1:0,adm:MPV.owner?1:0,mus:_mus,day:S.day,coins:Math.floor(S.coins),total:S.total,species:Object.keys(S.log).filter(k=>S.log[k].n>0).length,coll:COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,trophies:S.trophies.length,variants:varN(),big,look:lookOf(S.look),pin:S.pinHi||0,bet:S.sb&&S.sb.rec?{w:S.sb.rec.w,l:S.sb.rec.l,net:S.sb.rec.net}:null,today:(()=>{const d=dayBest();return d?{f:d.f,w:d.w,v:d.v,d:d.d}:null})()}}
 function mpCabin(){return {pet:curPet(),cab:CAB(),leg:legendsCaught().map(f=>f.id),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,native:nativeOf(),decor:Object.keys(S.decor).filter(has),yard:yardOk(S.yard)?{land:yardLand(),it:S.yard.it.filter(a=>yHas(a[0])).slice(0,120).map(a=>{const o=[a[0],Math.round(a[1]),Math.round(a[2]),a[3]?1:0];if(a[4])o.push(Math.round(+a[4]));if(a[5])o.push(a[5]);return o}),g:yGroundPack(S.yard.g),hc:S.yard.hc||{}}:null},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
 async function mpSync(force){const m=mpS();if(SESS.paused||!m.id||MPV.busy)return;if(!SESS.claimed&&!titleOn)await sessClaim();if(SESS.paused)return;if(!force&&Date.now()-MPV.last<(afk()?600000:110000))return;if(MPV.online===false&&!force)return;
   MPV.busy=true;
@@ -5604,7 +5702,7 @@ async function renderFriends(){const b=$('friendsBody'),m=mpS();if(!b)return;
   }
   else if(MPV.tab==='boards'){const pl=await mpPlayers();const B=BOARDS[MPV.board];const rows=pl.filter(x=>x.stats).sort((a,c)=>B[1](c.stats)-B[1](a.stats)).slice(0,25);
     p.innerHTML=`<div class="fr-chips">${Object.entries(BOARDS).map(([k,v])=>`<button data-bd="${k}" aria-pressed="${MPV.board===k}">${v[0]}</button>`).join('')}</div>
-      <ol class="fr-list">${rows.map((x,i)=>`<li class="${x.id===m.id?'me':''}"><span class="rk">${i+1}</span><span class="nm"><button class="fr-who" data-who="${x.id}">${esc(x.name)}</button><small>${x.seen?ago(x.seen):''}</small></span><span class="vl">${B[2](B[1](x.stats),x.stats)}</span>${x.id!==m.id?`<button class="fr-mini" data-visit="${x.id}">Visit</button>`:'<i></i>'}</li>`).join('')||'<p class="fr-muted">'+(m.lake==='all'?'No anglers yet. Invite your friends!':'Only you so far. Share the join code!')+'</p>'}</ol>`;
+      <ol class="fr-list">${rows.map((x,i)=>`<li class="${x.id===m.id?'me':''}"><span class="rk">${i+1}</span><span class="nm"><button class="fr-who" data-who="${x.id}">${esc(x.name)}</button>${x.stats&&x.stats.pr?prBadge(Math.min(10,x.stats.pr|0)):''}<small>${x.seen?ago(x.seen):''}</small></span><span class="vl">${B[2](B[1](x.stats),x.stats)}</span>${x.id!==m.id?`<button class="fr-mini" data-visit="${x.id}">Visit</button>`:'<i></i>'}</li>`).join('')||'<p class="fr-muted">'+(m.lake==='all'?'No anglers yet. Invite your friends!':'Only you so far. Share the join code!')+'</p>'}</ol>`;
     p.querySelectorAll('[data-bd]').forEach(x=>x.onclick=()=>{MPV.board=x.dataset.bd;renderFriends()});p.querySelectorAll('[data-visit]').forEach(x=>x.onclick=()=>visitCabin(x.dataset.visit));p.querySelectorAll('[data-who]').forEach(x=>x.onclick=()=>{const pl=(MPV.players||[]).find(q=>q.id===x.dataset.who);if(pl){MPV.contact=pl;renderFriends();const sc=$('app-friends');if(sc)sc.scrollTop=0}})}
   else if(MPV.tab==='records'){const recs=[...MPV.records].filter(r=>FI(r.fish)).sort((a,c)=>RAR_ORDER(FI(c.fish).r)-RAR_ORDER(FI(a.fish).r)||FI(a.fish).n.localeCompare(FI(c.fish).n));const mine=recs.filter(r=>r.pid===m.id).length;
     p.innerHTML=`<div class="fr-card"><b>Lake records</b><p>The heaviest of each fish caught by anyone on your lake. You hold <b>${mine}</b>. Beat a record by catching a heavier one.</p></div>
@@ -5892,8 +5990,8 @@ function drawTown(d,T,top,bot){const nw=performance.now(),dt=TOWN.lt?Math.min(.1
   A.sort((a,b)=>a.y-b.y);for(const a of A)a.fn();
   // labels and bubbles on top
   if(!here)TNPC.forEach((n,i)=>{townTag(n.x,n.y-92,n.n,'rgba(90,60,20,.78)');if(n.bub)townBubble(n.x,n.y-104,n.bub.s,n.bub.t);RH2(V,n.x-18,n.y-100,36,100,'tnpc',i)});
-  for(const p of TOWN.peers.values()){if(p.x==null||(p.z||'')!==here)continue;townTag(p.x,p.y-92,p.name);if(p.bub)townBubble(p.x,p.y-104,p.bub.s,p.bub.t);RH2(V,p.x-18,p.y-100,36,100,'tpeer',p.cid)}
-  townTag(TOWN.x,TOWN.y-92,'You','rgba(200,90,30,.85)');
+  for(const p of TOWN.peers.values()){if(p.x==null||(p.z||'')!==here)continue;townTag(p.x,p.y-92,p.name);if(p.pr)prStar(ctx,p.x+ctx.measureText(p.name).width/2+12,p.y-85.5,6,Math.min(10,p.pr|0),T);if(p.bub)townBubble(p.x,p.y-104,p.bub.s,p.bub.t);RH2(V,p.x-18,p.y-100,36,100,'tpeer',p.cid)}
+  townTag(TOWN.x,TOWN.y-92,'You','rgba(200,90,30,.85)');if(prLv())prStar(ctx,TOWN.x+22,TOWN.y-85.5,6,prLv(),T);
   if(TOWN.bub)townBubble(TOWN.x,TOWN.y-98,TOWN.bub.s,TOWN.bub.t);
   drawCoinToss();
   if(TOWN.tx!=null){ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(TOWN.tx,TOWN.ty,10,3,0,0,7);ctx.stroke()}
@@ -6531,6 +6629,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:141,n:'The Phoenix Collection',items:['A new Mythic set you buy outright, never from a crate: find it at the top of the Crate Expectations app.','Phoenix Prow ($50,000,000): a firebird of a boat with a carved head on the bow, wings that beat, a trailing tail and embers rising. It glows like a bonfire after dark, and it replaces the cabin on bigger boats so nothing hides the wings.','Flame Feather ($30,000,000): a rod like a burning tail feather. Wings of flame open over every fish you land.','Phoenix Egg ($20,000,000): a smoldering bobber that bursts into fire when a fish bites.','Wear all three for the set bonus: heat shimmer on the water around your boat, and a firebird that crosses the sky whenever you land a legendary.','Other anglers on your lake see all of it.']},
+ {v:140,n:'Prestige',items:['Retire is now Prestige, with ten levels. Prestige I needs $10,000,000 and each level after costs twice as much.','Prestiging resets your money, gear and catch. Your house, yard, pets, decor, logbook, collection and trophies stay.','Every level adds +10% to every fish you sell, for good.','A star by your name on your contact card, the leaderboards and your name tag: bronze, then silver, gold and finally rainbow at Prestige X.','A flag on your boat that other anglers can see. It sparkles at silver, glows at gold and shifts color at rainbow.','Three Legacy rods (Prestige I, V and X) and four new costumes: Captain’s cap, Fisherman’s sweater, Lighthouse keeper’s coat and Golden captain’s hat.','Anyone who retired before keeps their levels: each retire counts as one Prestige level, and the rewards are already waiting.']},
  {v:139,n:'Phone controls',items:['New for phones and tablets: a thumbstick for walking around town, your yard and friends’ houses. Push it a little to stroll or all the way to walk faster. Tapping to walk still works too.','An action button appears when you’re near something you can use, like “Enter Bait & Tackle”, “Talk to Old Pete” or “Notice Board”. One tap and you’re in.','New “Go to” button in the town bar: pick any place on the street and you walk there.','Prefer tapping? Turn the thumbstick off under Settings on your phone.']},
  {v:138,n:'Rebuild the town',items:['Town projects! The whole lake rebuilds Lantern Harbor together. First up: the old bandstand in the Town Square. Tap it to chip in money or materials ($1,000 is 1 point, materials count by rarity).','When the bandstand is rebuilt, the band plays every evening from 6 PM, the street shows what’s playing, and anyone standing nearby dances.','Next, the Old Cannery reopens. Can up to 20 fish a day: canned fish sells for 50% more, or eat a can for a full meal.','Give 25 points or more to a project and you get its Builder trophy and +50 town reputation when it’s finished. Every 10 points you give also earns reputation (up to 60 a day).','Lantern Harbor is longer: a new grassy lot, Harbor Green, sits at the east end of the street past the cannery, with a bench and a couple of trees. The Harvest Fair stall sets up there in November.']},
  {v:137,n:'Town jobs and the Fish Market',items:['The Notice Board in Lantern Harbor is up! Three jobs a day from the townsfolk: bring fish, a rare catch, fruit or materials, or catch fish at a certain water or after dark. New jobs go up at midnight.','Jobs pay $15,000 to $25,000 each depending on how hard they are, and finishing every job in a day adds a $30,000 board bonus. They also build your town reputation. Climb from Newcomer to Regular, Local, Friend of the Harbor and Pillar of the Harbor for better pay, a fourth daily job, 10% off at Marge’s and a trophy.','The Fish Market is open. Every day it posts three wanted fish, the same for everyone in town, and pays double for them up to a daily amount.','The Harvest Fair stall moves to the east end of the street by the Old Cannery, so it doesn’t block the market.']},
@@ -7838,7 +7938,7 @@ function drawBoat0(d,T){
   if(b===0){ax=dockEnd()-8;ay=246}else{
     let x=[0,430,420,410,400,385,375,370][b];const bmv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98),y=262+bob-(b===7&&bmv?8:0),L=[0,90,110,130,150,180,190,200][b];if(S.sleep)x+=(dockEnd()+10-x)*boatK();if(TRV.on){x+=TRV.dx;if((TRV.cur??TRV.dir)<0){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1)}drawWake(x,y,L,d,T)}
     if(S.sleep&&!TRV.on){const ph=S.sleep.ph,k=boatK();if(!['boatOut','pick'].includes(ph)){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1);if(ph==='boatIn'&&k<.97)drawWake(x,y,L,d,T)}else if(ph==='boatOut'&&k>.03)drawWake(x,y,L,d,T)}
-    ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x+L/2,y+16,L*.6,5,0,0,7);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x+L/2,y+16,L*.6,5,0,0,7);ctx.fill();if(phxSet()&&!RM&&!mir)phxHeat(x,y,L,T,d);
     if(AMB.rock>.08){ctx.strokeStyle=`rgba(255,255,255,${Math.min(.35,AMB.rock*.4)})`;ctx.lineWidth=1.2;const sp=1+(1-AMB.rock)*.6;ctx.beginPath();ctx.ellipse(x+L/2,y+15,L*.62*sp,6*sp,0,0,7);ctx.stroke()}
     pv=[x+L/2,y+12];ang=AMB.rock*.1*Math.sin(T*5.2);ctx.save();ctx.translate(pv[0],pv[1]);ctx.rotate(ang);ctx.translate(-pv[0],-pv[1]);
     if(!S.sleep||['boatIn','boatOut','pick'].includes(S.sleep.ph)){inBoat=true;drawAngler(x+L-36,y+INBOAT,d,T)}
@@ -7850,7 +7950,8 @@ function drawBoat0(d,T){
       ctx.fillStyle=rgb(mix([12,12,14],[34,36,40],d));rrect(mx-12*s,y-13*s,13*s,13*s,3*s);ctx.fill();ctx.fillStyle=rgb(mix([40,10,10],[210,60,48],d));ctx.fillRect(mx-11*s,y-9*s,11*s,2.2*s);
       ctx.fillStyle=rgb(mix([10,10,12],[46,48,54],d));ctx.fillRect(mx-8*s,y+15*s,8*s,2.4*s);const sp=mv?Math.sin(T*45):.7;ctx.fillStyle=rgb(mix([40,40,40],[170,172,176],d));ctx.beginPath();ctx.ellipse(mx-8.5*s,y+18*s,1.4*s,Math.max(1,5*s*Math.abs(sp)),0,0,7);ctx.fill();
       if(mv){ctx.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(mx-13*s-i*6-Math.random()*3,y+15*s+Math.random()*4,1.5+Math.random()*1.5,0,7);ctx.fill()}}}
-    if(b>=4&&!WDN)boatTop(b,x,y,L,d,T,bmv);
+    if(b>=4&&!WDN&&PNT().eq!=='phoenix')boatTop(b,x,y,L,d,T,bmv);
+    if(prLv())prFlag(ctx,x+5,y-(b>=3?2:0),prLv(),T,d);
     ax=x+L-36;ay=y+INBOAT;deck=[b>=4?x+L*.62:x+L*.28,y-(b>=3?3:0)];
   }
   const R=(px,py)=>{if(!pv)return [px,py];const c=Math.cos(ang),sn=Math.sin(ang),dx=px-pv[0],dy=py-pv[1];return [pv[0]+dx*c-dy*sn,pv[1]+dx*sn+dy*c]};
@@ -7862,6 +7963,7 @@ function drawBoat0(d,T){
   const bend=CATCH.on&&ct<.84&&!CATCH.item?Math.min(14,4+Math.sqrt(CATCH.w)*1.6)*(1-ct*.6):CATCH.on&&ct<.84?3:0;
   const tipL=[ax+40-bend*.4,ay-58-Math.sin(T*2)*2+bend];
   rodStroke(ctx,()=>{ctx.beginPath();ctx.moveTo(ax+4,ay-14);ctx.quadraticCurveTo(ax+26,ay-40,tipL[0],tipL[1])},rodEq(),d,T);
+  {const rf=rodEq();if(rf&&rf.col==='phoenix')phxTip(ctx,tipL[0],tipL[1],T,d)}
   done();
   const [tipX,tipY]=R(tipL[0],tipL[1]);
   const bx=Math.min(760,ax+(b===0?170:150)),dip=p>.85?Math.abs(Math.sin(T*16))*6:0,by=294+Math.sin(T*2.2)*1.5+dip;BOB.x=bx;BOB.y=by;
@@ -7872,7 +7974,7 @@ function drawBoat0(d,T){
     let cbx=bx,cby=by;const cp=CASTO.t0!=null?(now-CASTO.t0)/.45:2;
     if(cp<1){const q=ease(cp);cbx=tipX+(bx-tipX)*q;cby=tipY+(by-tipY)*q-Math.sin(cp*Math.PI)*45}
     {const rf=rodEq(),beam=rf&&rf.fx==='starforge';ctx.save();if(beam){ctx.strokeStyle='#fff2c8';ctx.shadowColor='#ffd870';ctx.shadowBlur=8;ctx.lineWidth=1.3}else{ctx.strokeStyle='rgba(230,230,230,.55)';ctx.lineWidth=1}ctx.beginPath();ctx.moveTo(tipX,tipY);ctx.quadraticCurveTo((tipX+cbx)/2,Math.max(tipY,cby)-10,cbx,cby-5);ctx.stroke();ctx.restore()}
-    {const be=bobEq();if(be&&be.p==='sun'&&!RM)sunFlare(cbx,cby-3,p>.85,T,d)}drawBobber(ctx,cbx,cby-3,bobEq(),d,T);
+    {const be=bobEq();if(be&&be.p==='sun'&&!RM)sunFlare(cbx,cby-3,p>.85,T,d);if(be&&be.p==='phoenix'&&!RM)phxFlare(cbx,cby-3,p>.85,T,d)}drawBobber(ctx,cbx,cby-3,bobEq(),d,T);
     if(cp>=1&&cp<1.6){const q=(cp-1)/.6;ctx.strokeStyle=`rgba(255,255,255,${.5*(1-q)})`;ctx.lineWidth=1.2;ctx.beginPath();ctx.ellipse(bx,by+2,5+q*16,2+q*4,0,0,7);ctx.stroke()}
   }
   if(d<.4)glow(ax,ay-10,28,.25);
@@ -9654,25 +9756,54 @@ const PROJ=[
   {id:'barn',n:'Salvage Barn',d:'A big red barn for sorting everything the lake coughs up.',bonus:s=>`Materials turn up ${s*10}% more often`,stages:[{c:200000,m:{drift:40,fabric:20}},{c:700000,m:{paint:20,scrap:40}},{c:2000000,m:{carbon:8,moon:4}}]}];
 const PJ=id=>{S.proj=S.proj||{};return S.proj[id]||(S.proj[id]={s:0,b:null})};
 const projLv=id=>S.proj&&S.proj[id]?S.proj[id].s:0;
-const sellBonus=()=>(1+.05*projLv('marina'))*(1+.1*(S.ret||0));
+const sellBonus=()=>(1+.05*projLv('marina'))*(1+.1*prLv());
 function projCan(p){const st=PJ(p.id),nx=p.stages[st.s];if(!nx||st.b!=null)return false;return S.coins>=nx.c&&Object.entries(nx.m).every(([k,n])=>(S.mats[k]||0)>=n)}
 function projFund(id){const p=PROJ.find(x=>x.id===id);if(!p||!projCan(p))return;const st=PJ(id),nx=p.stages[st.s];S.coins-=nx.c;for(const [k,n] of Object.entries(nx.m))S.mats[k]-=n;st.b=S.day;storeDirty=true;sfx('craft');
   showToast(`${p.n}: stage ${st.s+1} is under construction. Ready tomorrow.`,'Lake projects');save();renderDecor()}
 function projTick(){if(!S.proj)return;for(const p of PROJ){const st=S.proj[p.id];if(st&&st.b!=null&&S.day>st.b){st.s++;st.b=null;celebrate({lbl:'Project finished!',r:'L',name:`${p.n} · stage ${st.s} of ${p.stages.length}`,sub:p.bonus(st.s),icon:svgI('crown','#ffd05a')});save();if(phView==='shop')renderDecor()}}}
-const RETIRE_AT=5000000;
-function retireNow(){if(S.coins<RETIRE_AT)return;const keep=S.ret||0;S.ret=keep+1;
-  S.trophies.unshift({name:`Retired ×${S.ret}`,water:'pond',type:'big',score:`$${money(S.coins)}`,day:S.day});
-  Object.assign(S,{coins:1000,rod:0,lure:0,boat:0,shack:0,water:'pond',cooler:{},junk:{},mats:{},pots:{},buffs:{},locked:{},pin:null,tour:null,sleep:null});S.hot=[null,null,null,null,null];
-  cast={el:0,dur:castDur()};sfx('fanfare');celebrate({lbl:'Retired!',r:'M',name:`New lake, ${S.ret*10}% sale bonus for good`,sub:'Your logbook, trophies, collectibles, tapes and decor came with you',icon:svgI('crown','#ffd05a')});
-  renderAll();save();renderDecor()}
+// ==PRESTIGE== replaces Retire. Ten levels; each costs twice the last, starting at $10M. Gear, money and your catch reset;
+// your house, yard, pets, decor, logbook, collection, trophies and cosmetics stay. Every level shows: a star, a boat flag, rods and costumes.
+const PR_MAX=10,PR_ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
+const prLv=()=>Math.max(0,Math.min(PR_MAX,S.ret|0)),prCost=L=>1e7*Math.pow(2,L-1);
+const prTier=l=>l>=10?4:l>=7?3:l>=4?2:l>=1?1:0,PR_TN=['','Bronze','Silver','Gold','Rainbow'];
+const prCol=(l,T)=>{const t=prTier(l);return t===4?`hsl(${((T||performance.now()/1000)*90)%360},95%,62%)`:['#888','#e0904a','#dfe8f4','#ffd05a'][t]};
+const PR_REW=[[1,'Bronze star and boat flag','Captain’s cap costume','Legacy rod'],[2,'+10% sale bonus'],[3,'Fisherman’s sweater costume'],[4,'Silver star and boat flag, with sparkles'],[5,'Legacy rod lights up (Lit Legacy rod)'],[6,'Lighthouse keeper’s coat costume'],[7,'Gold star and boat flag, glowing'],[8,'+10% sale bonus'],[9,'+10% sale bonus'],[10,'Rainbow star and flag','Golden captain’s hat','Golden Legacy rod']];
+const prBadge=(l,big)=>l>0?`<span class="prb pt${prTier(l)}${big?' big':''}" title="Prestige ${PR_ROMAN[l]}">★ ${big?'Prestige ':''}${PR_ROMAN[l]}</span>`:'';
+function prGrant(){const L=prLv(),P=PNT();let any=false;for(const [n,id] of [[1,'r_legacy'],[5,'r_legacylit'],[10,'r_legacygold']])if(L>=n&&!(P.own[id]|0)){P.own[id]=1;any=true}if(any){storeDirty=true;try{save()}catch(e){}}}
+function prestigeNow(){const L=prLv()+1;if(L>PR_MAX||S.coins<prCost(L))return;const paid=S.coins;S.ret=L;
+  S.trophies.unshift({name:`Prestige ${PR_ROMAN[L]}`,water:'pond',type:'count',score:`$${money(paid)}`,day:S.day});
+  Object.assign(S,{coins:1000,rod:0,lure:0,boat:0,water:'pond',cooler:{},junk:{},mats:{},pots:{},buffs:{},locked:{},pin:null,tour:null,sleep:null});S.hot=[null,null,null,null,null];
+  prGrant();if(L===1||L===3||L===6||L===10){const k={1:'pcap',3:'psweat',6:'pkeep',10:'pgold'}[L];HW().wear=k}
+  cast={el:0,dur:castDur()};renderAll();save();renderDecor();prShow(L);
+  try{for(let i=0;i<14;i++)setTimeout(()=>{try{AMB.rockets.push({x:rnd(160,700),y:240,vy:-rnd(140,190),ty:rnd(50,120),c:pick(FWC)})}catch(e){}},i*180)}catch(e){}
+  const m=mpS();if(m.id){mpSync(true);api('prestige',{id:m.id,key:m.key,lv:L}).catch(()=>{})}}
+// A full-screen moment: the new star, rays and confetti, and what it unlocked.
+function prShow(L){const el=document.createElement('div');el.className='pr-show pt'+prTier(L);const got=PR_REW.find(r=>r[0]===L);
+  el.innerHTML=`<div class="pr-rays"></div><div class="pr-box"><div class="pr-star">★<b>${PR_ROMAN[L]}</b></div><h2>Prestige ${PR_ROMAN[L]}</h2><p>${PR_TN[prTier(L)]} tier · +${L*10}% on every sale, for good</p>${got?`<ul>${got.slice(1).map(x=>`<li>✦ ${x}</li>`).join('')}</ul>`:''}<p class="pr-sub">New lake, same home. Your house, yard, pets, decor, logbook and collection came with you.</p><button class="jig" id="prOk">Start fishing</button></div>`;
+  for(let i=0;i<60;i++){const c=document.createElement('i');c.style.cssText=`left:${Math.random()*100}%;animation-delay:${Math.random()*1.6}s;background:${['#ffd05a','#ff7a3d','#7cc7dc','#c9a0f2','#ff8fb8','#bcd06b'][i%6]}`;el.append(c)}
+  document.body.append(el);sfx('fanfare');setTimeout(()=>sfx('chime','M'),700);el.querySelector('#prOk').onclick=()=>el.remove()}
+function prPreview(){const L=prLv()+1,B=$('itemBox');if(L>PR_MAX)return;const cost=prCost(L),can=S.coins>=cost,got=PR_REW.find(r=>r[0]===L);
+  B.innerHTML=`<div class="pr-prev pt${prTier(L)}"><span class="eyebrow">Prestige</span><h2>Go for Prestige ${PR_ROMAN[L]}?</h2>
+    <div class="pr-cols"><div><b>You keep</b><ul><li>Your house, yard and pets</li><li>Decor, logbook, collection and trophies</li><li>Boat paints, rods, bobbers and costumes</li><li>Lake projects and cases</li></ul></div><div><b>Resets</b><ul><li>Money (you start with $1,000)</li><li>Rod, lure and boat</li><li>Cooler, materials and potions</li><li>You start at Dock Pond</li></ul></div></div>
+    <div class="pr-gets"><b>You unlock</b><ul><li>✦ A ${PR_TN[prTier(L)].toLowerCase()} ★ ${PR_ROMAN[L]} star by your name, for everyone to see</li><li>✦ +${L*10}% on every fish you sell, for good</li>${got?got.slice(1).map(x=>`<li>✦ ${x}</li>`).join(''):''}</ul></div>
+    <p class="pr-cost">Costs $${money(cost)} in hand${can?'':` · you have $${money(Math.floor(S.coins))}`}</p>
+    <div class="xf-row"><button class="jig" id="prGo" ${can?'':'disabled'}>Prestige</button><button class="ghost" id="prNo">Not yet</button></div></div>`;
+  $('itemModal').hidden=false;$('prNo').onclick=()=>$('itemModal').hidden=true;const g=$('prGo');g.onclick=()=>{if(!g.dataset.arm){g.dataset.arm=1;g.textContent=`Tap again to reset and reach Prestige ${PR_ROMAN[L]}`;return}$('itemModal').hidden=true;prestigeNow()}}
+// Drawing: a star, and a flag on the stern of the boat. Silver and up sparkle, gold glows, rainbow shifts color.
+function prStar(c,x,y,r,l,T,fill){const col=fill||prCol(l,T),t=prTier(l);c.save();if(t>=3){c.shadowColor=col;c.shadowBlur=8+3*Math.sin(T*4)}c.fillStyle=col;c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;c.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}c.closePath();c.fill();c.shadowBlur=0;c.strokeStyle='rgba(0,0,0,.45)';c.lineWidth=.8;c.stroke();c.restore()}
+function prFlag(c,x,y,l,T,d){if(!l)return;const t=prTier(l),col=prCol(l,T),H=38;c.save();c.strokeStyle=rgb(mix([30,24,20],[90,70,50],d));c.lineWidth=1.6;c.beginPath();c.moveTo(x,y);c.lineTo(x,y-H);c.stroke();c.fillStyle='#ffd05a';c.beginPath();c.arc(x,y-H-1.5,1.8,0,7);c.fill();
+  if(t>=3){c.shadowColor=col;c.shadowBlur=10+4*Math.sin(T*3)}c.fillStyle=col;c.beginPath();c.moveTo(x,y-H);for(let i=0;i<=8;i++){const u=i/8,w=Math.sin(T*6-u*5)*2.6*u;c.lineTo(x-u*24,y-H+u*7+w)}for(let i=8;i>=0;i--){const u=i/8,w=Math.sin(T*6-u*5)*2.6*u;c.lineTo(x-u*24,y-H+14-u*7+w)}c.closePath();c.fill();c.shadowBlur=0;
+  prStar(c,x-8,y-H+7+Math.sin(T*6-1.6)*.8,3.6,l,T,'#ffffff');c.fillStyle='#fff';c.globalAlpha=.9;
+  if(t>=2)for(let i=0;i<4;i++){const q=(T*.7+i/4)%1,sx=x-6-q*26,sy=y-H+3+Math.sin(T*3+i*2)*7;c.globalAlpha=(1-q)*.9;c.beginPath();c.arc(sx,sy,.9+(1-q)*.8,0,7);c.fill()}
+  c.restore();if(t>=3&&lit(d))glow(x-12,y-H+7,26,.35,'255,220,140')}
 function projHTML(){let h=`<div class="pj-intro">Big builds for your lake. Fund a stage with money and materials and it’s finished the next morning. Bonuses last forever.</div>`;
   for(const p of PROJ){const st=PJ(p.id),nx=p.stages[st.s],done=!nx;h+=`<div class="pj-card${done?' done':''}"><div class="pj-h"><b>${p.n}</b><span>${'●'.repeat(st.s)}${'○'.repeat(p.stages.length-st.s)}</span></div><p>${p.d}</p><p class="pj-bonus">${st.s?`Now: ${p.bonus(st.s)}`:'Not started'}${nx?` · Next: ${p.bonus(st.s+1)}`:''}</p>`;
     if(st.b!=null)h+=`<p class="pj-wip">Stage ${st.s+1} under construction. Ready tomorrow.</p>`;
     else if(nx){h+=`<div class="pj-cost"><span class="${S.coins>=nx.c?'ok':''}">$${money(nx.c)}</span>${Object.entries(nx.m).map(([k,n])=>`<span class="${(S.mats[k]||0)>=n?'ok':''}">${n} ${MI(k).n} (${S.mats[k]||0})</span>`).join('')}</div><button class="sbtn" data-proj="${p.id}" ${projCan(p)?'':'disabled'}>Fund stage ${st.s+1}</button>`}
     else h+=`<p class="pj-wip">Complete!</p>`;h+='</div>'}
-  h+=`<div class="pj-card ret"><div class="pj-h"><b>Retire to a new lake</b><span>${S.ret?`Retired ×${S.ret}`:''}</span></div><p>Sell up and start over with a lean-to and a stick rod. You keep your logbook, trophies, collectibles, tapes, decor, cases and projects, and every fish you sell is worth 10% more for good each time you retire.</p>
-    <p class="pj-bonus">Needs $${money(RETIRE_AT)} in hand.${S.ret?` Current bonus: +${S.ret*10}%.`:''}</p><button class="sbtn" id="retireBtn" ${S.coins>=RETIRE_AT?'':'disabled'}>Retire</button></div>`;return h}
-function bindProj(p){p.querySelectorAll('[data-proj]').forEach(b=>b.onclick=()=>projFund(b.dataset.proj));const r=p.querySelector('#retireBtn');if(r)r.onclick=()=>{if(!r.dataset.arm){r.dataset.arm=1;r.textContent='Tap again: this resets your gear and money';return}retireNow()}}
+  {const L=prLv(),nx=L<PR_MAX?L+1:0;h+=`<div class="pj-card ret pr-card pt${prTier(nx||L)}"><div class="pj-h"><b>Prestige</b><span>${L?prBadge(L):''}</span></div><p>Start over on a fresh lake and earn a star everyone can see. Your house, yard, pets, decor, logbook and collection stay; your gear and money reset. Every level adds +10% to every sale for good and unlocks something flashy.</p>
+    ${nx?`<p class="pj-bonus">Prestige ${PR_ROMAN[nx]} needs $${money(prCost(nx))} in hand.${L?` Current bonus: +${L*10}%.`:''}</p><button class="sbtn" id="retireBtn">${S.coins>=prCost(nx)?`Go for Prestige ${PR_ROMAN[nx]}`:'See what you’ll unlock'}</button>`:'<p class="pj-bonus">Prestige X: the very top. +100% on every sale.</p>'}</div>`}return h}
+function bindProj(p){p.querySelectorAll('[data-proj]').forEach(b=>b.onclick=()=>projFund(b.dataset.proj));const r=p.querySelector('#retireBtn');if(r)r.onclick=()=>prPreview()}
 function drawMarina(d,T){const s=projLv('marina');if(!s)return;const wood=rgb(mix([40,30,26],[124,86,58],d)),dark=rgb(mix([24,18,16],[76,52,36],d));
   ctx.fillStyle=dark;ctx.fillRect(668,250,132,6);for(let x=676;x<800;x+=22)ctx.fillRect(x,256,3,18);ctx.fillStyle=wood;ctx.fillRect(668,248,132,3);for(const x of [700,744])ctx.fillRect(x,251,4,18);
   if(s>=2){const by=262+Math.sin(T*1.3)*1.2;ctx.fillStyle=rgb(mix([60,60,64],[236,234,226],d));ctx.beginPath();ctx.moveTo(708,by);ctx.lineTo(742,by);ctx.lineTo(738,by+6);ctx.lineTo(712,by+6);ctx.fill();ctx.fillStyle=dark;ctx.fillRect(724,by-30,1.6,30);ctx.fillStyle=rgb(mix([60,60,64],[245,242,232],d),.9);ctx.beginPath();ctx.moveTo(726,by-29);ctx.lineTo(740,by-3);ctx.lineTo(726,by-3);ctx.fill()}
@@ -10649,8 +10780,9 @@ function drawPeer(p,d,T){const sl=liveSlotPos(p);if(!sl)return;const [x,y0,s]=sl
   const ax=L/2-36;LIVE.drawing=true;LIVE.drawWear=p.wear||null;LIVE.drawG=p.g==='f'?'f':'m';try{drawAngler(ax,INBOAT,d,T)}finally{LIVE.drawing=false}
   const hc=peerHullC[b],psk=p.pt&&SKIN_BY[p.pt];if(p.wd)drawWarden(ctx,-L/2,0,L,d,T,p.wd===2,false);else if(psk)drawPaint(ctx,-L/2,0,L,b,d,T,psk);else{ctx.fillStyle=rgb(mix(hc.map(v=>v*.3),hc,d*.8+.2));ctx.beginPath();ctx.moveTo(-L/2,0);ctx.lineTo(L/2,-(b>=3?6:0));ctx.lineTo(L/2-16,14);ctx.lineTo(-L/2+10,14);ctx.fill()}
   if(!p.wd&&(b===2||b===3)){ctx.fillStyle=rgb(mix([14,14,16],[40,42,48],d));ctx.fillRect(-L/2-8,-10,11,12);ctx.fillRect(-L/2-4,2,3,14)}
-  if(b>=4&&!p.wd)boatTop(b,-L/2,0,L,d,T,false);
-  const bend=p.fx&&p.fx.t<1.2?8:0;rodStroke(ctx,()=>{ctx.beginPath();ctx.moveTo(ax+4,-14+INBOAT);ctx.quadraticCurveTo(ax+26,-40+INBOAT,ax+40-bend*.4,-58+bend+INBOAT)},p.rd&&ITEM_BY[p.rd]||null,d,T);ctx.restore();
+  if(b>=4&&!p.wd&&p.pt!=='phoenix')boatTop(b,-L/2,0,L,d,T,false);
+  if(p.pr)prFlag(ctx,-L/2+5,-(b>=3?2:0),Math.min(10,p.pr|0),T,d);
+  const bend=p.fx&&p.fx.t<1.2?8:0;rodStroke(ctx,()=>{ctx.beginPath();ctx.moveTo(ax+4,-14+INBOAT);ctx.quadraticCurveTo(ax+26,-40+INBOAT,ax+40-bend*.4,-58+bend+INBOAT)},p.rd&&ITEM_BY[p.rd]||null,d,T);if(p.rd==='r_phoenix')phxTip(ctx,ax+40-bend*.4,-58+bend+INBOAT,T,d);ctx.restore();
   const tip=[x+(ax+40-bend*.4)*s,y+(-58+bend+INBOAT)*s];
   if(!(p.fx&&p.fx.t<1.4)){ctx.strokeStyle='rgba(235,235,235,.55)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(tip[0],tip[1]);ctx.quadraticCurveTo(bobX-10,bobY-20,bobX,bobY);ctx.stroke();drawBobber(ctx,bobX,bobY,p.bb&&ITEM_BY[p.bb]||null,d,T,3)}
   if(p.fx&&p.fx.t<1.4){const q=p.fx.t/1.4,fx=bobX+(x+ax*s-bobX)*q,fy=bobY+(y-10*s-bobY)*q-Math.sin(q*Math.PI)*40*s,f=FI(p.fx.f),col=p.fx.v&&VAR[p.fx.v]?VAR[p.fx.v].col:RCOL[(f&&f.r)||p.fx.r||'C'],len=Math.min(30,8+Math.sqrt(p.fx.w)*2.4)*s;
@@ -10658,7 +10790,7 @@ function drawPeer(p,d,T){const sl=liveSlotPos(p);if(!sl)return;const [x,y0,s]=sl
     if(q<.3){ctx.strokeStyle=`rgba(255,255,255,${.6-q*2})`;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(bobX,bobY+2,4+q*40,1.5+q*8,0,0,7);ctx.stroke()}}
   // name tag, catch tag and emote
   const ty=y-(b>=4?40:30)*s-30*s;ctx.font='bold 9px "Sniglet",sans-serif';ctx.textAlign='center';const nw=ctx.measureText(p.name).width+10;
-  ctx.fillStyle='rgba(10,22,28,.65)';rrect(x-nw/2+(ax*s),ty-8,nw,12,6);ctx.fill();ctx.fillStyle='#eaf6ff';ctx.fillText(p.name,x+ax*s,ty+1);
+  ctx.fillStyle='rgba(10,22,28,.65)';rrect(x-nw/2+(ax*s),ty-8,nw,12,6);ctx.fill();ctx.fillStyle='#eaf6ff';ctx.fillText(p.name,x+ax*s,ty+1);if(p.pr)prStar(ctx,x+ax*s+nw/2+7,ty-2,5,Math.min(10,p.pr|0),T);
   if(p.fx&&p.fx.t<5){const f=FI(p.fx.f),k=p.fx.t,al=Math.min(1,k/.3,(5-k)/.6),txt=`${p.fx.w} lb ${p.fx.v&&VAR[p.fx.v]?VAR[p.fx.v].n+' ':''}${f?f.n:p.fx.f}`;ctx.globalAlpha=a*al;ctx.font='bold 10px "Sniglet",sans-serif';const tw=ctx.measureText(txt).width+12,yy=ty-16-Math.min(8,k*6);
     ctx.fillStyle=p.fx.r==='L'?'rgba(120,80,0,.85)':p.fx.r==='R'?'rgba(70,40,110,.85)':'rgba(10,22,28,.8)';rrect(x+ax*s-tw/2,yy-9,tw,14,7);ctx.fill();ctx.fillStyle=p.fx.r==='L'?'#ffd700':p.fx.r==='R'?'#e2c8ff':'#ffffff';ctx.fillText(txt,x+ax*s,yy+2);ctx.globalAlpha=a}
   if(p.emo&&p.emo.t<4)emoBubble(x+ax*s,ty-(p.fx&&p.fx.t<5?34:16),EMO[p.emo.e]||'👋',p.emo.t);
@@ -10879,7 +11011,7 @@ function start(data){
   if(!W(S.water))S.water='pond';
   if(isRealm(S.water)){if(S.realmWx)S.wx=S.realmWx;delete S.realmWx;S.water=S.realmFrom&&!isRealm(S.realmFrom)?S.realmFrom:'deep'}
   if(S.sleep&&(S.sleep.at||['door','pick','inside'].includes(S.sleep.ph)))S.sleep=null;
-  SETS();applyDock();applyPhHide();applyPhTheme();applyTextSize();if(!S.guide&&S.total===0&&S.day<=1&&!(S.mp&&S.mp.id))S.guide={step:0,apps:{}};if(S.q&&S.q.step===7)S.q.everSolved=true;if(S.tour&&S.tour.ghost&&S.q2)S.q2.ghost={t0:0};else if(S.q2)S.q2.ghost=null;try{sbInit()}catch(e){}
+  SETS();applyDock();applyPhHide();try{prGrant()}catch(e){}applyPhTheme();applyTextSize();if(!S.guide&&S.total===0&&S.day<=1&&!(S.mp&&S.mp.id))S.guide={step:0,apps:{}};if(S.q&&S.q.step===7)S.q.everSolved=true;if(S.tour&&S.tour.ghost&&S.q2)S.q2.ghost={t0:0};else if(S.q2)S.q2.ghost=null;try{sbInit()}catch(e){}
   if(!Array.isArray(S.hot))S.hot=[];while(S.hot.length<5)S.hot.push(null);
   if(S.snd&&!S.snd.v){if(S.snd.amb===.6)S.snd.amb=.4;if(S.snd.music===.35)S.snd.music=.5;S.snd.v=2}
   if(S.tvInput==='console')S.tvInput='vhs';delete S.cart;delete S.games;

@@ -422,6 +422,20 @@ await check('phone controls: thumbstick walks, action button enters places, Go t
   await p.evaluate(()=>townGoUI());await p.click('[data-go="1240"]');await p.waitForTimeout(6000);ok(await p.evaluate(()=>!TOWN.z&&Math.abs(TOWN.x-1240)<4),'Go to walks there');
   await p.evaluate(()=>{SETS().joy=false});await p.waitForTimeout(400);ok(!(await p.isVisible('#joy')),'thumbstick off in Settings');ok(!errs.length,errs.join('; '));await c.close()});
 
+await check('prestige: preview, reset keeps house and pets, star, flag, Legacy rod, costume, old retirees convert',async()=>{const p=await page(VPS[0][1],save({coins:1e7+5,rod:5,boat:3,shack:6,cooler:{walleye:{n:3,val:300}}}));
+  await p.evaluate(()=>prPreview());ok(await p.isVisible('.pr-prev #prGo:not([disabled])'),'preview with Prestige button');await p.click('#prGo');ok(await p.evaluate(()=>prLv()===0),'two taps needed');await p.click('#prGo');await p.waitForTimeout(500);
+  ok(await p.evaluate(()=>prLv()===1&&S.coins===1000&&S.boat===0&&S.rod===0&&S.shack===6&&!Object.keys(S.cooler).length),'reset gear, kept house');
+  ok(await p.evaluate(()=>(PNT().own.r_legacy|0)===1&&HW().wear==='pcap'&&S.trophies[0].name==='Prestige I'),'Legacy rod, cap, trophy');ok(await p.isVisible('.pr-show'),'big moment');await p.click('#prOk');
+  ok(await p.evaluate(()=>prCost(2)===2e7&&mpStats().pr===1),'next costs double, star shared');ok(!p.errs.length,p.errs.join('; '));await p.context().close();
+  const q=await page(VPS[0][1],save({ret:5}));ok(await q.evaluate(()=>prLv()===5&&(PNT().own.r_legacy|0)===1&&(PNT().own.r_legacylit|0)===1),'retiree converts with rods');ok(!q.errs.length,q.errs.join('; '));await q.context().close()});
+
+await check('Phoenix Collection: Mythic set in Crate Expectations, two-tap buy, unveil, equips, set bonus firebird',async()=>{const p=await page(VPS[1][1],save({coins:1e8+5}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);openPhone();phShow('crate')});await p.waitForTimeout(400);ok(await p.isVisible('.phx-card'),'collection shown');
+  await p.click('[data-phx="phoenix"]');ok(await p.evaluate(()=>!PNT().own.phoenix),'two taps needed');await p.click('[data-phx="phoenix"]');await p.waitForTimeout(400);
+  ok(await p.evaluate(()=>PNT().own.phoenix===1&&PNT().eq==='phoenix'&&S.coins===5e7+5),'bought and wearing the boat');ok(await p.isVisible('.phx-show'),'unveil');await p.click('#phxOk');
+  ok(await p.evaluate(()=>phxBuy('r_phoenix')&&phxBuy('b_phoenix')&&!phxBuy('b_phoenix')&&phxSet()&&S.coins===5),'whole set, no double buy');await p.evaluate(()=>document.querySelectorAll('.phx-show').forEach(e=>e.remove()));
+  await p.evaluate(()=>phxBird());await p.waitForTimeout(800);ok(await p.evaluate(()=>performance.now()/1000-PHXB.t0<3.4),'firebird flying');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
