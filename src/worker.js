@@ -49,6 +49,10 @@ async function init(db){
   try{await db.prepare('ALTER TABLE players ADD COLUMN host TEXT').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN sup INTEGER DEFAULT 0').run()}catch(e){/* already there */}
   try{await db.prepare('ALTER TABLE players ADD COLUMN hts INTEGER').run()}catch(e){/* already there */}
+  try{await db.prepare('ALTER TABLE cloud ADD COLUMN fish INTEGER').run()}catch(e){/* already there */}
+  try{await db.prepare('ALTER TABLE cloud ADD COLUMN sp INTEGER').run()}catch(e){/* already there */}
+  await db.batch([db.prepare('CREATE TABLE IF NOT EXISTS cloudhist(id INTEGER PRIMARY KEY AUTOINCREMENT,pid TEXT,data TEXT,ts INTEGER,dev TEXT,kind TEXT,day INTEGER,coins REAL,fish INTEGER,sp INTEGER,saved INTEGER)'),
+    db.prepare('CREATE INDEX IF NOT EXISTS cloudhist_p ON cloudhist(pid,id)')]);
   await db.prepare('CREATE TABLE IF NOT EXISTS cfg(k TEXT PRIMARY KEY,v TEXT)').run();
   await db.batch([db.prepare('CREATE TABLE IF NOT EXISTS museum(slot TEXT PRIMARY KEY,fish TEXT,v TEXT,pid TEXT,name TEXT,w REAL,ts INTEGER)'),
     db.prepare('CREATE TABLE IF NOT EXISTS mnote(id INTEGER PRIMARY KEY AUTOINCREMENT,pid TEXT,body TEXT,ts INTEGER,seen INTEGER DEFAULT 0)'),
@@ -200,6 +204,20 @@ async function evPart(db,me,b,now){
     db.prepare('SELECT w,ts FROM evbest WHERE ev=? AND pid=?').bind(HW_EV,me.id).first()]);
   let rank=0;if(mine){const r=await db.prepare('SELECT COUNT(*) AS c FROM evbest WHERE ev=? AND (w>? OR (w=? AND ts<?))').bind(HW_EV,mine.w,mine.w,mine.ts).first();rank=(r.c|0)+1}
   return {id:HW_EV,ended:now>=HW_END,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:x.w,me:x.pid===me.id})),me:mine?{w:mine.w,rank}:null}}
+// Harvest Basket: one lake-wide basket for the Harvest Festival (Nov 2 to Nov 30, Eastern). Points add up per angler in evbest.
+// The goal is set once, from how many anglers played in the week before it started.
+const HVB_EV='hv26b',HVB_END=Date.UTC(2026,11,1,5,0,0); // midnight Eastern, December 1 2026
+async function hvbPart(db,me,b,now){
+  if(now>HVB_END+14*864e5)return null;
+  let g=await db.prepare("SELECT v FROM cfg WHERE k='hvb:goal'").first();
+  if(!g){const n=await db.prepare('SELECT COUNT(*) AS c FROM players WHERE seen>?').bind(now-7*864e5).first();const goal=Math.max(10000,Math.round((n.c|0)*500/1000)*1000);
+    await db.prepare("INSERT OR IGNORE INTO cfg(k,v) VALUES('hvb:goal',?)").bind(String(goal)).run();g=await db.prepare("SELECT v FROM cfg WHERE k='hvb:goal'").first()}
+  const add=now<HVB_END?Math.min(20000,Math.max(0,Math.floor(+b.hvb||0))):0;
+  if(add>0)await db.batch([db.prepare('INSERT INTO evbest(ev,pid,name,w,ts) VALUES(?,?,?,?,?) ON CONFLICT(ev,pid) DO UPDATE SET w=evbest.w+excluded.w,name=excluded.name,ts=excluded.ts').bind(HVB_EV,me.id,me.name,add,now),db.prepare("DELETE FROM kvc WHERE k='hvb:tot'")]);
+  const [tot,top,mine]=await Promise.all([cached(db,'hvb:tot',MIN,async()=>await db.prepare('SELECT COALESCE(SUM(w),0) AS s,COUNT(*) AS n FROM evbest WHERE ev=?').bind(HVB_EV).first()),
+    cached(db,'hvb:top',2*MIN,async()=>({results:(await db.prepare('SELECT e.pid,e.name,e.w,COALESCE(p.pub,1) AS pub FROM evbest e LEFT JOIN players p ON p.id=e.pid WHERE e.ev=? ORDER BY e.w DESC,e.ts ASC LIMIT 5').bind(HVB_EV).all()).results})),
+    db.prepare('SELECT w FROM evbest WHERE ev=? AND pid=?').bind(HVB_EV,me.id).first()]);
+  return {goal:+g.v,total:Math.round(+tot.s||0),n:tot.n|0,mine:Math.round(mine?mine.w:0),ended:now>=HVB_END,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:Math.round(x.w),me:x.pid===me.id}))}}
 async function monPart(db,me,b,now,wk){
   let m=await db.prepare('SELECT maxhp,dead FROM mon WHERE week=?').bind(wk).first();
   if(!m){const n=await db.prepare('SELECT COUNT(*) AS c FROM players WHERE seen>?').bind(now-7*864e5).first();const maxhp=Math.max(3000,2500*(n.c|0));
@@ -232,6 +250,7 @@ async function chalPart(db,me,b,now){
 async function syncExtras(db,me,b,now,wk){const out={};
   try{out.ev=await evPart(db,me,b,now)}catch(e){}
   try{out.mon=await monPart(db,me,b,now,wk)}catch(e){}
+  try{if(b.hvq)out.hvb=await hvbPart(db,me,b,now)}catch(e){}
   try{out.gb=await yardPart(db,me,b,now,wk)}catch(e){}
   try{const iv=(await db.prepare('SELECT id,from_pid,from_name,ts FROM invites WHERE to_pid=? AND ts>? ORDER BY id DESC LIMIT 5').bind(me.id,now-15*60000).all()).results||[];if(iv.length){out.inv=iv;await db.prepare('DELETE FROM invites WHERE to_pid=? AND id<=?').bind(me.id,iv[0].id).run()}if(Math.random()<.02)await db.prepare('DELETE FROM invites WHERE ts<?').bind(now-864e5).run()}catch(e){}
   try{out.chal=await chalPart(db,me,b,now)}catch(e){}
@@ -316,6 +335,15 @@ async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.wai
   if(p==='owner/reports'){const r=await db.prepare('SELECT id,from_name,to_pid,to_name,reason,where_ AS wh,ts FROM reports ORDER BY id DESC LIMIT 80').all();return json({reports:r.results||[]})}
   if(p==='owner/repdel'){await db.prepare('DELETE FROM reports WHERE id=?').bind(b.rid|0).run();return json({ok:true})}
   if(p==='owner/bugdel'){await db.prepare('DELETE FROM bugs WHERE id=?').bind(b.bid|0).run();return json({ok:true})}
+  // Owner: a player's current cloud save and earlier saves, and a one-time restore code for any of them.
+  if(p==='owner/saves'){const t=await db.prepare('SELECT id,name FROM players WHERE lname=?').bind(String(b.name||'').trim().toLowerCase()).first();if(!t)return json({found:false});
+    const [cur,h]=await Promise.all([db.prepare('SELECT ts,kind,day,coins,fish,sp FROM cloud WHERE pid=?').bind(t.id).first(),db.prepare('SELECT id,ts,kind,day,coins,fish,sp,saved FROM cloudhist WHERE pid=? ORDER BY id DESC LIMIT 10').bind(t.id).all()]);
+    return json({found:true,pid:t.id,name:t.name,cur,list:h.results})}
+  if(p==='owner/restorecode'){const pid=String(b.pid||'');const r=b.hid==='cur'?await db.prepare('SELECT data FROM cloud WHERE pid=?').bind(pid).first():await db.prepare('SELECT data FROM cloudhist WHERE pid=? AND id=?').bind(pid,Math.floor(+b.hid||0)).first();
+    if(!r)return json({error:'not-found'},404);
+    let code=xcode();for(let i=0;i<5&&await db.prepare('SELECT 1 FROM xfer WHERE code=?').bind(code).first();i++)code=xcode();
+    await db.prepare('INSERT OR REPLACE INTO xfer(code,data,exp) VALUES(?,?,?)').bind(code,r.data,now+XFER_MS*4).run();
+    return json({code,exp:now+XFER_MS*4})}
   if(p==='owner/backup'){const [pl,cl]=await Promise.all([db.prepare('SELECT id,name,created,seen,COALESCE(pub,1) AS pub,stats FROM players ORDER BY created').all(),db.prepare('SELECT c.pid,p.name,c.ts,c.day,c.coins,c.data FROM cloud c LEFT JOIN players p ON p.id=c.pid').all()]);
     return json({made:now,players:pl.results,cloud:cl.results})}
   return null}
@@ -340,7 +368,7 @@ async function dcEdit(db,ch,id,body){const c=await dcCfg(db),u=c[ch];if(!u||!DC_
 const dcLink=c=>c.site?`\n[Open Lantern Lake](${c.site})`:'';
 
 // ==MUSEUM== one plaque per species (main hall) and per species+variant (rare wing), held by the heaviest donated fish.
-const MUS_W={"bluegill":[1.5,"C"],"pumpkin":[1.0,"C"],"shiner":[0.8,"C"],"bullhead":[3.0,"C"],"carp":[35.0,"U"],"warmouth":[1.2,"U"],"lmb":[11.0,"U"],"redear":[2.5,"U"],"pickerel":[6.0,"R"],"grasscarp":[60.0,"R"],"eel":[8.0,"R"],"koi":[20.0,"L"],"tench":[8.0,"L"],"perch":[2.0,"C"],"crappie":[3.0,"C"],"rockbass":[1.6,"C"],"sucker":[5.0,"C"],"walleye":[13.0,"U"],"pike":[35.0,"U"],"smb":[8.0,"U"],"whitebass":[5.0,"U"],"bowfin":[14.0,"R"],"whitefish":[12.0,"R"],"spotgar":[10.0,"R"],"tiger":[40.0,"L"],"bluepike":[15.0,"L"],"rainbow":[10.0,"C"],"chub":[1.2,"C"],"channel":[40.0,"C"],"fallfish":[3.0,"C"],"brown":[22.0,"U"],"gar":[28.0,"U"],"sauger":[6.0,"U"],"brook":[6.0,"U"],"flathead":[110.0,"R"],"shovelnose":[8.0,"R"],"steelhead":[25.0,"R"],"golden":[5.0,"L"],"alligar":[300.0,"L"],"laker":[50.0,"C"],"cisco":[4.0,"C"],"roundwf":[4.0,"C"],"smelt":[0.6,"C"],"burbot":[18.0,"U"],"chinook":[60.0,"U"],"coho":[30.0,"U"],"siscowet":[40.0,"U"],"muskie":[65.0,"R"],"paddle":[140.0,"R"],"atlsalmon":[30.0,"R"],"sturgeon":[250.0,"L"],"aurora":[8.0,"L"],"croaker":[4.0,"C"],"spot":[1.5,"C"],"scup":[4.0,"C"],"weakfish":[18.0,"C"],"striper":[70.0,"U"],"bluefish":[25.0,"U"],"fluke":[22.0,"U"],"reddrum":[90.0,"U"],"cobia":[120.0,"R"],"tarpon":[250.0,"R"],"blackdrum":[110.0,"R"],"tuna":[1000.0,"L"],"swordfish":[1100.0,"L"],"mudminnow":[0.3,"U"],"orfe":[7.0,"R"],"stormkoi":[24.0,"L"],"drum":[20.0,"U"],"lamprey":[1.0,"R"],"thundermusk":[55.0,"L"],"mooneye":[2.0,"U"],"grayling":[4.0,"R"],"boltsturg":[200.0,"L"],"kiyi":[1.0,"U"],"sculpin":[0.4,"R"],"frostchar":[20.0,"L"],"mackerel":[4.0,"U"],"cod":[60.0,"R"],"marlin":[900.0,"L"],"lakebeast":[2400.0,"L"],"moonjelly":[60.0,"C"],"cratereel":[90.0,"C"],"dustminnow":[12.0,"C"],"selenekoi":[200.0,"U"],"orbitperch":[70.0,"U"],"cometrout":[260.0,"R"],"eclipseray":[500.0,"R"],"lunarlev":[6000.0,"L"],"cinderminnow":[8.0,"C"],"magmabass":[60.0,"C"],"embereel":[90.0,"U"],"brimpike":[120.0,"U"],"soulcarp":[260.0,"R"],"obsidiangar":[400.0,"R"],"cerberus":[3000.0,"L"],"puffguppy":[10.0,"C"],"cumuluscarp":[120.0,"C"],"kitefish":[40.0,"U"],"stormray":[300.0,"U"],"prismtrout":[150.0,"R"],"thundereel":[400.0,"R"],"skywhale":[15000.0,"L"],"jacksun":[2.4,"U"],"ghostgar":[40.0,"R"],"witcheel":[14.0,"L"],"bonepike":[30.0,"R"]}; // id -> [max normal weight, rarity]
+const MUS_W={"bluegill":[1.5,"C"],"pumpkin":[1.0,"C"],"shiner":[0.8,"C"],"bullhead":[3.0,"C"],"carp":[35.0,"U"],"warmouth":[1.2,"U"],"lmb":[11.0,"U"],"redear":[2.5,"U"],"pickerel":[6.0,"R"],"grasscarp":[60.0,"R"],"eel":[8.0,"R"],"koi":[20.0,"L"],"tench":[8.0,"L"],"perch":[2.0,"C"],"crappie":[3.0,"C"],"rockbass":[1.6,"C"],"sucker":[5.0,"C"],"walleye":[13.0,"U"],"pike":[35.0,"U"],"smb":[8.0,"U"],"whitebass":[5.0,"U"],"bowfin":[14.0,"R"],"whitefish":[12.0,"R"],"spotgar":[10.0,"R"],"tiger":[40.0,"L"],"bluepike":[15.0,"L"],"rainbow":[10.0,"C"],"chub":[1.2,"C"],"channel":[40.0,"C"],"fallfish":[3.0,"C"],"brown":[22.0,"U"],"gar":[28.0,"U"],"sauger":[6.0,"U"],"brook":[6.0,"U"],"flathead":[110.0,"R"],"shovelnose":[8.0,"R"],"steelhead":[25.0,"R"],"golden":[5.0,"L"],"alligar":[300.0,"L"],"laker":[50.0,"C"],"cisco":[4.0,"C"],"roundwf":[4.0,"C"],"smelt":[0.6,"C"],"burbot":[18.0,"U"],"chinook":[60.0,"U"],"coho":[30.0,"U"],"siscowet":[40.0,"U"],"muskie":[65.0,"R"],"paddle":[140.0,"R"],"atlsalmon":[30.0,"R"],"sturgeon":[250.0,"L"],"aurora":[8.0,"L"],"croaker":[4.0,"C"],"spot":[1.5,"C"],"scup":[4.0,"C"],"weakfish":[18.0,"C"],"striper":[70.0,"U"],"bluefish":[25.0,"U"],"fluke":[22.0,"U"],"reddrum":[90.0,"U"],"cobia":[120.0,"R"],"tarpon":[250.0,"R"],"blackdrum":[110.0,"R"],"tuna":[1000.0,"L"],"swordfish":[1100.0,"L"],"mudminnow":[0.3,"U"],"orfe":[7.0,"R"],"stormkoi":[24.0,"L"],"drum":[20.0,"U"],"lamprey":[1.0,"R"],"thundermusk":[55.0,"L"],"mooneye":[2.0,"U"],"grayling":[4.0,"R"],"boltsturg":[200.0,"L"],"kiyi":[1.0,"U"],"sculpin":[0.4,"R"],"frostchar":[20.0,"L"],"mackerel":[4.0,"U"],"cod":[60.0,"R"],"marlin":[900.0,"L"],"lakebeast":[2400.0,"L"],"moonjelly":[60.0,"C"],"cratereel":[90.0,"C"],"dustminnow":[12.0,"C"],"selenekoi":[200.0,"U"],"orbitperch":[70.0,"U"],"cometrout":[260.0,"R"],"eclipseray":[500.0,"R"],"lunarlev":[6000.0,"L"],"cinderminnow":[8.0,"C"],"magmabass":[60.0,"C"],"embereel":[90.0,"U"],"brimpike":[120.0,"U"],"soulcarp":[260.0,"R"],"obsidiangar":[400.0,"R"],"cerberus":[3000.0,"L"],"puffguppy":[10.0,"C"],"cumuluscarp":[120.0,"C"],"kitefish":[40.0,"U"],"stormray":[300.0,"U"],"prismtrout":[150.0,"R"],"thundereel":[400.0,"R"],"skywhale":[15000.0,"L"],"jacksun":[2.4,"U"],"acornsun":[2.2,"U"],"mapletrout":[9,"R"],"cranberry":[0.6,"U"],"mooncarp":[60,"L"],"ghostgar":[40.0,"R"],"witcheel":[14.0,"L"],"bonepike":[30.0,"R"]}; // id -> [max normal weight, rarity]
 const MUS_V=['','golden','albino','giant'],VAR_N={golden:'Golden',albino:'Albino',giant:'Giant'};
 async function musVer(db){try{const r=await db.prepare("SELECT v FROM kvc WHERE k='mus:v'").first();return r?+r.v:0}catch(e){return 0}}
 // ==LIVE LAKE== one Durable Object room per lake scope and water. Players connect with a WebSocket while they fish;
@@ -631,19 +659,38 @@ async function route(req,env,url,ctx){
   // Cloud save: the latest copy of this player's game, so their devices stay in sync.
   if(p==='cloud/put'){
     const d=String(b.data||'');if(d.length<20||d.length>MAX_SAVE)return json({error:'bad-save'},400);
-    const ts=Math.min(now+60000,Number(b.ts)||now);
+    const ts=Math.min(now+60000,Number(b.ts)||now),dev=clean(b.dev,16);
+    const fish=b.fish==null?null:Math.max(0,Math.floor(+b.fish||0)),sp=b.sp==null?null:Math.max(0,Math.floor(+b.sp||0));
+    const cur=await db.prepare('SELECT ts,dev,kind,day,coins,up,fish,sp FROM cloud WHERE pid=?').bind(me.id).first();
     // Safety net: never let a device overwrite a newer save from another device it hasn't seen yet.
     // 'base' is the cloud version (server 'up' time) this device last uploaded or loaded.
-    if(b.base!=null){const cur=await db.prepare('SELECT ts,dev,kind,day,coins,up FROM cloud WHERE pid=?').bind(me.id).first();
-      if(cur&&cur.dev!==clean(b.dev,16)&&(Number(cur.up)||0)>(Number(b.base)||0))return json({error:'stale',ts:cur.ts,dev:cur.dev,kind:cur.kind,day:cur.day,coins:cur.coins,up:cur.up},409)}
-    await db.prepare('INSERT INTO cloud(pid,data,ts,dev,kind,day,coins,up) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(pid) DO UPDATE SET data=excluded.data,ts=excluded.ts,dev=excluded.dev,kind=excluded.kind,day=excluded.day,coins=excluded.coins,up=excluded.up')
-      .bind(me.id,d,ts,clean(b.dev,16),clean(b.kind,12),Number(b.day)|0,Number(b.coins)||0,now).run();
+    if(b.base!=null&&cur&&cur.dev!==dev&&(Number(cur.up)||0)>(Number(b.base)||0))return json({error:'stale',ts:cur.ts,dev:cur.dev,kind:cur.kind,day:cur.day,coins:cur.coins,up:cur.up,fish:cur.fish,sp:cur.sp},409);
+    // Downgrade guard: a save with far less progress can't replace this one unless the player confirmed it.
+    if(cur&&!b.force&&fish!=null&&cur.fish!=null&&cur.fish>=200&&(fish<cur.fish*.5||(cur.sp!=null&&sp!=null&&sp<cur.sp-10)))
+      return json({error:'downgrade',ts:cur.ts,dev:cur.dev,kind:cur.kind,day:cur.day,coins:cur.coins,up:cur.up,fish:cur.fish,sp:cur.sp},409);
+    // Save history: keep the old copy when a different device takes over, when progress drops, or about once an hour.
+    const st=[];
+    if(cur){const last=await db.prepare('SELECT MAX(saved) AS s FROM cloudhist WHERE pid=?').bind(me.id).first();
+      if(b.force||cur.dev!==dev||(fish!=null&&cur.fish!=null&&fish<cur.fish*.9)||now-(Number(last&&last.s)||0)>=36e5){
+        st.push(db.prepare('INSERT INTO cloudhist(pid,data,ts,dev,kind,day,coins,fish,sp,saved) SELECT pid,data,ts,dev,kind,day,coins,fish,sp,? FROM cloud WHERE pid=?').bind(now,me.id));
+        // keep the 7 newest plus the one with the most fish
+        st.push(db.prepare('DELETE FROM cloudhist WHERE pid=? AND id NOT IN (SELECT id FROM cloudhist WHERE pid=? ORDER BY id DESC LIMIT 7) AND id NOT IN (SELECT id FROM cloudhist WHERE pid=? ORDER BY COALESCE(fish,0) DESC,id DESC LIMIT 1)').bind(me.id,me.id,me.id))}}
+    st.push(db.prepare('INSERT INTO cloud(pid,data,ts,dev,kind,day,coins,up,fish,sp) VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(pid) DO UPDATE SET data=excluded.data,ts=excluded.ts,dev=excluded.dev,kind=excluded.kind,day=excluded.day,coins=excluded.coins,up=excluded.up,fish=excluded.fish,sp=excluded.sp')
+      .bind(me.id,d,ts,dev,clean(b.kind,12),Number(b.day)|0,Number(b.coins)||0,now,fish,sp));
+    await db.batch(st);
     return json({ok:true,ts,up:now});
   }
+  // Earlier saves: the player's own save history, newest first.
+  if(p==='cloud/hist'){
+    const r=await db.prepare('SELECT id,ts,kind,day,coins,fish,sp,saved FROM cloudhist WHERE pid=? ORDER BY id DESC LIMIT 10').bind(me.id).all();
+    return json({list:r.results})}
+  if(p==='cloud/histget'){
+    const r=await db.prepare('SELECT data,ts,day,coins,fish FROM cloudhist WHERE pid=? AND id=?').bind(me.id,Math.floor(+b.hid||0)).first();
+    if(!r)return json({error:'not-found'},404);return json(r)}
   if(p==='cloud/get'){
-    const r=await db.prepare('SELECT data,ts,dev,kind,day,coins,up FROM cloud WHERE pid=?').bind(me.id).first();
+    const r=await db.prepare('SELECT data,ts,dev,kind,day,coins,up,fish,sp FROM cloud WHERE pid=?').bind(me.id).first();
     if(!r)return json({none:true});
-    if(b.meta)return json({ts:r.ts,dev:r.dev,kind:r.kind,day:r.day,coins:r.coins,up:r.up});
+    if(b.meta)return json({ts:r.ts,dev:r.dev,kind:r.kind,day:r.day,coins:r.coins,up:r.up,fish:r.fish,sp:r.sp});
     return json(r);
   }
   if(p==='rename'){

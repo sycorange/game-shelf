@@ -175,6 +175,14 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .gd-x{background:none;border:0;color:var(--muted);font:inherit;font-size:.78rem;cursor:pointer;text-decoration:underline}
 @media (max-width:560px){.guide{grid-template-columns:auto minmax(0,1fr) auto}.gd-x{grid-column:1/-1;justify-self:end;padding:0}}
 .ph-screen.v-hw{background:linear-gradient(180deg,#1a1024,#2a1438 60%,#160c1e)}.ph-screen.v-hw .ph-bar{color:#fff}
+.ph-screen.v-hv{background:linear-gradient(180deg,#2a1608,#3a1e0e 60%,#1e1006)}.ph-screen.v-hv .ph-bar{color:#fff}
+#hvBody{display:grid;gap:10px;padding:0 2px 14px}#hvBody .hw-card{color:#f8ecdc}#hvBody .hw-card p{color:#e8d2b8}#hvBody .hw-rw small,#hvBody .hw-fish small{color:#d8b898}
+.hv-hero{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:linear-gradient(135deg,#e8823a,#8a2e14);color:#fff}.hv-hero svg{width:44px;height:44px}.hv-hero b{font-size:1.1rem;display:block}.hv-hero small{opacity:.9}
+#hvBody .hw-bar{position:relative}#hvBody .hw-bar i{background:linear-gradient(90deg,#e8823a,#ffd05a)}#hvBody .hw-rw li.got>span{background:#e8823a}
+.hvb-mk{position:absolute;top:0;bottom:0;width:2px;background:rgba(0,0,0,.35)}
+.hv-give{list-style:none;margin:0;padding:0;display:grid;gap:6px}.hv-give li{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:6px;align-items:center}.hv-give svg{width:40px;height:20px}.hv-give small{display:block;color:#d8b898;font-size:.74rem}
+.hv-give button,.hv-btn{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:.76rem;cursor:pointer;white-space:nowrap}.hv-btn.hv-main{background:#e8823a;border-color:#e8823a;color:#2a1206;font-weight:800;padding:8px 14px}.hv-give button:disabled,.hv-btn:disabled{opacity:.45;cursor:default}
+.sec-h.hv-sec h3{color:#e8823a}
 #hwBody{display:grid;gap:10px;padding:0 2px 14px}
 .hw-hero{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:linear-gradient(135deg,#ff8a2a,#7a2a9a);color:#fff}.hw-hero svg{width:44px;height:44px}.hw-hero b{font-size:1.1rem;display:block}.hw-hero small{opacity:.9}
 .hw-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;color:#f2eaf6;display:grid;gap:6px}.hw-card p{margin:0;font-size:.82rem;color:#d8c8e2}
@@ -246,6 +254,12 @@ ol.case-sig{margin:6px 0;padding-left:20px;display:grid;gap:2px;font-size:.84rem
 .rgear{display:grid;gap:4px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px dashed var(--line)}.rgear small{color:var(--muted)}.rgear.have{border-style:solid;border-color:rgba(160,200,90,.4)}.rgear .sbtn{justify-self:start}
 @media (max-width:600px){.ovl.ovl-realm{top:40px;left:8px;font-size:.7rem}}
 .cl-card{display:grid;gap:4px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.cl-card b{font-size:1.05rem}
+.cl-card:has(.cl-two){padding:0;border:0;background:none}.cl-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cl-opt{display:grid;gap:3px;align-content:start;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.cl-opt>span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}.cl-opt b{font-size:1rem}.cl-opt small{color:var(--muted);font-size:.8rem}
+.cl-opt.big{border-color:var(--reed);box-shadow:0 0 0 1px var(--reed) inset}.cl-opt em{font-style:normal;font-size:.72rem;font-weight:800;color:var(--reed)}
+@media (max-width:420px){.cl-two{grid-template-columns:minmax(0,1fr)}}
+.own-code{font-family:var(--font-display);font-size:1.2rem;letter-spacing:.12em;color:var(--gold)}
+.xf-hist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}.xf-hist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}.xf-hist small{display:block;color:var(--muted);font-size:.78rem}.xf-hist li.none{display:block;color:var(--muted);font-size:.85rem}
 .reset{background:none;border:0;color:var(--muted);font-size:.8rem;text-decoration:underline;padding:0;justify-self:start}
 .rar-M{color:var(--r-m)}
 /* Tools row: hot bar, buffs, casino */
@@ -1164,7 +1178,8 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .shop-note{background:#fff3e8;color:#8a3a10;border-radius:12px;padding:8px 11px;font-size:.8rem;line-height:1.35}
 .shop-h{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px}
 .shop-h h3{font-size:.95rem;color:#1a1d24}
-.shop-h h3.hw{color:#d0561a}
+.shop-h h3.hw{color:#d0561a}.shop-h h3.hv{color:#e8823a}
+.tscreen.harvest .ttag{color:#ffe2c0}.tscreen.harvest .tribbon{background:linear-gradient(90deg,#c8461f,#e8a03a)}
 .shop-h small{color:#6a6f7a;font-variant-numeric:tabular-nums}
 .shop-card{background:#fff;border-radius:14px;padding:10px 12px;display:grid;gap:5px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .shop-card b{font-size:.92rem}
@@ -1480,7 +1495,11 @@ body:not([data-mt="catch"]) .main .tabs{display:none}
   .pdock:not(.open) .phone{--peek:42px;transform:translateY(calc(100% - var(--peek))) scale(var(--scc))}
   .pdock.ping:not(.open) .phone{--peek:120px}
   .pdock:not(.open):not(.ping) .phone:hover{--peek:48px}
-  .pdock.hid:not(.open):not(.ping) .phone{--peek:42px;box-shadow:0 0 0 2px #34343e,0 0 0 5px #0d0d10,0 -6px 24px rgba(0,0,0,.45)}
+  .pdock.hid:not(.open):not(.ping) .phone{--peek:0px;box-shadow:none}
+  body.ph-hid .mnav{padding-right:4px}
+  body.ph-hid .mn-hide{display:flex;flex-direction:column;justify-content:center;gap:2px;position:relative;border:0;background:none;color:var(--muted);font-size:.7rem;font-weight:800;min-height:52px;padding:6px 10px}
+  body.ph-hid .mn-hide svg{width:22px;height:22px}
+  body.ph-hid .mn-hide .mn-badge{position:absolute;top:2px;left:calc(50% + 6px);font-size:.62rem}
 }
 </style>
 
@@ -1695,6 +1714,10 @@ body:not([data-mt="catch"]) .main .tabs{display:none}
       <section class="ph-view" id="app-hw" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Spooky</b><i></i></div>
         <div id="hwBody"></div>
+      </section>
+      <section class="ph-view" id="app-hv" hidden>
+        <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Harvest Festival</b><i></i></div>
+        <div id="hvBody"></div>
       </section>
       <section class="ph-view" id="app-weather" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Lake 7 Weather</b><i></i></div>
@@ -1987,6 +2010,12 @@ body:not([data-mt="catch"]) .main .tabs{display:none}
       <p>Already play on another device? Log in with your angler name and PIN to get your game here.</p>
       <button class="jig" id="tLogin">Log in with name + PIN</button>
     </div>
+    <div class="xf-sec" id="xfHist" hidden>
+      <h3>Earlier saves</h3>
+      <p>Your cloud keeps your last few saves, plus your biggest one. Restore one if a game got replaced by mistake.</p>
+      <button class="ghost" id="xfHistBtn">Show earlier saves</button>
+      <ol class="xf-hist" id="xfHistList" hidden></ol>
+    </div>
     <div class="xf-sec">
       <h3>Send this game with a code</h3>
       <p>No PIN? Get a 6-letter code here, then enter it on your phone or computer.</p>
@@ -2239,17 +2268,23 @@ const DECOR = [
   {id:'pelican',cat:'dock',n:'Resident Pelican',c:500000,d:'Moved in and never left.'},
   {id:'barge',cat:'dock',n:'Fireworks Barge',c:2500000,d:'Anchored offshore. Many more fireworks at night.'},
   {id:'jacks',cat:'land',hw:1,n:"Jack-o'-Lanterns",c:2500,d:'Three carved pumpkins by the water. They flicker after dark.'},
-  {id:'scarecrow',cat:'land',hw:1,n:'Scarecrow',c:12000,d:'Straw-stuffed and plaid-shirted. Sways in the wind.'},
+  {id:'scarecrow',cat:'land',hw:1,hv:1,n:'Scarecrow',c:12000,d:'Straw-stuffed and plaid-shirted. Sways in the wind.'},
   {id:'tombstones',cat:'land',hw:1,n:'Tombstones',c:30000,d:'A tiny graveyard in the corner of the yard.'},
   {id:'cauldron',cat:'land',hw:1,n:"Witch's Cauldron",c:80000,d:'Bubbles green over a small fire.'},
   {id:'webs',cat:'house',hw:1,n:'Spiderwebs',c:4000,d:'Strung in the corners under the eaves.'},
   {id:'ghosts',cat:'house',hw:1,n:'Window Ghosts',c:15000,d:'Little ghosts peek out of the windows.'},
   {id:'blackcat',cat:'house',hw:1,n:'Black Cat',c:40000,d:'Sits on the roof. Eyes glow at night.'},
   {id:'bats',cat:'house',hw:1,n:'Bat Colony',c:120000,d:'A handful of bats circling the roof.'},
-  {id:'hay',cat:'dock',hw:1,n:'Hay Bales & Gourds',c:6000,d:'Stacked at the foot of the dock.'},
+  {id:'hay',cat:'dock',hw:1,hv:1,n:'Hay Bales & Gourds',c:6000,d:'Stacked at the foot of the dock.'},
   {id:'skeleton',cat:'dock',hw:1,n:'Skeleton Angler',c:50000,d:'Sits on the dock, still waiting on a bite.'},
   {id:'floatjacks',cat:'dock',hw:1,n:'Floating Pumpkins',c:250000,d:"Jack-o'-lanterns bobbing on the water."},
   {id:'ghostship',cat:'dock',hw:1,n:'Ghost Ship',c:1500000,d:'Anchored offshore, glowing a faint green.'},
+  {id:'cornstalks',cat:'land',hv:1,n:'Corn Stalk Bundles',c:3000,d:'Tied-up corn stalks by the path. They rustle in the wind.'},
+  {id:'harvtable',cat:'land',hv:1,n:'Harvest Table',c:45000,d:'A long table set with a pumpkin, apples and a fresh pie.'},
+  {id:'wreath',cat:'house',hv:1,n:'Harvest Wreath',c:8000,d:'Fall leaves, wheat and little gourds on the front door.'},
+  {id:'sillpie',cat:'house',hv:1,n:'Pie on the Windowsill',c:20000,d:'Cooling by the window. It steams in the cold air.'},
+  {id:'cornucopia',cat:'land',hv:1,basket:1,n:'The Cornucopia',c:0,d:'A woven horn spilling over with gourds, apples and corn. From the 2026 Harvest Basket.'},
+  {id:'mums',cat:'dock',hv:1,n:'Potted Mums',c:5000,d:'Orange and gold mums at the foot of the dock.'},
 ];
 const CAT = {land:'Yard',house:'House',dock:'Dock'};
 const RIVALS = ['Earl Tackett','June Bramble','Rusty Hollis','Marisol Vega','Old Pete Dunmore','Dot Callahan','Hank Weller','Priya Nair','Gus Lindqvist','Tammy Reel','Walt Okafor','Bea Strand'];
@@ -2331,7 +2366,16 @@ I.mug=c=>`<rect x="10" y="6" width="12" height="22" rx="3" fill="${c}"/><rect x=
 const HW_FROM=new Date(2026,9,20).getTime(),HW_TO=new Date(2026,10,2).getTime(),HW_ID='hw26';
 const SEASON_FORCE=(()=>{try{const q=new URL(location.href).searchParams.get('season');if(q==='auto')localStorage.removeItem('ll-season');else if(q)localStorage.setItem('ll-season',q);return localStorage.getItem('ll-season')||''}catch(e){return ''}})();
 const HWL=()=>hwOn()?'Halloween':'Halloween keepsake';
-const hwOn=()=>SEASON_FORCE==='hw'?true:SEASON_FORCE==='off'?false:(Date.now()>=HW_FROM&&Date.now()<HW_TO);
+const hwOn=()=>SEASON_FORCE==='hw'?true:SEASON_FORCE?false:(Date.now()>=HW_FROM&&Date.now()<HW_TO);
+// ==HARVEST== Harvest Festival 2026 runs Nov 2 through Nov 30 (local time), right after Halloween. Test with ?season=hv.
+const HV_FROM=new Date(2026,10,2).getTime(),HV_TO=new Date(2026,11,1).getTime(),HV_ID='hv26';
+const hvOn=()=>SEASON_FORCE==='hv'?true:SEASON_FORCE?false:(Date.now()>=HV_FROM&&Date.now()<HV_TO);
+const HV=()=>{if(!S.hv||typeof S.hv!=='object')S.hv={};return S.hv};
+const hvDaysLeft=()=>Math.max(1,Math.ceil((HV_TO-Date.now())/864e5));
+const FALL=[[204,66,38],[230,128,40],[240,186,62],[178,54,46],[214,150,52],[164,98,42]];
+const seasonDecorOn=x=>(x.hw&&hwOn())||(x.hv&&hvOn());
+const isSeasonal=x=>!!(x.hw||x.hv);
+const seasonLbl=x=>x.hv&&hvOn()?'Harvest':x.hw&&hwOn()?'Halloween':x.hw?'Halloween keepsake':'Harvest keepsake';
 const HW=()=>{if(!S.hw||typeof S.hw!=='object')S.hw={pk:0,candy:0,wear:null,gg:0,ggSent:0,fish:{}};return S.hw};
 I.pumpkin=c=>`<ellipse cx="16" cy="19" rx="12" ry="9" fill="${c}"/><path d="M16 10v18M10 11q-3 8 0 16M22 11q3 8 0 16" stroke="rgba(0,0,0,.18)" stroke-width="1.4" fill="none"/><path d="M15 10q1-5 4-6" stroke="#4a7a2a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
 const pumpkinSvg=svgI('pumpkin','#ff8a2a');
@@ -2341,12 +2385,17 @@ const EVFISH=[
   Object.assign(F('ghostgar','Ghost Gar',4,40,32,'R','dusk night','lake'),{ev:HW_ID,col:'#cfe8ff'}),
   Object.assign(F('witcheel','Witch’s Eel',2,14,130,'L','night','river'),{ev:HW_ID,col:'#9a5ad0'}),
   Object.assign(F('bonepike','Skeleton Pike',3,30,38,'R','night','deep'),{ev:HW_ID,col:'#e8e2d0'}),
+  Object.assign(F('acornsun','Acorn Sunfish',.3,2.2,40,'U','dawn day','pond'),{ev:HV_ID,col:'#b07a3a'}),
+  Object.assign(F('mapletrout','Maple Trout',1,9,36,'R','dawn day dusk','lake'),{ev:HV_ID,col:'#d8502e'}),
+  Object.assign(F('cranberry','Cranberry Darter',.1,.6,180,'U','day dusk','river'),{ev:HV_ID,col:'#c0304a'}),
+  Object.assign(F('mooncarp','Harvest Moon Carp',8,60,26,'L','night','deep'),{ev:HV_ID,col:'#ffb04a'}),
 ];
-function hwFishRoll(water,minute,mods){if(!hwOn())return null;const ph=phaseOf(minute),ev=EVFISH.filter(f=>f.at===water&&f.t.includes(ph));
+const evLive=f=>(f.ev===HW_ID&&hwOn())||(f.ev===HV_ID&&hvOn());
+function hwFishRoll(water,minute,mods){if(!hwOn()&&!hvOn())return null;const ph=phaseOf(minute),ev=EVFISH.filter(f=>evLive(f)&&f.at===water&&f.t.includes(ph));
   if(!ev.length||Math.random()>.07*(mods&&mods.luck?1.5:1))return null;
   const f=pickW(ev.map(f=>({f,w:{C:6,U:4,R:2,L:.7}[f.r]}))).f;const k=mods&&mods.giant?Math.max(.7,1.8-S.rod*.22):Math.max(1.3,2.8-S.rod*.22);
   return {f,w:+(f.w[0]+(f.w[1]-f.w[0])*Math.pow(Math.random(),k)).toFixed(2)}}
-function hwOnCatch(f,w){if(!f.ev)return;const h=HW();h.fish[f.id]=Math.max(h.fish[f.id]||0,w);if(f.id==='ghostgar'&&w>(h.gg||0)){h.gg=w;if(MPV.ev)MPV.ev.dirty=1}}
+function hwOnCatch(f,w){if(!f.ev)return;if(f.ev===HV_ID){const h=HV();h.fish=h.fish||{};h.fish[f.id]=Math.max(h.fish[f.id]||0,w);return}const h=HW();h.fish[f.id]=Math.max(h.fish[f.id]||0,w);if(f.id==='ghostgar'&&w>(h.gg||0)){h.gg=w;if(MPV.ev)MPV.ev.dirty=1}}
 // Pumpkin hunt: pumpkins pop up around the lake. Tap them before they vanish.
 const HW_RW=[{n:5,k:'witch',t:'Witch hat',d:'A pointy hat with a purple band. Wear it from the Spooky app.'},{n:15,k:'vamp',t:'Vampire cape',d:'High collar, red lining, very dramatic.'},{n:30,k:'gold',t:'Golden Pumpkin',d:'A Mythic collectible that stays in your collection for good.'},{n:50,k:'cash',t:'$50,000',d:'A big bag of candy money.'}];
 const HWP={list:[],t:25};
@@ -2367,10 +2416,57 @@ function hwReward(r){const h=HW();
   else if(r.k==='cash'){S.coins+=50000;celebrate({lbl:'Pumpkin reward!',r:'L',name:'$50,000 in candy money',sub:`${r.n} pumpkins found`,icon:pumpkinSvg})}
   else{celebrate({lbl:'Costume unlocked!',r:'R',name:r.t,sub:'Wear it from the Spooky app, or Settings any time',icon:pumpkinSvg});if(!h.wear)h.wear=r.k}}
 const hwHas=k=>{const r=HW_RW.find(x=>x.k===k);return !!r&&HW().pk>=r.n};
+I.leaf=c=>`<path d="M16 3c7 4 11 10 9 17-2 6-8 9-13 8 1-4 0-8-4-11 1-6 4-11 8-14z" fill="${c}"/><path d="M12 28c2-7 5-14 10-20" stroke="rgba(0,0,0,.28)" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M15 20l-4-2M17 15l-4-3M19 11l3-1M17 19l5-1" stroke="rgba(0,0,0,.22)" stroke-width="1.2" fill="none"/>`;
+// Harvest Festival: a free flannel and knit hat the first time you play during the festival.
+function hvTick(){if(!hvOn()||titleOn||!S)return;const h=HV();if(h.flannel)return;h.flannel=1;if(S.hw&&!S.hw.wear)HW().wear='flannel';else if(!S.hw)HW().wear='flannel';save();
+  setTimeout(()=>{try{celebrate({lbl:'Harvest Festival!',r:'R',name:'Flannel & knit hat',sub:'A festival gift. Change or take it off in Settings any time',icon:svgI('leaf','#e8823a')})}catch(e){}},1200)}
+// Fall trees mixed into the far shore, drifting leaves and geese overhead while the festival is on.
+function hvTree(x,y,s,i,d){const c=FALL[i%FALL.length];ctx.fillStyle=C2([18,12,10],[84,58,38],d);ctx.fillRect(x-.8*s,y-6*s,1.6*s,6*s);
+  ctx.fillStyle=C2(c.map(v=>v*.16),c,d*.85+.05);for(const [dx,dy,r] of [[0,-10,6],[-4,-7,4.6],[4,-7.5,4.8]]){ctx.beginPath();ctx.arc(x+dx*s,y+dy*s,r*s,0,7);ctx.fill()}}
+function hvBack(loc,d){if(!hvOn())return;
+  if(loc==='lake'){for(let i=0,x=6;x<800;x+=17,i++){if((x>528&&x<662)||(x>76&&x<114)||(i*37)%10<4)continue;hvTree(x,206-(x*7)%4,1+((i*13)%5)/10,i,d)}}
+  else if(loc==='pond'){for(let i=0,x=-830;x<800;x+=19,i++){if((i*37)%10<3)continue;hvTree(x,204+Math.sin(x/90)*3,1.05+((i*13)%5)/10,i,d)}}
+  else if(loc==='river'){for(let i=0,x=23;x<800;x+=26,i++){if(i%3===1)continue;hvTree(x,194+Math.sin(x)*3,1.35,i,d)}}
+  else if(loc==='deep'){for(let i=0,x=8;x<670;x+=22,i++){if((i*37)%10<4)continue;hvTree(x,190+Math.sin(x/60)*10+(x%36<18?-10:0),1.15,i,d)}}
+  else if(loc==='bay'){for(const [x,i] of [[684,0],[704,2],[768,1],[790,3]])hvTree(x,222-(x-640)*.26,1.2,i,d)}}
+function hvInland(d){if(!hvOn())return;for(let i=0,x=-812;x<-60;x+=34,i++)hvTree(x,219,1.3,i+3,d)}
+const HVL={a:[],lt:0,init:false};
+function hvLeaves(d,T){if(!hvOn()||RM)return;const dt=Math.min(.05,Math.max(0,T-(HVL.lt||T)));HVL.lt=T;const A=HVL.a,wind=(AMB.wind||0)/12;
+  while(A.length<16){A.push({x:Math.random()*900-80,y:HVL.init?-10:Math.random()*400,vy:12+Math.random()*16,ph:Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*3,c:FALL[Math.floor(Math.random()*FALL.length)],s:.8+Math.random()*.6})}HVL.init=true;
+  for(let i=A.length-1;i>=0;i--){const l=A[i];l.y+=l.vy*dt;l.x+=(wind*8+6+Math.sin(T*1.3+l.ph)*16)*dt;l.r+=l.vr*dt;if(l.y>410||l.x>870){A.splice(i,1);continue}
+    ctx.save();ctx.translate(l.x,l.y);ctx.rotate(l.r);ctx.scale(.35+.65*Math.abs(Math.cos(T*2+l.ph)),1);ctx.fillStyle=C2(l.c.map(v=>v*.25),l.c,d*.8+.15);ctx.beginPath();ctx.ellipse(0,0,3.8*l.s,1.9*l.s,0,0,7);ctx.fill();ctx.restore()}}
+function hvLandOne(id,d,T){
+  if(id==='cornucopia')hvCornucopia(d);
+  if(id==='cornstalks')for(const bx of [60,80]){const sw=Math.sin(T*1.4+bx)*(.03+AMB.wind/1400);ctx.save();ctx.translate(bx,300);ctx.rotate(sw);
+    ctx.strokeStyle=rgb(mix([46,38,20],[214,180,104],d));ctx.lineWidth=1.4;for(let i=0;i<7;i++){ctx.beginPath();ctx.moveTo(i*1.3-4,0);ctx.lineTo((i-3)*2.4,-30-(i%3)*3);ctx.stroke()}
+    ctx.strokeStyle=rgb(mix([40,34,18],[190,156,80],d));ctx.lineWidth=1.1;for(let i=0;i<5;i++){const y=-16-i*3,sd=i%2?1:-1;ctx.beginPath();ctx.moveTo(0,y);ctx.quadraticCurveTo(sd*6,y-2,sd*9,y+3);ctx.stroke()}
+    ctx.fillStyle=rgb(mix([40,16,12],[170,60,40],d));ctx.fillRect(-5,-11,10,2.2);ctx.restore()}
+  if(id==='harvtable'){const wd=rgb(mix([30,22,16],[132,92,58],d)),wd2=rgb(mix([24,18,12],[100,68,42],d));ctx.fillStyle=wd2;ctx.fillRect(149,360,3,12);ctx.fillRect(188,360,3,12);ctx.fillStyle=wd;ctx.fillRect(146,356,48,4);
+    ctx.fillStyle=rgb(mix([50,20,10],[214,110,40],d));ctx.fillRect(160,355,20,5);
+    ctx.fillStyle=rgb(mix([60,28,10],[236,128,36],d));ctx.beginPath();ctx.ellipse(155,351,6,4.6,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([20,30,10],[80,110,40],d));ctx.fillRect(154.4,345.5,1.4,2.4);
+    for(const [ax,ay,c] of [[165,353,[200,40,40]],[169,352.5,[214,60,40]],[167,350,[180,190,60]]]){ctx.fillStyle=rgb(mix(c.map(v=>v*.2),c,d*.85+.1));ctx.beginPath();ctx.arc(ax,ay,2.1,0,7);ctx.fill()}
+    ctx.fillStyle=rgb(mix([50,34,20],[214,160,90],d));ctx.beginPath();ctx.ellipse(184,353,7,2.6,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([40,26,14],[170,110,56],d));ctx.fillRect(179,351.5,10,.8);ctx.fillRect(181,352.8,7,.8);
+    ctx.fillStyle=rgb(mix([40,36,10],[220,190,70],d));ctx.beginPath();ctx.ellipse(175,354,2.6,1.8,.4,0,7);ctx.fill()}}
+function hvCornucopia(d){const S2=(c)=>rgb(mix(c.map(v=>v*.2),c,d*.85+.1));
+  ctx.fillStyle=S2([196,150,80]);ctx.beginPath();ctx.moveTo(138,284);ctx.quadraticCurveTo(144,296,130,299);ctx.lineTo(110,300);ctx.lineTo(107,287);ctx.quadraticCurveTo(124,284,138,284);ctx.fill();
+  ctx.strokeStyle=S2([140,98,46]);ctx.lineWidth=.8;for(let i=0;i<5;i++){const x=112+i*5;ctx.beginPath();ctx.moveTo(x,286.5-i*.3);ctx.lineTo(x+1,299.5);ctx.stroke()}ctx.beginPath();ctx.moveTo(108,293);ctx.lineTo(136,291);ctx.stroke();
+  ctx.fillStyle=S2([120,80,36]);ctx.beginPath();ctx.ellipse(108,293.5,3,6.6,0,0,7);ctx.fill();
+  for(const [x,y,r,c] of [[101,296,4.6,[236,128,36]],[106,300,2.6,[200,40,40]],[110,301,2.4,[214,60,40]],[96,301,2.2,[180,190,60]]]){ctx.fillStyle=S2(c);ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
+  ctx.fillStyle=S2([240,200,70]);ctx.save();ctx.translate(93,298);ctx.rotate(-.5);ctx.beginPath();ctx.ellipse(0,0,5,2,0,0,7);ctx.fill();ctx.restore();
+  ctx.fillStyle=S2([120,60,150]);for(const [x,y] of [[113,300.5],[115,301.5],[114,299]]){ctx.beginPath();ctx.arc(x,y,1.3,0,7);ctx.fill()}}
+function hvHouse(G,wins,d,T){
+  if(has('wreath')){const cx=G.door+7,cy=222;for(let i=0;i<12;i++){const a=i/12*Math.PI*2,c=FALL[i%FALL.length];ctx.fillStyle=rgb(mix(c.map(v=>v*.2),c,d*.85+.1));ctx.beginPath();ctx.ellipse(cx+Math.cos(a)*4.4,cy+Math.sin(a)*4.4,2,1.4,a,0,7);ctx.fill()}
+    ctx.fillStyle=rgb(mix([40,10,10],[180,40,36],d));ctx.beginPath();ctx.moveTo(cx,cy+4);ctx.lineTo(cx-3,cy+7.5);ctx.lineTo(cx+3,cy+7.5);ctx.fill()}
+  if(has('sillpie')&&wins&&wins.length){const [wx,wy]=wins[0],by=wy+(wy===212?12:10),px=wx+7;ctx.fillStyle=rgb(mix([46,32,20],[206,150,82],d));ctx.beginPath();ctx.ellipse(px,by-1.4,5.4,2,0,Math.PI,0);ctx.fill();ctx.fillRect(px-5.6,by-1.6,11.2,1.6);
+    ctx.fillStyle=rgb(mix([36,24,14],[160,102,50],d));ctx.fillRect(px-3,by-2.6,6,.7);for(let i=0;i<3;i++){const q=(T*.35+i/3)%1;ctx.fillStyle=`rgba(236,236,240,${.4*(1-q)})`;ctx.beginPath();ctx.arc(px-2+i*2+Math.sin(q*6+i)*1.5,by-4-q*12,1+q*1.6,0,7);ctx.fill()}}}
 // Costumes from holiday events. Earned ones stay wearable after the event; pick None in Settings to take it off.
-const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')}];
+const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')},{k:'flannel',n:'Flannel & knit hat',ev:'Harvest',own:()=>!!(S.hv&&S.hv.flannel)}];
 const hwWear=()=>{const w=S.hw&&S.hw.wear,c=w&&COSTUMES.find(x=>x.k===w);return c&&c.own()?w:null};
 function drawCostume(ax,ay,d,T,k){const sh=c=>rgb(mix(c.map(v=>v*.3),c,d*.8+.2));
+  if(k==='flannel'){ctx.fillStyle=sh([176,44,40]);ctx.fillRect(ax-6,ay-22,12,20);ctx.fillStyle=sh([60,20,22]);for(let i=0;i<4;i++)ctx.fillRect(ax-6,ay-20+i*5,12,1.3);for(const xx of [-3.5,1.5])ctx.fillRect(ax+xx,ay-22,1.3,20);
+    ctx.fillStyle=sh([236,226,206]);ctx.beginPath();ctx.moveTo(ax-3,ay-22);ctx.lineTo(ax,ay-18);ctx.lineTo(ax+3,ay-22);ctx.fill();
+    ctx.fillStyle=sh([214,140,40]);ctx.beginPath();ctx.arc(ax,ay-31,6.4,Math.PI,0);ctx.fill();ctx.fillRect(ax-6.6,ay-32,13.2,2.6);ctx.fillStyle=sh([150,80,30]);for(let i=0;i<5;i++)ctx.fillRect(ax-5.6+i*2.6,ay-36,1,4);
+    ctx.fillStyle=sh([240,226,190]);ctx.beginPath();ctx.arc(ax,ay-38.4,2.6,0,7);ctx.fill();return}
   if(k==='witch'){ctx.fillStyle=sh([28,22,34]);ctx.beginPath();ctx.ellipse(ax,ay-33,11,2.6,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(ax-6.5,ay-34);ctx.lineTo(ax+6.5,ay-34);ctx.quadraticCurveTo(ax+2,ay-44,ax+7,ay-50);ctx.quadraticCurveTo(ax-2,ay-45,ax-6.5,ay-34);ctx.fill();
     ctx.fillStyle=sh([140,70,200]);ctx.fillRect(ax-6.4,ay-37,12.8,2.4);ctx.fillStyle=sh([255,208,90]);ctx.fillRect(ax-1.2,ay-37.4,2.4,3.2)}
   else if(k==='vamp'){ctx.fillStyle=sh([20,16,22]);ctx.beginPath();ctx.moveTo(ax-6,ay-22);ctx.lineTo(ax-10,ay-1);ctx.lineTo(ax-6,ay-2);ctx.fill();ctx.beginPath();ctx.moveTo(ax+6,ay-22);ctx.lineTo(ax+10,ay-1);ctx.lineTo(ax+6,ay-2);ctx.fill();
@@ -2395,6 +2491,7 @@ const SCN_EV=[
   {id:'witch',lay:'sky',hw:1,w:2.5,dur:9,ok:c=>c.night>.5,init:()=>({dir:Math.random()<.5?1:-1})},
   {id:'bats',lay:'sky',hw:1,w:2,dur:7,ok:c=>c.night>.2,init:()=>({dir:Math.random()<.5?1:-1,b:Array.from({length:18},()=>({dx:rnd(-90,90),dy:rnd(-30,30),p:rnd(0,6)}))})},
   {id:'jackboat',lay:'water',hw:1,w:1.2,dur:45,ok:c=>c.night>.5&&c.loc!=='transit',init:()=>({dir:Math.random()<.5?1:-1})},
+  {id:'geese',lay:'sky',hv:1,w:3,dur:18,ok:c=>c.d>.25&&AMB.rainK<20&&c.loc!=='transit',init:()=>({dir:Math.random()<.5?1:-1,y:rnd(40,90)})},
   {id:'tot',lay:'yard',hw:1,w:5,dur:50,ok:c=>(c.loc==='pond')&&c.home&&(S.min>=1020||S.min<60)&&!TOT.inside,init:()=>({kids:Array.from({length:2+Math.floor(Math.random()*2)},(_,i)=>({c:pick(['ghost','witch','pumpkin','skeleton','cat']),o:i*16})),state:'walk',give:0})},
 ];
 function scnCtx(loc){const h=S.min/60,d=daylight(h);return {loc,d,night:1-Math.min(1,d*1.6),home:loc==='pond'&&(!S.sleep||['run','yard','walkOut','boatIn','boatOut'].includes(S.sleep.ph)||!S.sleep)}}
@@ -2402,7 +2499,7 @@ function scnTick(dt,loc){if(RM&&!hwOn())return;const wet=['rain','storm','drizzl
   const c=SCN.cur;if(c){c.t+=dt;if(c.id==='tot')totTick(c,dt);if(c.t>=c.dur||c.done){SCN.cur=null;SCN.t=rnd(45,110)}return}
   if(titleOn||indoor()||VISIT||isRealm(loc))return;
   if((SCN.t-=dt)>0)return;SCN.t=rnd(20,40);const cx=scnCtx(loc);
-  const ok=SCN_EV.filter(e=>(!e.hw||hwOn())&&e.ok(cx));if(!ok.length)return;const e=pickW(ok.map(e=>({e,w:e.w}))).e;
+  const ok=SCN_EV.filter(e=>(!e.hw||hwOn())&&(!e.hv||hvOn())&&e.ok(cx));if(!ok.length)return;const e=pickW(ok.map(e=>({e,w:e.w}))).e;
   SCN.cur={id:e.id,lay:e.lay,dur:e.dur,t:0,loc,data:e.init?e.init():{}};
   if(e.id==='loon'&&typeof loon==='function')setTimeout(()=>{try{loon()}catch(_){}},800);
   if(e.id==='tot')showToast('Trick-or-treaters are coming up the path!','Halloween')}
@@ -2433,6 +2530,8 @@ function scnDraw(lay,d,T,loc){const c=SCN.cur;if(!c||c.lay!==lay||c.loc!==loc)re
     for(const [sx,t0] of [[D.x,0],[D.x+28*D.s,1]]){const q=(c.t-t0*1.1)/1.2;if(q>0&&q<1){ctx.strokeStyle=`rgba(255,255,255,${.6*(1-q)})`;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(sx,D.y+2,4+q*16,1.5+q*4,0,0,7);ctx.stroke()}}break}
   case 'ghosts':{const dir=D.dir;for(let i=0;i<3;i++){const gx0=(dir>0?-60+u*900:860-u*900)-dir*i*70,gy0=258+i*18+Math.sin(T*1.5+i*2)*7;ctx.save();ctx.translate(gx0,gy0);ctx.scale(1.7,1.7);const x=0,y=0;ctx.globalAlpha=fadeA*(.55+.2*Math.sin(T*2+i));glow(x,y,20,.25,'210,235,255');ctx.fillStyle='#eef6ff';
     ctx.beginPath();ctx.arc(x,y-6,8,Math.PI,0);ctx.lineTo(x+8,y+7);for(let k=0;k<4;k++)ctx.lineTo(x+8-(k+.5)*4,y+(k%2?7:3)+Math.sin(T*6+k)*1);ctx.lineTo(x-8,y+7);ctx.fill();ctx.fillStyle='#1a1a2a';ctx.beginPath();ctx.ellipse(x-3,y-6,1.5,2.2,0,0,7);ctx.ellipse(x+3,y-6,1.5,2.2,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(x,y-1,1.6,2,0,0,7);ctx.fill();ctx.restore()}break}
+  case 'geese':{const dir=D.dir,x=dir>0?-120+u*1040:920-u*1040,y=D.y+Math.sin(T*.6)*4;ctx.strokeStyle=rgb(mix([20,20,26],[52,50,54],d),.9);ctx.lineWidth=1.5;
+    for(let i=0;i<9;i++){const k=Math.ceil(i/2),sd=i%2?1:-1,bx=x-dir*k*13,by=y+k*7*sd,w=Math.sin(T*7+i)*3;ctx.beginPath();ctx.moveTo(bx-6,by-w);ctx.quadraticCurveTo(bx-3,by-1,bx,by);ctx.quadraticCurveTo(bx+3,by-1,bx+6,by-w);ctx.stroke()}break}
   case 'witch':{const mh=S.min/60>=19?S.min/60-19:S.min/60+5,p=Math.min(1,mh/12),mx=60+p*680,my=210-Math.sin(Math.PI*p)*160,dir=D.dir,x=dir>0?mx-200+u*400:mx+200-u*400,y=my-6+Math.sin(T*2)*4+(u-.5)*-20;
     ctx.fillStyle='#0c0a10';ctx.save();ctx.translate(x,y);ctx.scale(dir*1.7,1.7);ctx.rotate(-.08);ctx.fillRect(-16,0,30,1.6);for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(-16,.8);ctx.lineTo(-24,-3+i*1.6);ctx.lineTo(-22,-2+i*1.6);ctx.fill()}
     ctx.beginPath();ctx.moveTo(-6,0);ctx.lineTo(2,0);ctx.lineTo(0,-9);ctx.lineTo(-4,-9);ctx.fill();ctx.beginPath();ctx.arc(-1,-11,2.6,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(-6,-12);ctx.lineTo(4,-12);ctx.lineTo(1,-20);ctx.fill();
@@ -2483,7 +2582,7 @@ function renderHW(){const b=$('hwBody');if(!b)return;const h=HW();
   html+=`<div class="hw-card"><b>Pumpkin hunt · ${h.pk} found</b><p>Glowing pumpkins pop up around the lake and on your dock. Tap them before they vanish.</p><div class="hw-bar"><i style="width:${next?Math.round((h.pk-lo)/(hi-lo)*100):100}%"></i></div>
     <ul class="hw-rw">${HW_RW.map(r=>`<li class="${h.pk>=r.n?'got':''}"><span>${h.pk>=r.n?'✓':r.n}</span><div><b>${r.t}</b><small>${r.d}</small></div></li>`).join('')}</ul></div>`;
   html+=`<div class="hw-card"><b>Costume</b><div class="hw-cos">${[['','None'],['witch','Witch hat'],['vamp','Vampire cape']].map(([k,n])=>`<button data-wear="${k}" aria-pressed="${(h.wear||'')===k}" ${k&&!hwHas(k)?'disabled':''}>${n}${k&&!hwHas(k)?' 🔒':''}</button>`).join('')}</div></div>`;
-  html+=`<div class="hw-card"><b>Spooky fish</b><p>Only biting until November 1.</p><ul class="hw-fish">${EVFISH.map(f=>{const w=h.fish[f.id]||(S.log[f.id]&&S.log[f.id].big);return `<li>${fishSvg(f.col)}<div><b class="rar-${f.r}">${w?f.n:'???'}</b><small>${W(f.at).n} · ${f.t.map(x=>PH[x]).join(', ')}${w?` · best ${(+w).toFixed(2)} lb`:''}</small></div></li>`}).join('')}</ul></div>`;
+  html+=`<div class="hw-card"><b>Spooky fish</b><p>Only biting until November 1.</p><ul class="hw-fish">${EVFISH.filter(f=>f.ev===HW_ID).map(f=>{const w=h.fish[f.id]||(S.log[f.id]&&S.log[f.id].big);return `<li>${fishSvg(f.col)}<div><b class="rar-${f.r}">${w?f.n:'???'}</b><small>${W(f.at).n} · ${f.t.map(x=>PH[x]).join(', ')}${w?` · best ${(+w).toFixed(2)} lb`:''}</small></div></li>`}).join('')}</ul></div>`;
   const E=MPV.ev;html+=`<div class="hw-card"><b>Ghost Gar contest</b><p>Biggest Ghost Gar (Reed Lake, dusk and night) by November 1 wins. 1st: $100,000 and a trophy · 2nd: $50,000 · 3rd: $25,000.</p>`+
     (E&&E.top?`<ol class="hw-board">${E.top.length?E.top.map((x,i)=>`<li class="${x.me?'me':''}"><span>${i+1}</span><b>${esc(x.name)}</b><em>${(+x.w).toFixed(2)} lb</em></li>`).join(''):'<li class="none">No Ghost Gar landed yet. Be the first!</li>'}</ol>${E.me&&E.me.rank>10?`<p>You’re #${E.me.rank} with ${(+E.me.w).toFixed(2)} lb.</p>`:''}`:`<p class="fr-muted">${S.mp&&S.mp.id?'Loading the board…':'Pick an angler name in the Friends app to enter.'}</p>`)+`</div>`;
   html+=`<div class="hw-card"><b>Trick-or-treaters</b><p>After 5 PM they walk up to your cabin, or knock if you’re inside. Tap them to hand out candy. You’ve served ${h.candy||0}.</p></div>`;
@@ -2567,7 +2666,7 @@ COLL.push(C('moongolf','Apollo Golf Ball','R','moon','pearl','#f4f4f4','Hit on t
 const POT={
   luck:{n:'Lucky Potion',d:'Rare and legendary fish bite 2.5× as often.',col:'#5ac05a'},
   haste:{n:'Quick Cast Tonic',d:'Casts take half as long.',col:'#4aa8d0'},
-  gold:{n:'Golden Scale Elixir',d:'Fish sell for double.',col:'#e8b030'},
+  gold:{n:'Golden Scale Elixir',d:'Fish you catch while it lasts are worth double.',col:'#e8b030'},
   magnet:{n:'Magnet Draught',d:'Triple the chance of pulling up items and collectibles.',col:'#a070e0'},
   giant:{n:'Big Fish Brew',d:'Fish run much heavier.',col:'#ff7a3d'},
   coffee:{n:'Thermos of Coffee',d:'Restores 30 stamina right away.',col:'#8a5a34',ic:'mug',inst:true},
@@ -3077,7 +3176,7 @@ function goHome(){if(TRV.on||S.sleep||(S.tour&&S.tour.phase==='live')){if(S.tour
 let shopFilter='all';
 function decorCard(it){
   const c=document.createElement('div');c.className='shop-card';
-  c.innerHTML=`${it.hw?`<span class="tag">${HWL()} · ${CAT[it.cat]}</span>`:`<span class="tag" style="color:#6a6f7a">${CAT[it.cat]}</span>`}<b>${it.n}</b><p>${it.d}</p>`;
+  c.innerHTML=`${isSeasonal(it)?`<span class="tag">${seasonLbl(it)} · ${CAT[it.cat]}</span>`:`<span class="tag" style="color:#6a6f7a">${CAT[it.cat]}</span>`}<b>${it.n}</b><p>${it.d}</p>`;
   const b=document.createElement('button');b.id='decor-'+it.id;
   const box=S.boxes.find(x=>x.id===it.id);
   if(owned(it.id)){const on=!S.off[it.id];b.className='sbtn own'+(on?'':' off');b.setAttribute('aria-pressed',on);
@@ -3088,9 +3187,14 @@ function decorCard(it){
   else{b.className='sbtn';b.innerHTML=`<span>Buy</span><span>$${money(it.c)}</span>`;b.dataset.cost=it.c;b.onclick=()=>orderItem(it)}
   c.append(b);return c;
 }
+// Seasonal shop groups: the live event's decor, then keepsakes from past events you own.
+function seasonGroups(){const out=[],shown=new Set();
+  for(const [k,n,on] of [['hw','Halloween',hwOn()],['hv','Harvest',hvOn()]])if(on){const it=DECOR.filter(x=>x[k]&&(!x.basket||owned(x.id)));it.forEach(x=>shown.add(x.id));out.push({k,title:n==='Harvest'?'Harvest Festival':n,chip:n==='Harvest'?'🍂 Harvest':'Halloween',items:it})}
+  for(const [k,n] of [['hw','Halloween'],['hv','Harvest']]){const it=DECOR.filter(x=>x[k]&&owned(x.id)&&!shown.has(x.id));if(!it.length||out.some(g=>g.k===k))continue;it.forEach(x=>shown.add(x.id));out.push({k,title:n+' keepsakes',chip:out.length?n+' keepsakes':'Keepsakes',items:it})}
+  return out}
 function renderDecor(){
   const p=$('shopBody');if(!p)return;p.innerHTML='';
-  const F=[['all','All'],['pets','🐾 Pets'],['sup','Supplies'],['proj','Projects'],...(hwOn()||DECOR.some(x=>x.hw&&owned(x.id))?[['hw',hwOn()?'Halloween':'Keepsakes']]:[]),['land','Yard'],['house','House'],['dock','Dock'],['own','Owned']];
+  const SG=seasonGroups(),F=[['all','All'],['pets','🐾 Pets'],['sup','Supplies'],['proj','Projects'],...SG.map(g=>[g.k,g.chip]),['land','Yard'],['house','House'],['dock','Dock'],['own','Owned']];
   const ch=document.createElement('div');ch.className='chips2';
   for(const [k,l] of F){const b=document.createElement('button');b.textContent=l;b.setAttribute('aria-pressed',shopFilter===k);b.onclick=()=>{shopFilter=k;renderDecor()};ch.append(b)}
   p.append(ch);
@@ -3103,13 +3207,13 @@ function renderDecor(){
   const n=document.createElement('div');n.className='shop-note';
   n.textContent=S.boxes.length?`${S.boxes.length} box${S.boxes.length>1?'es are':' is'} waiting in your yard. Tap a box in the lake view to unpack it.`:'Orders arrive by drone and get dropped in your yard. Tap the box to unpack it and put it on display.';
   p.append(n);
-  if(shopFilter==='hw'&&!hwOn()&&!DECOR.some(x=>x.hw&&owned(x.id)))shopFilter='all';
-  const groups=[[hwOn()?'Halloween':'Halloween keepsakes',DECOR.filter(x=>x.hw&&(hwOn()||owned(x.id))),true],...['land','house','dock'].map(c=>[CAT[c],DECOR.filter(x=>x.cat===c&&!x.hw),false])];
+  const SK=SG.map(g=>g.k);if((shopFilter==='hw'||shopFilter==='hv')&&!SK.includes(shopFilter))shopFilter='all';
+  const groups=[...SG.map(g=>[g.title,g.items,g.k]),...['land','house','dock'].map(c=>[CAT[c],DECOR.filter(x=>x.cat===c&&!isSeasonal(x)),false])];
   for(const [title,all,hw] of groups){
-    let items=all;if(shopFilter==='hw'&&!hw)continue;if(['land','house','dock'].includes(shopFilter)){if(hw||title!==CAT[shopFilter])continue}if(shopFilter==='own')items=all.filter(x=>owned(x.id));
+    let items=all;if(SK.includes(shopFilter)&&hw!==shopFilter)continue;if(['land','house','dock'].includes(shopFilter)){if(hw||title!==CAT[shopFilter])continue}if(shopFilter==='own')items=all.filter(x=>owned(x.id));
     if(!items.length)continue;
-    const h=document.createElement('div');h.className='shop-h';h.innerHTML=`<h3${hw?' class="hw"':''}>${title}</h3><small>${all.filter(x=>owned(x.id)).length}/${all.length} owned</small>`;p.append(h);
-    if(hw&&shopFilter!=='own'){const own=all.filter(x=>owned(x.id));if(own.length){const anyOn=own.some(x=>!S.off[x.id]);const t=document.createElement('button');t.className='sbtn own off';t.id='hwToggle';t.textContent=anyOn?'Hide all Halloween decor':'Show all Halloween decor';
+    const h=document.createElement('div');h.className='shop-h';h.innerHTML=`<h3${hw?` class="${hw}"`:''}>${title}</h3><small>${all.filter(x=>owned(x.id)).length}/${all.length} owned</small>`;p.append(h);
+    if(hw&&shopFilter!=='own'){const own=all.filter(x=>owned(x.id));if(own.length){const anyOn=own.some(x=>!S.off[x.id]);const t=document.createElement('button');t.className='sbtn own off';t.id=hw+'Toggle';const nm=hw==='hv'?'Harvest':'Halloween';t.textContent=anyOn?`Hide all ${nm} decor`:`Show all ${nm} decor`;
       t.onclick=()=>{own.forEach(x=>{if(anyOn)S.off[x.id]=1;else delete S.off[x.id]});renderDecor();save()};p.append(t)}}
     for(const it of items)p.append(decorCard(it));
   }
@@ -3119,7 +3223,7 @@ function renderDecor(){
 const SPOTS=[[98,322],[122,336],[74,338],[146,314],[58,318],[104,354],[40,350]];
 const boxSpot=b=>SPOTS[b.spot%SPOTS.length].map((v,i)=>v+(i?0:Math.floor(b.spot/SPOTS.length)*8));
 function orderItem(it){guideMark('craft');
-  if(it.hw&&!hwOn())return;
+  if((isSeasonal(it)&&!seasonDecorOn(it))||it.basket)return;
   if(S.coins<it.c||owned(it.id)||S.boxes.some(b=>b.id===it.id))return;
   S.coins-=it.c;const used=new Set(S.boxes.map(b=>b.spot));let spot=0;while(used.has(spot))spot++;
   const box={id:it.id,spot};sfx('pop');S.boxes.push(box);if(!indoor())AMB.drones.push({id:it.id,box,t:0});
@@ -3205,7 +3309,7 @@ function renderLog(){
   const lg=document.createElement('div');lg.className='legend';
   lg.innerHTML=`<span>Color variants:</span>${['golden','albino','giant'].map(k=>`<span class="vchip on" style="--vc:${VAR[k].col}"><i></i>${VAR[k].n} ×${VAR[k].mult}</span>`).join('')}<span>Rare versions of each fish that sell for more. A chip lights up with a ✓ once you've caught that version.</span>`;
   p.append(lg);
-  hwLogSection(p);
+  hvLogSection(p);hwLogSection(p);
   const fn=LOGF[logF][1];let shown=0;
   if(logF==='now'){const w=W(S.water);p.insertAdjacentHTML('beforeend',`<p class="empty" style="margin:0 0 8px">Fish that can bite at ${w.n} right now (${PH[ph].toLowerCase()}, ${WX[S.wx.id].n.toLowerCase()}). Changes with the time, weather and water.</p>`)}
   for(const w of WATERS){
@@ -3415,6 +3519,7 @@ const APPS=[
   {id:'weather',n:'Lake 7 Weather',s:'Weather',bg:'linear-gradient(145deg,#3a8aff,#0c2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="#ffd05a"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7" stroke="#ffd05a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 25.5a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6 3.8 3.8 0 0 1 .4 7.4z" fill="#fff"/><rect x="19" y="20" width="11" height="9" rx="2" fill="#d8312a"/><path d="M22 22.4h5l-2.6 4.8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
   {id:'crate',n:'Crate Expectations',s:'Crates',bg:'linear-gradient(145deg,#ff5ad8,#3a1a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11l12-6 12 6v12l-12 6-12-6z" fill="#b07a3a"/><path d="M4 11l12 6 12-6M16 17v12" stroke="#5a3814" stroke-width="1.6" fill="none"/><path d="M14 18l4-2v5l-4 2z" fill="#ffc23a"/><path d="M24 3l1 2.4 2.4 1-2.4 1L24 10l-1-2.6-2.4-1 2.4-1z" fill="#fff"/></svg>`},
   {id:'hw',n:'Spooky',bg:'linear-gradient(145deg,#ff8a2a,#5a1a6a)',ic:()=>pumpkinSvg,when:()=>hwOn()},
+  {id:'hv',n:'Harvest',bg:'linear-gradient(145deg,#e8823a,#7a2e14)',ic:()=>svgI('leaf','#fff1d0'),when:()=>hvOn()||!!(S.hv&&S.hv.pts)},
   {id:'settings',n:'Settings',bg:'linear-gradient(145deg,#a8aeb8,#5e6470)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4l2.2 3.1 3.7-.9.9 3.7 3.1 2.2-1.7 3.4 1.7 3.4-3.1 2.2-.9 3.7-3.7-.9L16 28l-2.2-3.1-3.7.9-.9-3.7-3.1-2.2 1.7-3.4-1.7-3.4 3.1-2.2.9-3.7 3.7.9z" fill="#fff"/><circle cx="16" cy="16" r="4.5" fill="#6e7480"/></svg>`},
   {id:'help',n:'Help',bg:'linear-gradient(145deg,#5aa8ff,#2a5ad0)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12" fill="#fff"/><path d="M12.4 12.6a3.6 3.6 0 1 1 5.2 3.2c-1 .5-1.6 1.2-1.6 2.3v1" stroke="#2a5ad0" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="16" cy="23.2" r="1.7" fill="#2a5ad0"/></svg>`},
 ];
@@ -3422,8 +3527,8 @@ const APP_ORDER=['texts','discord','friends','bounty','shop','case','news','weat
 const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
-  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='discord'?'v-dc':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
-  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case'){CASEV=0;renderCase()}if(v==='hw')renderHW();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='fishdle')renderFishdle();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin){CR.tab='home';CR.last=null}renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
+  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='hv'?'v-hv':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='discord'?'v-dc':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
+  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case'){CASEV=0;renderCase()}if(v==='hw')renderHW();if(v==='hv')renderHV();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='fishdle')renderFishdle();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin){CR.tab='home';CR.last=null}renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
   const sec=v==='lock'?$('phLock'):v==='home'?$('phApps'):$('app-'+v);if(sec)sec.scrollTop=0;
 }
 
@@ -4292,7 +4397,7 @@ function musCaseHTML(inHall){const c=MC();
   return c.map((x,i)=>{const f=FI(x.f),ok=musBeats(x.f,x.v,x.w),rec=musRec(x.f,x.v),col=x.v&&x.v!=='giant'?VAR[x.v].col:RCOL[f.r];
     return `<div class="mc-it${ok?'':' stale'}">${fishSvg(col)}<div class="mc-t"><b>${x.v?VAR[x.v].n+' ':''}${esc(f.n)} · ${x.w} lb</b><small>${ok?(rec?`Beats ${esc(rec.name)}’s ${rec.w} lb plaque`:'No plaque yet. It’s yours to take'):`Someone donated a bigger one (${rec.w} lb)`}</small></div>
       <div class="mc-b">${inHall&&ok?`<button class="mc-don" data-mdon="${i}">Donate</button>`:''}<button class="mini" data-mcsell="${i}">Sell $${money(x.val)}</button></div></div>`}).join('')}
-function musGroupName(f){if(EVFISH.includes(f))return 'Halloween';const w=W(f.at);if(w)return w.n;const r=REALMS.find(r=>r.id===f.at);return r?r.n:'Elsewhere'}
+function musGroupName(f){if(EVFISH.includes(f))return f.ev===HV_ID?'Harvest Festival':'Halloween';const w=W(f.at);if(w)return w.n;const r=REALMS.find(r=>r.id===f.at);return r?r.n:'Elsewhere'}
 function openMuseum(){S.musBeat=[];$('musModal').hidden=false;musFetch(true);renderMuseum();setTimeout(()=>{try{$('musClose').focus()}catch(e){}},50)}
 function renderMuseum(){const b=$('musBody'),m=mpS(),map=MUS.map;
   if(!m.id){b.innerHTML='<p class="fr-muted">Pick an angler name in the Friends app first, then come back to donate.</p>';return}
@@ -4356,6 +4461,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   const ver=UPDATES.reduce((m,u)=>Math.max(m,u.v),0);
   b.innerHTML=`
   <div><h4>Appearance</h4><div class="grp">
+    ${row('Hide the phone','Tucks it off the screen. New messages still show a red badge',sw('phHide',!!st.phHide,'Hide the phone'))}
     ${row('Next goals card','Suggestions for what to do next, under the scene',sw('goals',st.goals!==false,'Next goals card'))}
     ${row('Dark mode',st.dark==='auto'?'Auto: follows your device':'Dark backgrounds for the phone’s apps',seg('dark',[['off','Off'],['on','On'],['auto','Auto']]))}
     ${(()=>{const own=COSTUMES.filter(c=>c.own());if(!own.length)return row('Costume','Earn costumes in holiday events','<small class="fr-muted">None yet</small>');const cur=hwWear()||'';return row('Costume','From holiday events. Pick None to take it off',`<span class="seg" role="group">${[['','None'],...own.map(c=>[c.k,c.n])].map(([k,n])=>`<button data-cos="${k}" aria-pressed="${cur===k}">${n}</button>`).join('')}</span>`)})()}
@@ -4399,7 +4505,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   appSettingsBind(b);{const sb=$('setBlocks');if(sb)sb.onclick=blocksUI}
   b.querySelectorAll('[data-cos]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.cos||null;sfx('click');save();renderSettings()});
   b.querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{let v=x.dataset.sv;if(v==='true')v=true;else if(v==='false')v=false;st[x.dataset.sk]=v;sfx('click');applyDock();applyPhTheme();applyTextSize();save();renderSettings();renderLock();renderVitals&&renderVitals()});
-  b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();});
+  b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();if(x.dataset.sw==='phHide')applyPhHide();});
   {const pn=$('setPin');if(pn)pn.onclick=()=>{closePhone();openPin(false)};const mv=$('setMove');if(mv)mv.onclick=()=>{closePhone();openSaveModal()};const ow=$('setOwner');if(ow)ow.onclick=()=>{closePhone();openOwner()}}
   b.querySelectorAll('[data-snd]').forEach(x=>x.onchange=()=>{S.snd[x.dataset.snd]=x.checked;if(x.dataset.snd==='on'&&x.checked)initAudio();applyVol();renderSnd();save();if(x.dataset.snd==='on')renderSettings()});
   b.querySelectorAll('[data-sl]').forEach(x=>{const k=x.dataset.sl;x.oninput=()=>{S.snd[k]=x.value/100;x.previousElementSibling.querySelector('small').textContent=x.value;applyVol();renderSnd()};x.onchange=()=>{save();if(k==='sfx')sfx('chime','R')}})}
@@ -4837,6 +4943,12 @@ function renderHelp(){
    ['Spooky fish',`<p>Four fish only bite until November 1: the Jack-o’-Lantern Sunfish (Dock Pond, day and dusk), the Ghost Gar (Reed Lake, dusk and night), the Witch’s Eel (Fork River, night) and the Skeleton Pike (Deepwater Basin, night). They have their own section at the top of your Logbook.</p>`],
    ['Ghost Gar contest',`<p>The biggest Ghost Gar landed by anyone on your site before the event ends wins $100,000 and a trophy. 2nd wins $50,000 and 3rd wins $25,000. Prizes arrive in your Friends mailbox. You need an angler name in the Friends app to enter. The board is in the Spooky app.</p>`],
    ['Trick-or-treaters',`<p>After 5 PM, kids in costumes walk up to your cabin when you’re fishing Dock Pond or out in your yard. Tap them to hand out candy for $250 and a chance at a bonus pumpkin. If you’re inside, they knock: tap the front door.</p>`]]]]:[]),
+  ...(hvOn()?[['Harvest Festival 2026 (until November 30)',[
+   ['Fall at the lake',`<p>The trees around every water have turned red, orange and gold, leaves drift across the lake, and geese fly over in a V now and then.</p>`],
+   ['Festival decor',`<p>The Shop has a Harvest section: Corn Stalk Bundles, a Harvest Table, a Harvest Wreath, a Pie on the Windowsill and Potted Mums, plus the Scarecrow and Hay Bales. Anything you buy is yours to keep, but these leave the Shop when the festival ends.</p>`],
+   ['Festival fish',`<p>Four fish only bite until November 30: the Acorn Sunfish (Dock Pond, dawn and day), the Maple Trout (Reed Lake, dawn to dusk), the Cranberry Darter (Fork River, day and dusk) and the legendary Harvest Moon Carp (Deepwater Basin, night). They have their own section at the top of your Logbook and in the Harvest app.</p>`],
+   ['The Harvest Basket',`<p>Open the <b>Harvest</b> app on your phone to give fish from your cooler to one basket for the whole lake. Commons are worth 1 point, uncommons 2, rares 4, legendaries 10 and mythics 25, and festival fish count double. When the lake fills a quarter of the basket, everyone who gave at least 10 points gets $25,000. Half full brings 3 Golden Scale Elixirs, three-quarters brings The Cornucopia for your yard, and a full basket brings $100,000 and a trophy. You need an angler name from the Friends app to join in.</p>`],
+   ['Flannel & knit hat',`<p>Everyone gets a flannel shirt and knit hat for the festival. Change it or take it off under Costume in Settings.</p>`]]]]:[]),
   ['New in the Lake Life Update',[
    ['Spooky sights and lake life',`<p>Little moments happen around the lake now: deer drinking on the far shore, an eagle snatching a fish, a loon family paddling by, hot air balloons, planes towing banners, rainbows after rain and the northern lights on clear nights. During Halloween, look for ghosts, bats, a witch crossing the moon and a drifting jack-o’-lantern boat.</p>`],
    ['First day guide',`<p>Brand-new players get a short checklist under the cast bar that walks through catching, selling, the paper, grilling, upgrading and sleeping, with a small reward for each step. Phone apps unlock one at a time as they play. You can skip it any time.</p>`],
@@ -4866,7 +4978,7 @@ function renderHelp(){
    ['Hunger and stamina',`<p>Hunger empties over about half an hour of play. Below 25 you're hungry and casts are slower. At 0 you're starving: much slower casts, and more fish get away.</p><p>Stamina drains at a random rate, faster when you jig, land big fish or fish in storms. At 0 you're exhausted: slow casts, more misses and no jigging. Tap <b>Return home</b>, then tap your bed to sleep until your stamina is full. Being away from the game for 20+ minutes also counts as sleeping.</p>`],
    ['Junk, salvage and casino coins',`<p>Junk you pull up goes to the <b>Storage</b> tab. In Storage, tap <b>Salvage</b> on any piece of junk (one at a time or the whole stack), or <b>Salvage all</b>, to turn it into Casino Coins. Rarer junk is worth more coins. Casino Coins are spent in the Slots app.</p><p>Your shack decides how much junk fits: 25 at the start, up to 800 with the biggest shack. When storage is full, new junk is tossed back, so salvage often.</p>`],
    ['Slots',`<p>Open the Slots app on your phone. Spins cost 10, 30 or 50 Casino Coins. Prizes include cash (based on your steady income, with a daily limit), potions, more coins, and a collectible for three pearls. The full payout table is inside the app.</p>`],
-   ['Potions and the hot bar',`<p>Potions mostly come from the slots, bounties and gifts. Each lasts 1 minute, and drinking the same potion again adds another minute:</p><ul><li><b>Lucky Potion</b>: rare and legendary fish bite 2.5× as often, and rare variants are twice as likely.</li><li><b>Quick Cast Tonic</b>: casts take half as long.</li><li><b>Golden Scale Elixir</b>: fish sell for double.</li><li><b>Magnet Draught</b>: triple the chance of items and collectibles.</li><li><b>Big Fish Brew</b>: fish run much heavier.</li></ul><p>Put up to 5 potions on the hot bar under the lake (Storage → Add to hot bar) and drink them with a tap or the keys 1 to 5.</p>`],
+   ['Potions and the hot bar',`<p>Potions mostly come from the slots, bounties and gifts. Each lasts 1 minute, and drinking the same potion again adds another minute:</p><ul><li><b>Lucky Potion</b>: rare and legendary fish bite 2.5× as often, and rare variants are twice as likely.</li><li><b>Quick Cast Tonic</b>: casts take half as long.</li><li><b>Golden Scale Elixir</b>: fish you catch while it lasts are worth double when you sell them. Drink it before you fish, not before you sell.</li><li><b>Magnet Draught</b>: triple the chance of items and collectibles.</li><li><b>Big Fish Brew</b>: fish run much heavier.</li></ul><p>Put up to 5 potions on the hot bar under the lake (Storage → Add to hot bar) and drink them with a tap or the keys 1 to 5.</p>`],
    ['While you are away',`<p>Your angler keeps fishing while the game is closed, at the spot you were fishing. Your home decides for how long: 1 hour at the start, up to 24 hours at the Lantern Lake Estate. Fish go to the Cooler, junk and materials go to Storage, and rare finds still count. A summary shows what you caught when you come back. A tournament in progress pauses while you're gone.</p>`],
   ]],
   ['Gear, waters and crafting',[
@@ -4935,7 +5047,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.cont
 $('pane-waters').addEventListener('click',e=>{if(sheetMode()&&e.target.closest('.go:not(:disabled),.lm-pin:not(:disabled)'))setTimeout(()=>sheetSet(false),0)});
 matchMedia('(max-width:700px)').addEventListener('change',()=>{document.body.classList.remove('sheet-on');mnSync()});
 openTab('waters',true);
-function applyPhHide(){const on=!!SETS().phHide;$('phoneDock').classList.toggle('hid',on);$('phHideBtn').setAttribute('aria-pressed',on);$('phHideLbl').textContent=on?'Show phone':'Hide phone';$('phHideBtn').title=on?'Bring the phone back':'Tuck the phone away. Click again to bring it back.'}
+function applyPhHide(){const on=!!SETS().phHide;$('phoneDock').classList.toggle('hid',on);document.body.classList.toggle('ph-hid',on);$('phHideBtn').setAttribute('aria-pressed',on);$('phHideLbl').textContent=on?'Show phone':'Hide phone';$('phHideBtn').title=on?'Bring the phone back':'Tuck the phone away. Click again to bring it back.'}
 $('phHideBtn').onclick=()=>{SETS().phHide=!SETS().phHide;sfx('click');applyPhHide();save()};
 $('sellQ').onclick=()=>{const f=coolF;coolF='all';try{sellAll()}finally{coolF=f}if(f!=='all')renderCooler()};
 function mnTick(){let n=0,sn=0,sv=0;for(const k of coolerIds()){const c=S.cooler[k];n+=c.n;if(!S.locked[k]){sn+=c.n;sv+=c.val}}
@@ -5052,8 +5164,20 @@ const fmtXC=c=>c.slice(0,3)+'-'+c.slice(3);
 const saveMsg=(t,bad)=>{const m=$('saveMsg');m.style.color=bad?'var(--buoy)':'var(--reed)';m.textContent=t};
 const XFER={exp:0,t:null};
 function xfSyncNote(){const m=S.mp||{};$('xfSync').textContent=!m.id?'Tip: pick an angler name in the Friends app and your devices stay in sync on their own after you move your game once.':SETS().cloud===false?'Cloud sync is off in Settings, so you’ll need a code each time you switch.':'Cloud sync is on. After you move your game once, it follows you between devices automatically.'}
-function openSaveModal(){save();$('saveTxt').value='';saveMsg('');$('xfCode').hidden=true;$('xfSub').hidden=true;$('xfMake').hidden=false;$('xfIn').value='';$('xfLoad').dataset.arm='';$('xfLoad').textContent='Load';xfSyncNote();$('saveModal').hidden=false}
+function openSaveModal(){save();$('xfHist').hidden=!cloudOn();$('xfHistList').hidden=true;$('xfHistList').innerHTML='';$('xfHistBtn').hidden=false;$('saveTxt').value='';saveMsg('');$('xfCode').hidden=true;$('xfSub').hidden=true;$('xfMake').hidden=false;$('xfIn').value='';$('xfLoad').dataset.arm='';$('xfLoad').textContent='Load';xfSyncNote();$('saveModal').hidden=false}
 $('saveBtn').onclick=openSaveModal;
+async function histLoad(){const m=S.mp,L=$('xfHistList'),bt=$('xfHistBtn');if(!cloudOn())return;bt.disabled=true;bt.textContent='Loading…';
+  try{const r=await api('cloud/hist',{id:m.id,key:m.key});bt.hidden=true;L.hidden=false;
+    L.innerHTML=r.list.length?r.list.map(x=>`<li><div><b>Day ${x.day} · $${money(x.coins)}</b><small>${x.fish!=null?`${(+x.fish).toLocaleString()} fish · ${x.sp|0} species · `:''}played ${ago(x.ts)} on your ${esc(x.kind||'device')}</small></div><button class="ghost" data-hist="${x.id}" data-f="${x.fish==null?'':x.fish}">Restore</button></li>`).join(''):'<li class="none">No earlier saves yet. They start building up as you play.</li>';
+    L.querySelectorAll('[data-hist]').forEach(b=>b.onclick=()=>histRestore(b))}
+  catch(e){bt.disabled=false;bt.textContent='Show earlier saves';saveMsg('Couldn’t load your earlier saves. Check your connection and try again.')}}
+async function histRestore(b){if(!b.dataset.arm){b.dataset.arm=1;b.textContent='Tap again to restore';saveMsg(`Restoring replaces the game on this device (day ${S.day}, ${(S.total|0).toLocaleString()} fish). That game moves to Earlier saves.`);return}
+  b.disabled=true;b.textContent='Restoring…';const m=S.mp;
+  try{const r=await api('cloud/histget',{id:m.id,key:m.key,hid:+b.dataset.hist}),o=await decSave(r.data);if(!validSave(o))throw new Error('bad');
+    o.mp=Object.assign({},o.mp||{},{id:m.id,key:m.key,name:m.name});applySave(o);CSYNC.offer=null;CSYNC.checked=true;CSYNC.force=true;CSYNC.lastUp=0;save();await cloudPush(true);
+    $('saveModal').hidden=true;showToast(`Earlier save restored: day ${S.day}`,'Welcome back')}
+  catch(e){b.disabled=false;b.textContent='Restore';b.dataset.arm='';saveMsg('Couldn’t restore that save. Check your connection and try again.')}}
+$('xfHistBtn').onclick=histLoad;
 // ==LOGIN PIN== sign in on a new device with angler name + PIN, then load that account's cloud save.
 const LG={acct:null,meta:null};
 function lgMsg(t,cls){const m=$('lgMsg');m.textContent=t||'';m.className='xf-sub lg-msg'+(cls?' '+cls:'')}
@@ -5128,10 +5252,12 @@ const AFK={t:Date.now(),ms:5*60000};const afk=()=>document.hidden||Date.now()-AF
 for(const ev of ['pointerdown','pointermove','keydown','wheel','touchstart'])addEventListener(ev,()=>{const was=Date.now()-AFK.t>AFK.ms;AFK.t=Date.now();if(was&&!document.hidden){try{mpSync(true);txPoll(true)}catch(e){}}},{passive:true,capture:true});
 const cloudOn=()=>SETS().cloud!==false&&!!(S.mp&&S.mp.id&&S.mp.key)&&MPV.online!==false&&MPV.online!=='nodb';
 async function cloudPush(force,keep){if(SESS.paused||!cloudOn()||CSYNC.busy||!CSYNC.checked||CSYNC.offer||titleOn)return;if(!force&&Date.now()-CSYNC.lastUp<(afk()?600000:120000))return;
-  CSYNC.busy=true;try{const data=await encSave2(),body={id:S.mp.id,key:S.mp.key,data,ts:S.last,dev:DEV,kind:DEVK,day:S.day,coins:S.coins,base:S.cbase||0};if(SESS.claimed)body.sid=SESS.sid;
+  CSYNC.busy=true;try{const data=await encSave2(),body={id:S.mp.id,key:S.mp.key,data,ts:S.last,dev:DEV,kind:DEVK,day:S.day,coins:S.coins,base:S.cbase||0,fish:S.total|0,sp:spCount()};if(CSYNC.force)body.force=1;if(SESS.claimed)body.sid=SESS.sid;
     if(keep)fetch('/api/cloud/put',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),keepalive:data.length<60000}).catch(()=>{});
-    else{const r=await api('cloud/put',body);if(r.up){S.cbase=r.up;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}CSYNC.lastUp=Date.now()}
-  catch(e){if(sessErr(e)){CSYNC.busy=false;return}if(e.message==='stale'){CSYNC.checked=false;CSYNC.busy=false;CSYNC.lastUp=Date.now();cloudCheck();return}}CSYNC.busy=false}
+    else{const r=await api('cloud/put',body);if(r.up){S.cbase=r.up;CSYNC.force=false;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}CSYNC.lastUp=Date.now()}
+  catch(e){if(sessErr(e)){CSYNC.busy=false;return}if(e.message==='stale'){CSYNC.checked=false;CSYNC.busy=false;CSYNC.lastUp=Date.now();cloudCheck();return}
+    if(e.message==='downgrade'&&!keep&&e.j){CSYNC.busy=false;CSYNC.lastUp=Date.now();CSYNC.offer=e.j;showCloudOffer(e.j,'down');return}}CSYNC.busy=false}
+const spCount=()=>FISH.filter(f=>S.log[f.id]).length;
 // Force cloud save: the cloud button next to the title saves right now. Limited to once a minute.
 const FCS={last:0,t:0};
 function cloudBtnUI(){const b=$('cloudBtn');if(!b)return;const on=cloudOn()&&!SESS.paused;b.hidden=!on;if(!on)return;
@@ -5154,14 +5280,20 @@ async function cloudCheck(){if(!cloudOn()||CSYNC.offer)return;const m=S.mp,mine=
     if(S.cbase&&!((r.up||0)>S.cbase))return;               // nothing new since this device last synced
     if(!S.cbase&&!(r.ts>(BOOT_LAST||mine)+15000)){S.cbase=r.up||0;return} // first sync after the update: this device was played last
     CSYNC.offer=r;showCloudOffer(r);if(SESS.take==='dev'){SESS.take='';$('clYes').click()}}catch(e){if(e.message==='auth'||e.message==='bad-request')CSYNC.checked=true}}
-function showCloudOffer(r){$('clEye').textContent='Cloud save';$('clH').textContent='Pick up where you left off?';
-  $('clP').textContent=`You played more recently on your ${r.kind||'other device'}. Continue that game here?`;
-  $('clCard').innerHTML=`<b>Day ${r.day} · $${money(r.coins)}</b><small>Saved ${ago(r.ts)} on your ${esc(r.kind||'other device')}</small><small>This device: day ${S.day} · $${money(S.coins)}</small>`;
-  $('clYes').textContent=`Continue from ${r.kind||'there'}`;$('clNo').textContent='Keep this game';$('clMsg').textContent='';$('clYes').disabled=false;
-  $('clYes').onclick=async()=>{$('clYes').disabled=true;$('clYes').textContent='Loading…';
-    try{const m=S.mp,full=await api('cloud/get',{id:m.id,key:m.key}),o=await decSave(full.data);if(!validSave(o))throw new Error('bad');CSYNC.offer=null;applySave(o);S.cbase=full.up||r.up||0;save();$('cloudModal').hidden=true;showToast('Game loaded from your '+(r.kind||'other device'),'Welcome back')}
-    catch(e){$('clMsg').textContent='Couldn’t load it. Check your connection and try again.';$('clYes').disabled=false;$('clYes').textContent=`Continue from ${r.kind||'there'}`}};
-  $('clNo').onclick=()=>{CSYNC.offer=null;S.cbase=r.up||0;$('cloudModal').hidden=true;cloudPush(true)};
+// Which game to keep: both games side by side. Keeping the smaller one takes a second tap, and the server keeps the replaced one in Earlier saves.
+function showCloudOffer(r,mode){const down=mode==='down',here={day:S.day,coins:S.coins,fish:S.total|0,sp:spCount()},cf=r.fish==null?null:r.fish|0;
+  const cloudBig=cf==null?(r.day||0)>=S.day:cf>=here.fish,where=r.kind||'other device';
+  const card=(t,o,sub,big)=>`<div class="cl-opt${big?' big':''}"><span>${t}</span><b>Day ${o.day} · $${money(o.coins)}</b>${o.fish!=null?`<small>${(+o.fish).toLocaleString()} fish · ${(+o.sp||0)} species</small>`:''}<small>${sub}</small>${big?'<em>More progress</em>':''}</div>`;
+  $('clEye').textContent='Cloud save';$('clH').textContent=down?'Your saved game has more progress':'Which game do you want here?';
+  $('clP').textContent=down?`This device has a smaller game than the one saved to your account. Load your saved game here, or replace it with this device’s game.`:`You played more recently on your ${where}. Pick the game to keep on this device. If you replace your saved game, it stays in Earlier saves for a while.`;
+  $('clCard').innerHTML=`<div class="cl-two">${card(down?'Saved to your account':'From your '+esc(where),{day:r.day,coins:r.coins,fish:cf,sp:r.sp},`Saved ${ago(r.ts)}`,cloudBig)}${card('On this device',here,'Playing now',!cloudBig)}</div>`;
+  const yes=$('clYes'),no=$('clNo');yes.textContent=down?'Load my saved game':`Continue from ${where}`;no.textContent='Keep this device’s game';no.dataset.arm='';
+  yes.className=cloudBig?'jig':'ghost';no.className=cloudBig?'ghost':'jig';$('clMsg').textContent='';yes.disabled=false;no.disabled=false;
+  yes.onclick=async()=>{yes.disabled=true;yes.textContent='Loading…';
+    try{const m=S.mp,full=await api('cloud/get',{id:m.id,key:m.key}),o=await decSave(full.data);if(!validSave(o))throw new Error('bad');o.mp=Object.assign({},o.mp||{},{id:m.id,key:m.key,name:m.name});CSYNC.offer=null;applySave(o);S.cbase=full.up||r.up||0;CSYNC.checked=true;save();$('cloudModal').hidden=true;showToast(down?'Your saved game is loaded':'Game loaded from your '+where,'Welcome back')}
+    catch(e){$('clMsg').textContent='Couldn’t load it. Check your connection and try again.';yes.disabled=false;yes.textContent=down?'Load my saved game':`Continue from ${where}`}};
+  no.onclick=()=>{if(cloudBig&&cf!=null&&here.fish<cf&&!no.dataset.arm){no.dataset.arm=1;no.textContent=`Tap again to replace your ${cf.toLocaleString()}-fish game`;$('clMsg').textContent=`Your saved game has ${(cf-here.fish).toLocaleString()} more fish. It will move to Earlier saves.`;return}
+    CSYNC.offer=null;S.cbase=r.up||0;CSYNC.force=true;CSYNC.checked=true;$('cloudModal').hidden=true;cloudPush(true)};
   $('cloudModal').hidden=false}
 // A link like …/lantern-lake/?code=ABCDEF opens straight to loading that transfer code.
 let URLMOVED=false;
@@ -6064,7 +6196,7 @@ function yardHits(){const G=shackGeo(),e=dockEnd(),P=(x,y,w,h,kind,data)=>HITS.p
 function yardTip(h){if(h.kind==='ypeer'){const p=HOUSE.peers.get(h.data);return p?`<b>${p.host?'🏡 ':''}${esc(p.name)}</b><small>Tap for options</small>`:''}if(h.kind==='ygame'){const K=YGAMES[h.data.id];return `<b>${K.n}</b><small>${K.d} Tap to play.</small>`}if(h.kind==='ypet')return `<b>${esc(h.data)}</b><small>Tap to pet</small>`;const fr=S.sleep&&S.sleep.at==='friend',who=fr&&VT?(VT.arcade?'The arcade’s':VT.museum?'The museum’s':esc(VT.name)+'’s'):'Your';
   if(h.kind==='yhouse'&&h.data===7)return '<b>Lantern Lake Museum</b><small>Tap the door to go inside and donate</small>';
   if(h.kind==='ytree')return yTreeTip(h);if(h.kind==='yplot')return yPlotTip(h);if(h.kind==='yfarm')return farmTip(h);if(h.kind==='yhang')return hangTip(h);if(h.kind==='yshow'){const a=yardList()[h.data.i];return a?showItemTip(a):''}if(h.kind==='ychick')return '<b>Chicken</b><small>Bawk. Tap to shoo it</small>';
-  if(h.kind==='ydeco'){const it=DECOR.find(x=>x.id===h.data);if(!it)return YUNIT[h.data]?`<b>${YUNIT[h.data].n}</b><small>Yard build</small>`:'';return `<b>${it.n}</b><small>${CAT[it.cat]} decor${it.hw?' · '+HWL():''} · from the Shop</small><small class="yd">${it.d}</small>`}
+  if(h.kind==='ydeco'){const it=DECOR.find(x=>x.id===h.data);if(!it)return YUNIT[h.data]?`<b>${YUNIT[h.data].n}</b><small>Yard build</small>`:'';return `<b>${it.n}</b><small>${CAT[it.cat]} decor${isSeasonal(it)?' · '+seasonLbl(it):''} · from the Shop</small><small class="yd">${it.d}</small>`}
   if(h.kind==='yhouse'){const it=GEAR.shack.items[h.data];return `<b>${it?it.n:'Shack'}</b><small>${who} place</small>`}
   if(h.kind==='ydock')return `<b>Dock</b><small>${who} dock${(fr&&VT?VT.ext.shack:S.shack)>=4?', with lamp posts':''}</small>`;
   if(h.kind==='ytro')return `<b>${h.data} ${h.data===1?'trophy':'trophies'}</b><small>On the porch rail. ${fr?'Go inside to see the shelves.':'Pick which go on your shelves from the trophy drawer.'}</small>`;
@@ -6172,6 +6304,10 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:132,n:'Safer cloud saves',items:['Bug fix: switching devices could replace a big game with a smaller one when you tapped “Keep this game”. Now you see both games side by side (fish, species, money and when each was played), the one with more progress is highlighted, and keeping the smaller game takes a second tap.','Your cloud save can no longer be replaced by a game with far less progress unless you confirm it, even from an older copy of the game left open somewhere.','New: Earlier saves. Your cloud keeps your last few saves plus your biggest one. Find them under Your game on the title screen and restore one with two taps if a game ever gets replaced by mistake.']},
+ {v:131,n:'Harvest Basket',items:['Four festival fish bite from November 2 to 30: the Acorn Sunfish at Dock Pond, the Maple Trout at Reed Lake, the Cranberry Darter at Fork River and the legendary Harvest Moon Carp at Deepwater Basin at night. They get their own Logbook section and count for the Museum.','The Harvest Basket: the whole lake fills one basket together by giving fish from their coolers. Rarer fish are worth more points, and festival fish count double.','Every quarter of the basket the lake fills pays everyone who gave at least 10 points: $25,000, then 3 Golden Scale Elixirs, then The Cornucopia (a festival-only yard piece), then $100,000 and a Harvest Basket 2026 trophy.','A new Harvest app on your phone shows the basket, the top helpers, the festival fish and your costume.']},
+ {v:130,n:'Harvest Festival',items:['The Harvest Festival starts November 2, right after Halloween, and runs through November 30.','Fall comes to the lake: red, orange and gold trees around every water, leaves drifting across the scene, and geese flying over in a V.','A new autumn title screen to match.','New festival decor in the Shop: Corn Stalk Bundles, a Harvest Table, a Harvest Wreath, a Pie on the Windowsill and Potted Mums. The Scarecrow and Hay Bales are back too. You keep whatever you buy, but it leaves the Shop when the festival ends.','A festival gift for everyone: a flannel shirt and knit hat. Change it or take it off under Costume in Settings.','More festival fun is on the way, including new fish and a lake-wide Harvest Basket.']},
+ {v:129,n:'Hide your phone anywhere',items:['You can hide the phone on phones too now. Turn on Hide the phone in the phone’s Settings app, and a Show phone button takes its spot in the bottom bar. New messages still show a red badge on it.','On computers, the same setting is in Settings, along with the Hide phone button next to the menus.','Bug fix: the Golden Scale Elixir said fish “sell for double”, but it actually doubles the value of fish you catch while it lasts. The description now says that, so drink it before you fish, not before you sell.']},
  {v:128,n:'New menus',items:['The menus under the lake have a new layout. Everything you use while fishing sits in one strip: the cast bar, Jig, hunger and stamina rings, your potion hot bar and a quick Sell button.','Four menus replace the old row of tabs: Map, Gear, Catch and Stuff. Map is first, since traveling is what you do most.','The new Map tab shows the whole lake. Tap a spot on the map to head there, or tap Lantern Harbor to visit town.','Catch holds your Cooler, Logbook and Collection. Stuff holds your Storage, trophies and setup.','Next goals now fit on one line. Tap the goal to go do it, or tap “1 of 3” to see the next one.','On phones the menus sit in a bar at the bottom of the screen and slide up when you tap them. The phone tucks into the corner of the bar and grows to full size when you pull it up.','On computers there’s a new Hide phone button next to the menus. It tucks the phone all the way off the screen, and new messages still show a red badge on the button.']},
  {v:127,n:'Pet bed fix',items:['Bug fix: your pet now naps on top of its pet bed instead of underneath it.']},
  {v:126,n:'Yard games and showing off',items:['Two more yard games. Horseshoe Pit: four throws, tap when the meter’s in the green, and a ringer scores 3. Putting Green: three holes with walls and slopes, where you drag back from the ball to putt. Both keep your best, and your first three good rounds each day pay.','Koi Pond (Homestead tab): stock it with goldfish, koi or the rare Butterfly Koi, up to eight. Feed them once a day and after three feedings they’re prize size and sell for far more than you paid. They swim around, and they crowd in when you feed them.','A new Show-off & seasonal tab. The Trophy Statue shows your biggest catch cast in bronze, with its weight on the plaque, and visitors see yours. The Fish Weathervane swings with the wind and spins in a gale.','Leaf piles for autumn (sold September to November): tap one to jump in. Snowmen for winter (December to February): tap to roll him up ball by ball and finish him with a hat, scarf and carrot nose. The ones you own stay all year.']},
@@ -6307,15 +6443,17 @@ let titleOn=false,titleRAF=0;
 function showTitle(){titleOn=true;$('titleScreen').hidden=false;
  try{$('tNew').hidden=+(localStorage.getItem('ll-upd-seen')||0)>=UPDATES[0].v}catch(e){$('tNew').hidden=true}
 
- {const sp=hwOn(),rb=$('tRibbon');$('titleScreen').classList.toggle('spooky',sp);rb.querySelector('.trb-txt').textContent=sp?'Halloween Update':`${UPDATES[0].n} Update`;rb.setAttribute('aria-label',`New: the ${sp?'Halloween':UPDATES[0].n} Update. See what’s new`);$('tGo').textContent=S&&S.total>0?'Continue':'Go fishing'}
+ {const sp=hwOn(),hv=hvOn(),rb=$('tRibbon'),nm=sp?'Halloween Update':hv?'Harvest Festival':`${UPDATES[0].n} Update`;$('titleScreen').classList.toggle('spooky',sp);$('titleScreen').classList.toggle('harvest',hv);rb.querySelector('.trb-txt').textContent=nm;rb.setAttribute('aria-label',`New: ${nm}. See what’s new`);$('tGo').textContent=S&&S.total>0?'Continue':'Go fishing'}
  $('tSave').innerHTML=S&&S.total>0?`<b>Day ${S.day} · $${money(S.coins)}</b><span>${S.total.toLocaleString()} fish landed${S.mp&&S.mp.id&&SETS().cloud!==false?' · ☁ Cloud sync on':''}${hwOn()&&S.hw&&S.hw.pk?` · ${S.hw.pk} pumpkin${S.hw.pk===1?'':'s'} found`:''}</span>${S.mp&&S.mp.titleNote?`<em>${esc(S.mp.titleNote)}</em>`:''}`:'A fresh lake is waiting.';
  cancelAnimationFrame(titleRAF);titleRAF=requestAnimationFrame(drawTitle);setTimeout(()=>{const g=$('tGo');if(g)g.focus()},50)}
 function hideTitle(){titleOn=false;$('titleScreen').hidden=true;cancelAnimationFrame(titleRAF)}
 const TL={lan:Array.from({length:9},(_,i)=>({x:Math.random(),y:.5+Math.random()*.5,s:.6+Math.random()*.6,sp:.006+Math.random()*.01,ph:Math.random()*6})),
- birds:Array.from({length:5},(_,i)=>({x:Math.random(),y:.12+Math.random()*.2,sp:.01+Math.random()*.01,ph:Math.random()*6}))};
+ birds:Array.from({length:5},(_,i)=>({x:Math.random(),y:.12+Math.random()*.2,sp:.01+Math.random()*.01,ph:Math.random()*6})),
+ lv:Array.from({length:22},(_,i)=>({x:Math.random(),y:Math.random(),s:.7+Math.random()*.7,sp:.04+Math.random()*.05,ph:Math.random()*6,vr:(Math.random()-.5)*2,c:FALL[i%FALL.length]}))};
 function drawTitle(now){if(!titleOn)return;const c=$('titleCv'),x=c.getContext('2d'),dpr=Math.min(2,devicePixelRatio||1),W=c.clientWidth,H=c.clientHeight;
  if(c.width!==Math.round(W*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(W*dpr);c.height=Math.round(H*dpr)}x.setTransform(dpr,0,0,dpr,0,0);const T=now/1000,HZ=Math.round(H*.6);
  if(hwOn()){const dt=Math.min(.05,(now-(TLS.lt||now))/1000);TLS.lt=now;drawTitleHW(x,W,H,T,dt);titleRAF=requestAnimationFrame(drawTitle);return}
+ const hv=hvOn();
  let g=x.createLinearGradient(0,0,0,HZ);g.addColorStop(0,'#241c48');g.addColorStop(.35,'#6a2f62');g.addColorStop(.7,'#e0624a');g.addColorStop(1,'#ffc46a');x.fillStyle=g;x.fillRect(0,0,W,HZ);
  x.fillStyle='rgba(255,250,230,.8)';for(let i=0;i<40;i++){const sx=(i*137.5)%W,sy=(i*61.7)%(HZ*.35);x.globalAlpha=.25+.35*Math.sin(T*1.3+i);x.fillRect(sx,sy,1.6,1.6)}x.globalAlpha=1;
  const sx=W*.66,sr=Math.max(34,Math.min(W,H)*.075),sy=HZ-sr*.35;let rg=x.createRadialGradient(sx,sy,sr*.4,sx,sy,sr*5);rg.addColorStop(0,'rgba(255,220,140,.55)');rg.addColorStop(1,'rgba(255,160,90,0)');x.fillStyle=rg;x.fillRect(0,0,W,HZ);
@@ -6324,6 +6462,7 @@ function drawTitle(now){if(!titleOn)return;const c=$('titleCv'),x=c.getContext('
  const hill=(base,amp,f,col,ph)=>{x.fillStyle=col;x.beginPath();x.moveTo(0,HZ);for(let i=0;i<=W;i+=8)x.lineTo(i,HZ-base-amp*(.5+.5*Math.sin(i/W*f+ph)));x.lineTo(W,HZ);x.closePath();x.fill()};
  hill(H*.07,H*.05,5,'#6a3a6a',1);hill(H*.035,H*.035,9,'#40284a',3);
  x.fillStyle='#22182c';x.beginPath();x.moveTo(0,HZ);for(let i=0;i<=W;i+=10){const tall=(i<W*.3||i>W*.82)?1:.35;x.lineTo(i,HZ-6*tall-((i*7)%13)*tall-(i%20<10?10*tall:0))}x.lineTo(W,HZ);x.closePath();x.fill();
+ if(hv)for(let i=4,k=0;i<=W;i+=15,k++){if(i>W*.3&&i<W*.82)continue;const c=FALL[k%FALL.length].map(v=>Math.round(v*.62+24)),r=7+((k*7)%4);x.fillStyle=`rgb(${c})`;x.beginPath();x.arc(i,HZ-12-((k*5)%8),r,0,7);x.fill();x.beginPath();x.arc(i+6,HZ-6-((k*3)%5),r*.7,0,7);x.fill()}
  g=x.createLinearGradient(0,HZ,0,H);g.addColorStop(0,'#c86a5a');g.addColorStop(.15,'#6a3a5a');g.addColorStop(1,'#141a30');x.fillStyle=g;x.fillRect(0,HZ,W,H-HZ);
  for(let i=0;i<34;i++){const yy=HZ+6+i*i*.32,w2=sr*(1.5-i*.025)*(.7+.3*Math.sin(T*2+i*1.7)),xo=Math.sin(T*1.1+i)*8;if(yy>H)break;x.fillStyle=`rgba(255,220,150,${.55-i*.014})`;x.fillRect(sx-w2/2+xo,yy,w2,2)}
  x.strokeStyle='rgba(255,210,190,.14)';x.lineWidth=1;for(let i=0;i<22;i++){const yy=HZ+10+((i*37)%(H-HZ-10)),xx=((i*173+T*12)%(W+200))-100;x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+60+(i%4)*20,yy);x.stroke()}
@@ -6331,7 +6470,8 @@ function drawTitle(now){if(!titleOn)return;const c=$('titleCv'),x=c.getContext('
  x.strokeStyle='#1a1222';x.lineWidth=1.5;x.beginPath();x.moveTo(bx+2,by-14);x.lineTo(bx+30,by-34);x.stroke();x.strokeStyle='rgba(255,230,200,.35)';x.lineWidth=.8;x.beginPath();x.moveTo(bx+30,by-34);x.quadraticCurveTo(bx+40,by-10,bx+44,by+3);x.stroke();
  rg=x.createRadialGradient(bx-14,by-8,0,bx-14,by-8,26);rg.addColorStop(0,'rgba(255,200,110,.7)');rg.addColorStop(1,'rgba(255,200,110,0)');x.fillStyle=rg;x.fillRect(bx-40,by-34,52,52);x.fillStyle='#ffd27a';x.fillRect(bx-16,by-11,4,6);
  for(const b of TL.birds){const xx=((b.x+T*b.sp)%1.2-.1)*W,yy=b.y*H+Math.sin(T+b.ph)*4,f=Math.sin(T*6+b.ph)*3;x.strokeStyle='rgba(40,20,40,.7)';x.lineWidth=1.5;x.beginPath();x.moveTo(xx-6,yy-f);x.quadraticCurveTo(xx-3,yy-2,xx,yy);x.quadraticCurveTo(xx+3,yy-2,xx+6,yy-f);x.stroke()}
- for(const l of TL.lan){l.y-=l.sp*.016;if(l.y<-.05){l.y=1.02;l.x=Math.random()}const lx=(l.x+Math.sin(T*.3+l.ph)*.01)*W,ly=l.y*HZ,s=l.s*Math.max(.8,W/1100),fl=.85+.15*Math.sin(T*5+l.ph);
+ if(hv){const k=Math.max(.8,W/1100);for(const l of TL.lv){l.y+=l.sp*.016;l.x+=Math.sin(T+l.ph)*.0008+.0005;if(l.y>1.03){l.y=-.03;l.x=Math.random()}const lx=(l.x%1)*W,ly=l.y*H;x.save();x.translate(lx,ly);x.rotate(T*l.vr+l.ph);x.scale(.35+.65*Math.abs(Math.cos(T*2+l.ph)),1);x.fillStyle=`rgb(${l.c})`;x.beginPath();x.ellipse(0,0,6*l.s*k,3*l.s*k,0,0,7);x.fill();x.restore()}}
+ else for(const l of TL.lan){l.y-=l.sp*.016;if(l.y<-.05){l.y=1.02;l.x=Math.random()}const lx=(l.x+Math.sin(T*.3+l.ph)*.01)*W,ly=l.y*HZ,s=l.s*Math.max(.8,W/1100),fl=.85+.15*Math.sin(T*5+l.ph);
   rg=x.createRadialGradient(lx,ly,0,lx,ly,22*s);rg.addColorStop(0,`rgba(255,190,90,${.5*fl})`);rg.addColorStop(1,'rgba(255,190,90,0)');x.fillStyle=rg;x.fillRect(lx-24*s,ly-24*s,48*s,48*s);
   x.fillStyle=`rgba(255,${170+30*fl},90,1)`;x.beginPath();x.moveTo(lx-5*s,ly-7*s);x.lineTo(lx+5*s,ly-7*s);x.lineTo(lx+4*s,ly+6*s);x.lineTo(lx-4*s,ly+6*s);x.closePath();x.fill();x.fillStyle='rgba(255,250,210,.9)';x.fillRect(lx-1.5*s,ly+2*s,3*s,3*s);
   const ry=HZ+(HZ-ly)*.35;if(ry<H){x.fillStyle=`rgba(255,190,90,${.18*fl})`;x.fillRect(lx-3*s,ry,6*s,2)}}
@@ -6452,7 +6592,7 @@ function draw0(now){
   if(AMB.cover>.05){ctx.fillStyle=rgb(mix([34,38,50],[150,156,168],d),Math.min(.9,AMB.cover*.85));for(let i=0;i<12;i++){const x=((i*90+T*AMB.wind*.25)%1080)-140,y=12+(i%3)*16;ctx.beginPath();ctx.ellipse(x,y,80,26,0,0,7);ctx.fill()}}
   ctx.strokeStyle=rgb(mix([20,20,30],[40,44,56],d),.85);ctx.lineWidth=1.4;
   for(const f of AMB.birds)for(const b of f.b){const x=f.x+b.dx,y=f.y+b.dy,w=Math.sin(T*9+b.p)*3;ctx.beginPath();ctx.moveTo(x-6,y-w);ctx.quadraticCurveTo(x-3,y-1,x,y);ctx.quadraticCurveTo(x+3,y-1,x+6,y-w);ctx.stroke()}
-  scnDraw('back',d,T,loc);drawBackdrop(WL(loc),d,T);scnDraw('sky',d,T,loc);
+  scnDraw('back',d,T,loc);drawBackdrop(WL(loc),d,T);if(!isRealm(loc)&&loc!=='transit')hvBack(WL(loc),d);scnDraw('sky',d,T,loc);
   const RL=isRealm(loc),PT=loc==='transit'&&trvPortal();
   // water
   if(RL)realmScene(loc,d,T);else if(PT)drawVortex(T);else{const wt=W(WL(loc==='transit'?TRV.to:loc)).tint,wl=mix([10,18,30],wt[0],d*.85+.1),wd=mix([4,8,16],wt[1],d*.7+.2);
@@ -6494,7 +6634,7 @@ function draw0(now){
   for(const f of fx){const bx=BOB.x,by=BOB.y;ctx.strokeStyle=`rgba(255,255,255,${1-f.t})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(bx,by+2,6+f.t*30,2+f.t*8,0,0,7);ctx.stroke();
     }
   setBase();
-  if(!RL&&!PT)drawWeatherFront(d,T);
+  if(!RL&&!PT){drawWeatherFront(d,T);hvLeaves(d,T)}
   if(fade>0){ctx.fillStyle=`rgba(4,8,14,${Math.min(1,fade)})`;ctx.fillRect(0,0,800,400)}
 }
 function drawLighthouse(d,T,night){
@@ -6633,7 +6773,7 @@ function drawShack0(d,h,T){
   if(has('chimes')){const cx=x-3,cy=y+3;ctx.strokeStyle=dark;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx,cy+5);ctx.stroke();ctx.fillStyle=rgb(mix([60,60,60],[200,200,190],d));
     for(let i=0;i<4;i++){const sw=Math.sin(T*2.2+i)*1.5;ctx.fillRect(cx-4+i*2.5+sw,cy+6,1,6+i%2*2)}}
   if(has('lantern')){const lx=G.door+17,ly=222;ctx.fillStyle=dark;ctx.fillRect(lx-1,ly-4,3,1.5);ctx.fillStyle=lit(d)?'#ffdc8a':'#c8b890';ctx.fillRect(lx-1.5,ly-2,4,6);if(lit(d))glow(lx,ly+1,20,.5*(1-d))}
-  hwHouse(G,wins,d,T);
+  hwHouse(G,wins,d,T);hvHouse(G,wins,d,T);
   drawTrophies(G);
 }
 function drawTrophies(G){
@@ -6820,7 +6960,8 @@ const YI={
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
-  jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]}};
+  jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
+  cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]}};
 const YIDS=Object.keys(YI),yQty=id=>YI[id].unit?yInv(id):YI[id].def.length;
 const YLAND=[{n:'Home Lot',x:-40,c:0},{n:'Side Meadow',x:-200,c:2500,d:'A sunny strip of grass next to your lot.'},{n:'Birch Glade',x:-360,c:15000,d:'Soft ground under the birches. Room for a lot more.'},
   {n:'Pine Woods',x:-520,c:60000,d:'A quiet stand of pines further inland.'},{n:'Hilltop',x:-700,c:200000,d:'The far end of the property, with a view back over the lake.'}];
@@ -6867,6 +7008,7 @@ function yDraw(id,d,T,night,ph){
   else if(id==='fence'){ctx.fillStyle=rgb(mix([60,62,66],[244,242,234],d));ctx.fillRect(0,385,128,2);ctx.fillRect(0,391,128,2);for(let x=2;x<126;x+=8){ctx.fillRect(x,383,4,14);ctx.beginPath();ctx.moveTo(x,383);ctx.lineTo(x+2,380);ctx.lineTo(x+4,383);ctx.fill()}}
   else if(id==='birch')birchOne(d,T,ph);
   else if(id==='jacks'||id==='scarecrow'||id==='tombstones'||id==='cauldron')hwLandOne(id,d,T);
+  else if(id==='cornstalks'||id==='harvtable'||id==='cornucopia')hvLandOne(id,d,T);
   else if(YI[id]&&YI[id].fruit)treeDraw(YI[id].fruit,d,T,YCUR);
   else if(id==='plot')plotDraw(d,T,YCUR);
   else if(id==='pethouse')petHouseDraw(d);
@@ -6893,7 +7035,7 @@ function drawInland(d,T){const g1=C2([16,26,22],[66,92,54],d);
   ctx.fillStyle=g1;ctx.beginPath();ctx.moveTo(-830,215);ctx.lineTo(-64,215);ctx.quadraticCurveTo(-14,217,0,232);ctx.lineTo(3,233);ctx.lineTo(3,400);ctx.lineTo(-830,400);ctx.fill();
   if(AMB.snowAcc>0){ctx.fillStyle=`rgba(234,240,248,${.65*AMB.snowAcc*(.5+.5*d)})`;ctx.fill()}
   const pc=C2([10,18,16],[38,66,46],d),pc2=C2([14,24,20],[52,84,56],d);
-  for(let x=-820;x<-50;x+=17){const h=22+((x*7919)%13+13)%13;pine(x,217,h,(x/17|0)%2?pc:pc2)}
+  for(let x=-820;x<-50;x+=17){const h=22+((x*7919)%13+13)%13;pine(x,217,h,(x/17|0)%2?pc:pc2)}hvInland(d);
   ctx.fillStyle=C2([24,36,26],[110,136,70],d);for(let x=-820;x<0;x+=9)ctx.fillRect(x,226+Math.sin(x)*3,2,-8-Math.sin(x*3)*4);
   // soft patches and tufts so the open ground isn't flat
   ctx.fillStyle=C2([20,32,26],[76,104,60],d);for(let i=0;i<46;i++){const x=-820+((i*7919)%820),y=244+((i*104729)%150);ctx.beginPath();ctx.ellipse(x,y,10+(i%4)*4,2.5+(i%3),0,0,7);ctx.fill()}
@@ -9165,6 +9307,8 @@ function hwDock(d,T){
     ctx.beginPath();ctx.arc(sx,231,3.6,0,7);ctx.fill();ctx.fillStyle='#111';ctx.fillRect(sx-1.8,230,1.3,1.3);ctx.fillRect(sx+.6,230,1.3,1.3);ctx.fillRect(sx-1,233,2,.8);
     ctx.beginPath();ctx.moveTo(sx,235);ctx.lineTo(sx,244);for(let i=0;i<3;i++){ctx.moveTo(sx-3,237+i*2.4);ctx.lineTo(sx+3,237+i*2.4)}ctx.moveTo(sx,244);ctx.lineTo(sx+2,254);ctx.moveTo(sx,244);ctx.lineTo(sx-2,255);ctx.moveTo(sx,237);ctx.lineTo(sx+5,240);ctx.stroke();
     ctx.strokeStyle=rgb(mix([30,24,20],[90,60,36],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(sx+5,240);ctx.lineTo(sx+24,224);ctx.stroke();ctx.strokeStyle='rgba(220,220,220,.4)';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(sx+24,224);ctx.lineTo(sx+30,282);ctx.stroke()}
+  if(has('mums'))for(const [mx,my,k] of [[192,272,0],[202,269,1]]){ctx.fillStyle=rgb(mix([40,22,16],[176,96,60],d));ctx.beginPath();ctx.moveTo(mx-4,my-5);ctx.lineTo(mx+4,my-5);ctx.lineTo(mx+3,my);ctx.lineTo(mx-3,my);ctx.fill();
+    const fc=k?[240,186,62]:[230,118,40];for(let i=0;i<9;i++){const a=i/9*Math.PI,r=3.4+(i%2);ctx.fillStyle=rgb(mix(fc.map(v=>v*.2),fc,d*.85+.1));ctx.beginPath();ctx.arc(mx+Math.cos(a)*r*1.2,my-6-Math.sin(a)*r,1.7,0,7);ctx.fill()}}
   if(has('floatjacks'))for(let i=0;i<4;i++)jack(262+i*30,316+(i%2)*10+Math.sin(T*1.4+i)*1.5,.85,d,T);
 }
 function drawGhostShip(d,T){
@@ -9936,7 +10080,7 @@ function tvSportsParts(){const b=sbInit(),season=b.season,d=sbLDay(),done=sbDone
 // --- Lake Shopping Channel: one deal a day
 function tvDeal(){const d=arcUTC(),R=tvSeed('shop'+d),kind=R()<1/7?'paint':['decor','pots','mats'][Math.floor(R()*3)];
   if(kind==='paint'&&!PNT().own.testpat)return {kind,id:'testpat',n:'Test Pattern boat paint',d:'Color bars and a little “PLEASE STAND BY” on your hull. Only on Shop 8.',c:Math.max(5000,rwCoins(300))};
-  if(kind==='decor'||kind==='paint'){const opts=DECOR.filter(x=>!owned(x.id)&&!S.boxes.some(b=>b.id===x.id)&&x.c>0&&(!x.hw||hwOn()));if(opts.length){const it=opts[Math.floor(R()*opts.length)];return {kind:'decor',id:it.id,n:it.n,d:it.d,was:it.c,c:Math.round(it.c*.7/10)*10}}}
+  if(kind==='decor'||kind==='paint'){const opts=DECOR.filter(x=>!owned(x.id)&&!S.boxes.some(b=>b.id===x.id)&&x.c>0&&(!isSeasonal(x)||seasonDecorOn(x)));if(opts.length){const it=opts[Math.floor(R()*opts.length)];return {kind:'decor',id:it.id,n:it.n,d:it.d,was:it.c,c:Math.round(it.c*.7/10)*10}}}
   if(kind==='mats')return {kind:'mats',n:'Tackle-box bundle',d:'8 Old Rope, 5 Brass Fittings and 3 Sea Glass, boxed and shipped.',m:{rope:8,brass:5,glass:3},c:rwCoins(30)};
   const ps=[];for(let i=0;i<5;i++)ps.push(PKEYS[Math.floor(R()*PKEYS.length)]);return {kind:'pots',n:'Potion party pack',d:'Five potions, picked by our host: '+ps.map(k=>POT[k].n).join(', ')+'.',ps,c:rwCoins(25)}}
 function tvBuy(){const t=TVS(),d=arcUTC(),it=tvDeal();if(t.shop===d||S.coins<it.c)return;S.coins-=it.c;t.shop=d;sfx('coin');
@@ -9966,12 +10110,12 @@ const XKIND={
   yard:{name:it=>{const [c]=String(it).split('|');return `Best yard of the week: $${money(+c)}`},give:it=>{const [c]=String(it).split('|');S.coins+=+c||0;S.trophies.unshift({name:'Best Yard',water:'pond',type:'big',score:'Most liked',day:S.day});celebrate({lbl:'Best yard!',r:'L',name:'Your yard got the most likes',sub:`+$${money(+c)} and a trophy`,icon:cupSvg});return true}},
   chal:{name:it=>{const [k,c,o,f]=String(it).split('|');const fn=FI(f)?FI(f).n:f;return k==='win'?`Challenge won vs ${o} (${fn}): $${money(+c)}`:k==='tie'?`Challenge tie with ${o}: $${money(+c)} back`:`Challenge refund (${o}): $${money(+c)}`},give:it=>{const [k,c,o]=String(it).split('|');S.coins+=+c||0;if(k==='win')celebrate({lbl:'Challenge won!',r:'R',name:`You beat ${o}`,sub:`+$${money(+c)}`,icon:cupSvg});else showToast(`+$${money(+c)}`,k==='tie'?'Challenge tie':'Challenge refund');return true}}};
 XKIND.cos={name:it=>ITEM_BY[it]?`${ITEM_BY[it].n} (${KIND_LBL[kindOf(it)]||'cosmetic'})`:'a parcel',give:(it,n)=>{if(!ITEM_BY[it])return false;const P=PNT();P.own[it]=(P.own[it]||0)+1;storeDirty=true;celebrate({lbl:'A parcel for you!',r:ITEM_BY[it].t||'R',name:ITEM_BY[it].n,sub:`A ${KIND_LBL[kindOf(it)]||'cosmetic'} for your locker`,icon:svgI('crown','#ffd05a')});return true}};
-function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
+function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(hvOn()||(S.hv&&S.hv.pts)){body.hvq=1;if(m.hvb>0)body.hvb=Math.round(m.hvb)}if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
 // Supporters get the Mythic Lantern Keeper kit once. It stays theirs.
 const SUP_KIT=['leviathan','r_starforged','b_sun'];
 function supKit(){if(S.supKit)return;const P=PNT();for(const id of SUP_KIT)P.own[id]=Math.max(1,P.own[id]|0);const cb=CAB();try{cabSync()}catch(e){}cb.own.eternal=1;try{cabSync()}catch(e){}S.supKit=1;storeDirty=true;save();
   setTimeout(()=>celebrate({lbl:'Mythic! Thank you, supporter',r:'M',name:'The Lantern Keeper kit',sub:'Aurora Leviathan paint, Starforged rod, Pocket Sun bobber and the Eternal Lantern for your cabin. Find them in Crates → Locker and Decorate.',icon:svgI('crown','#ff8fb8')}),4500)}
-function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}if(S.sup)supKit()}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);
+function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}if(S.sup)supKit()}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);if(body.hvb&&r.hvb)m.hvb=Math.max(0,(m.hvb||0)-body.hvb);if(r.hvb){const pv=MPV.hvb;MPV.hvb=r.hvb;if(pv&&pv.goal===r.hvb.goal)MPV.hvb.total=Math.max(r.hvb.total,pv.total|0);hvClaim();if(phView==='hv'&&!$('slotsModal').hidden)renderHV()};
   if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;if(r.owner&&!S.wdOwn){S.wdOwn=1;save();setTimeout(()=>showToast('Your Game Warden boat is ready. Turn it on in the Owner tools.','Game Warden'),5000)}
   if(r.chal){const prev=MPV.chal||[];MPV.chal=r.chal;const newIn=r.chal.filter(c=>c.mine==='b'&&c.st==='pend'&&!(m.chSeen||[]).includes(c.id));if(newIn.length){m.chSeen=(m.chSeen||[]).concat(newIn.map(c=>c.id)).slice(-40);phNotify('friends','Challenge!',`${newIn[0].other} challenges you: biggest ${FI(newIn[0].fish)?FI(newIn[0].fish).n:newIn[0].fish} for $${money(newIn[0].stake)}`)}
     const live=new Set(r.chal.filter(c=>c.st==='live').map(c=>String(c.id)));if(m.chw)for(const k of Object.keys(m.chw))if(!live.has(k))delete m.chw[k]}
@@ -10075,6 +10219,8 @@ async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('o
       <div class="dchips">${['luck','gold','haste','giant','magnet','charm','coffee'].map(k=>`<label class="og-pot"><input type="checkbox" data-ogp="${k}" ${['luck','gold','haste','charm'].includes(k)?'checked':''}> ${POT[k].n}</label>`).join('')}</div>
       <label class="og-pot"><input type="checkbox" id="ogPlaque" checked> “Thanks for Your Patience” cabin plaque (one of a kind)</label><input id="ogMsg" class="lg-in" maxlength="120" placeholder="Note (optional)" value="Sorry the game wouldn’t load. Thanks for sticking with Lantern Lake!">
       <button class="jig" id="ogGo">Send gift</button><p class="own-note" id="ogMsgOut" role="status"></p></div>
+      <h3 class="own-h">Restore a player’s save</h3><p class="own-note">Find a player to see their cloud save and earlier saves. Make a restore code and send it to them privately: they enter it under Your game → Get your game from another device. Codes work once and last 2 hours.</p>
+      <div class="xf-row"><input id="ownSvName" class="lg-in" placeholder="Angler name" maxlength="16" style="flex:1;min-width:0"><button class="ghost" id="ownSvGo">Find saves</button></div><div id="ownSvOut"></div>
       <h3 class="own-h">Reset a login PIN</h3><p class="own-note">For a player who lost every device and forgot their PIN. Make sure it's really them first. They can then set a new PIN after moving their game with a transfer code.</p>
       <div class="xf-row"><input id="ownPinName" class="lg-in" placeholder="Angler name" maxlength="16" style="flex:1;min-width:0"><button class="ghost" id="ownPinGo">Reset PIN</button></div><p class="own-note" id="ownPinMsg"></p>
       <h3 class="own-h">Discord posts</h3><p class="own-note">Paste a webhook link for each channel (in Discord: Edit Channel → Integrations → Webhooks → New Webhook → Copy Webhook URL). Leave one blank to turn it off. Links are kept on your server and never shown in full again.</p>
@@ -10090,6 +10236,12 @@ async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('o
     ownDcLoad();ownMoveLoad();ownSupLoad();
     $('ownPinGo').onclick=async()=>{const n=$('ownPinName').value.trim();if(!n)return;$('ownPinGo').disabled=true;try{const r=await api('owner/pinreset',{id:m.id,key:m.key,name:n});$('ownPinMsg').textContent=r.found?`${n}'s PIN is cleared. They can set a new one in Settings.`:`No angler named ${n}.`}catch(e){$('ownPinMsg').textContent='Couldn’t reset it.'}$('ownPinGo').disabled=false};
     ownReports();
+    $('ownSvGo').onclick=async()=>{const n=$('ownSvName').value.trim(),out=$('ownSvOut');if(!n)return;out.innerHTML='<p class="own-note">Loading…</p>';
+      try{const r=await api('owner/saves',{id:m.id,key:m.key,name:n});if(!r.found){out.innerHTML=`<p class="own-note">No angler named ${esc(n)}.</p>`;return}
+        const row=(x,hid,lbl)=>`<li><div><b>${lbl}: day ${x.day} · $${money(x.coins)}</b><small>${x.fish!=null?`${(+x.fish).toLocaleString()} fish · ${x.sp|0} species · `:''}played ${ago(x.ts)} on ${esc(x.kind||'a device')}</small></div><button class="ghost" data-osv="${hid}">Make restore code</button></li>`;
+        out.innerHTML=`<ol class="xf-hist">${r.cur?row(r.cur,'cur','Now'):''}${r.list.map(x=>row(x,x.id,'Earlier')).join('')||''}</ol>${!r.cur&&!r.list.length?'<p class="own-note">No cloud saves for this player.</p>':''}<p class="own-note" id="ownSvCode" role="status"></p>`;
+        out.querySelectorAll('[data-osv]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const c=await api('owner/restorecode',{id:m.id,key:m.key,pid:r.pid,hid:b.dataset.osv});$('ownSvCode').innerHTML=`Restore code for ${esc(r.name)}: <b class="own-code">${esc(c.code)}</b> · works once, until ${new Date(c.exp).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}. Send it privately.`}catch(e){$('ownSvCode').textContent='Couldn’t make a code. Try again.'}b.disabled=false})}
+      catch(e){out.innerHTML='<p class="own-note">Couldn’t load saves. Try again.</p>'}};
     $('ogGo').onclick=async()=>{const n=$('ogName').value.trim(),out=$('ogMsgOut');if(!n){out.textContent='Type an angler name first.';return}const bt=$('ogGo');
       if(bt.dataset.arm!==n){bt.dataset.arm=n;bt.textContent=`Tap again to send to ${n}`;return}bt.dataset.arm='';bt.disabled=true;
       try{const r=await api('owner/gift',{id:m.id,key:m.key,name:n,coins:+$('ogCoins').value||0,hrs:+$('ogHrs').value||0,cc:+$('ogCc').value||0,pots:[...document.querySelectorAll('[data-ogp]:checked')].map(x=>x.dataset.ogp),plaque:$('ogPlaque').checked,msg:$('ogMsg').value.trim()});
@@ -10099,13 +10251,53 @@ async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('o
   catch(e){b.innerHTML=`<p class="fr-err">${e.message==='not-owner'?'Owner tools are only for the site owner.':'Couldn’t load owner tools.'}</p>`}}
 
 
-function hwLogSection(p){const any=EVFISH.some(f=>S.log[f.id]);if(!hwOn()&&!any)return;const ph=phaseOf(S.min);
+// ==HARVEST BASKET== everyone gives fish from their cooler to fill one basket for the whole lake. Each quarter filled pays every helper.
+const HVB_T=[[.25,'$25,000','Cash for every helper'],[.5,'3 Golden Scale Elixirs','Fish you catch while it lasts are worth double'],[.75,'The Cornucopia','A festival-only yard piece, delivered by drone'],[1,'$100,000 and a trophy','The Harvest Basket 2026 trophy for your case']];
+const HVB_MIN=10;
+const hvPts=f=>({C:1,U:2,R:4,L:10,M:25}[f.r]||1)*(f.ev===HV_ID?2:1);
+function hvGiveDecor(id){if(owned(id)||S.boxes.some(b=>b.id===id))return;const used=new Set(S.boxes.map(b=>b.spot));let spot=0;while(used.has(spot))spot++;const box={id,spot};S.boxes.push(box);if(!indoor())AMB.drones.push({id,box,t:0})}
+function hvReward(i){const ic=svgI('leaf','#e8823a');
+  if(i===0){S.coins+=25000;celebrate({lbl:'Harvest Basket: a quarter full!',r:'R',name:'+$25,000',sub:'Thanks for helping fill the basket',icon:ic})}
+  else if(i===1){givePotion('gold',3);storeDirty=true;celebrate({lbl:'Harvest Basket: half full!',r:'R',name:'3 Golden Scale Elixirs',sub:'Fish you catch while one lasts are worth double',icon:ic})}
+  else if(i===2){hvGiveDecor('cornucopia');celebrate({lbl:'Harvest Basket: three-quarters full!',r:'L',name:'The Cornucopia',sub:'A drone is bringing it to your yard',icon:ic})}
+  else{S.coins+=100000;S.trophies.unshift({name:'Harvest Basket 2026',water:'pond',type:'bag',score:'Filled it together',day:S.day});celebrate({lbl:'The Harvest Basket is full!',r:'L',name:'+$100,000 and a trophy',sub:'The whole lake did it together',icon:ic})}
+  save()}
+function hvClaim(){const B=MPV.hvb,h=HV();if(!B||!B.goal||(h.pts||0)<HVB_MIN)return;h.tiers=h.tiers||{};let any=false;
+  HVB_T.forEach(([fr],i)=>{if(B.total>=Math.ceil(B.goal*fr)&&!h.tiers[i]){h.tiers[i]=1;any=true;hvReward(i)}});if(any){try{renderAll()}catch(e){}}}
+function hvbGive(k,n){const c=S.cooler[k],f=FI(k),m=mpS();if(!c||!f||!m.id||!hvOn())return;n=Math.min(n,c.n);if(n<=0)return;
+  const per=c.val/c.n;c.n-=n;c.val=Math.max(0,c.val-per*n);if(c.n<=0)delete S.cooler[k];const p=n*hvPts(f),h=HV();h.pts=(h.pts||0)+p;m.hvb=(m.hvb||0)+p;
+  if(MPV.hvb){MPV.hvb.total+=p;MPV.hvb.mine=(MPV.hvb.mine||0)+p}coolDirty=true;renderCooler();sfx('coin');showToast(`Gave ${n.toLocaleString()} ${f.n} to the Harvest Basket`,`+${p.toLocaleString()} point${p>1?'s':''}`);save();hvClaim();renderHV()}
+function hvbGiveAll(){const ids=coolerIds().filter(k=>!S.locked[k]);if(!ids.length)return;let p=0,n=0;const m=mpS();if(!m.id||!hvOn())return;
+  for(const k of ids){const c=S.cooler[k],f=FI(k);p+=c.n*hvPts(f);n+=c.n;delete S.cooler[k]}const h=HV();h.pts=(h.pts||0)+p;m.hvb=(m.hvb||0)+p;if(MPV.hvb){MPV.hvb.total+=p;MPV.hvb.mine=(MPV.hvb.mine||0)+p}
+  coolDirty=true;renderCooler();sfx('coin');showToast(`Gave ${n.toLocaleString()} fish to the Harvest Basket`,`+${p.toLocaleString()} points`);save();hvClaim();renderHV()}
+function renderHV(){const b=$('hvBody');if(!b)return;const h=HV(),m=mpS(),B=MPV.hvb,on=hvOn();h.tiers=h.tiers||{};
+  let html=`<div class="hv-hero"><span>${svgI('leaf','#fff1d0')}</span><div><b>Harvest Festival</b><small>${on?`${hvDaysLeft()} day${hvDaysLeft()===1?'':'s'} left · ends November 30`:'The festival is over. Thanks for playing!'}</small></div></div>`;
+  const tot=B?B.total:0,goal=B&&B.goal?B.goal:0,pc=goal?Math.min(100,tot/goal*100):0;
+  html+=`<div class="hw-card"><b>The Harvest Basket</b><p>Everyone on the lake fills one basket together. Give fish from your cooler: commons are 1 point, uncommons 2, rares 4, legendaries 10, mythics 25, and festival fish count double. Give at least ${HVB_MIN} points to share in every reward the lake reaches.</p>`+
+    (!m.id?`<p class="fr-muted">Pick an angler name in the Friends app to join in.</p>`:!B?`<p class="fr-muted">Loading the basket…</p>`:
+    `<div class="hw-bar"><i style="width:${pc.toFixed(1)}%"></i>${HVB_T.slice(0,3).map(([fr])=>`<span class="hvb-mk" style="left:${fr*100}%"></span>`).join('')}</div><p><b>${tot.toLocaleString()}</b> of ${goal.toLocaleString()} points · ${(B.n||0).toLocaleString()} angler${B.n===1?'':'s'} helping · you’ve given ${(h.pts||0).toLocaleString()}${(h.pts||0)<HVB_MIN?` (give ${HVB_MIN-(h.pts||0)} more to share the rewards)`:''}</p>`)+
+    `<ul class="hw-rw">${HVB_T.map(([fr,t,d],i)=>{const hit=goal&&tot>=Math.ceil(goal*fr);return `<li class="${hit?'got':''}"><span>${hit?'✓':Math.round(fr*100)+'%'}</span><div><b>${t}</b><small>${d}${h.tiers[i]?' · yours':hit&&(h.pts||0)<HVB_MIN?' · give a little to claim it':''}</small></div></li>`}).join('')}</ul></div>`;
+  if(on&&m.id){const ids=coolerIds().filter(k=>!S.locked[k]).sort((a,b)=>hvPts(FI(b))-hvPts(FI(a)));let allN=0,allP=0;for(const k of ids){allN+=S.cooler[k].n;allP+=S.cooler[k].n*hvPts(FI(k))}
+    html+=`<div class="hw-card"><b>Give fish</b>${ids.length?`<p>Fish you give leave your cooler and don’t sell. Locked fish stay put.</p><button class="hv-btn hv-main" id="hvAll">Give all ${allN.toLocaleString()} fish · ${allP.toLocaleString()} points</button><ul class="hv-give">${ids.slice(0,30).map(k=>{const c=S.cooler[k],f=FI(k);return `<li>${fishSvg(f.col||RCOL[f.r])}<div><b class="rar-${f.r}">${f.n}</b><small>×${c.n.toLocaleString()} · ${hvPts(f)} pt${hvPts(f)>1?'s':''} each</small></div><button data-hvg="${k}" data-n="1">Give 1</button><button data-hvg="${k}" data-n="${c.n}">All ${c.n.toLocaleString()}</button></li>`}).join('')}</ul>`:'<p>Your cooler is empty. Go catch something!</p>'}</div>`}
+  if(B&&B.top&&B.top.length)html+=`<div class="hw-card"><b>Top helpers</b><ol class="hw-board">${B.top.map((x,i)=>`<li class="${x.me?'me':''}"><span>${i+1}</span><b>${esc(x.name)}</b><em>${(+x.w).toLocaleString()} pts</em></li>`).join('')}</ol></div>`;
+  html+=`<div class="hw-card"><b>Festival fish</b><p>${on?'Only biting until November 30.':'Gone until next fall.'}</p><ul class="hw-fish">${EVFISH.filter(f=>f.ev===HV_ID).map(f=>{const w=(h.fish&&h.fish[f.id])||(S.log[f.id]&&S.log[f.id].big);return `<li>${fishSvg(f.col)}<div><b class="rar-${f.r}">${w?f.n:'???'}</b><small>${W(f.at).n} · ${f.t.map(x=>PH[x]).join(', ')}${w?` · best ${(+w).toFixed(2)} lb`:''}</small></div></li>`}).join('')}</ul></div>`;
+  html+=`<div class="hw-card"><b>Costume</b><div class="hw-cos">${[['','None'],['flannel','Flannel & knit hat']].map(([k,n])=>`<button data-hvw="${k}" aria-pressed="${(hwWear()||'')===k}" ${k&&!h.flannel?'disabled':''}>${n}</button>`).join('')}</div></div>`;
+  b.innerHTML=html;
+  b.querySelectorAll('[data-hvg]').forEach(x=>x.onclick=()=>hvbGive(x.dataset.hvg,+x.dataset.n));const ga=$('hvAll');if(ga)ga.onclick=()=>{if(!ga.dataset.arm){ga.dataset.arm=1;ga.textContent='Tap again to give them all';return}hvbGiveAll()};
+  b.querySelectorAll('[data-hvw]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.hvw||null;sfx('click');save();renderHV()})}
+function hwLogSection(p){const any=EVFISH.filter(f=>f.ev===HW_ID).some(f=>S.log[f.id]);if(!hwOn()&&!any)return;const ph=phaseOf(S.min);
   const h=document.createElement('div');h.className='sec-h hw-sec';h.innerHTML=`<h3>🎃 Halloween 2026</h3><small>${hwOn()?`Limited time · ${hwDaysLeft()} day${hwDaysLeft()===1?'':'s'} left`:'Event over'}</small>`;p.append(h);
   const g=document.createElement('div');g.className='grid';
-  for(const f of EVFISH){const L=S.log[f.id];if(!hwOn()&&!L)continue;const c=document.createElement('div');c.className='card fish'+(L?'':' unk');
+  for(const f of EVFISH.filter(f=>f.ev===HW_ID)){const L=S.log[f.id];if(!hwOn()&&!L)continue;const c=document.createElement('div');c.className='card fish'+(L?'':' unk');
     c.innerHTML=`${fishSvg(f.col)}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]} · ${W(f.at).n}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+`<div class="chips">${f.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div>${musLine(f)}${L?`<div class="fbtns"><button class="mini facts" data-facts="${f.id}">Fish facts</button></div>`:''}</div>`;g.append(c)}
   p.append(g)}
-document.querySelectorAll('#app-hw [data-home]').forEach(b=>b.onclick=()=>phShow('home'));
+function hvLogSection(p){const any=EVFISH.filter(f=>f.ev===HV_ID).some(f=>S.log[f.id]);if(!hvOn()&&!any)return;const ph=phaseOf(S.min);
+  const h=document.createElement('div');h.className='sec-h hw-sec hv-sec';h.innerHTML=`<h3>🍂 Harvest Festival 2026</h3><small>${hvOn()?`Limited time · ${hvDaysLeft()} day${hvDaysLeft()===1?'':'s'} left`:'Event over'}</small>`;p.append(h);
+  const g=document.createElement('div');g.className='grid';
+  for(const f of EVFISH.filter(f=>f.ev===HV_ID)){const L=S.log[f.id];if(!hvOn()&&!L)continue;const c=document.createElement('div');c.className='card fish'+(L?'':' unk');
+    c.innerHTML=`${fishSvg(f.col)}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]} · ${W(f.at).n}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+`<div class="chips">${f.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div>${musLine(f)}${L?`<div class="fbtns"><button class="mini facts" data-facts="${f.id}">Fish facts</button></div>`:''}</div>`;g.append(c)}
+  p.append(g)}
+document.querySelectorAll('#app-hw [data-home],#app-hv [data-home]').forEach(b=>b.onclick=()=>phShow('home'));
 $('kpSig').onclick=keeperSignal;$('kpCv').onclick=keeperSignal;$('kpClose').onclick=keeperClose;$('kpOk').onclick=()=>{KP.on=false;$('keeperModal').hidden=true;renderCase&&!$('slotsModal').hidden&&phView==='case'&&renderCase()};
 $('gbSend').onclick=sendGuestbook;$('gbCancel').onclick=()=>$('gbModal').hidden=true;$('gbModal').onclick=e=>{if(e.target.id==='gbModal')$('gbModal').hidden=true};
 $('bugSend').onclick=sendBug;$('bugCancel').onclick=()=>$('bugModal').hidden=true;$('bugModal').onclick=e=>{if(e.target.id==='bugModal')$('bugModal').hidden=true};
@@ -10397,7 +10589,7 @@ function tick(now){if(SESS.paused)return;
     $('scene').classList.toggle('in',indoor()||!!VISIT);$('leaveBar').hidden=!(S.sleep&&S.sleep.ph==='awake')||!!VISIT||CED.on;renderVisitBar();if(S.sleep&&S.sleep.ph==='awake')$('leaveTxt').textContent=ROOM==='basement'?'Down in the basement. Tap the stairs to go up.':S.sleep.visit?(S.shack===0?'In your tent. Craft or rest, then head back out.':'At home. Craft, decorate, then head back out.'):'Up and rested. Decorate, or head back out?';$('decoBtn').hidden=(ROOM==='basement')||S.shack===0;$('arrBtn').hidden=(ROOM==='basement')||S.shack===0;$('yardBtn').hidden=ROOM==='basement';renderYNav();if(gearDirty){gearDirty=false;refreshGear()}{const fr=S.sleep&&S.sleep.at==='friend',lb=TOWN.on?(TOWN.z?['In town',TROOMS[TOWN.z].n]:['In town',TOWN.peers.size?`Harbor · ${TOWN.peers.size+1} here`:'Lantern Harbor']):TRV.on?['On the move',TRV.to==='friend'?placeName('friend'):TRV.to==='pond'&&TRV.label?'Home':placeName(TRV.to)]:VISIT?['Visiting',VISIT.name+'’s home']:fr?['At',placeName('friend')]:S.sleep?['At home',ROOM==='basement'?'Basement':indoor()?GEAR.shack.items[S.shack].n:'Dock Pond']:['Fishing',W(S.water).n],k=lb.join('|');if($('waterName').dataset.k!==k){$('waterName').dataset.k=k;$('locLbl').textContent=lb[0];$('waterName').textContent=lb[1]}}
     $('hint').hidden=yardStill();$('hint').textContent=VISIT?'Hover the shelves, trophies and tank':indoor()?(ROOM==='basement'?'Tap the fish sticks, fridge, aquarium, smokehouse or light switch':(S.shack===0?'Tap the bed or crafting table':'Tap the TV, tank, drawers, bed or crafting table')):S.sleep?$('stamTxt').textContent:'Tap the water to jig';
     $('castLabel').textContent=TRV.on?'On the move…':S.sleep?dockFishing()?(cast.el/cast.dur>.85?'Something’s biting…':'Fishing off the dock'):(S.sleep.at?(VT&&VT.arcade?'At the arcade…':VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
-    refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();mnTick();
+    refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();mnTick();hvTick();
     if(!$('slotsModal').hidden){if(!spinning)updateSlots();if(phView==='lock')renderLock()}else{$('phClock').textContent=fmtClock(S.min).replace(/ [AP]M/,'');$('phBat').style.width=Math.max(4,S.stamina)+'%'}
     ensureBounties();checkStreak();qStart();renderGuide();renderGoals();houseTick();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
     {const bc=mpBadge()+TX.unread+(newsUnread()?1:0)+readyBounties()+(S.streak.claimed?0:1)+(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step?1:0)+(S.q2&&S.q2.step>0&&S.q2.step<7&&S.q2.seen!==S.q2.step?1:0)+(S.q3&&S.q3.step>0&&S.q3.step<7&&S.q3.seen!==S.q3.step?1:0);$('phoneBadge').hidden=!bc;$('phoneBadge').textContent=bc}

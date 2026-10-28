@@ -53,6 +53,9 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - Supporter kit: the Mythic Lantern Keeper set is granted once, hung in the cabin, and can't be mailed
 - Lantern Harbor town: two anglers see each other on the street and inside shops, Marge’s Counter sales, a round of darts, a Lake 7 song request, a Post Office parcel, the wishing fountain, the daily paper, trivia night, Leave returns home
 - New menus: Map is the first tab with the lake map, Catch shows Cooler/Logbook/Collection, quick Sell, Hide phone, and the phone-size bottom bar opens and closes its sheet
+- Harvest Festival: the season switch, the flannel gift, fall scenery at every water and the Harvest decor in the Shop
+- Harvest Basket: the festival fish bite, giving fish from the cooler, the lake-wide total on the server and the tier rewards
+- Save safety: a much smaller game can't replace a cloud save without confirming, earlier saves are kept and can be restored, and the owner can make a restore code
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

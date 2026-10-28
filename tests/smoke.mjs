@@ -338,6 +338,41 @@ await check('menus: Map/Gear/Catch/Stuff, phone sheet, lake map travel, quick se
   ok(await q.evaluate(()=>document.body.classList.contains('sheet-on')&&!document.getElementById('pane-gear').hidden),'gear sheet');await q.click('#mnav [data-mt="gear"]');ok(await q.evaluate(()=>!document.body.classList.contains('sheet-on')),'tap again closes');
   await q.evaluate(()=>openTab('cooler'));ok(await q.evaluate(()=>document.body.classList.contains('sheet-on')),'openTab opens the sheet');await q.click('#shClose');ok(!q.errs.length,q.errs.join('; '));await q.context().close()});
 
+await check('Harvest Festival: season switch, flannel gift, fall scene, harvest decor in the Shop',async()=>{const c=await b.newContext({viewport:VPS[0][1]});await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({}));
+  const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(URL0.replace('season=off','season=hv'));await p.waitForTimeout(900);
+  ok(await p.evaluate(()=>document.getElementById('titleScreen').classList.contains('harvest')&&!document.getElementById('titleScreen').classList.contains('spooky')),'harvest title');await p.click('#tGo');await p.waitForTimeout(1200);
+  ok(await p.evaluate(()=>hvOn()&&!hwOn()&&S.hv.flannel===1&&hwWear()==='flannel'),'flannel gift');
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);SCN.cur={id:'geese',lay:'sky',dur:18,t:5,loc:S.water,data:{dir:1,y:60}};for(const w of ['pond','river','deep','bay','lake']){S.water=w;renderAll()}});await p.waitForTimeout(500);
+  await p.evaluate(()=>{openPhone();phShow('shop')});await p.click('#shopBody .chips2 button:has-text("Harvest")');ok(await p.evaluate(()=>document.getElementById('shopBody').textContent.includes('Corn Stalk Bundles')),'harvest shop');
+  await p.evaluate(()=>orderItem(DECOR.find(x=>x.id==='cornstalks')));ok(await p.evaluate(()=>S.boxes.some(b=>b.id==='cornstalks')),'order harvest decor');ok(!errs.length,errs.join('; '));await c.close()});
+
+await check('Harvest Basket: festival fish, giving fish, lake-wide total, tier rewards',async()=>{const c=await b.newContext({viewport:VPS[1][1]});
+  const cx=await b.newContext(),p0=await cx.newPage();await p0.goto(URL0);const A=await p0.evaluate(async()=>api('hello',{name:'Hv'+Math.floor(Math.random()*1e5)}));
+  const r1=await p0.evaluate(async A=>api('sync',{id:A.id,key:A.key,stats:{},hvq:1,hvb:30}),A);ok(r1.hvb&&r1.hvb.mine===30&&r1.hvb.total>=30&&r1.hvb.goal>=10000,'server basket '+JSON.stringify(r1.hvb));await cx.close();
+  await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({mp:{id:A.id,key:A.key,name:A.name},cooler:{bluegill:{n:5,val:40},walleye:{n:4,val:600}}}));
+  const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(URL0.replace('season=off','season=hv'));await p.waitForTimeout(800);await p.click('#tGo');await p.waitForTimeout(1500);
+  await p.evaluate(()=>document.querySelectorAll('.away').forEach(m=>m.hidden=true));
+  ok(await p.evaluate(()=>{let n=0;for(let i=0;i<4000;i++){const e=hwFishRoll('deep',23*60,null);if(e&&e.f.id==='mooncarp')n++}return n>0}),'Harvest Moon Carp never bites');
+  await p.evaluate(()=>{openPhone();phShow('hv')});await p.waitForTimeout(300);ok(await p.isVisible('#hvBody [data-hvg="bluegill"]'),'give list');
+  await p.click('#hvBody [data-hvg="bluegill"][data-n="1"]');ok(await p.evaluate(()=>S.cooler.bluegill.n===4&&HV().pts===1&&mpS().hvb===1),'give one');
+  await p.click('#hvAll');await p.click('#hvAll');ok(await p.evaluate(()=>!Object.keys(S.cooler).some(k=>S.cooler[k].n>0)&&HV().pts>=10),'give all');
+  await p.evaluate(()=>mpSync(true));await p.waitForTimeout(800);ok(await p.evaluate(()=>!mpS().hvb&&MPV.hvb&&MPV.hvb.mine>=40),'sent to the lake '+await p.evaluate(()=>JSON.stringify([mpS().hvb,MPV.hvb])));
+  const c0=await p.evaluate(()=>S.coins);await p.evaluate(()=>{MPV.hvb={goal:100,total:60,n:1,mine:40,top:[]};hvClaim()});ok(await p.evaluate(c0=>S.coins===c0+25000&&(S.pots.gold|0)>=3&&HV().tiers[0]&&HV().tiers[1]&&!HV().tiers[2],c0),'tier rewards');
+  await p.evaluate(()=>{MPV.hvb.total=100;hvClaim()});ok(await p.evaluate(()=>S.boxes.some(b=>b.id==='cornucopia')&&S.trophies.some(t=>t.name==='Harvest Basket 2026')),'top tiers');ok(!errs.length,errs.join('; '));await c.close()});
+
+await check('save safety: downgrade guard, save history, restore, owner restore code',async()=>{const c=await b.newContext();const p=await c.newPage();await p.goto(URL0);
+  const r=await p.evaluate(async()=>{const call=async(path,body)=>{const x=await fetch('/api/'+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});return {s:x.status,j:await x.json()}};
+    const A=(await call('hello',{name:'Sv'+Math.floor(Math.random()*1e5)})).j,big='BIG'.repeat(20),small='SMALL'.repeat(10),o={id:A.id,key:A.key};
+    const p1=await call('cloud/put',{...o,data:big,dev:'devA',kind:'computer',day:200,coins:5e5,fish:15000,sp:60,base:0});
+    const p2=await call('cloud/put',{...o,data:small,dev:'devB',kind:'phone',day:12,coins:900,fish:400,sp:9,base:p1.j.up});
+    const g1=await call('cloud/get',{...o});
+    const p3=await call('cloud/put',{...o,data:small,dev:'devB',kind:'phone',day:12,coins:900,fish:400,sp:9,base:p1.j.up,force:1});
+    const h=await call('cloud/hist',{...o});const hg=h.j.list[0]?await call('cloud/histget',{...o,hid:h.j.list[0].id}):null;
+    const own=(await call('hello',{name:'sycorange'})).j;let oc=null;if(own&&own.id){const sv=await call('owner/saves',{id:own.id,key:own.key,name:A.name});const rc=sv.j.found?await call('owner/restorecode',{id:own.id,key:own.key,pid:sv.j.pid,hid:sv.j.list[0].id}):null;const xg=rc&&rc.j.code?await call('xfer/get',{code:rc.j.code}):null;oc={n:sv.j.list.length,data:xg&&xg.j.data}}
+    return {p2:p2.s,p2e:p2.j.error,g1:g1.j.data===big,p3:p3.s,hist:h.j.list.length,hg:hg&&hg.j.data===big,oc,big}});
+  ok(r.p2===409&&r.p2e==='downgrade','downgrade not refused '+r.p2);ok(r.g1,'cloud save changed');ok(r.p3===200,'force failed');ok(r.hist>=1&&r.hg,'history missing');
+  ok(!r.oc||(r.oc.n>=1&&r.oc.data===r.big),'owner restore code '+JSON.stringify(r.oc));await c.close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
