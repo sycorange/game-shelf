@@ -1380,6 +1380,108 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
 .newver{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);z-index:45;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:4px 10px;align-items:center;width:min(460px,calc(100% - 24px));box-sizing:border-box;padding:10px 12px;border-radius:14px;background:var(--panel);border:1px solid var(--buoy);box-shadow:0 12px 30px rgba(0,0,0,.45);color:var(--fg)}
 .newver .nv-ic{font-size:1.4rem}.newver b{display:block;font-size:.92rem}.newver small{color:var(--muted);font-size:.78rem}.newver button{padding:6px 12px}
 @media (max-width:700px){.newver{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 8px);grid-template-columns:auto minmax(0,1fr) auto}.newver #nvNo{grid-column:1/-1;justify-self:end;padding:2px 6px;font-size:.78rem}}
+
+/* ==MENU LAYOUT== action strip, NEXT line, Map/Gear/Catch/Stuff */
+.astrip{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.astrip .bar{flex:1 1 240px;min-width:200px}
+.astrip .vitals{display:flex;gap:16px;flex:0 0 auto}
+.astrip .vital{display:grid;grid-template-columns:36px minmax(0,auto) auto;align-items:center;gap:0 8px;background:none;border:0;padding:3px 4px;border-radius:10px}
+.astrip .vital .vh{display:flex;flex-direction:column;align-items:flex-start;gap:0;min-width:0;max-width:150px}
+.astrip .vital .vh .eyebrow{font-size:.64rem;line-height:1.2}
+.astrip .vital .vh b{font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.astrip .vital button{grid-column:auto;grid-row:auto}
+.astrip .vital.warn{background:rgba(255,208,90,.08)}
+.astrip .vital.crit{background:rgba(255,122,61,.14)}
+.vring{width:36px;height:36px;display:block}.vr-bg{fill:none;stroke:var(--bg);stroke-width:5}.vr-fg{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dasharray .3s}
+.astrip .tools{flex:1 1 100%;display:flex;flex-wrap:nowrap;align-items:center;gap:10px}
+.astrip .buffs{min-width:0}
+.sellq{white-space:nowrap;border-color:rgba(255,122,61,.7);color:var(--buoy);font-weight:800;margin-left:auto}
+.sellq:disabled{opacity:.55;color:var(--muted);border-color:var(--line)}
+.side .casino{display:flex;margin:0;padding:10px 14px;justify-content:space-between}
+.goals.nx{display:flex;align-items:center;gap:10px;padding:8px 12px;margin:0}
+.nx-k{font-weight:800;font-size:.72rem;color:var(--buoy);letter-spacing:.08em;text-transform:uppercase;flex:none}
+.nx-t{flex:1;min-width:0;text-align:left;background:none;border:0;color:var(--fg);padding:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;font:inherit}
+.nx-t:disabled{cursor:default}.nx-t small{color:var(--muted);font-size:.86rem;font-weight:400}
+.nx-t:not(:disabled):hover b{text-decoration:underline}
+.nx-n{background:none;border:0;color:var(--muted);font:inherit;font-size:.82rem;white-space:nowrap;cursor:pointer;padding:2px 4px}
+.goals.nx .gd-x{flex:none}
+.mnav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:-4px}
+.mn-tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);padding:4px;border-radius:12px}
+.mn-tabs button{position:relative;display:flex;align-items:center;gap:7px;border:0;background:none;color:var(--muted);font-weight:800;font-size:.95rem;padding:8px 16px;border-radius:9px;cursor:pointer}
+.mn-tabs button:hover{color:var(--fg)}
+.mn-tabs svg,.mn-hide svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mn-tabs button[aria-selected="true"]{background:var(--gold);color:#2a1a06}
+.mn-dot{width:8px;height:8px;border-radius:50%;background:var(--reed);display:inline-block}
+.mn-n{background:var(--buoy);color:var(--buoy-ink);border-radius:999px;font-size:.7rem;padding:0 6px;line-height:1.5}
+.mn-dot[hidden],.mn-n[hidden],.mn-badge[hidden]{display:none}
+.mn-hide{display:flex;align-items:center;gap:7px}
+.mn-hide[aria-pressed="true"] .mh-x{display:none}
+.mn-badge{background:#e8402e;color:#fff;border-radius:999px;font-size:.7rem;padding:0 6px;line-height:1.5}
+.mn-where{margin-left:auto;color:var(--muted);font-size:.86rem}.mn-where b{color:var(--gold)}
+.main .tabs #t-gear,.main .tabs #t-waters,.main .tabs #t-storage{display:none}
+body:not([data-mt="catch"]) .main .tabs{display:none}
+.sh-h{display:none}
+.pdock.hid:not(.open):not(.ping) .phone,.pdock.hid:not(.open):not(.ping) .phone:hover{--peek:0px;box-shadow:none}
+.photo-mode .mnav{display:none!important}
+.lmap{grid-column:1/-1;position:relative;width:100%;max-width:640px;aspect-ratio:520/300;border-radius:14px;overflow:hidden;border:1px solid var(--line);justify-self:center}
+.lmap>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.lm-t{position:absolute;left:50%;top:3%;transform:translateX(-50%);color:rgba(237,242,234,.75);font-family:var(--font-display);font-size:clamp(.7rem,2.6vw,1rem);letter-spacing:.12em;text-transform:uppercase;pointer-events:none;white-space:nowrap}
+.lm-pin{position:absolute;transform:translate(-50%,-50%);background:none;border:0;padding:6px;display:flex;align-items:center;gap:4px;cursor:pointer}
+.lm-pin i{width:14px;height:14px;border-radius:50%;border:2px solid #0f2026;background:var(--buoy);flex:none;box-sizing:border-box}
+.lm-pin span{position:absolute;left:calc(50% + 12px);top:50%;transform:translateY(-50%);background:rgba(15,32,38,.88);color:var(--fg);border-radius:6px;padding:1px 6px;font-weight:700;font-size:clamp(.62rem,2.3vw,.8rem);white-space:nowrap}
+.lm-pin span.below{left:auto;right:calc(50% - 22px);top:calc(50% + 12px);transform:none}
+.lm-pin.home i{background:var(--reed)}.lm-pin.town i{background:#c9a0f2}
+.lm-pin.here i{background:var(--gold);box-shadow:0 0 0 4px rgba(255,208,90,.4)}.lm-pin.here span{color:var(--gold)}
+.lm-pin.locked i{background:#5a6a70}.lm-pin.locked span{color:var(--muted)}
+.lm-pin:disabled{cursor:default}.lm-pin:not(:disabled):hover span{background:#0f2026;outline:1px solid var(--gold)}
+#pane-waters{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+#pane-waters .card.water:not(.realm):not(.arc-card){grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 10px}
+#pane-waters .card.water:not(.realm):not(.arc-card)>*{grid-column:1}
+#pane-waters .card.water:not(.realm):not(.arc-card)>.go{grid-column:2;grid-row:1/span 4;margin:0;white-space:nowrap}
+#pane-waters .card.water.active{outline:1px solid var(--gold)}
+@media (max-width:700px){
+  body{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+  .astrip{padding:9px 10px;gap:8px}
+  .astrip .bar{flex:1 1 100%}
+  .astrip .vitals{flex:1 1 100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .astrip .vital{grid-template-columns:32px minmax(0,1fr);gap:2px 6px;padding:2px;align-items:start}
+  .astrip .vital .vring{grid-row:1/3;align-self:center}
+  .astrip .vital button{grid-column:2;justify-self:start;width:auto}
+  .astrip .vring{width:32px;height:32px}
+  .astrip .vital .vh{max-width:none}
+  .astrip .vital button{padding:4px 8px;font-size:.74rem}
+  .astrip .tools{flex-wrap:wrap;gap:6px}
+  .astrip .hotbar{flex:1 1 100%;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+  .astrip .hotbar .hslot{width:auto}
+  .astrip .buffs{flex:1 1 auto}
+  .astrip .buffs:has(.none){display:none}
+  .sellq{flex:1 1 100%;margin:0}
+  .nx-t small{display:none}
+  .mnav{position:fixed;left:0;right:0;bottom:0;z-index:18;background:var(--panel);border-top:1px solid var(--line);padding:4px 178px calc(6px + env(safe-area-inset-bottom,0px)) 4px;margin:0;gap:0;flex-wrap:nowrap}
+  .mn-tabs{flex:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:none;border:0;padding:0;gap:0}
+  .mn-tabs button{flex-direction:column;justify-content:center;gap:2px;padding:6px 0;min-height:52px;font-size:.7rem;background:none!important;color:var(--muted)}
+  .mn-tabs button[aria-selected="true"]{color:var(--gold)}
+  .mn-tabs svg{width:22px;height:22px}
+  .mn-dot{position:absolute;top:6px;left:calc(50% + 8px)}
+  .mn-n{position:absolute;top:2px;left:calc(50% + 6px);font-size:.62rem}
+  .mn-hide,.mn-where{display:none}
+  .main{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom,0px));max-height:max(50vh,calc(100dvh - 400px));overflow:auto;overscroll-behavior:contain;z-index:17;background:var(--panel);border-top:1px solid var(--line);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.45);padding:0 10px 14px;display:block;transform:translateY(calc(100% + 90px));visibility:hidden;transition:transform .3s cubic-bezier(.2,.9,.25,1),visibility 0s .3s}
+  body.sheet-on .main{transform:none;visibility:visible;transition:transform .3s cubic-bezier(.2,.9,.25,1)}
+  .main>.box{border:0;padding:0;background:none}
+  .main .side{display:none}
+  body[data-mt="stuff"] .main .side{display:grid;margin-top:14px}
+  .sh-h{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;position:sticky;top:0;background:var(--panel);z-index:3;padding:14px 2px 8px;margin-bottom:4px}
+  .sh-h h2{margin:0;font-size:1.2rem}
+  .sh-grip{position:absolute;left:50%;top:5px;transform:translateX(-50%);width:44px;height:5px;border-radius:9px;background:var(--line)}
+  .sh-x{width:36px;height:36px;border-radius:50%;border:0;background:var(--panel-2);color:var(--muted);display:grid;place-items:center;cursor:pointer}
+  .sh-x svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .pdock,.pdock.pos-left,.pdock.pos-center{justify-content:flex-end;padding:0 4px;--scc:.48}
+  .pdock .phone{transform-origin:100% 0}
+  .pdock:not(.open) .phone{--peek:42px;transform:translateY(calc(100% - var(--peek))) scale(var(--scc))}
+  .pdock.ping:not(.open) .phone{--peek:120px}
+  .pdock:not(.open):not(.ping) .phone:hover{--peek:48px}
+  .pdock.hid:not(.open):not(.ping) .phone{--peek:42px;box-shadow:0 0 0 2px #34343e,0 0 0 5px #0d0d10,0 -6px 24px rgba(0,0,0,.45)}
+}
 </style>
 
 </head>
@@ -1429,31 +1531,43 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
   <div class="yedbar" id="yedBar" hidden></div>
   <section class="tour" id="tour" hidden></section>
 
-  <div class="bar">
-    <small id="castLabel">Line in the water</small>
-    <div class="track"><i id="castFill"></i></div>
-    <button class="jig" id="jigBtn">Jig</button>
+  <div class="astrip" id="astrip">
+    <div class="bar">
+      <small id="castLabel">Line in the water</small>
+      <div class="track"><i id="castFill"></i></div>
+      <button class="jig" id="jigBtn">Jig</button>
+    </div>
+    <div class="vitals">
+      <div class="vital" id="vHunger"><svg class="vring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14" class="vr-bg"/><circle cx="18" cy="18" r="14" class="vr-fg" id="hungerBar" pathLength="100" stroke-dasharray="100 100" transform="rotate(-90 18 18)"/></svg><div class="vh"><span class="eyebrow">Hunger</span><b id="hungerTxt">Full</b></div><button class="mini cook" id="eatBtn">Eat</button></div>
+      <div class="vital" id="vStam"><svg class="vring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14" class="vr-bg"/><circle cx="18" cy="18" r="14" class="vr-fg" id="stamBar" pathLength="100" stroke-dasharray="100 100" transform="rotate(-90 18 18)"/></svg><div class="vh"><span class="eyebrow">Stamina</span><b id="stamTxt">Rested</b></div><button class="mini" id="bedBtn">Return home</button></div>
+    </div>
+    <div class="tools">
+      <div class="hotbar" id="hotbar" aria-label="Potion hot bar"></div>
+      <div class="buffs" id="buffs"></div>
+      <button class="ghost sellq" id="sellQ" disabled>Nothing to sell</button>
+    </div>
   </div>
 
   <div class="pinbar" id="pinbar" hidden></div>
   <div class="guide" id="guide" hidden></div>
   <div class="goals" id="goals" hidden></div>
 
-  <div class="vitals">
-    <div class="vital" id="vHunger"><div class="vh"><span class="eyebrow">Hunger</span><b id="hungerTxt">Full</b></div><div class="meter"><i id="hungerBar"></i></div><button class="mini cook" id="eatBtn">Eat</button></div>
-    <div class="vital" id="vStam"><div class="vh"><span class="eyebrow">Stamina</span><b id="stamTxt">Rested</b></div><div class="meter"><i id="stamBar"></i></div><button class="mini" id="bedBtn">Return home</button></div>
-  </div>
-
   <div class="wxinfo" id="wxinfo"></div>
 
-  <div class="tools">
-    <div class="hotbar" id="hotbar" aria-label="Potion hot bar"></div>
-    <div class="buffs" id="buffs"></div>
-    <div class="casino"><span>Casino coins</span><b id="cc">0</b></div>
-  </div>
+  <nav class="mnav" id="mnav" aria-label="Main menu">
+    <div class="mn-tabs" role="tablist">
+      <button role="tab" data-mt="map" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span>Map</span></button>
+      <button role="tab" data-mt="gear" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20L16 8M16 8l2-5 3 3-5 2"/><circle cx="6" cy="18" r="1.5"/></svg><span>Gear</span><i class="mn-dot" id="mnGearDot" hidden></i></button>
+      <button role="tab" data-mt="catch" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-5 9-6 14-2l4-3v10l-4-3c-5 4-11 3-14-2z"/><circle cx="9" cy="11" r="1"/></svg><span>Catch</span><b class="mn-n" id="mnCatchN" hidden></b></button>
+      <button role="tab" data-mt="stuff" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l9-5 9 5v8l-9 5-9-5zM3 8l9 5 9-5M12 13v8"/></svg><span>Stuff</span></button>
+    </div>
+    <button class="ghost mn-hide" id="phHideBtn" aria-pressed="false" title="Tuck the phone away. Click again to bring it back."><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/><path class="mh-x" d="M3 3l18 18"/></svg><span id="phHideLbl">Hide phone</span><b class="mn-badge" id="phHideN" hidden></b></button>
+    <span class="mn-where" id="mnWhere"></span>
+  </nav>
 
-  <div class="main">
+  <div class="main" id="mainPanel">
     <section class="box">
+      <div class="sh-h"><span class="sh-grip" aria-hidden="true"></span><h2 id="shTitle">Gear</h2><button class="sh-x" id="shClose" aria-label="Close menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div>
       <div class="tabs" role="tablist">
         <button role="tab" id="t-gear" aria-selected="true" data-tab="gear">Gear</button>
         <button role="tab" id="t-cooler" aria-selected="false" data-tab="cooler">Cooler <small id="coolCount"></small></button>
@@ -1471,6 +1585,7 @@ body.ach-on .scene .toast{opacity:0;transition:opacity .2s}
     </section>
 
     <aside class="side">
+      <div class="box casino"><span>Casino coins</span><b id="cc">0</b></div>
       <div class="box">
         <span class="eyebrow">Trophy case</span>
         <div id="trophies"></div>
@@ -2897,7 +3012,7 @@ function renderCraft(){
   if(CRAFT_CAT==='ready'){head('Ready to craft','Everything you have the money and materials for right now.');
     if(!ready.length){const e=document.createElement('div');e.className='cempty';e.textContent='Nothing is ready yet. Keep fishing for materials, or pin a recipe from the Gear tab to track it.';pane.append(e);bindPins(pane);return}
     for(const r of ready)grid.append(r.g?gearCard(r.g):cosCard(r.z));pane.append(grid);bindPins(pane);return}
-  if(CRAFT_CAT==='gear'){head('Gear upgrades','Each upgrade costs money plus materials you pull up while fishing. Materials live in your Storage tab.');
+  if(CRAFT_CAT==='gear'){head('Gear upgrades','Each upgrade costs money plus materials you pull up while fishing. Materials live in your Stuff tab.');
     const left=GEAR_KEYS.filter(k=>GEAR[k].items[S[k]+1]);for(const k of left)grid.append(gearCard(k));if(left.length)pane.append(grid);
     done('Fully upgraded',GEAR_KEYS.filter(k=>!GEAR[k].items[S[k]+1]).map(k=>[GEAR[k].label,GEAR[k].items[S[k]].n]));bindPins(pane);return}
   if(CRAFT_CAT==='trade'){tuPane(pane,head);return}
@@ -3021,6 +3136,7 @@ function refreshBuy(){
 }
 function renderWaters(){
   const p=$('pane-waters');p.innerHTML='';const ph=phaseOf(S.min);
+  p.insertAdjacentHTML('afterbegin',lakeMapHTML());
   for(const w of WATERS){
     const ok=S.boat>=w.boat,act=S.water===w.id;
     const sp=FISH.filter(f=>f.at===w.id),got=sp.filter(f=>S.log[f.id]).length;
@@ -3747,10 +3863,10 @@ function phNotify(app,title,msg,extra){const st=SETS();if(app==='texts'?!st.nTex
   const peekPx=()=>parseFloat(getComputedStyle(ph).getPropertyValue('--peek'))||46;
   const grabbable=t=>!d.classList.contains('open')||t===ph||t.closest('.ph-status,.ph-notch,#phHome');
   ph.addEventListener('pointerdown',e=>{if(e.button>0||!grabbable(e.target))return;
-    PDK.drag={y:e.clientY,t:performance.now(),open:d.classList.contains('open'),h:ph.offsetHeight,peek:peekPx(),dy:0,moved:false,id:e.pointerId}});
+    PDK.drag={y:e.clientY,t:performance.now(),open:d.classList.contains('open'),h:ph.offsetHeight,peek:peekPx(),sc:parseFloat(getComputedStyle(d).getPropertyValue('--scc'))||1,dy:0,moved:false,id:e.pointerId}});
   addEventListener('pointermove',e=>{const s=PDK.drag;if(!s||e.pointerId!==s.id)return;s.dy=e.clientY-s.y;
     if(!s.moved&&Math.abs(s.dy)>6){s.moved=true;try{ph.setPointerCapture(e.pointerId)}catch(_){}ph.style.transition='none'}
-    if(s.moved){const lo=-12,hi=s.h-s.peek,y=Math.max(lo,Math.min(hi,(s.open?lo:hi)+s.dy));ph.style.transform=`translateY(${y}px)`;e.preventDefault()}},{passive:false});
+    if(s.moved){const lo=-12,hi=s.h-s.peek,y=Math.max(lo,Math.min(hi,(s.open?lo:hi)+s.dy));ph.style.transform=`translateY(${y}px)`+(s.sc<1?` scale(${(s.sc+(1-s.sc)*(hi-y)/Math.max(1,hi-lo)).toFixed(3)})`:'');e.preventDefault()}},{passive:false});
   const end=e=>{const s=PDK.drag;if(!s||e.pointerId!==s.id)return;PDK.drag=null;ph.style.transition='';ph.style.transform='';
     if(!s.moved){if(!s.open&&e.type==='pointerup')openPhone();return}
     PDK.justDragged=performance.now();const v=s.dy/Math.max(1,performance.now()-s.t);
@@ -4729,12 +4845,12 @@ function renderHelp(){
    ['Logbook sets',`<p>Catch every species in a water to claim a set reward and a Master trophy from the Logbook: $5,000 for Dock Pond up to $500,000 for Misty Bay.</p>`],
    ['Cabin TV',`<p>Tap the TV in your cabin and use CH ▲▼ to flip channels. Channel 3 is Lake 7 (forecast and tournaments). Channel 4 is LLNN with news from around the lake. Channel 5 is Fish or Fake?, a daily quiz show: is each fish real or made up for Lantern Lake? It pays 5 prize tickets per right answer. Channel 6 is LLBA Tonight, with live scores, last night’s results and standings. Channel 8 is the Lake Shopping Channel, with one deal a day and the occasional TV-exclusive boat paint.</p>`],
    ['Fishdle',`<p>A daily puzzle in the Fishdle phone app: guess today’s mystery fish in 6 tries. Each guess shows whether its water, rarity, max size, bite times and weather match today’s fish (green), are close (yellow) or don’t (grey), with arrows pointing higher or lower. Everyone gets the same fish each day. Solving it pays 60 prize tickets for a first-try guess, down to 10 for a sixth. Tap Copy result to share your squares.</p>`],
-   ['Lantern Pier Arcade',`<p>Visit the arcade from the Waters tab or when you leave your cabin. Play Bobber Toss, Whack-a-Gar and Pinball to win prize tickets (up to 600 a day), try the Claw Machine (30 tickets) for plushies, and take your 3 daily tries at Putt of the Day, the same hole for everyone. Spend tickets at the Prize Counter on crates, plushies, a neon sign and arcade-only boat paints. Tickets never cost cash and prices never change. Weekly high-score boards crown a champion for each cabinet with a trophy.</p>`],
+   ['Lantern Pier Arcade',`<p>Visit the arcade from the Map tab or when you leave your cabin. Play Bobber Toss, Whack-a-Gar and Pinball to win prize tickets (up to 600 a day), try the Claw Machine (30 tickets) for plushies, and take your 3 daily tries at Putt of the Day, the same hole for everyone. Spend tickets at the Prize Counter on crates, plushies, a neon sign and arcade-only boat paints. Tickets never cost cash and prices never change. Weekly high-score boards crown a champion for each cabinet with a trophy.</p>`],
    ['The 3:33 Broadcast',`<p>A fifth case opens after you close The Angler Who Isn’t There. Your cabin TV turns itself on between 3 and 5 AM in game time. Be home and awake to record what it says, one broadcast a night. Then catch the fish it names in the right water at the right time of day, play the unlabeled tape it leaves you, pull up three radio parts at night and build a shortwave receiver. To finish, tune in at 3 AM: drag the dial to keep the needle on the drifting signal until it locks, three times.</p>`],
    ['The Angler Who Isn’t There',`<p>A fourth case opens after you close the Keeper’s Light. Someone on Reed Lake is wearing your face. Follow the leads (a text from your own number, a figure on the far water at dusk, lies in your own records, mirror shards at night) and craft a Silvered Lantern. The finale is Mirror Match on a clear night at Reed Lake: your reflection flashes a row of arrows and you press the opposite of each one in order (◀ becomes ▶, ▲ stays ▲). Tap the buttons or use the arrow keys. Win five rounds before three mistakes. The lies are only on your screen: your real stats, plaques and what friends see never change.</p>`],
    ['The Keeper’s Light',`<p>A third case opens after you close the Emerald Wake. Its finale is a storm rescue: when the lighthouse beam crosses the lost rowboat, tap Signal (or press Space). Three good signals bring the keeper home.</p>`],
    ['Lake monster, challenges and guestbooks',`<p>Open the <b>Together</b> tab in the Friends app. Every week a lake monster appears and every pound anyone lands hits it; beat it together for a $20,000 bounty each. Challenge a friend from their contact card: biggest fish of one kind in 24 hours, winner takes both stakes. When you visit a friend you can sign their guestbook and like their yard; the most-liked yard each week wins $25,000.</p>`],
-   ['Portals: the Moon, the Underworld and the Cloud Sea',`<p>Once you have one of the biggest boats, you can build portal gates from the <b>Beyond the Lake</b> section of the Waters tab. Each gate needs rare materials, and each realm drops the materials for the next gate. A glowing portal ring then floats beside your dock: tap it, or use the Waters tab, to step through.</p><p><b>Sea of Tranquility</b> (Lunar Gate): low gravity means huge fish, but you only have a few minutes of air. A Big Air Tank doubles it and a Moon Base makes it unlimited. <b>The Ember Lake</b> (Hellmouth Gate): fish come up already cooked and feed you a little, but the heat melts 1 in 5 lines until you craft a Hellforged Line, and it tires you faster. <b>The Cloud Sea</b> (Skyward Gate): peaceful and restful. Updrafts lift whole schools: tap one to scoop up three fish at once, and a Sky Kite brings them twice as often.</p><p>Raids, live friends, tournaments and other events stay on Lantern Lake. If you close the game while in a realm, you’ll be back on the lake next time.</p>`],
+   ['Portals: the Moon, the Underworld and the Cloud Sea',`<p>Once you have one of the biggest boats, you can build portal gates from the <b>Beyond the Lake</b> section of the Map tab. Each gate needs rare materials, and each realm drops the materials for the next gate. A glowing portal ring then floats beside your dock: tap it, or use the Map tab, to step through.</p><p><b>Sea of Tranquility</b> (Lunar Gate): low gravity means huge fish, but you only have a few minutes of air. A Big Air Tank doubles it and a Moon Base makes it unlimited. <b>The Ember Lake</b> (Hellmouth Gate): fish come up already cooked and feed you a little, but the heat melts 1 in 5 lines until you craft a Hellforged Line, and it tires you faster. <b>The Cloud Sea</b> (Skyward Gate): peaceful and restful. Updrafts lift whole schools: tap one to scoop up three fish at once, and a Sky Kite brings them twice as often.</p><p>Raids, live friends, tournaments and other events stay on Lantern Lake. If you close the game while in a realm, you’ll be back on the lake next time.</p>`],
    ['Stamina and rods',`<p>Rare and Legendary catches cost stamina, and the cost now shrinks as your rod and boat get faster, so a full bar lasts about the same on every rod. The top rods carry perks: the Heirloom Bamboo Rod makes big catches 25% cheaper, the Starlight Rod gives you 10 stamina back for every Legendary, the Abyssal Rod makes jigging free, and the Lantern Legend Rod halves the cost of big catches. Need a boost without heading home? Buy a <b>Thermos of Coffee</b> in the Shop app under Supplies: it restores 30 stamina and sits on your potion bar.</p>`],
    ['Live lake',`<p>When friends are fishing the same water as you, their boats appear on your lake in real time with name tags. You’ll see them cast, reel in fish and celebrate big catches as they happen. Tap 💬 to send a quick emote, and tap a friend’s boat to open their card. Now and then, when two or more of you share a water, a raid monster surfaces: every fish anyone lands hits it, and if you beat it within 3 minutes everyone who helped shares the bounty. Turn it off in Settings under Live lake.</p>`],
    ['Phone layout and text size',`<p>On phones the lake view is taller and follows the action. Settings has a Text size option, and the title screen shows a Continue card with your progress.</p>`]]],
@@ -4745,7 +4861,7 @@ function renderHelp(){
    ['Saving and switching devices',`<p>Your progress saves automatically on this device. To play somewhere else, tap <b>Move your game</b> on the title screen (or in Settings), then <b>Get a transfer code</b>. On your other device, open Lantern Lake, tap Move your game and enter the 6-letter code. Codes work once and last 30 minutes.</p><p>If you’ve picked an angler name in the Friends app, <b>cloud sync</b> keeps your latest game on your Lantern Lake website. After you move your game once, opening the game on either device offers to pick up where you left off. You can turn this off in Settings.</p><p>No internet? Open “Use a save code instead” to copy a long code and paste it on the other device.</p>`],
   ]],
   ['Money and survival',[
-   ['Cooler and selling',`<p>Fish go into the Cooler tab instead of selling automatically. Coins only arrive when you sell. Use <b>Sell all</b>, sell one species at a time, or use the rarity buttons to sell only one rarity. Tap <b>Lock</b> on a fish to keep it out of Sell all.</p><p>Your shack raises the price of every fish, and the Golden Scale Elixir doubles it for a minute.</p>`],
+   ['Cooler and selling',`<p>Fish go into the Catch tab instead of selling automatically. Coins only arrive when you sell. Use <b>Sell all</b>, sell one species at a time, or use the rarity buttons to sell only one rarity. Tap <b>Lock</b> on a fish to keep it out of Sell all.</p><p>Your shack raises the price of every fish, and the Golden Scale Elixir doubles it for a minute.</p>`],
    ['Cooking',`<p>Cook a fish from the Cooler to fill your hunger. On the grill, tap <b>Take it off</b> while the marker is in the gold zone. Take it off too early and you get as little as 3 hunger, rising toward the full amount as the marker nears the gold zone. A perfect grill adds a 3 point bonus. A burnt fish only gives 3, whatever its size. Bigger and rarer fish fill you up more. Each fish cooks at a slightly different speed, so watch the marker.</p>`],
    ['Hunger and stamina',`<p>Hunger empties over about half an hour of play. Below 25 you're hungry and casts are slower. At 0 you're starving: much slower casts, and more fish get away.</p><p>Stamina drains at a random rate, faster when you jig, land big fish or fish in storms. At 0 you're exhausted: slow casts, more misses and no jigging. Tap <b>Return home</b>, then tap your bed to sleep until your stamina is full. Being away from the game for 20+ minutes also counts as sleeping.</p>`],
    ['Junk, salvage and casino coins',`<p>Junk you pull up goes to the <b>Storage</b> tab. In Storage, tap <b>Salvage</b> on any piece of junk (one at a time or the whole stack), or <b>Salvage all</b>, to turn it into Casino Coins. Rarer junk is worth more coins. Casino Coins are spent in the Slots app.</p><p>Your shack decides how much junk fits: 25 at the start, up to 800 with the biggest shack. When storage is full, new junk is tossed back, so salvage often.</p>`],
@@ -4759,7 +4875,7 @@ function renderHelp(){
    ['Crafting gear and decor',`<p>Gear and cabin decor are crafted at the crafting table in your cabin from money plus materials. About 1 cast in 11 pulls up a material, and they go to Storage. Common ones turn up anywhere; rarer ones only at certain waters, and Moonstone only at night.</p><p>The crafting table has categories down the side: <b>Ready now</b> lists everything you can afford, then Gear, Beds, Rugs, Lamps, Wall decor and Extras. The Gear tab shows what each next upgrade needs, exactly what it improves, and where to find missing materials. Tap <b>Pin to screen</b> to keep a goal tracker under the cast bar. An orange ! over the crafting table means something is ready to build.</p>`],
   ]],
   ['Home',[
-   ['Going home and sleeping',`<p>Tap <b>Return home</b> under the stamina bar. Your boat takes you back to the dock and you walk inside. Tap your bed to sleep until your stamina is full: a few game hours if you're a little tired, about 8 from empty.</p><p>Tap <b>Head out</b> (or the front door) to leave. Your boat takes you back to where you were fishing, or to a new spot if you picked one in the Waters tab while you were home. You can't go home during a tournament.</p>`],
+   ['Going home and sleeping',`<p>Tap <b>Return home</b> under the stamina bar. Your boat takes you back to the dock and you walk inside. Tap your bed to sleep until your stamina is full: a few game hours if you're a little tired, about 8 from empty.</p><p>Tap <b>Head out</b> (or the front door) to leave. Your boat takes you back to where you were fishing, or to a new spot if you picked one in the Map tab while you were home. You can't go home during a tournament.</p>`],
    ['Your cabin',`<p>The light switch by the front door turns the cabin lights on and off. They also go off when you sleep or head out, and come on when you wake up or come home.</p><p>Tap things in the cabin to use them: the crafting table, the TV, the record tank, the trophy shelves, the collection cabinet, the drawers under the TV and the front door.</p><ul><li><b>Left drawer</b>: your trophies. Choose which 8 go on the shelves.</li><li><b>Middle drawer</b>: your VHS tapes.</li><li><b>Right drawer</b>: your collectibles. Choose which 16 go in the wall cabinet.</li></ul><p>The stairs on the right lead down to the finished basement: heat up fish sticks in the microwave (+10 hunger), grab a cold one from the fridge, admire your Legendary fish in the big aquarium, flip the lights at the bottom of the stairs, and play Big Catch pinball in the corner. Recycled cans get picked up once the bin has six.</p>`],
    ['Big Catch pinball',`<p>Play Big Catch at the Lantern Pier Arcade. Hold the big buttons (or <b>Z</b> / <b>←</b> and <b>/</b> / <b>→</b>) to flip, and pull the plunger down and let go (or hold and release <b>Space</b>) to launch. Bobber bumpers score 100, the three fish targets score 250 each with a 1,000 bonus for all three, and lighting F·I·S·H at the top raises your multiplier. Watch out for the swimming fish, the bait bucket (+1,500) and the drain lanes on each side. A ball save protects the first 5 seconds of each ball, and the current rises every 15,000 points. You get 3 balls, and your best score is saved. <b>P</b> pauses.</p><p><b>Daily challenge</b>: on your Lantern Lake website, every finished game posts your score to today's board. The day ends at midnight Eastern, and the top score wins 1,000 Casino Coins and 2 potions, delivered to your Friends mailbox.</p>`],
    ['Decorating',`<p>Tap <b>Decorate</b> in the bar at the top of the cabin, or tap the rug, curtains or lamp. Recolor the walls, floor, bedding, curtains, rug, furniture and tank. Each has 8 colors, and changing them is free. Beds, rugs, lamps, wall decor and extras you've crafted are placed and swapped here too. You have three wall spots.</p>`],
@@ -4770,7 +4886,7 @@ function renderHelp(){
    ['Replaying cases',`<p>The Casefile counts how many game days each case takes, from the first lead to case closed. Once you’ve solved a case, tap <b>Replay this case</b> to start it over and try for a faster time. Your best time stays as your record until you beat it. Replays pay out again but don’t award a second trophy.</p>`],
    ['The Emerald Wake',`<p>Close the Lake Beast case and a second mystery opens in the Casefile app. Switch between cases with the tabs at the top. Follow the leads (a ship’s bell, the captain’s logbook pages, an old broadcast on Lake 7) and craft a Spirit Lantern.</p><p>Then wait for the right night: Misty Bay, at night, in fog. The ghostly Emerald Wake drifts out of the fog and Captain Silas Marsh challenges you. You have 30 seconds to accept. It’s a 2-hour duel, biggest fish wins, and it’s a coin flip. Lose and he’ll be back on another foggy night.</p>`],
    ['Logbook and variants',`<p>The Logbook tracks every species, how many you've caught and your biggest. Filter to <b>Biting here now</b> to see what can bite at your current water, time and weather. The top shows completion bars and your stats. Your three heaviest fish ever swim in the record tank in your cabin.</p><p>Any fish can very rarely come up <b>Golden</b> (sells ×10), <b>Albino</b> (×4) or <b>Giant</b> (×2, and much heavier). Each species has three variant stamps to collect. Lucky Potions double your chances.</p>`],
-   ['Collectibles',`<p>Rarely you'll pull up a collectible instead of junk. Each water has its own set, from Uncommon to Mythic. See them all in the Collection tab, and choose which ones go in your cabin's display cabinet from the right drawer under the TV. Tap one for its story.</p><p>Two Mythic collectibles come from Deep Dive: land the Lake Beast there, and beat it at Depth 4 or deeper.</p>`],
+   ['Collectibles',`<p>Rarely you'll pull up a collectible instead of junk. Each water has its own set, from Uncommon to Mythic. See them all in the Catch tab under Collection, and choose which ones go in your cabin's display cabinet from the right drawer under the TV. Tap one for its story.</p><p>Two Mythic collectibles come from Deep Dive: land the Lake Beast there, and beat it at Depth 4 or deeper.</p>`],
    ['Tournaments and trophies',`<p>Tournaments run on a schedule. Check the cabin TV or the lock screen for what's coming. When one starts you get an invitation with an entry fee. Rival anglers fish the same water and weather as you, and only fish caught at that water while you're playing count.</p><p>1st wins the prize and a trophy (its metal and shape match the tournament), 2nd wins 35%, and 3rd gets the entry fee back. Choose which trophies go on your shelves from the left drawer under the TV.</p>`],
    ['FinDuel sportsbook',`<p>The FinDuel app follows the 30-team Lantern Lake Basketball Association (LLBA). Every team plays every game day, and three games a day go up on the board for betting. Bets close at 7:00 PM when the games tip off, and the games finish by 11:00 PM. Check back to watch live scores.</p><p>Bet up to $1,000 per game on who wins. The odds come from how good each team is, and payouts are capped at 5×. Winnings land automatically when the game ends.</p><p>The <b>Standings</b> tab shows every team by division. After 72 games a <b>Playoffs</b> tab shows the projected bracket, which locks after game 82. The top 8 in each conference make it: the first round is best of 5, then every round after is best of 7 until one team is crowned Lantern Lake champion. Yesterday's scores are also in the newspaper.</p><p>Everyone on Lantern Lake follows the same league, so Day 12 of a season has the same matchups and scores for every player, even if you each get there at different times. Your betting record and money won or lost show on your Friends contact card.</p>`],
    ['News and daily coupon',`<p>A new Lantern Ledger comes out each game day in the News app, with yesterday's big catches from around the lake (and your friends' catches on your Lantern Lake website). The first time you read each day's paper, a coupon worth $100 to $1,000 falls out.</p>`],
@@ -4802,8 +4918,43 @@ document.querySelectorAll('#bets button').forEach(b=>b.onclick=()=>{if(spinning)
 function renderAll(){renderWx();renderSnd();renderCooler();renderVitals();renderGear();renderDecor();renderWaters();renderLog();renderFeed();renderSetup();renderTrophies();renderTour();renderStorage();renderColl();renderHot();renderBuffs();pinSig='';renderPin();$('waterName').dataset.k=''}
 
 const TABS=['gear','cooler','waters','log','storage','coll'];
-function openTab(t){if(t==='cooler')renderCooler();document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===t));for(const k of TABS)$('pane-'+k).hidden=k!==t}
+// ==MENU NAV== Map, Gear, Catch and Stuff sit on top of the old tab panes. On phones the panel is a sheet that slides up over the bottom bar.
+const MT_OF={waters:'map',gear:'gear',cooler:'catch',log:'catch',coll:'catch',storage:'stuff'},MT_TAB={map:'waters',gear:'gear',catch:'cooler',stuff:'storage'},MT_N={map:'Map',gear:'Gear',catch:'Catch',stuff:'Stuff'};
+let curTab='waters',mtCatch='cooler';
+const sheetMode=()=>matchMedia('(max-width:700px)').matches;
+function mnSync(){const m=MT_OF[curTab]||'gear';if(m==='catch')mtCatch=curTab;document.body.dataset.mt=m;const on=!sheetMode()||document.body.classList.contains('sheet-on');
+  document.querySelectorAll('#mnav [data-mt]').forEach(b=>b.setAttribute('aria-selected',on&&b.dataset.mt===m));$('shTitle').textContent=MT_N[m]}
+function sheetSet(on){document.body.classList.toggle('sheet-on',!!on);if(on)$('mainPanel').scrollTop=0;mnSync()}
+function openTab(t,quiet){curTab=t;if(t==='cooler')renderCooler();document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x.dataset.tab===t));for(const k of TABS)$('pane-'+k).hidden=k!==t;
+  if(!quiet&&sheetMode()&&!document.body.classList.contains('sheet-on'))sheetSet(true);else mnSync()}
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>openTab(b.dataset.tab));
+document.querySelectorAll('#mnav [data-mt]').forEach(b=>b.onclick=()=>{const m=b.dataset.mt;sfx('click');
+  if(sheetMode()&&document.body.classList.contains('sheet-on')&&document.body.dataset.mt===m){sheetSet(false);return}openTab(m==='catch'?mtCatch:MT_TAB[m])});
+$('shClose').onclick=()=>sheetSet(false);
+addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('sheet-on')&&sheetMode()&&document.querySelector('.away:not([hidden])')==null)sheetSet(false)});
+$('pane-waters').addEventListener('click',e=>{if(sheetMode()&&e.target.closest('.go:not(:disabled),.lm-pin:not(:disabled)'))setTimeout(()=>sheetSet(false),0)});
+matchMedia('(max-width:700px)').addEventListener('change',()=>{document.body.classList.remove('sheet-on');mnSync()});
+openTab('waters',true);
+function applyPhHide(){const on=!!SETS().phHide;$('phoneDock').classList.toggle('hid',on);$('phHideBtn').setAttribute('aria-pressed',on);$('phHideLbl').textContent=on?'Show phone':'Hide phone';$('phHideBtn').title=on?'Bring the phone back':'Tuck the phone away. Click again to bring it back.'}
+$('phHideBtn').onclick=()=>{SETS().phHide=!SETS().phHide;sfx('click');applyPhHide();save()};
+$('sellQ').onclick=()=>{const f=coolF;coolF='all';try{sellAll()}finally{coolF=f}if(f!=='all')renderCooler()};
+function mnTick(){let n=0,sn=0,sv=0;for(const k of coolerIds()){const c=S.cooler[k];n+=c.n;if(!S.locked[k]){sn+=c.n;sv+=c.val}}
+  const q=$('sellQ'),l=sn?`Sell ${sn.toLocaleString()} · $${money(Math.round(sv))}`:'Nothing to sell';if(q.textContent!==l)q.textContent=l;q.disabled=!sn;
+  const cn=$('mnCatchN'),ct=n>999?'999+':String(n);cn.hidden=!n;if(cn.textContent!==ct)cn.textContent=ct;
+  let gd=false;try{gd=!!gearNext()}catch(e){}$('mnGearDot').hidden=!gd;
+  const w=`${esc($('locLbl').textContent)} <b>${esc($('waterName').textContent)}</b>`;const mw=$('mnWhere');if(mw.dataset.v!==w){mw.dataset.v=w;mw.innerHTML=w}
+  const ws=[S.water,TOWN.on,TRV.on,!!VT,S.boat].join();if(mnTick.ws!==ws){if(mnTick.ws!==undefined)renderWaters();mnTick.ws=ws}
+  const pb=$('phoneBadge'),hn=$('phHideN');hn.hidden=pb.hidden||!SETS().phHide;if(hn.textContent!==pb.textContent)hn.textContent=pb.textContent}
+// The lake map at the top of the Map tab. Pins sit in a 520 by 300 picture.
+const LMAP={pond:[92,238],lake:[190,108],river:[410,60],deep:[292,176],bay:[78,44]};
+const LMAP_SVG=`<svg viewBox="0 0 520 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="520" height="300" fill="#4a7a4c"/><path d="M455 0 C445 30 420 45 400 70 C385 90 370 95 355 100" fill="none" stroke="#3f86a0" stroke-width="16" stroke-linecap="round"/><path d="M60 60 C90 30 150 25 190 45 C230 30 300 40 345 70 C400 95 430 140 420 190 C410 240 350 270 280 268 C240 285 190 285 150 262 C110 262 70 250 55 215 C35 185 50 150 75 130 C55 110 45 85 60 60 Z" fill="#3f86a0"/><path d="M60 60 C40 40 30 20 55 10 C85 0 110 15 120 35" fill="#4f8ea6"/><ellipse cx="72" cy="30" rx="40" ry="18" fill="#dfe8ec" opacity=".45"/><ellipse cx="95" cy="44" rx="34" ry="12" fill="#dfe8ec" opacity=".35"/><ellipse cx="290" cy="175" rx="85" ry="55" fill="#23577a"/><ellipse cx="295" cy="178" rx="45" ry="28" fill="#1b4566"/><path d="M75 205 C55 215 45 245 70 262 C95 275 125 262 120 240" fill="#4f9ab0"/><g stroke="#7aa65a" stroke-width="2.4" stroke-linecap="round"><path d="M170 95v-14M176 97v-18M182 95v-12M190 99v-16M198 96v-12M206 100v-15M214 97v-11M164 104v-12M222 103v-13"/></g><g fill="#b0703a"><circle cx="176" cy="80" r="2"/><circle cx="190" cy="83" r="2"/><circle cx="206" cy="85" r="2"/></g><rect x="44" y="270" width="26" height="18" fill="#c8b48a"/><path d="M40 271 L57 258 L74 271 Z" fill="#7a3a2a"/><rect x="70" y="262" width="22" height="4" fill="#8a6a42"/><path d="M418 150 C440 140 470 150 490 175 C505 200 500 235 470 250 C450 258 428 245 424 225 Z" fill="#5c8c58"/><rect x="430" y="198" width="66" height="5" rx="2" fill="#a89878"/><rect x="404" y="206" width="30" height="4" fill="#8a6a42"/><rect x="406" y="210" width="2" height="6" fill="#6a4a2a"/><rect x="428" y="210" width="2" height="6" fill="#6a4a2a"/><rect x="440" y="184" width="12" height="14" fill="#3a6a8a"/><path d="M438 184 L446 175.6 L454 184 Z" fill="#1e3a52"/><rect x="456" y="182" width="12" height="16" fill="#a8463a"/><path d="M454 182 L462 172.4 L470 182 Z" fill="#5a2018"/><rect x="472" y="184" width="12" height="14" fill="#e6dccb"/><path d="M470 184 L478 175.6 L486 184 Z" fill="#8a8070"/><rect x="446" y="166" width="12" height="12" fill="#4a2a7a"/><path d="M444 166 L452 158.8 L460 166 Z" fill="#2a1640"/><rect x="462" y="165" width="12" height="13" fill="#2e6a3a"/><path d="M460 165 L468 157.2 L476 165 Z" fill="#1a3a20"/><rect x="400" y="190" width="5" height="16" fill="#f0ece2"/><rect x="400" y="195" width="5" height="3" fill="#c8281a"/><rect x="399" y="186" width="7" height="4" fill="#2a2a30"/><circle cx="402.5" cy="185" r="2.6" fill="#ffd05a"/><path d="M500 8 l-6 14 h12 Z" fill="#2f5a34"/><path d="M480 250 l-8 18 h16 Z" fill="#2f5a34"/><path d="M492 262 l-7 16 h14 Z" fill="#2f5a34"/><path d="M20 120 l-7 16 h14 Z" fill="#2f5a34"/></svg>`;
+function lakeMapHTML(){const pin=(x,y,k,lbl,cls,dis,tip,lb)=>`<button class="lm-pin ${cls}" data-lm="${k}" style="left:${(x/5.2).toFixed(2)}%;top:${(y/3).toFixed(2)}%"${dis?' disabled':''} title="${esc(tip)}" aria-label="${esc(lbl+'. '+tip)}"><i></i><span${lb?` class="${lb}"`:''}>${esc(lbl)}</span></button>`;
+  let h='';for(const w of WATERS){const [x,y]=LMAP[w.id],ok=S.boat>=w.boat,act=S.water===w.id&&!TOWN.on;
+    h+=pin(x,y,w.id,w.n,act?'here':!ok?'locked':w.id==='pond'?'home':'',act||!ok||TRV.on,act?'You’re fishing here':ok?'Head out':`Needs ${GEAR.boat.items[w.boat].n}`)}
+  h+=pin(470,212,'town','Lantern Harbor','town'+(TOWN.on?' here':''),TOWN.on||TRV.on||!!VT||isRealm(S.water),TOWN.on?'You’re in town':'Visit the town','below');
+  return `<div class="lmap">${LMAP_SVG}<b class="lm-t" aria-hidden="true">Lantern Lake</b>${h}</div>`}
+$('pane-waters').addEventListener('click',e=>{const b=e.target.closest('.lm-pin');if(!b||b.disabled)return;const k=b.dataset.lm;
+  if(k==='town')openTown();else travelTo(k);if(!sheetMode())$('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){$('updModal').hidden=true;$('cardModal').hidden=true;closePhone();$('itemModal').hidden=true;$('decoModal').hidden=true;$('gamesModal').hidden=true;$('troModal').hidden=true;$('collModal').hidden=true;$('hotModal').hidden=true;$('loginModal').hidden=true;$('lpinModal').hidden=true;$('tripModal').hidden=true;$('saveModal').hidden=true;$('gbModal').hidden=true;$('bugModal').hidden=true;$('ownModal').hidden=true;if(!$('tvModal').hidden)closeTV()}
   if(/^[1-5]$/.test(e.key)&&!e.target.closest('input,textarea')){const k=S.hot[+e.key-1];if(k)usePotion(k)}
@@ -6021,6 +6172,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:128,n:'New menus',items:['The menus under the lake have a new layout. Everything you use while fishing sits in one strip: the cast bar, Jig, hunger and stamina rings, your potion hot bar and a quick Sell button.','Four menus replace the old row of tabs: Map, Gear, Catch and Stuff. Map is first, since traveling is what you do most.','The new Map tab shows the whole lake. Tap a spot on the map to head there, or tap Lantern Harbor to visit town.','Catch holds your Cooler, Logbook and Collection. Stuff holds your Storage, trophies and setup.','Next goals now fit on one line. Tap the goal to go do it, or tap “1 of 3” to see the next one.','On phones the menus sit in a bar at the bottom of the screen and slide up when you tap them. The phone tucks into the corner of the bar and grows to full size when you pull it up.','On computers there’s a new Hide phone button next to the menus. It tucks the phone all the way off the screen, and new messages still show a red badge on the button.']},
+ {v:127,n:'Pet bed fix',items:['Bug fix: your pet now naps on top of its pet bed instead of underneath it.']},
  {v:126,n:'Yard games and showing off',items:['Two more yard games. Horseshoe Pit: four throws, tap when the meter’s in the green, and a ringer scores 3. Putting Green: three holes with walls and slopes, where you drag back from the ball to putt. Both keep your best, and your first three good rounds each day pay.','Koi Pond (Homestead tab): stock it with goldfish, koi or the rare Butterfly Koi, up to eight. Feed them once a day and after three feedings they’re prize size and sell for far more than you paid. They swim around, and they crowd in when you feed them.','A new Show-off & seasonal tab. The Trophy Statue shows your biggest catch cast in bronze, with its weight on the plaque, and visitors see yours. The Fish Weathervane swings with the wind and spins in a gale.','Leaf piles for autumn (sold September to November): tap one to jump in. Snowmen for winter (December to February): tap to roll him up ball by ball and finish him with a hat, scarf and carrot nose. The ones you own stay all year.']},
  {v:125,n:'Hangouts',items:['A new Hangouts tab in Decorate yard: places to spend time, best with Open House guests.','Fire Pit & Benches: tap it to sit on a bench, then tap the fire to roast a marshmallow. Pull it out when it’s golden, not on fire. Your first five perfect ones each day pay out, and every one fills you up a little.','Gazebo & Telescope: after dark, sweep the telescope across the sky and hold a constellation in the middle to log it. There are eight to find, and finding them all earns the Stargazer trophy. Tap shooting stars as they streak by.','Treehouse: climb up to the lookout and wave from the window. Once a day you’ll spot a school of fish, which gives you a 10-minute treasure boost.','Movie Screen: shows a short film on a loop after dark for everyone in your yard. Tap it to change the film.']},
  {v:124,n:'Homestead',items:['A new Homestead tab in Decorate yard, with four things that make something while you’re away. Place one, then tap it in your yard.','Greenhouse: grows what the garden plot can’t. Glowberries glow at night, moonflowers open after dark, and sunfruit sells for a lot. It also grows Glow Worms and Fat Grubs, live bait you use from your pantry for 10 minutes of Luck or Big Fish.','Beehive: fills with jars of honey, and fills faster with flowers, a garden or a greenhouse nearby. You can watch the bees fly out to the flowers.','Chicken Coop: three chickens wander your yard, peck around and lay eggs. Tap one to shoo it. Visitors see them too.','Drying Rack: hang up to five of one kind of fish from your cooler. In two hours they turn into jerky worth almost twice as much.','Honey, eggs and greenhouse crops go into your pantry in Storage to eat or sell. Their prices grow with your income.']},
@@ -6603,7 +6756,10 @@ function petBoat(ax,ay,deck,d,T){const P=curPet();if(!P)return;const ex=CATCH.on
 // Cabin: naps by the rug, or pads around while you're up.
 function petCabin(T){const P=VISIT?petParse(VISIT.S.petv):curPet();if(!P)return;const cb=VISIT?VISIT.S.cab:CAB(),bed=Array.isArray(cb.fp)&&cb.fp.find(a=>a[0]==='petbed'&&cb.own.petbed),awake=S.sleep&&S.sleep.ph==='awake',onBed=bed&&(!awake||Math.sin(T*.07)>.3);
   const x=onBed?bed[1]:awake?560+Math.sin(T*.15)*120:610,y=onBed?bed[2]-8:424,face=onBed?1:awake?(Math.cos(T*.15)>0?1:-1):1,pose=onBed?'nap':awake?(Math.abs(Math.cos(T*.15))>.25?'walk':'sit'):'nap';
-  petDraw(ctx,P,x,y,face,pose,T,2.6,1);petHearts(ctx,x,y-38,2.6);if(!VISIT&&petGiftReady())petBubble(ctx,x+14,y-30,2.6);RH(x-30,y-46,60,48,'pet',P.name)}
+  const draw=()=>{petDraw(ctx,P,x,y,face,pose,T,2.6,1);petHearts(ctx,x,y-38,2.6);if(!VISIT&&petGiftReady())petBubble(ctx,x+14,y-30,2.6);RH(x-30,y-46,60,48,'pet',P.name)};
+  // a bed in the front row is drawn after the pet, so the pet waits and lies down on top of it
+  if(onBed&&bed[2]>=396){PET_ON_BED=draw;return}draw()}
+let PET_ON_BED=null;
 function petTap(){const P=curPet();if(!P)return;PET_RT.heart=performance.now();petVoice(P.k);const ps=petsS(),day=todayKey();
   const g=petGift();if(g){sfx('chime','R');setTimeout(()=>showToast(`${P.name} brought you ${g}!`,'A gift'),ps.day!==day?1400:0);save()}
   if(ps.day!==day){ps.day=day;const before=S.stamina;S.stamina=Math.min(100,S.stamina+10);renderVitals();showToast(`You pet ${P.name} ♥`,before<100?'+10 stamina (once a day)':'Good pet!');save()}}
@@ -7437,8 +7593,8 @@ function vitalsTick(dt){
 }
 function renderVitals(){
   const col=v=>v>50?'var(--reed)':v>25?'var(--gold)':'var(--buoy)';
-  $('hungerBar').style.width=S.hunger+'%';$('hungerBar').style.background=col(S.hunger);
-  $('stamBar').style.width=S.stamina+'%';$('stamBar').style.background=col(S.stamina);
+  const ring=(id,v)=>{const e=$(id);e.setAttribute('stroke-dasharray',`${Math.max(0,Math.min(100,v)).toFixed(1)} 100`);e.style.stroke=col(v)};ring('hungerBar',S.hunger);ring('stamBar',S.stamina);
+  $('vHunger').title='Hunger: '+$('hungerTxt').textContent;$('vStam').title='Stamina: '+$('stamTxt').textContent;
   const h=vitalLvl(S.hunger,25),st=vitalLvl(S.stamina,20);
   $('hungerTxt').textContent=S.hunger>=75?'Full':S.hunger>=25?'Peckish':S.hunger>0?'Hungry · casts 10% slower':'Starving · casts 40% slower';
   $('stamTxt').textContent=S.sleep?({boatIn:'Rowing in…',run:S.sleep&&S.sleep.at?'Walking up…':'Heading home…',door:'Visiting',inside:'Visiting',yard:'In the yard',pick:'On the boat',enter:S.sleep&&S.sleep.bed?'Off to bed…':'Heading inside…',sleep:'Sleeping…',wake:'Waking up…',awake:S.sleep.visit?'At home':'Rested · at home',exit:'Heading out…',walkOut:'Heading out…',boatOut:'Rowing out…'}[S.sleep.ph]||'Resting'):S.stamina>=60?'Rested':S.stamina>=20?'Tiring':S.stamina>0?'Tired · casts 10% slower':'Exhausted · slow casts, more misses';
@@ -7846,7 +8002,7 @@ function drawFreeItem(id,d,T){const F=CC('furn'),B=CC('bed'),dark=d<.4;
     ctx.fillStyle='#5a9a4a';for(let k=0;k<6;k++){const a=-Math.PI/2+(k-2.5)*.55+Math.sin(T*.7+k)*.04;ctx.save();ctx.translate(0,-70);ctx.rotate(a+Math.PI/2);ctx.beginPath();ctx.ellipse(0,-14,5,16,0,0,7);ctx.fill();ctx.restore()}}}
 function drawFreeLayer(d,T,front){const cb=VISIT?VISIT.S.cab:CAB(),R=RD(cb);if(!Array.isArray(R.fp))return;const own=k=>cb.own[k];
   const L=R.fp.map((a,i)=>[a,i]).filter(([a])=>(a[2]>=396)===front&&own(a[0])).sort((p,q)=>p[0][2]-q[0][2]);
-  for(const [a,i] of L){const [id,x,y,f]=a,[w,h]=FREE_SZ[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);try{drawFreeItem(id,d,T)}finally{ctx.restore()}
+  for(const [a,i] of L){const [id,x,y,f]=a,[w,h]=FREE_SZ[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);try{drawFreeItem(id,d,T)}finally{ctx.restore()}if(id==='petbed'&&PET_ON_BED){const pd=PET_ON_BED;PET_ON_BED=null;pd()}
     {const ut=upgOf(id,cb);if(ut)decoFx(ut,x-w/2,y-h,w,h,T,d)}
     if(CED.on&&!VISIT){const s=CED.sel&&CED.sel.k==='f'&&CED.sel.i===i;ctx.save();ctx.setLineDash(s?[6,4]:[4,5]);ctx.lineWidth=s?2.4:1.2;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.6)';ctx.strokeRect(x-w/2-3,y-h-3,w+6,h+6);ctx.restore()}
     else RH(x-w/2,y-h,w,h,'deco','free')}}
@@ -8098,7 +8254,7 @@ function drawCabin(d,T,top,bot){
   if(pose&&lying)drawPerson(pose.x,pose.y,pose.rot,pose.face,pose.walk,T,2.9);
   drawBlanket(st,lying,T,ph);
   RH(110,st==='canopy'?124:240,236,152,'deco','bed');
-  petCabin(T);drawFreeLayer(d,T,true);
+  PET_ON_BED=null;petCabin(T);drawFreeLayer(d,T,true);if(PET_ON_BED){const pd=PET_ON_BED;PET_ON_BED=null;pd()}
   if(pose&&!lying)drawPerson(pose.x,pose.y,pose.rot,pose.face,pose.walk,T,2.9);
   if(cb.ex.lights&&cb.own.lights)drawStringLights(T,!lightsOff);
   // lighting
@@ -8593,12 +8749,12 @@ function genDaily(){
   const mk={
     species:()=>{const w=pick(open),f=pick(FISH.filter(x=>x.at===w.id&&(x.r==='C'||x.r==='U')&&!x.wx&&x.t[0])),n=f.r==='U'?3:6;return {k:'species',id:f.id,need:n,txt:`Catch ${n} ${f.n}`,hint:`${w.n} · bites at ${f.t.map(p=>PH[p].toLowerCase()).join(', ')}`}},
     water:()=>{const w=pick(open);return {k:'water',id:w.id,need:30,txt:`Catch 30 fish at ${w.n}`}},
-    perfect:()=>({k:'perfect',need:2,txt:'Grill 2 fish perfectly',hint:'Cook from the Cooler tab'}),
-    salvage:()=>({k:'salvage',need:15,txt:'Salvage 15 pieces of junk',hint:'Storage tab'}),
+    perfect:()=>({k:'perfect',need:2,txt:'Grill 2 fish perfectly',hint:'Cook from the Catch tab'}),
+    salvage:()=>({k:'salvage',need:15,txt:'Salvage 15 pieces of junk',hint:'Stuff tab'}),
     night:()=>({k:'night',need:20,txt:'Catch 20 fish at night'}),
     rare:()=>({k:'rare',need:1,txt:'Catch a Rare or Legendary fish'}),
     big:()=>{const c=FISH.filter(x=>x.at===best.id&&(x.r==='C'||x.r==='U')&&!x.wx),lb=Math.max(2,Math.round(c.reduce((a,f)=>a+f.w[1],0)/c.length*.35));return {k:'big',need:1,min:lb,txt:`Land a fish over ${lb} lb`,hint:`Try ${best.n}`}},
-    sell:()=>{const v=Math.max(200,Math.round(estRate()*25/50)*50);return {k:'sell',need:v,money:true,txt:`Sell $${money(v)} worth of fish`,hint:'Cooler tab'}},
+    sell:()=>{const v=Math.max(200,Math.round(estRate()*25/50)*50);return {k:'sell',need:v,money:true,txt:`Sell $${money(v)} worth of fish`,hint:'Catch tab'}},
   };
   return Object.keys(mk).sort(()=>Math.random()-.5).slice(0,3).map(k=>({...mk[k](),have:0,done:false,claimed:false,rw:{coins:rwCoins(rnd(12,20)),cc:pick([0,15,25]),pot:Math.random()<.4?pick(PKEYS):null}}));
 }
@@ -9023,7 +9179,7 @@ function drawGhostShip(d,T){
 // ==FIRST DAY GUIDE== only for brand-new saves. Apps also unlock one at a time for them.
 const GUIDE=[
   {k:'fish',t:'Catch 3 fish',h:'Your line is already in. Tap the water or the Jig button to speed things up.',rw:{coins:100},done:()=>S.total>=3},
-  {k:'sold',t:'Sell your catch',h:'Open the Cooler tab below and tap Sell.',rw:{coins:150}},
+  {k:'sold',t:'Sell your catch',h:'Tap Sell above the menus, or open Catch and tap Sell all.',rw:{coins:150}},
   {k:'news',t:'Read the morning paper',h:'Swipe up on the phone at the bottom of the screen and open News.',rw:{coins:200}},
   {k:'cooked',t:'Grill a fish',h:'Tap Eat next to Hunger, pick a fish and pull it off the grill in the gold zone.',rw:{pot:1}},
   {k:'craft',t:'Upgrade your gear or yard',h:'Craft a rod or lure in the Gear tab, or order decor from the Shop app.',rw:{coins:300}},
@@ -9041,11 +9197,14 @@ const GOALS=[
   {id:'fruit',ok:()=>!!(S.mp&&S.mp.id)&&!Object.keys(S.picks||{}).length&&!FIDS.some(f=>f!==nativeOf()&&(S.pantry||{})[f]),t:'Pick a friend’s fruit',h:'Visit a friend or a random yard and tap a ripe tree.',go:()=>{MPV.tab='together';openPhone();phShow('friends')},b:'Yards'},
   {id:'water',ok:()=>{const w=WATERS.find(w=>w.boat===(S.boat|0)+1);return !!w&&S.total>=50},t:()=>`Reach ${WATERS.find(w=>w.boat===(S.boat|0)+1).n}`,h:'A bigger boat opens new water with new fish.',go:()=>openTab('waters'),b:'Waters'},
   {id:'log',ok:()=>{const n=FISH.filter(f=>!f.quest&&S.log[f.id]).length;return n<FISH.filter(f=>!f.quest).length&&S.total>=100},t:()=>`Fill your logbook (${FISH.filter(f=>!f.quest&&S.log[f.id]).length}/${FISH.filter(f=>!f.quest).length})`,h:'Some fish only bite at dawn, dusk or night.',go:()=>openTab('log'),b:'Logbook'}];
+let GLI=0;
 function renderGoals(){const el=$('goals');if(!el)return;if(guideOn()||SETS().goals===false||titleOn||S.total<3){el.hidden=true;return}
   let list=[];try{list=GOALS.filter(g=>g.ok()).slice(0,3)}catch(e){}if(!list.length){el.hidden=true;return}
-  const T=g=>typeof g.t==='function'?g.t():g.t,sig=list.map(g=>g.id+T(g)).join('|');if(el.dataset.sig===sig&&!el.hidden)return;el.dataset.sig=sig;el.hidden=false;
-  el.innerHTML=`<div class="gl-h"><b>Next goals</b><button class="gd-x" id="glHide" aria-label="Hide next goals">Hide</button></div>`+list.map((g,i)=>`<div class="gl-row"><span class="gl-dot">${i+1}</span><div class="gd-t"><b>${esc(T(g))}</b><small>${g.h}</small></div>${g.go?`<button class="ghost gl-go" data-gl="${g.id}">${g.b}</button>`:''}</div>`).join('');
+  if(GLI>=list.length)GLI=0;const g=list[GLI];
+  const T=g=>typeof g.t==='function'?g.t():g.t,sig=GLI+':'+list.map(g=>g.id+T(g)).join('|');if(el.dataset.sig===sig&&!el.hidden)return;el.dataset.sig=sig;el.hidden=false;el.classList.add('nx');
+  el.innerHTML=`<span class="nx-k">Next</span><button class="nx-t" ${g.go?`data-gl="${g.id}"`:'disabled'} title="${esc(g.h)}"><b>${esc(T(g))}</b> <small>· ${g.h}</small></button>${list.length>1?`<button class="nx-n" id="glNext" aria-label="Show the next goal">${GLI+1} of ${list.length} <span aria-hidden="true">›</span></button>`:''}<button class="gd-x" id="glHide" aria-label="Hide next goals">Hide</button>`;
   el.querySelectorAll('[data-gl]').forEach(b=>b.onclick=()=>{const g=GOALS.find(x=>x.id===b.dataset.gl);if(g&&g.go)g.go()});
+  const nx=$('glNext');if(nx)nx.onclick=()=>{GLI=(GLI+1)%list.length;sfx('click');renderGoals()};
   $('glHide').onclick=()=>{SETS().goals=false;save();renderGoals();showToast('Next goals hidden','Turn them back on in Settings')}}
 function guideOn(){return !!(S.guide&&!S.guide.done&&!S.guide.skip)}
 function guideMark(k){if(!S.guide)return;S.guide.m=S.guide.m||{};S.guide.m[k]=1;guideCheck()}
@@ -10079,7 +10238,7 @@ function payCost(c){S.coins-=c.c;for(const [k,n] of Object.entries(c.m))S.mats[k
 function costHTML(c){return `<div class="pj-cost"><span class="${S.coins>=c.c?'ok':''}">$${money(c.c)}</span>${Object.entries(c.m).map(([k,n])=>`<span class="${(S.mats[k]||0)>=n?'ok':''}">${n} ${MI(k).n} (${S.mats[k]||0})</span>`).join('')}</div>`}
 function gateCan(r){return !gateOwned(r.id)&&S.boat>=r.boat&&costOk(r.cost)}
 function buildGate(id){const r=REALMS_BY[id];if(!r||!gateCan(r))return;payCost(r.cost);RS().gates[id]=S.day;sfx('fanfare');
-  celebrate({lbl:'Gate built!',r:'M',name:r.gate,sub:`A portal ring now floats beside your dock. Travel to ${r.n} from the Waters tab.`,icon:svgI('ring',r.col)});burst(340,226,[r.col,'#ffffff'],80);save();renderWaters();renderLog()}
+  celebrate({lbl:'Gate built!',r:'M',name:r.gate,sub:`A portal ring now floats beside your dock. Travel to ${r.n} from the Map tab.`,icon:svgI('ring',r.col)});burst(340,226,[r.col,'#ffffff'],80);save();renderWaters();renderLog()}
 function buyRGear(id){const g=RGEAR.find(x=>x.id===id);if(!g||rgear(id)||(g.need&&!rgear(g.need))||!costOk(g.cost))return;payCost(g.cost);RS().gear[id]=S.day;sfx('craft');
   celebrate({lbl:'Crafted!',r:'L',name:g.n,sub:g.d,icon:svgI('crown','#ffd05a')});if(id==='tank'&&S.water==='moon')S.o2=Math.max(S.o2||0,o2Max());save();renderWaters()}
 // Weather stays on Lantern Lake while you're away.
@@ -10192,7 +10351,7 @@ function renderRealmHud(){const el=$('realmHud');if(!el)return;const r=REALMS_BY
   if(r.id==='moon'){const inf=!isFinite(o2Max()),left=Math.max(0,Math.ceil(S.o2||0)),pc=inf?100:Math.max(0,(S.o2||0)/o2Max()*100);el.className='ovl ovl-realm'+(!inf&&left<=60?' warn':'');el.innerHTML=`<b>O₂</b><span class="o2"><i style="width:${pc.toFixed(1)}%"></i></span><span>${inf?'Moon Base':`${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`}</span>`}
   else if(r.id==='hell'){el.className='ovl ovl-realm hot';el.innerHTML=rgear('hellline')?'<b>🔥</b><span>Hellforged Line</span>':'<b>🔥</b><span>Heat melts 1 in 5 lines</span>'}
   else{el.className='ovl ovl-realm';el.innerHTML=UPD.cur?'<b>🌬</b><span>Updraft! Tap it</span>':`<b>🌬</b><span>Next updraft soon${rgear('kite')?' · Sky Kite':''}</span>`}}
-// Waters tab: Beyond the Lake
+// Map tab: Beyond the Lake
 function realmWatersHTML(){let h=`<div class="sec-h realm-h" style="grid-column:1/-1"><h3>Beyond the Lake</h3><small>Portal gates for the biggest boats</small></div>`;
   for(const r of REALMS){const own=gateOwned(r.id),act=S.water===r.id,sp=FISH.filter(f=>f.at===r.id),got=sp.filter(f=>S.log[f.id]).length,boatOk=S.boat>=r.boat;
     h+=`<div class="card water realm r-${r.id}${act?' active':''}"><span class="eyebrow">${own?`${got}/${sp.length} species logged`:r.gate}</span><h3>${r.n}</h3><p>${r.d}</p>`;
@@ -10238,7 +10397,7 @@ function tick(now){if(SESS.paused)return;
     $('scene').classList.toggle('in',indoor()||!!VISIT);$('leaveBar').hidden=!(S.sleep&&S.sleep.ph==='awake')||!!VISIT||CED.on;renderVisitBar();if(S.sleep&&S.sleep.ph==='awake')$('leaveTxt').textContent=ROOM==='basement'?'Down in the basement. Tap the stairs to go up.':S.sleep.visit?(S.shack===0?'In your tent. Craft or rest, then head back out.':'At home. Craft, decorate, then head back out.'):'Up and rested. Decorate, or head back out?';$('decoBtn').hidden=(ROOM==='basement')||S.shack===0;$('arrBtn').hidden=(ROOM==='basement')||S.shack===0;$('yardBtn').hidden=ROOM==='basement';renderYNav();if(gearDirty){gearDirty=false;refreshGear()}{const fr=S.sleep&&S.sleep.at==='friend',lb=TOWN.on?(TOWN.z?['In town',TROOMS[TOWN.z].n]:['In town',TOWN.peers.size?`Harbor · ${TOWN.peers.size+1} here`:'Lantern Harbor']):TRV.on?['On the move',TRV.to==='friend'?placeName('friend'):TRV.to==='pond'&&TRV.label?'Home':placeName(TRV.to)]:VISIT?['Visiting',VISIT.name+'’s home']:fr?['At',placeName('friend')]:S.sleep?['At home',ROOM==='basement'?'Basement':indoor()?GEAR.shack.items[S.shack].n:'Dock Pond']:['Fishing',W(S.water).n],k=lb.join('|');if($('waterName').dataset.k!==k){$('waterName').dataset.k=k;$('locLbl').textContent=lb[0];$('waterName').textContent=lb[1]}}
     $('hint').hidden=yardStill();$('hint').textContent=VISIT?'Hover the shelves, trophies and tank':indoor()?(ROOM==='basement'?'Tap the fish sticks, fridge, aquarium, smokehouse or light switch':(S.shack===0?'Tap the bed or crafting table':'Tap the TV, tank, drawers, bed or crafting table')):S.sleep?$('stamTxt').textContent:'Tap the water to jig';
     $('castLabel').textContent=TRV.on?'On the move…':S.sleep?dockFishing()?(cast.el/cast.dur>.85?'Something’s biting…':'Fishing off the dock'):(S.sleep.at?(VT&&VT.arcade?'At the arcade…':VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
-    refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();
+    refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();mnTick();
     if(!$('slotsModal').hidden){if(!spinning)updateSlots();if(phView==='lock')renderLock()}else{$('phClock').textContent=fmtClock(S.min).replace(/ [AP]M/,'');$('phBat').style.width=Math.max(4,S.stamina)+'%'}
     ensureBounties();checkStreak();qStart();renderGuide();renderGoals();houseTick();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
     {const bc=mpBadge()+TX.unread+(newsUnread()?1:0)+readyBounties()+(S.streak.claimed?0:1)+(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step?1:0)+(S.q2&&S.q2.step>0&&S.q2.step<7&&S.q2.seen!==S.q2.step?1:0)+(S.q3&&S.q3.step>0&&S.q3.step<7&&S.q3.seen!==S.q3.step?1:0);$('phoneBadge').hidden=!bc;$('phoneBadge').textContent=bc}
@@ -10260,7 +10419,7 @@ function start(data){
   if(!W(S.water))S.water='pond';
   if(isRealm(S.water)){if(S.realmWx)S.wx=S.realmWx;delete S.realmWx;S.water=S.realmFrom&&!isRealm(S.realmFrom)?S.realmFrom:'deep'}
   if(S.sleep&&(S.sleep.at||['door','pick','inside'].includes(S.sleep.ph)))S.sleep=null;
-  SETS();applyDock();applyPhTheme();applyTextSize();if(!S.guide&&S.total===0&&S.day<=1&&!(S.mp&&S.mp.id))S.guide={step:0,apps:{}};if(S.q&&S.q.step===7)S.q.everSolved=true;if(S.tour&&S.tour.ghost&&S.q2)S.q2.ghost={t0:0};else if(S.q2)S.q2.ghost=null;try{sbInit()}catch(e){}
+  SETS();applyDock();applyPhHide();applyPhTheme();applyTextSize();if(!S.guide&&S.total===0&&S.day<=1&&!(S.mp&&S.mp.id))S.guide={step:0,apps:{}};if(S.q&&S.q.step===7)S.q.everSolved=true;if(S.tour&&S.tour.ghost&&S.q2)S.q2.ghost={t0:0};else if(S.q2)S.q2.ghost=null;try{sbInit()}catch(e){}
   if(!Array.isArray(S.hot))S.hot=[];while(S.hot.length<5)S.hot.push(null);
   if(S.snd&&!S.snd.v){if(S.snd.amb===.6)S.snd.amb=.4;if(S.snd.music===.35)S.snd.music=.5;S.snd.v=2}
   if(S.tvInput==='console')S.tvInput='vhs';delete S.cart;delete S.games;

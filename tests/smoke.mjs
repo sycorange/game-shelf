@@ -116,7 +116,7 @@ await check('pet fun: one gift a day, fetch round trip, pet house; next goals ca
   const f=await p.evaluate(()=>PET_RT.fetch&&[Math.round(PET_RT.fetch.hx),Math.round(PET_RT.fetch.hy),Math.abs(PET_RT.fetch.tx-60)>=40]);ok(f&&f[0]===60&&f[1]===340&&f[2],'ball thrown from where you stand '+f);
   done=false;for(let i=0;i<30&&!done;i++){await p.waitForTimeout(500);done=await p.evaluate(()=>!PET_RT.fetch)}ok(done&&await p.evaluate(()=>Math.hypot(PET_RT.x-WALK.x,PET_RT.y-WALK.y)<30),'pet brings it back to you');
   ok(!p.errs.length,p.errs.join('; '));await p.context().close();
-  const q=await page(VPS[1][1],save({coins:3000,total:200}));await q.waitForTimeout(600);const t=await q.evaluate(()=>{const e=document.getElementById('goals');return e.hidden?'':e.textContent});ok(t.includes('Adopt a pet'),'goals: '+t);
+  const q=await page(VPS[1][1],save({coins:3000,total:200}));await q.waitForTimeout(600);let t='';for(let i=0;i<3&&!t.includes('Adopt a pet');i++){if(i)await q.click('#glNext');t=await q.evaluate(()=>{const e=document.getElementById('goals');return e.hidden?'':e.textContent})}ok(t.includes('Adopt a pet'),'goals: '+t);
   await q.click('[data-gl="pet"]');ok(await q.evaluate(()=>document.getElementById('shopBody').textContent.includes('Lakeside Rescue')),'pet button');await q.evaluate(()=>closePhone());
   await q.click('#glHide');ok(await q.evaluate(()=>document.getElementById('goals').hidden),'hide');ok(!q.errs.length,q.errs.join('; '));await q.context().close()});
 
@@ -326,6 +326,17 @@ await check('yard batch 3: horseshoes, putting, koi pond, statue, seasonal items
   ok(await p.evaluate(()=>{document.getElementById('plotModal').hidden=true;const L=yardList(),i=L.findIndex(a=>a[0]==='pond');openPond(i);const c0=S.coins;document.querySelector('[data-psell]').click();const sold=S.coins-c0;document.getElementById('pdFeed').click();const P=pondOf(L[i]);return sold>0&&P.length===1&&P[0].g===2}),'pond sell and feed');
   ok(await p.evaluate(()=>{document.getElementById('plotModal').hidden=true;const L=yardList(),s=L.findIndex(a=>a[0]==='snowman');showTap(s);showTap(s);showTap(s);return +L[s][5]===3&&typeof seasonOk('leaves')==='boolean'}),'snowman built');
   await p.waitForTimeout(500);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('menus: Map/Gear/Catch/Stuff, phone sheet, lake map travel, quick sell, hide phone',async()=>{
+  const p=await page(VPS[0][1],save({cooler:{bluegill:{n:3,val:90,w:3}}}));ok(await p.evaluate(()=>!document.getElementById('pane-waters').hidden&&!!document.querySelector('.lmap')),'map is not the first tab');
+  await p.click('#mnav [data-mt="catch"]');ok(await p.isVisible('#t-log')&&!(await p.isVisible('#t-gear')),'catch sub tabs');await p.click('#t-log');ok(await p.evaluate(()=>!document.getElementById('pane-log').hidden&&document.body.dataset.mt==='catch'),'logbook');
+  await p.click('#mnav [data-mt="stuff"]');ok(await p.evaluate(()=>!document.getElementById('pane-storage').hidden),'stuff');
+  await p.click('#sellQ');ok(await p.evaluate(()=>!S.cooler.bluegill&&S.coins===500090),'quick sell');
+  await p.click('#phHideBtn');ok(await p.evaluate(()=>S.set.phHide===true&&document.getElementById('phoneDock').classList.contains('hid')),'hide phone');await p.click('#phHideBtn');ok(await p.evaluate(()=>!S.set.phHide),'show phone');
+  await p.click('#mnav [data-mt="map"]');await p.click('.lm-pin[data-lm="pond"]');await p.waitForTimeout(300);ok(await p.evaluate(()=>TRV.on||S.water==='pond'),'map pin travel');ok(!p.errs.length,p.errs.join('; '));await p.context().close();
+  const q=await page(VPS[1][1],save({}));ok(await q.evaluate(()=>!document.body.classList.contains('sheet-on')),'sheet starts closed');await q.click('#mnav [data-mt="gear"]');await q.waitForTimeout(400);
+  ok(await q.evaluate(()=>document.body.classList.contains('sheet-on')&&!document.getElementById('pane-gear').hidden),'gear sheet');await q.click('#mnav [data-mt="gear"]');ok(await q.evaluate(()=>!document.body.classList.contains('sheet-on')),'tap again closes');
+  await q.evaluate(()=>openTab('cooler'));ok(await q.evaluate(()=>document.body.classList.contains('sheet-on')),'openTab opens the sheet');await q.click('#shClose');ok(!q.errs.length,q.errs.join('; '));await q.context().close()});
 
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
