@@ -3359,6 +3359,30 @@ function renderWeatherApp(){const b=$('wxBody');if(!b)return;ensureFc();
     <div class="l7-sun"><div>Sunrise<b>5:00 AM</b>Dawn bite 5 to 7 AM</div><div>Sunset<b>8:00 PM</b>Dusk bite 6 to 8 PM</div></div>
     <div class="l7-foot">Lake 7 Weather · Updated ${fmtClock(S.min)} · Every angler on Lantern Lake shares this sky.</div>`}
 
+// ==GAME WARDEN BOAT== Only for the person who runs Lantern Lake. A patrol boat with a light bar: tap the lights to run the reds and blues.
+// It swaps the look of your boat; which waters you can reach still comes from the boat you own.
+const WDB=()=>{if(!S.wd||typeof S.wd!=='object')S.wd={on:0,lit:0};return S.wd};
+const wardenOn=()=>!!(S.wdOwn&&WDB().on&&S.boat>=1);
+function wardenSiren(){const lit=WDB().lit;for(let i=0;i<(lit?3:1);i++){tone(lit?720:620,.16,{type:'sawtooth',vol:.025,delay:i*.32,to:lit?1180:340});tone(lit?1180:340,.14,{type:'sawtooth',vol:.02,delay:i*.32+.16,to:lit?720:200})}}
+function wardenLights(){const w=WDB();w.lit=w.lit?0:1;wardenSiren();showToast(w.lit?'Lights on. Everyone on the lake can see them.':'Lights off',w.lit?'🚨 Game Warden':'Game Warden');save()}
+function wardenToggle(on){const w=WDB();w.on=on?1:0;if(!on)w.lit=0;sfx('click');save();showToast(on?'The Game Warden boat is in the water. Tap the light bar to run the lights.':'Back to your own boat','Game Warden')}
+function drawWarden(c,x,y,L,d,T,lit,hit){const k=L/150,top=y-8*k,C=v=>rgb(mix(v.map(q=>q*.3),v,d*.8+.2)),night=1-Math.min(1,d*1.6);c.save();
+  // hull: white topsides, green stripe, dark bottom, raised bow
+  c.beginPath();c.moveTo(x,y-2*k);c.lineTo(x+L,top-4*k);c.lineTo(x+L-16*k,y+14*k);c.lineTo(x+10*k,y+14*k);c.closePath();c.fillStyle=C([236,238,240]);c.fill();c.save();c.clip();
+  c.fillStyle=C([28,84,52]);c.beginPath();c.moveTo(x-4,y+3*k);c.lineTo(x+L+4,top+3*k);c.lineTo(x+L+4,top+8*k);c.lineTo(x-4,y+8*k);c.fill();c.fillStyle=C([20,28,36]);c.fillRect(x-4,y+9*k,L+8,10*k);
+  const sx=x+L*.25,sy=y+1*k;c.fillStyle=C([214,170,60]);c.strokeStyle=C([120,90,20]);c.lineWidth=.8*k;c.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=(i%2?3.6:8.4)*k;c.lineTo(sx+Math.cos(a)*r,sy+Math.sin(a)*r)}c.closePath();c.fill();c.stroke();c.fillStyle=C([248,228,150]);c.beginPath();c.arc(sx,sy,2.6*k,0,7);c.fill();c.restore();
+  c.strokeStyle=C([160,166,172]);c.lineWidth=1.2*k;c.beginPath();c.moveTo(x+4*k,y-4*k);c.lineTo(x+L-2*k,top-6*k);c.stroke();
+  // outboards
+  for(const o of [0,6]){c.fillStyle=C([30,32,36]);rrect(x-9*k+o*k,y-12*k,9*k,13*k,2*k);c.fill();c.fillStyle=C([46,48,54]);c.fillRect(x-6*k+o*k,y,3*k,16*k)}
+  // console and T-top
+  const cx0=x+L*.40,cx1=x+L*.60,cy=y-4*k;c.fillStyle=C([228,230,232]);c.fillRect(cx0,cy-16*k,cx1-cx0,16*k);c.fillStyle=lit&&night>.2?'#2a3a4a':C([90,130,160]);c.beginPath();c.moveTo(cx0+3*k,cy-16*k);c.lineTo(cx0+8*k,cy-26*k);c.lineTo(cx1-2*k,cy-26*k);c.lineTo(cx1,cy-16*k);c.fill();
+  c.strokeStyle=C([200,204,210]);c.lineWidth=1.6*k;const tt=cy-50*k;for(const px of [cx0-6*k,cx1+6*k]){c.beginPath();c.moveTo(px,cy);c.lineTo(px,tt);c.stroke()}
+  c.fillStyle=C([28,84,52]);c.fillRect(cx0-12*k,tt-4*k,cx1-cx0+24*k,5*k);c.strokeStyle=C([200,204,210]);c.lineWidth=1*k;c.beginPath();c.moveTo(cx1+4*k,tt-4*k);c.lineTo(cx1+10*k,tt-26*k);c.stroke();
+  // the light bar
+  const bx0=cx0-2*k,bx1=cx1+2*k,by=tt-9*k,bw=bx1-bx0,ph=Math.floor(T*8)%4,redOn=lit&&(ph===0||ph===1&&Math.sin(T*60)>0),blueOn=lit&&(ph===2||ph===3&&Math.sin(T*60)>0);
+  c.fillStyle='#14161c';rrect(bx0,by,bw,5*k,2*k);c.fill();c.fillStyle=redOn?'#ff3a3a':'#6a1a1a';rrect(bx0+1*k,by+1*k,bw/2-1.5*k,3*k,1.5*k);c.fill();c.fillStyle=blueOn?'#3a8aff':'#1a2a6a';rrect(bx0+bw/2+.5*k,by+1*k,bw/2-1.5*k,3*k,1.5*k);c.fill();
+  if(c===ctx&&lit){c.globalCompositeOperation='lighter';const s=.55+.45*night;if(redOn){glow(bx0+bw*.25,by+2*k,70*k*(1+night*.6),.5*s,'255,40,40');glow(x+L*.3,y+26*k,70*k,.18*s,'255,40,40')}if(blueOn){glow(bx0+bw*.75,by+2*k,70*k*(1+night*.6),.5*s,'40,120,255');glow(x+L*.7,y+26*k,70*k,.18*s,'40,120,255')}c.globalCompositeOperation='source-over'}
+  c.restore();if(hit&&c===ctx)HITS.push({x:bx0-8*k,y:by-10*k,w:bw+16*k,h:22*k,kind:'wlight',data:0})}
 // ==CRATE EXPECTATIONS== a crate-opening app that pays out boat paint jobs. Every paint is drawn inside
 // the hull outline, so it fits any boat from the rowboat up. Odds are fixed per tier and shown in the app.
 const SK_TIERS={C:{n:'Common',col:'#b0b8c4',w:70},U:{n:'Uncommon',col:'#4ec46a',w:20},R:{n:'Rare',col:'#3a8cff',w:7},E:{n:'Epic',col:'#b25aff',w:2.5},L:{n:'Legendary',col:'#ffc23a',w:.5},M:{n:'Mythic',col:'#ff5ad8',w:0}};
@@ -4823,12 +4847,13 @@ function showTip(h,e){
   if(h.kind==='peer')html=h.data&&h.data.q4?'<b>…you?</b><small>Tap them</small>':peerTip(h.data);if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
   if(h.kind==='door'&&TOT.inside)html='<b>Trick or treat!</b><small>Tap the door to hand out candy</small>';
   if(TOWN.on){html=townTip(h);if(!html){tip.hidden=true;return}}
+  if(h.kind==='wlight')html=`<b>Light bar</b><small>Tap to turn the reds and blues ${WDB().lit?'off':'on'}</small>`;
   tip.innerHTML=html;tip.hidden=false;
   const r=$('scene').getBoundingClientRect();let x=e.clientX-r.left+14,y=e.clientY-r.top+14;
   const w=tip.offsetWidth,hh=tip.offsetHeight;if(x+w>r.width-8)x=Math.max(8,e.clientX-r.left-w-14);if(y+hh>r.height-8)y=Math.max(8,r.height-hh-8);if(h.kind[0]==='y'&&r.width<560){x=Math.max(6,(r.width-w)/2);y=6}
   tip.style.left=x+'px';tip.style.top=y+'px';
 }
-$('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(TOWN.on){if(!e.target.closest('button,.leave,.hchat,.stip'))townClick(x,y,e);return}if(h&&h.kind==='peer'&&h.data&&h.data.q4){q4TapReflect();return}if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&h.kind==='stairs'&&VISIT.S.sleep.ph==='awake'){goRoom('basement');return}if(h&&h.kind==='up'){goRoom('cabin');return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
+$('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(h&&h.kind==='wlight'&&!TOWN.on){wardenLights();return}if(TOWN.on){if(!e.target.closest('button,.leave,.hchat,.stip'))townClick(x,y,e);return}if(h&&h.kind==='peer'&&h.data&&h.data.q4){q4TapReflect();return}if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&h.kind==='stairs'&&VISIT.S.sleep.ph==='awake'){goRoom('basement');return}if(h&&h.kind==='up'){goRoom('cabin');return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
   if(indoor()&&CED.on){if(CED.skip){CED.skip=false;return}const [rx,ry]=[x/RK,y/RK];CED.sel=cedPick(rx,ry);renderCed();return}
   if(indoor()){if(!h){hideTip();return}
   if(h.kind==='tv')openTV();else if(h.kind==='drawer'){hideTip();openTapes()}else if(h.kind==='trodrawer'){openTroDrawer()}else if(h.kind==='colldrawer'){openCollDrawer()}else if(h.kind==='craft'){openCraft()}else if(h.kind==='coll'){hideTip();openItem(h.data)}
@@ -5996,6 +6021,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:122,n:'The Game Warden',items:['There’s a Game Warden patrol boat on Lantern Lake now: a white-and-green boat with a T-top and a light bar. It belongs to the person who runs the lake. If you see the reds and blues flashing, you’ll know who it is.']},
  {v:121,n:'The Lantern Keeper kit',items:['Crate Expectations opens on a shelf of crates now: tap a crate to open it. Your current boat paint, rod and bobber sit right under the crates, with the Locker and the Odds a tap away. The Locker lists what you own first. Use ‹ All crates to go back.','Bug fix: the Claim button in the Friends inbox no longer gets squeezed into a thin column of letters.','A new Mythic tier, above Legendary, for a thank-you set that goes to every ♥ Supporter, including everyone who already has the badge. It shows up the next time the game syncs.','Aurora Leviathan boat paint: living aurora ribbons on a starry hull, and a huge spirit whale that swims under your boat and sometimes rises to the surface. At night it lights the water around you.','Starforged rod: a glowing rod and a fishing line made of light. Landing a fish sends shooting stars off the tip.','Pocket Sun bobber: a tiny star that lights the water and flares like a supernova when a fish bites.','The Eternal Lantern: a floating lantern for your cabin wall, circled by little spirit fish.','The kit is cosmetic only. It never drops from crates and can’t be mailed or traded, and nothing in it helps you fish.']},
  {v:120,n:'Lantern Harbor',items:['A town on the lake! Walk down Lantern Harbor’s main street from the 🏘️ Town button in your yard, the Where to? list, or the Waters tab. Your line stays in the water while you’re in town.','Everyone in town shows up live, with their outfit and pet. Wave, emote and chat with the quick phrases, the same as Open House.','Walk into Bait & Tackle and Murphy’s, the same way you walk into your house. Everyone inside the same building sees each other, and the doors on the street show how many people are in each one.','Marge’s Counter, inside Bait & Tackle, only sells in person. Every day it has one of five new harbor bobbers (Neon Pink, Neon Cyan, Harbor Buoy, Harbor Light and Streetlamp), a potion of the day (up to 2) and a Bait Bag of three random potions. The stock is the same for everyone and changes at midnight.','Darts at Murphy’s: the aim drifts, so tap when it’s on target. Three darts a round, and your first five rounds each day pay out for every point. Everyone in the bar sees your score.','Lake 7 Station is open to walk in. Pick up the red phone (or ask DJ Nightjar) to request a song with a shout-out, and dedicate it to someone in town. Everyone in Lantern Harbor sees it scroll across the top, and it shows on the studio’s Now Playing board. The case files are in the cabinet by the door.','The Post Office is open to walk in. At Fern’s parcel counter you can mail a spare boat paint, rod or bobber to a friend, which you can’t do from your phone. It lands in their mailbox like any gift. Your P.O. box lights up when you have mail waiting.','Trivia Night at Murphy’s, 6 PM to 2 AM game time: five questions about the lake, the same for everyone each day. Cash for every right answer and a potion for a perfect 5/5. Everyone in the bar sees your score.','The Newsstand sells today’s Lantern Ledger, once a day. Its front-page tip comes with a 10-minute boost (luck, bigger fish, more treasure, quicker casts, or a short burst of double prices), plus what’s biting right now and the town gossip.','Toss a coin in the Town Square’s wishing fountain once a day. You might get lucky, get your coins back ten times over, find a potion, or, very rarely, fish out a town bobber.','The Museum and the Arcade open from their doors.','Say hi to the locals: Marge, Murphy, Fern and DJ Nightjar inside their shops, and Old Pete, Dot the mail carrier and Harbormaster Hollis out on the street. At night the streetlamps come on and every shop’s neon sign lights up the street. The town gets the same weather as the lake.','Coming soon: the Fish Market, the notice board, the bandstand, the ferry and the old cannery are boarded up for now.']},
  {v:119,n:'Case folders',items:['The Casefile app now opens on a shelf of case folders, one per mystery, each showing whether it’s open, closed or still sealed, how far along you are, and a “New lead” tag when something changed. Tap a folder to open it and ‹ All cases to go back.']},
@@ -6978,13 +7004,13 @@ function drawBoat0(d,T){
     ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x+L/2,y+16,L*.6,5,0,0,7);ctx.fill();
     if(AMB.rock>.08){ctx.strokeStyle=`rgba(255,255,255,${Math.min(.35,AMB.rock*.4)})`;ctx.lineWidth=1.2;const sp=1+(1-AMB.rock)*.6;ctx.beginPath();ctx.ellipse(x+L/2,y+15,L*.62*sp,6*sp,0,0,7);ctx.stroke()}
     pv=[x+L/2,y+12];ang=AMB.rock*.1*Math.sin(T*5.2);ctx.save();ctx.translate(pv[0],pv[1]);ctx.rotate(ang);ctx.translate(-pv[0],-pv[1]);
-    {const sk=skinEq();if(sk)drawPaint(ctx,x,y,L,b,d,T,sk);else{ctx.fillStyle=hull;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+L,y-(b>=3?6:0));ctx.lineTo(x+L-(b===2?4:16),y+14);ctx.lineTo(x+10,y+14);ctx.fill()}}if(isRealm(S.water)&&!S.sleep)realmBoatFx(x,y,L,d,T);
-    if(b===2||b===3){const s=b===3?1:.8,mx=x+1,mv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98);
+    const WDN=wardenOn()&&!isRealm(S.water);if(WDN)drawWarden(ctx,x,y,L,d,T,!!WDB().lit,!S.sleep&&!TRV.on&&!mir);else{const sk=skinEq();if(sk)drawPaint(ctx,x,y,L,b,d,T,sk);else{ctx.fillStyle=hull;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+L,y-(b>=3?6:0));ctx.lineTo(x+L-(b===2?4:16),y+14);ctx.lineTo(x+10,y+14);ctx.fill()}}if(isRealm(S.water)&&!S.sleep)realmBoatFx(x,y,L,d,T);
+    if(!WDN&&(b===2||b===3)){const s=b===3?1:.8,mx=x+1,mv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98);
       ctx.fillStyle=rgb(mix([10,10,12],[46,48,54],d));ctx.fillRect(mx-5*s,y-1,3.2*s,19*s);
       ctx.fillStyle=rgb(mix([12,12,14],[34,36,40],d));rrect(mx-12*s,y-13*s,13*s,13*s,3*s);ctx.fill();ctx.fillStyle=rgb(mix([40,10,10],[210,60,48],d));ctx.fillRect(mx-11*s,y-9*s,11*s,2.2*s);
       ctx.fillStyle=rgb(mix([10,10,12],[46,48,54],d));ctx.fillRect(mx-8*s,y+15*s,8*s,2.4*s);const sp=mv?Math.sin(T*45):.7;ctx.fillStyle=rgb(mix([40,40,40],[170,172,176],d));ctx.beginPath();ctx.ellipse(mx-8.5*s,y+18*s,1.4*s,Math.max(1,5*s*Math.abs(sp)),0,0,7);ctx.fill();
       if(mv){ctx.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(mx-13*s-i*6-Math.random()*3,y+15*s+Math.random()*4,1.5+Math.random()*1.5,0,7);ctx.fill()}}}
-    if(b>=4)boatTop(b,x,y,L,d,T,bmv);
+    if(b>=4&&!WDN)boatTop(b,x,y,L,d,T,bmv);
     ax=x+L-36;ay=y;deck=[b>=4?x+L*.62:x+L*.28,y-(b>=3?3:0)];
   }
   const R=(px,py)=>{if(!pv)return [px,py];const c=Math.cos(ang),sn=Math.sin(ang),dx=px-pv[0],dy=py-pv[1];return [pv[0]+dx*c-dy*sn,pv[1]+dx*sn+dy*c]};
@@ -9480,7 +9506,7 @@ const SUP_KIT=['leviathan','r_starforged','b_sun'];
 function supKit(){if(S.supKit)return;const P=PNT();for(const id of SUP_KIT)P.own[id]=Math.max(1,P.own[id]|0);const cb=CAB();try{cabSync()}catch(e){}cb.own.eternal=1;try{cabSync()}catch(e){}S.supKit=1;storeDirty=true;save();
   setTimeout(()=>celebrate({lbl:'Mythic! Thank you, supporter',r:'M',name:'The Lantern Keeper kit',sub:'Aurora Leviathan paint, Starforged rod, Pocket Sun bobber and the Eternal Lantern for your cabin. Find them in Crates → Locker and Decorate.',icon:svgI('crown','#ff8fb8')}),4500)}
 function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}if(S.sup)supKit()}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);
-  if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;
+  if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;if(r.owner&&!S.wdOwn){S.wdOwn=1;save();setTimeout(()=>showToast('Your Game Warden boat is ready. Turn it on in the Owner tools.','Game Warden'),5000)}
   if(r.chal){const prev=MPV.chal||[];MPV.chal=r.chal;const newIn=r.chal.filter(c=>c.mine==='b'&&c.st==='pend'&&!(m.chSeen||[]).includes(c.id));if(newIn.length){m.chSeen=(m.chSeen||[]).concat(newIn.map(c=>c.id)).slice(-40);phNotify('friends','Challenge!',`${newIn[0].other} challenges you: biggest ${FI(newIn[0].fish)?FI(newIn[0].fish).n:newIn[0].fish} for $${money(newIn[0].stake)}`)}
     const live=new Set(r.chal.filter(c=>c.st==='live').map(c=>String(c.id)));if(m.chw)for(const k of Object.keys(m.chw))if(!live.has(k))delete m.chw[k]}
   if(r.gb){MPV.gb=r.gb;if(r.gb.n>0&&r.gb.last){if(m.gbSeen!=null)phNotify('friends','Guestbook',r.gb.n>1?`${r.gb.n} new guestbook notes`:`${r.gb.from} signed your guestbook`);m.gbSeen=r.gb.last}}}
@@ -9563,6 +9589,7 @@ async function ownMoveLoad(){const m=mpS(),box=$('ownMove');if(!box)return;let r
     catch(e){$('mvMsg').textContent=e.message==='empty'?'Write a message first.':'Couldn’t send. Try again.';sb.disabled=false;delete sb.dataset.arm;sb.textContent=`Text ${n} angler${n===1?'':'s'}`}}}
 async function ownSupLoad(){const m=mpS(),box=$('ownSups');if(!box)return;
   const set=async(name,on)=>{try{const r=await api('owner/sup',{id:m.id,key:m.key,name,on});$('ownSupMsg').textContent=!r.found?`No angler named ${name}.`:on?`${r.name} now has the ♥ Supporter badge.`:`Removed ${r.name}’s badge.`;if(r.found)ownSupLoad()}catch(e){$('ownSupMsg').textContent='Couldn’t update the badge. Try again.'}};
+  {const wb=$('ownWd');if(wb)wb.onclick=()=>{wardenToggle(!WDB().on);wb.textContent=WDB().on?'Put the warden boat away':'🚨 Use the Game Warden boat';wb.className=WDB().on?'ghost':'jig'}}
   $('ownSupGo').onclick=async()=>{const n=$('ownSupName').value.trim();if(!n)return;$('ownSupGo').disabled=true;await set(n,true);$('ownSupName').value='';$('ownSupGo').disabled=false};
   let r;try{r=await api('owner/sups',{id:m.id,key:m.key})}catch(e){box.innerHTML='';return}
   box.innerHTML=r.sups.length?`<ul class="own-mv">${r.sups.map(x=>`<li><label><b>${esc(x.name)}</b> <small>${x.seen?'played '+ago(x.seen):''}</small><button class="fr-mini" data-supx="${esc(x.name)}" style="margin-left:auto">Remove</button></label></li>`).join('')}</ul>`:'<p class="own-note">No supporters yet.</p>';
@@ -9586,6 +9613,8 @@ async function openOwner(){const m=mpS();$('ownModal').hidden=false;const b=$('o
       <div class="xf-row"><input id="ownPinName" class="lg-in" placeholder="Angler name" maxlength="16" style="flex:1;min-width:0"><button class="ghost" id="ownPinGo">Reset PIN</button></div><p class="own-note" id="ownPinMsg"></p>
       <h3 class="own-h">Discord posts</h3><p class="own-note">Paste a webhook link for each channel (in Discord: Edit Channel → Integrations → Webhooks → New Webhook → Copy Webhook URL). Leave one blank to turn it off. Links are kept on your server and never shown in full again.</p>
       <div class="own-dc" id="ownDc"><p class="fr-muted">Loading…</p></div>
+      <h3 class="own-h">Game Warden boat</h3><p class="own-note">Your patrol boat. Only you have it. When it’s on, tap the light bar on the boat to run the reds and blues, and everyone on the lake sees them. It only changes how your boat looks.</p>
+      <div class="xf-row"><button class="${S.wdOwn&&WDB().on?'ghost':'jig'}" id="ownWd" ${S.wdOwn?'':'disabled'}>${S.wdOwn&&WDB().on?'Put the warden boat away':'🚨 Use the Game Warden boat'}</button></div>
       <h3 class="own-h">Supporters</h3><p class="own-note">When a donation comes in, type the angler name from the PayPal note and tap Give badge. The ♥ Supporter badge shows on their contact card within a couple of minutes.</p>
       <div class="xf-row"><input id="ownSupName" class="lg-in" placeholder="Angler name" maxlength="16" style="flex:1;min-width:0"><button class="jig" id="ownSupGo">Give badge</button></div><p class="own-note" id="ownSupMsg" role="status"></p><div id="ownSups"></div>
       <h3 class="own-h">Site move</h3><p class="own-note">Who played in the last 7 days, by address. Anglers are counted by name; devices count every copy of the game, including players without a name.</p>
@@ -9632,7 +9661,7 @@ const LIVE_SLOTS_POND=[[650,236,.62],[360,236,.6],[736,247,.68],[520,229,.54],[4
 // Fork River's channel is narrow and sits lower, between the far bank (about y 240) and the near bank (about y 344).
 const LIVE_SLOTS_BY={pond:LIVE_SLOTS_POND,river:[[250,272,.72],[690,268,.7],[165,304,.78],[330,312,.8],[660,308,.8],[764,288,.74]],deep:[[650,236,.62],[262,242,.64],[750,248,.66],[348,229,.55],[562,224,.5],[456,226,.5]]};
 const liveWanted=()=>SETS().live!==false&&!isRealm(S.water)&&!!(S.mp&&S.mp.id&&S.mp.key)&&MPV.online===true&&!titleOn&&!document.hidden&&!S.sleep&&!TRV.on&&!VISIT&&!!W(S.water)&&typeof WebSocket!=='undefined'&&/^https?:$/.test(location.protocol);
-const liveSig=()=>`${S.boat}|${hwWear()||''}|${lookOf(S.look).g}|${PNT().eq||''}|${PNT().eqR||''}|${PNT().eqB||''}`;
+const liveSig=()=>`${wardenOn()?(WDB().lit?2:1):0}|${S.boat}|${hwWear()||''}|${lookOf(S.look).g}|${PNT().eq||''}|${PNT().eqR||''}|${PNT().eqB||''}`;
 function liveOpen(){const m=S.mp;LIVE.room=`${m.lake||'all'}:${S.water}`;LIVE.cid=Math.random().toString(36).slice(2,8);LIVE.peers.clear();LIVE.raid=null;
   const u=new URL('/api/live',location.href);u.protocol=location.protocol==='https:'?'wss:':'ws:';
   const q={id:m.id,key:m.key,lake:m.lake||'all',water:S.water,boat:S.boat,wear:hwWear()||'',g:lookOf(S.look).g,pt:PNT().eq||'',rd:PNT().eqR||'',bb:PNT().eqB||'',cid:LIVE.cid};for(const k in q)u.searchParams.set(k,q[k]);
@@ -9651,7 +9680,7 @@ function liveTick(dt){for(const p of LIVE.peers.values()){p.t+=dt;p.castT+=dt;if
   const room=`${S.mp.lake||'all'}:${S.water}`;if(LIVE.ws&&LIVE.room!==room)liveClose();
   if(!LIVE.ws&&Date.now()>=LIVE.nextTry)liveOpen();
   if((LIVE.pingT+=dt)>40){LIVE.pingT=0;liveSend('ping')}
-  if(LIVE.st==='on'){const sg=liveSig();if(sg!==LIVE.lastSt){LIVE.lastSt=sg;liveSend({t:'st',boat:S.boat,wear:hwWear()||'',g:lookOf(S.look).g,pt:PNT().eq||'',rd:PNT().eqR||'',bb:PNT().eqB||''})}}}
+  if(LIVE.st==='on'){const sg=liveSig();if(sg!==LIVE.lastSt){LIVE.lastSt=sg;liveSend({t:'st',wd:wardenOn()?(WDB().lit?2:1):0,boat:S.boat,wear:hwWear()||'',g:lookOf(S.look).g,pt:PNT().eq||'',rd:PNT().eqR||'',bb:PNT().eqB||''})}}}
 function liveSlot(){const used=new Set([...LIVE.peers.values()].filter(p=>p.out==null).map(p=>p.slot));for(let i=0;i<LIVE_SLOTS.length;i++)if(!used.has(i))return i;return -1}
 function liveAdd(p,quiet){if(!p||!p.pid||(S.mp&&p.pid===S.mp.id))return;const old=LIVE.peers.get(p.pid);
   LIVE.peers.set(p.pid,{...p,slot:old&&old.out==null?old.slot:liveSlot(),t:old?old.t:0,castT:rnd(0,6),fx:null,emo:null,out:null});
@@ -9660,7 +9689,7 @@ function liveMsg(o){const me=S.mp&&S.mp.id;
   if(o.t==='hello'){LIVE.me=o.me;for(const p of o.peers||[])liveAdd(p,true);LIVE.raid=o.raid||null;const n=LIVE.peers.size;if(n)showToast(n===1?`${[...LIVE.peers.values()][0].name} is fishing here too`:`${n} friends are fishing here`,'Live lake')}
   else if(o.t==='join')liveAdd(o.p);
   else if(o.t==='leave'){const p=LIVE.peers.get(o.pid);if(p&&(!o.cid||p.cid===o.cid))p.out=0}
-  else if(o.t==='st'){const p=LIVE.peers.get(o.pid);if(p){p.boat=o.boat;p.wear=o.wear;if(o.g)p.g=o.g;p.pt=o.pt||'';p.rd=o.rd||'';p.bb=o.bb||''}}
+  else if(o.t==='st'){const p=LIVE.peers.get(o.pid);if(p){p.wd=o.wd|0;p.boat=o.boat;p.wear=o.wear;if(o.g)p.g=o.g;p.pt=o.pt||'';p.rd=o.rd||'';p.bb=o.bb||''}}
   else if(o.t==='catch'){if(o.raid&&LIVE.raid){LIVE.raid.hp=o.raid.hp}if(o.pid===me)return;const p=LIVE.peers.get(o.pid);if(!p)return;p.fx={f:o.f,w:o.w,v:o.v,r:o.r,t:0};p.castT=-1.6;
     const big=o.r==='L'||o.v==='golden'||o.v==='giant';if(big){const s=liveSlotPos(p);if(s){burst(s[0],s[1]-30,[o.r==='L'?'#ffd700':'#c9a0f2','#ffffff'],50);for(let i=0;i<3;i++)AMB.rockets.push({x:s[0]+rnd(-30,30),y:240,vy:-rnd(130,170),ty:rnd(60,110),c:pick(FWC)})}
       const f=FI(o.f);showToast(`${p.name} landed a ${o.w} lb ${o.v&&VAR[o.v]?VAR[o.v].n+' ':''}${f?f.n:o.f}!`,'Live')}}
@@ -9691,9 +9720,9 @@ function drawPeer(p,d,T){const sl=liveSlotPos(p);if(!sl)return;const [x,y0,s]=sl
   const bobX=x+(L/2+40)*s,bobY=y+26*s+(p.castT>-.2&&p.castT<0?0:Math.sin(T*2.2+p.slot)*1);
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);
   ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(0,16,L*.6,5,0,0,7);ctx.fill();
-  const hc=peerHullC[b],psk=p.pt&&SKIN_BY[p.pt];if(psk)drawPaint(ctx,-L/2,0,L,b,d,T,psk);else{ctx.fillStyle=rgb(mix(hc.map(v=>v*.3),hc,d*.8+.2));ctx.beginPath();ctx.moveTo(-L/2,0);ctx.lineTo(L/2,-(b>=3?6:0));ctx.lineTo(L/2-16,14);ctx.lineTo(-L/2+10,14);ctx.fill()}
-  if(b===2||b===3){ctx.fillStyle=rgb(mix([14,14,16],[40,42,48],d));ctx.fillRect(-L/2-8,-10,11,12);ctx.fillRect(-L/2-4,2,3,14)}
-  if(b>=4)boatTop(b,-L/2,0,L,d,T,false);
+  const hc=peerHullC[b],psk=p.pt&&SKIN_BY[p.pt];if(p.wd)drawWarden(ctx,-L/2,0,L,d,T,p.wd===2,false);else if(psk)drawPaint(ctx,-L/2,0,L,b,d,T,psk);else{ctx.fillStyle=rgb(mix(hc.map(v=>v*.3),hc,d*.8+.2));ctx.beginPath();ctx.moveTo(-L/2,0);ctx.lineTo(L/2,-(b>=3?6:0));ctx.lineTo(L/2-16,14);ctx.lineTo(-L/2+10,14);ctx.fill()}
+  if(!p.wd&&(b===2||b===3)){ctx.fillStyle=rgb(mix([14,14,16],[40,42,48],d));ctx.fillRect(-L/2-8,-10,11,12);ctx.fillRect(-L/2-4,2,3,14)}
+  if(b>=4&&!p.wd)boatTop(b,-L/2,0,L,d,T,false);
   const ax=L/2-36;LIVE.drawing=true;LIVE.drawWear=p.wear||null;LIVE.drawG=p.g==='f'?'f':'m';try{drawAngler(ax,0,d,T)}finally{LIVE.drawing=false}
   const bend=p.fx&&p.fx.t<1.2?8:0;rodStroke(ctx,()=>{ctx.beginPath();ctx.moveTo(ax+4,-14);ctx.quadraticCurveTo(ax+26,-40,ax+40-bend*.4,-58+bend)},p.rd&&ITEM_BY[p.rd]||null,d,T);ctx.restore();
   const tip=[x+(ax+40-bend*.4)*s,y+(-58+bend)*s];

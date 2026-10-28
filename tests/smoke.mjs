@@ -297,6 +297,12 @@ await check('supporters get the Mythic Lantern Keeper kit once; it shows in the 
   ok(await p.evaluate(()=>{mpSyncDone({},{sup:1});return PNT().own.leviathan===1&&!parcelItems().some(o=>ITEM_BY[o.id].t==='M')}),'granted once, never mailable');
   await p.evaluate(()=>{const P=PNT();P.eq='leviathan';P.eqR='r_starforged';P.eqB='b_sun';S.min=1320});await p.waitForTimeout(800);ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('owner: the Game Warden boat draws, its light bar toggles, and the live lake hears about it',async()=>{const p=await page(VPS[0][1],save({boat:3,min:1320}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);mpSyncDone({},{owner:1});wardenToggle(true)});await p.waitForTimeout(400);
+  ok(await p.evaluate(()=>S.wdOwn===1&&wardenOn()&&HITS.some(h=>h.kind==='wlight')),'warden boat on with a tappable light bar');
+  ok(await p.evaluate(()=>{wardenLights();return WDB().lit===1&&liveSig().startsWith('2|')}),'lights on and shared with the live lake');
+  await p.evaluate(()=>{wardenToggle(false)});ok(await p.evaluate(()=>!wardenOn()&&WDB().lit===0),'put away');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
