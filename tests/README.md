@@ -45,6 +45,7 @@ It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code 
 - Casefile: case encounters aren't blocked by an old tournament card; next-weather forecast
 - Case 5 (The 3:33 Broadcast): full play-through to the rewards
 - Casefile shelf: folders open cases, back button, new-lead tags
+- Lantern Harbor town: two anglers see each other on the street and inside shops, Marge’s Counter sales, a round of darts, a Lake 7 song request, a Post Office parcel, the wishing fountain, the daily paper, trivia night, Leave returns home
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

@@ -260,6 +260,34 @@ await check('casefile: opens on a shelf of case folders; a folder opens its case
   await p.click('[data-case="2"]');ok(await p.evaluate(()=>/EMERALD WAKE/.test(document.getElementById('caseBody').textContent)),'folder opens the case');
   await p.click('[data-case="0"]');ok(await p.evaluate(()=>!!document.querySelector('.cf-grid')&&!document.querySelector('.cf-new')),'back to the shelf, lead marked seen');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('town: two anglers see each other in Lantern Harbor and inside its shops, Marge’s Counter, darts, Lake 7 requests, parcels, the fountain, the paper and trivia work, Leave goes home',async()=>{const ps=[];
+  for(const vp of [VPS[0][1],VPS[1][1]]){const p=await page(vp,save({sleep:{ph:'yard',t:0,visit:true}}));await p.evaluate(async()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);const r=await api('hello',{name:'Tn'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true})});ps.push(p)}
+  const [A,B]=ps;await A.waitForTimeout(300);ok(await A.evaluate(()=>!!document.getElementById('vbTown')),'town button in the yard bar');
+  await A.evaluate(()=>document.getElementById('vbTown').click());await B.evaluate(()=>openTown());
+  await A.waitForFunction(()=>TOWN.st==='on'&&TOWN.peers.size===1,null,{timeout:8000});await B.waitForFunction(()=>TOWN.peers.size===1,null,{timeout:8000});
+  await A.evaluate(()=>{TOWN.tx=700;TOWN.ty=450});await B.waitForFunction(()=>[...TOWN.peers.values()].some(p=>p.tx===700),null,{timeout:10000});ok(true,'B sees A walk');
+  await B.evaluate(()=>{const b=TBLD.find(x=>x.id==='museum');TOWN.x=b.x;TOWN.cam=Math.max(0,b.x-300)});await B.waitForTimeout(250);
+  const h=await B.evaluate(()=>{const h=HITS.find(h=>h.kind==='tbld'&&h.data==='museum');return h&&[h.x+h.w/2,h.y+h.h*.8]});ok(!!h,'museum is tappable');
+  await B.evaluate(([x,y])=>townClick(x,y,{clientX:0,clientY:0}),h);await B.waitForFunction(()=>!document.getElementById('musModal').hidden,null,{timeout:6000});ok(true,'museum door opens the museum');
+  await B.evaluate(()=>{document.getElementById('musModal').hidden=true;townEnter('tackle')});await A.waitForFunction(()=>[...TOWN.peers.values()].some(p=>p.z==='tackle'),null,{timeout:8000});ok(true,'A sees B go into Bait & Tackle');
+  await A.evaluate(()=>townEnter('tackle'));await A.waitForTimeout(400);ok(await A.evaluate(()=>!!HITS.find(h=>h.kind==='tin'&&h.data==='keeper')&&[...TOWN.peers.values()].filter(p=>p.z===TOWN.z).length===1),'inside together, Marge is there');
+  await A.evaluate(()=>{S.coins=1e7;margeUI()});const c0=await A.evaluate(()=>S.coins);await A.click('#mgBobB');await A.click('#mgPot');
+  ok(await A.evaluate(c0=>{const M=margeStock();return PNT().own[M.bob.id]===1&&S.coins<c0&&townDay().pot===1&&!!ITEM_BY[M.bob.id]},c0),'Marge sells the town bobber and a potion');
+  await A.evaluate(()=>{document.getElementById('plotModal').hidden=true;townExit();townEnter('bar');dartsOpen()});for(let i=0;i<3;i++)await A.click('#dtCv');
+  ok(await A.evaluate(()=>DART.darts.length===3&&townDay().dr===1&&!document.getElementById('dtAgain').hidden),'a round of darts');await A.evaluate(()=>{document.getElementById('plotModal').hidden=true;townExit()});
+  await A.evaluate(()=>{townEnter('station')});await B.evaluate(()=>{townExit();townEnter('station')});await A.waitForFunction(()=>[...TOWN.peers.values()].some(p=>p.z==='station'),null,{timeout:8000});
+  await A.evaluate(()=>l7UI());await A.selectOption('#l7T',{index:1});await A.click('#l7Go');await B.waitForFunction(()=>TOWN.radio&&TOWN.radio.to&&TOWN.radio.by,null,{timeout:8000});ok(true,'a Lake 7 request reaches everyone, with the dedication');
+  await A.evaluate(()=>{PNT().own.b_duck=2;townExit();townEnter('post')});await A.evaluate(()=>parcelUI());await A.waitForSelector('#pcGo',{timeout:8000});await A.selectOption('#pcIt','b_duck');
+  const bn=await B.evaluate(()=>mpS().name);await A.selectOption('#pcTo',{label:bn});await A.click('#pcGo');await A.waitForFunction(()=>PNT().own.b_duck===1,null,{timeout:8000});
+  ok(await B.evaluate(async()=>{const m=mpS();await mpSync(true);const x=MPV.mail.find(x=>x.kind==='cos'&&x.item==='b_duck');if(!x)return false;const r=await api('claim',{id:m.id,key:m.key,mail:x.id});giveItem(r.mail.kind,r.mail.item,r.mail.n);return PNT().own.b_duck>=1}),'a parcel from the Post Office arrives and can be claimed');
+  await A.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);townExit()});await B.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);townExit()});
+  ok(await A.evaluate(()=>{S.coins=1e7;fountToss();ledgerUI();document.getElementById('lgBuy').click();const k=ledgerToday().L.k;return townDay().wish===1&&townDay().paper===1&&S.buffs[k]>0}),'fountain wish and the daily paper boost');
+  await A.evaluate(()=>{document.getElementById('plotModal').hidden=true;S.min=1200;townEnter('bar');triviaUI()});for(let i=0;i<5;i++){await A.click('[data-tq="0"]');await A.waitForTimeout(1250)}
+  ok(await A.evaluate(()=>townDay().tv!=null&&triviaQs().length===5&&/\/5 tonight/.test(document.getElementById('plotBody').textContent)),'a round of trivia');await A.evaluate(()=>{document.getElementById('plotModal').hidden=true;townExit()});
+  await A.evaluate(()=>document.getElementById('tbLeave').click());await B.waitForFunction(()=>TOWN.peers.size===0,null,{timeout:6000});
+  ok(await A.evaluate(()=>!TOWN.on&&S.sleep.ph==='yard'&&!!document.getElementById('vbTown')),'leave returns to the yard');
+  for(const p of ps){ok(!p.errs.length,p.errs.join('; '));await p.context().close()}});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

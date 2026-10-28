@@ -478,23 +478,33 @@ async function houseRoute(req,env,url,db){
   const fw=new URL('https://yard/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('host',host);
   for(const k of ['wear','g','pet'])fw.searchParams.set(k,String(q.get(k)||'').slice(0,120));
   return env.YARD.get(env.YARD.idFromName('house:'+host)).fetch(new Request(fw.toString(),{headers:req.headers}))}
+// Lantern Harbor: the shared town. Rooms hold up to 30 anglers; the client tries room 1, then 2, and so on.
+async function townRoute(req,env,url,db){
+  if((req.headers.get('Upgrade')||'').toLowerCase()!=='websocket')return json({error:'expected-websocket'},426);
+  if(!env.YARD)return json({error:'no-live'},503);
+  const q=url.searchParams,me=await auth(db,{id:q.get('id')||'',key:q.get('key')||''}),room=Math.max(1,Math.min(20,parseInt(q.get('room')||'1',10)||1));
+  const fw=new URL('https://yard/ws');fw.searchParams.set('pid',me.id);fw.searchParams.set('name',me.name);fw.searchParams.set('host','town'+room);
+  for(const k of ['wear','g','pet'])fw.searchParams.set(k,String(q.get(k)||'').slice(0,120));
+  return env.YARD.get(env.YARD.idFromName('town:'+room)).fetch(new Request(fw.toString(),{headers:req.headers}))}
 export class YardRoom{
   constructor(ctx,env){this.ctx=ctx;this.env=env;try{ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping','pong'))}catch(e){}}
   socks(except){return this.ctx.getWebSockets().filter(w=>w!==except)}
   att(w){try{return w.deserializeAttachment()}catch(e){return null}}
   bcast(o,except){const m=JSON.stringify(o);for(const w of this.socks(except)){try{w.send(m)}catch(e){}}}
-  async count(){const host=await this.ctx.storage.get('host');if(!host||!this.env.DB)return;const n=this.socks().map(w=>this.att(w)).filter(a=>a&&!a.host).length;try{await this.env.DB.prepare('UPDATE houses SET n=? WHERE pid=?').bind(n,host).run()}catch(e){}}
-  async fetch(req){const q=new URL(req.url).searchParams,host=q.get('host'),pid=q.get('pid'),isHost=pid===host;await this.ctx.storage.put('host',host);
+  async count(){const host=await this.ctx.storage.get('host');if(!host||!this.env.DB||String(host).startsWith('town'))return;const n=this.socks().map(w=>this.att(w)).filter(a=>a&&!a.host).length;try{await this.env.DB.prepare('UPDATE houses SET n=? WHERE pid=?').bind(n,host).run()}catch(e){}}
+  async fetch(req){const q=new URL(req.url).searchParams,host=q.get('host'),pid=q.get('pid'),town=String(host).startsWith('town'),isHost=!town&&pid===host;await this.ctx.storage.put('host',host);
     const bans=(await this.ctx.storage.get('bans'))||{};if(!isHost&&bans[pid]&&bans[pid]>Date.now())return new Response(JSON.stringify({error:'removed'}),{status:403});
     for(const w of this.socks()){const a=this.att(w);if(a&&a.pid===pid){try{w.close(4000,'replaced')}catch(e){}}}
-    const guests=this.socks().map(w=>this.att(w)).filter(a=>a&&!a.host&&a.pid!==pid).length;if(!isHost&&guests>=HOUSE_CAP)return new Response(JSON.stringify({error:'full'}),{status:409});
+    const guests=this.socks().map(w=>this.att(w)).filter(a=>a&&!a.host&&a.pid!==pid).length;if(!isHost&&guests>=(town?30:HOUSE_CAP))return new Response(JSON.stringify({error:'full'}),{status:409});
     let pet=null;try{const p=JSON.parse(q.get('pet')||'null');if(p&&typeof p.k==='string')pet={k:String(p.k).slice(0,8),coat:p.coat|0,acc:String(p.acc||'').slice(0,8),name:String(p.name||'').slice(0,16)}}catch(e){}
-    const me={pid,name:String(q.get('name')||'').slice(0,20),host:isHost,cid:Math.random().toString(36).slice(2,8),wear:String(q.get('wear')||'').slice(0,8),g:q.get('g')==='f'?'f':'m',pet,x:isHost?null:140,y:246,f:-1,at:Date.now()};
+    const me={pid,name:String(q.get('name')||'').slice(0,20),host:isHost,cid:Math.random().toString(36).slice(2,8),wear:String(q.get('wear')||'').slice(0,8),g:q.get('g')==='f'?'f':'m',pet,x:town?160:isHost?null:140,y:town?440:246,f:-1,at:Date.now(),town,z:''};
     const pair=new WebSocketPair(),client=pair[0],server=pair[1];this.ctx.acceptWebSocket(server);server.serializeAttachment(me);
-    server.send(JSON.stringify({t:'hello',me:me.cid,peers:this.socks(server).map(w=>this.att(w)).filter(a=>a&&a.pid!==pid)}));
+    const reqs=town?((await this.ctx.storage.get('reqs'))||[]):undefined;server.send(JSON.stringify({t:'hello',me:me.cid,peers:this.socks(server).map(w=>this.att(w)).filter(a=>a&&a.pid!==pid),reqs}));
     this.bcast({t:'join',p:me},server);await this.count();return new Response(null,{status:101,webSocket:client})}
   async webSocketMessage(ws,msg){if(typeof msg!=='string'||msg.length>500)return;let o;try{o=JSON.parse(msg)}catch(e){return}const a=this.att(ws);if(!a)return;
-    if(o.t==='mv'){const now=Date.now();if(a.lt&&now-a.lt<120)return;a.lt=now;a.x=Math.max(-830,Math.min(400,+o.x||0));a.y=Math.max(230,Math.min(400,+o.y||0));a.f=o.f<0?-1:1;ws.serializeAttachment(a);this.bcast({t:'mv',cid:a.cid,x:a.x,y:a.y,f:a.f,m:o.m?1:0},ws)}
+    if(o.t==='mv'){const now=Date.now();if(a.lt&&now-a.lt<120&&!(a.town&&String(o.z||'')!==(a.z||'')))return;a.lt=now;a.x=a.town?Math.max(0,Math.min(2600,+o.x||0)):Math.max(-830,Math.min(400,+o.x||0));a.y=a.town?Math.max(380,Math.min(490,+o.y||0)):Math.max(230,Math.min(400,+o.y||0));a.f=o.f<0?-1:1;if(a.town)a.z=/^[a-z]{0,10}$/.test(String(o.z||''))?String(o.z||''):'';ws.serializeAttachment(a);const mv={t:'mv',cid:a.cid,x:a.x,y:a.y,f:a.f,m:o.m?1:0};if(a.town)mv.z=a.z;this.bcast(mv,ws)}
+    else if(o.t==='req'&&a.town){const now=Date.now();if(a.rq&&now-a.rq<55000)return;const i=o.i|0,j=o.j|0;if(i<0||i>=12||j<0||j>=10)return;a.rq=now;ws.serializeAttachment(a);let toName='';if(o.to){const t=this.socks().map(x=>this.att(x)).find(x=>x&&x.cid===String(o.to));if(t)toName=t.name}
+      const r={t:'req',name:a.name,toName,i,j,ts:now};const L=((await this.ctx.storage.get('reqs'))||[]).concat([r]).slice(-5);await this.ctx.storage.put('reqs',L);this.bcast(r)}
     else if(o.t==='emo'){const e=o.e|0;if(e>=0&&e<12)this.bcast({t:'emo',cid:a.cid,e},ws)}
     else if(o.t==='say'){const i=o.i|0;const now=Date.now();if(a.st&&now-a.st<1500)return;a.st=now;ws.serializeAttachment(a);if(i>=0&&i<SAYS)this.bcast({t:'say',cid:a.cid,i},ws)}
     else if(o.t==='game'){const g=o.g&&typeof o.g==='object'?o.g:null;if(!g)return;const out={k:String(g.k||'').slice(0,10)};for(const k of ['sx','sy','ex','ey','h','dur','i','on','score'])if(isFinite(g[k]))out[k]=+g[k];if(typeof g.col==='string')out.col=g.col.slice(0,9);if(g.hoop)out.hoop=1;if(typeof g.msg==='string')out.msg=g.msg.slice(0,30);this.bcast({t:'game',cid:a.cid,g:out},ws)}
@@ -530,6 +540,7 @@ async function route(req,env,url,ctx){
   const db=env.DB,p=url.pathname.replace(/^\/api\//,''),now=Date.now();
   if(p==='ping')return json({ok:true,week:weekKey(),v:7,live:!!env.LAKE});
   if(p==='live')return liveRoute(req,env,url,db);
+  if(p==='town')return townRoute(req,env,url,db);
   if(p==='house')return houseRoute(req,env,url,db);
   // Radio app: look up a Spotify track's name (public oEmbed, no key), cached for 30 days.
   if(p==='spname'){const id=String(url.searchParams.get('id')||''),k=String(url.searchParams.get('k')||'track');
@@ -733,8 +744,8 @@ async function route(req,env,url,ctx){
     return json({name:t.name,cabin:t.cabin,champ:!!(yw&&yw.champ===t.id),wins:yw?yw.wins|0:0,house:!!(hh&&now-hh.ts<HOUSE_TTL)&&!(await blockedEither(db,me.id,t.id))});
   }
   if(p==='mail'){
-    if(!['pot','mat'].includes(b.kind))return json({error:'bad-kind'},400);
-    const n=Math.max(1,Math.min(5,b.n|0)),item=clean(b.item,16),to=String(b.to||'');
+    if(!['pot','mat','cos'].includes(b.kind))return json({error:'bad-kind'},400);if(b.kind==='cos'&&!/^[a-z0-9_]{1,16}$/.test(String(b.item||'')))return json({error:'bad-item'},400);
+    const n=b.kind==='cos'?1:Math.max(1,Math.min(5,b.n|0)),item=clean(b.item,16),to=String(b.to||'');
     if(to===me.id)return json({error:'self'},400);
     const dest=await db.prepare('SELECT id,COALESCE(pub,1) AS pub FROM players WHERE id=?').bind(to).first();if(!dest)return json({error:'no-player'},404);
     if(!((dest.pub&&(me.pub??1))||(await sharesLake(db,me.id,to))))return json({error:'private'},403);
