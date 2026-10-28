@@ -183,6 +183,13 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .hv-give{list-style:none;margin:0;padding:0;display:grid;gap:6px}.hv-give li{display:grid;grid-template-columns:40px minmax(0,1fr) auto auto;gap:6px;align-items:center}.hv-give svg{width:40px;height:20px}.hv-give small{display:block;color:#d8b898;font-size:.74rem}
 .hv-give button,.hv-btn{border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:4px 10px;font:inherit;font-size:.76rem;cursor:pointer;white-space:nowrap}.hv-btn.hv-main{background:#e8823a;border-color:#e8823a;color:#2a1206;font-weight:800;padding:8px 14px}.hv-give button:disabled,.hv-btn:disabled{opacity:.45;cursor:default}
 .sec-h.hv-sec h3{color:#e8823a}
+.tq-rep{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);margin-bottom:10px}.tq-rep b{font-size:1.05rem;color:var(--gold)}.tq-rep small{color:var(--muted);font-size:.8rem}.tq-rep small b{font-size:inherit}.tq-rep>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.tq-bar i{background:linear-gradient(90deg,#c8a868,#ffd05a)!important}
+.tq-list{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:8px}.tq-list li{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 12px 10px 14px;border-radius:6px;background:#f4ecd8;color:#2a2018;transform:rotate(-.4deg)}.tq-list li:nth-child(2n){transform:rotate(.5deg)}
+.tq-list li small{color:#7a6a50;font-size:.76rem;font-weight:700}.tq-list li b{display:block;font-size:.92rem}.tq-meta{display:block;font-size:.78rem;color:#5a4a36}.tq-list li.done{opacity:.6}.tq-list li .ghost{color:#5a4a36;border-color:#c8b890}
+.tq-pin{position:absolute;top:-4px;left:50%;width:9px;height:9px;border-radius:50%;background:#c8281a;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.mk-list{display:grid;gap:8px}.mk-c{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}.mk-c svg{width:44px;height:22px}.mk-c small{display:block;color:var(--muted);font-size:.78rem}.mk-b{display:flex;gap:6px}
+@media (max-width:480px){.mk-c{grid-template-columns:36px minmax(0,1fr)}.mk-b{grid-column:1/-1;justify-content:flex-end}.tq-list li{grid-template-columns:minmax(0,1fr)}.tq-list li button{justify-self:end}}
 .hvf{display:grid;gap:10px}.hvf-c{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}.hvf-c p{margin:0;color:var(--muted);font-size:.86rem}.hvf-c .jig,.hvf-c .ghost{justify-self:start}.hvf-r{font-size:.8rem!important}
 .hvf-res{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:10px}.hvf-res p{margin:2px 0;color:var(--muted)}
 .hvf-rib{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#1a1a1a;background:var(--rc);box-shadow:0 0 0 4px rgba(255,255,255,.15),0 10px 0 -2px var(--rc)}
@@ -2851,7 +2858,7 @@ function doCatch(){
   const val=Math.round(saleValue(f,w)*(m.gold?2:1)*(WX[S.wx.id].sellX||1)*(vr?VAR[vr].mult:1));
   const L=S.log[f.id]||(S.log[f.id]={n:0,big:0});
   const isNew=L.n===0, isRec=!isNew&&w>L.big;
-  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);q4OnCatch(f,w,vr);q5OnCatch(f);chalOnCatch(f,w);monOnCatch(w);liveOnCatch(f,w,vr);realmOnCatch(f);
+  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);q4OnCatch(f,w,vr);q5OnCatch(f);chalOnCatch(f,w);monOnCatch(w);tqOnCatch(f);liveOnCatch(f,w,vr);realmOnCatch(f);
   let newVar=false;if(vr){L.v=L.v||{};newVar=!L.v[vr];L.v[vr]=(L.v[vr]||0)+1}
   bountyEvent('catch',{f,w,water:S.water,ph:phaseOf(S.min)});
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
@@ -3529,7 +3536,7 @@ const APPS=[
   {id:'settings',n:'Settings',bg:'linear-gradient(145deg,#a8aeb8,#5e6470)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4l2.2 3.1 3.7-.9.9 3.7 3.1 2.2-1.7 3.4 1.7 3.4-3.1 2.2-.9 3.7-3.7-.9L16 28l-2.2-3.1-3.7.9-.9-3.7-3.1-2.2 1.7-3.4-1.7-3.4 3.1-2.2.9-3.7 3.7.9z" fill="#fff"/><circle cx="16" cy="16" r="4.5" fill="#6e7480"/></svg>`},
   {id:'help',n:'Help',bg:'linear-gradient(145deg,#5aa8ff,#2a5ad0)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12" fill="#fff"/><path d="M12.4 12.6a3.6 3.6 0 1 1 5.2 3.2c-1 .5-1.6 1.2-1.6 2.3v1" stroke="#2a5ad0" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="16" cy="23.2" r="1.7" fill="#2a5ad0"/></svg>`},
 ];
-const APP_ORDER=['texts','discord','friends','bounty','shop','case','news','weather','radio','crate','sports','slots','hw','settings','help'];
+const APP_ORDER=['texts','discord','friends','bounty','shop','case','news','weather','radio','crate','sports','slots','hw','hv','settings','help'];
 const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
@@ -5714,10 +5721,10 @@ var TOWN={on:false,z:'',fade:0,x:170,y:440,tx:null,ty:null,face:1,mv:0,cam:0,ws:
 const TBLD=[
   {id:'ferry',x:150,w:180,kind:'soon',n:'Ferry Landing',sub:'The ferry is out of service. Someday it might take you somewhere new.'},
   {id:'tackle',nc:'#4ae0ff',x:390,w:210,n:'Bait & Tackle',sub:'Step inside: Marge’s daily stock is only sold here',inside:1,col:'#3a6a8a',roof:'#1e3a52',sign:'BAIT & TACKLE'},
-  {id:'market',x:620,w:170,kind:'soon',n:'Fish Market',sub:'Opening soon: the market will post the fish it wants each day.',stall:1},
+  {id:'market',x:620,w:170,kind:'soon',n:'Fish Market',sub:'Three wanted fish a day at double price',stall:1,open:()=>marketUI()},
   {id:'post',nc:'#ff5a5a',x:830,w:190,n:'Post Office',sub:'Fern’s parcel counter and the P.O. boxes',inside:1,col:'#a8463a',roof:'#5a2018',sign:'POST OFFICE',flag:1},
   {id:'square',x:1080,w:240,kind:'square',n:'Town Square',sub:'The old bandstand is boarded up for now. Toss a coin in the fountain for luck.'},
-  {id:'board',x:1240,w:70,kind:'board',n:'Notice Board',sub:'Townsfolk requests are coming soon.'},
+  {id:'board',x:1240,w:70,kind:'board',n:'Notice Board',sub:'Jobs from the townsfolk, new every day',open:()=>boardUI()},
   {id:'museum',nc:'#ffe08a',x:1450,w:260,n:'Lantern Lake Museum',sub:'Record fish and plaques',col:'#d8d0c0',roof:'#8a8070',sign:'MUSEUM',cols:1,open:()=>openMuseum()},
   {id:'station',nc:'#8aa8ff',flick:1,x:1710,w:180,n:'Lake 7 Station',sub:'The studio: request a song, and Lake 7 keeps the case files',inside:1,col:'#2a3a5a',roof:'#141c2c',sign:'LAKE 7',tower:1},
   {id:'bar',nc:'#ff6ae0',flick:1,x:1930,w:200,n:'Murphy’s',sub:'Darts, the LLBA game and a seat at the bar',inside:1,col:'#5a3a2a',roof:'#2a1a12',sign:'Murphy’s'},
@@ -5851,7 +5858,9 @@ function drawTown(d,T,top,bot){const nw=performance.now(),dt=TOWN.lt?Math.min(.1
   const vis=TBLD.filter(b=>b.x+b.w/2+80>cam&&b.x-b.w/2-80<cam+V.VW);for(const b of vis)drawTB(b,d,T,night,V);if(hvOn())hvStreet(d,T,night,V,cam);
   for(const x of TLAMP){if(x<cam-40||x>cam+V.VW+40)continue;ctx.fillStyle=rgb(mix([20,20,24],[60,60,66],d));ctx.fillRect(x-2,TW_Y0-76,4,76);ctx.fillRect(x-8,TW_Y0-80,16,6);ctx.fillStyle=night>.2?'#ffe8a8':rgb(mix([60,60,50],[220,220,200],d));ctx.beginPath();ctx.arc(x,TW_Y0-70,5,0,7);ctx.fill();if(night>.2){ctx.globalCompositeOperation='lighter';glow(x,TW_Y0-70,60,.18*night,'255,210,140');glow(x,TW_Y0+30,80,.06*night,'255,210,140');ctx.globalCompositeOperation='source-over'}}
   RH2(V,FOUNT_X-46,TW_Y0-64,92,70,'tfount',0);
-  for(const b of vis){if(!b.inside)continue;const n=[...TOWN.peers.values()].filter(p=>p.z===b.id).length;if(n)townTag(b.x,TW_Y0-128,`${n} inside`,'rgba(30,110,60,.9)')}}
+  for(const b of vis){if(!b.inside)continue;const n=[...TOWN.peers.values()].filter(p=>p.z===b.id).length;if(n)townTag(b.x,TW_Y0-128,`${n} inside`,'rgba(30,110,60,.9)')}
+  if(vis.some(b=>b.id==='board')){const o=TQ().jobs.filter(j=>!j.done).length;if(o)townTag(1240,TW_Y0-114,`${o} job${o>1?'s':''}`,'rgba(170,60,30,.9)')}
+  if(vis.some(b=>b.id==='market'))townTag(620,TW_Y0-126,'Wanted: '+marketWants().map(f=>f.n).join(', '),'rgba(30,80,120,.88)')}
   // people: you, your pet, other anglers and townsfolk, in depth order
   const A=[];const s0=2.05;
   A.push({y:TOWN.y,fn:()=>townPerson(TOWN.x,TOWN.y,TOWN.face,TOWN.mv,T,d,undefined,undefined,undefined,s0)});
@@ -6040,7 +6049,7 @@ function drawRoomPost(d,T,V,top,bot){const R=TROOMS.post;roomShell(V,TOWN.cam,'#
 function seedRng(s){return ()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296}}
 const FOUNT_X=1150;
 // ==HARVEST FAIR== the festival on Lantern Harbor's main street: string lights, hay and pumpkins, and a stall in front of the Fish Market.
-const HVF_X=620;
+const HVF_X=2445;
 function hvStreet(d,T,night,V,cam){const Y=TW_Y0;
   // string lights: festival poles rise from the street lamps so the strings hang above the doorways, not across them
   const top=Y-124,sag=6;
@@ -6184,9 +6193,57 @@ function triviaDone(){const st=townDay(),n=TRIV.ok,pay=n*triviaPay();TRIV.on=fal
   $('plotBody').innerHTML=`<p class="land-d"><b>${n}/5 tonight.</b> ${pay?`+$${money(pay)}${extra}.`:'No prize this time.'}</p><p class="fr-muted">New questions tomorrow night.</p>`}
 // ==MARGE'S COUNTER== Daily stock only sold in person, the same for everyone that day.
 function townDay(){const S2=S.town&&typeof S.town==='object'?S.town:(S.town={});const k=todayKey();if(S2.d!==k){Object.assign(S2,{d:k,pot:0,bag:0,dr:0,db:S2.db|0})}return S2}
+// ==TOWN JOBS== the Notice Board: three requests a day from the townsfolk. Finishing them pays and builds town reputation.
+const REP_LV=[[0,'Newcomer','Finish jobs on the Notice Board to get known around town.'],[100,'Regular','Jobs pay 10% more.'],[300,'Local','A fourth job on the board every day.'],[700,'Friend of the Harbor','10% off at Marge’s and the Fish Market buys 50% more.'],[1500,'Pillar of the Harbor','Jobs pay 25% more, and a trophy for your case.']];
+const repPts=()=>S.rep|0,repLv=()=>{let i=0;REP_LV.forEach((l,k)=>{if(repPts()>=l[0])i=k});return i};
+const TQ_WHO=['Old Pete','Dot','Harbormaster Hollis','Marge','Fern'];
+const tqFishOk=f=>!f.quest&&!f.ev&&WATERS.some(w=>w.id===f.at&&S.boat>=w.boat)&&S.log[f.id];
+function tqMake(){const R=()=>Math.random(),jobs=[],used=new Set(),n=repLv()>=2?4:3;const reach=WATERS.filter(w=>S.boat>=w.boat);
+  const kinds=['fish','fish','catch','night','rare','fruit','mat'];
+  for(let tries=0;jobs.length<n&&tries<40;tries++){const k=kinds[Math.floor(R()*kinds.length)];if(used.has(k)&&k!=='fish')continue;const who=TQ_WHO[Math.floor(R()*TQ_WHO.length)];let j=null;
+    if(k==='fish'){const pool=FISH.filter(f=>tqFishOk(f)&&'CU'.includes(f.r)&&!jobs.some(x=>x.f===f.id));if(pool.length){const f=pool[Math.floor(R()*pool.length)];j={k,f:f.id,n:f.r==='C'?5+Math.floor(R()*4):2+Math.floor(R()*3),m:f.r==='C'?30:40,rp:f.r==='C'?10:15}}}
+    else if(k==='rare'){if(FISH.some(f=>tqFishOk(f)&&f.r==='R'))j={k,n:1,m:60,rp:25}}
+    else if(k==='catch'){const w=reach[Math.floor(R()*reach.length)];j={k,w:w.id,n:25+Math.floor(R()*16),p:0,m:40,rp:15}}
+    else if(k==='night')j={k,n:20,p:0,m:40,rp:15};
+    else if(k==='fruit'){const pan=S.pantry||{},have=FIDS.filter(x=>x in pan);if(have.length)j={k,fr:have[Math.floor(R()*have.length)],n:3,m:35,rp:12}}
+    else if(k==='mat'){const seen=MATS.filter(m=>'CU'.includes(m.r)&&(m.id in (S.mats||{})));if(seen.length){const m=seen[Math.floor(R()*seen.length)];j={k,mt:m.id,n:m.r==='C'?5:3,m:35,rp:12}}}
+    if(j){j.who=who;used.add(k);jobs.push(j)}}
+  return jobs}
+function TQ(){const k=todayKey();if(!S.tq||S.tq.d!==k)S.tq={d:k,jobs:tqMake()};if(!S.tq.v2){S.tq.v2=1;for(const j of S.tq.jobs)if(j.m<30)j.m=Math.round(j.m*2.6)}return S.tq}
+function tqText(j){const f=j.f&&FI(j.f);return ({fish:()=>`Bring me ${j.n} ${f?f.n:'fish'}.`,rare:()=>'Bring me any Rare fish. Something to show off at the shop.',catch:()=>`Catch ${j.n} fish at ${W(j.w).n} today.`,night:()=>`Catch ${j.n} fish after dark today.`,fruit:()=>`Bring me ${j.n} ${FRUITS[j.fr].n.toLowerCase()} from your trees.`,mat:()=>`Bring me ${j.n} ${MI(j.mt).n}.`}[j.k]||(()=>''))()}
+function tqHave(j){if(j.k==='fish')return Math.min(j.n,(S.cooler[j.f]&&S.cooler[j.f].n)|0);if(j.k==='rare')return coolerIds().some(k=>FI(k).r==='R'&&!S.locked[k])?1:0;if(j.k==='catch'||j.k==='night')return Math.min(j.n,j.p|0);if(j.k==='fruit')return Math.min(j.n,(pantry()[j.fr])|0);if(j.k==='mat')return Math.min(j.n,(S.mats[j.mt])|0);return 0}
+// Job pay is set in dollars, $15,000 to $25,000 by how hard the job is, so it's worth a trip to town. Reputation perks add on top.
+const tqBase=j=>j.k==='rare'?25000:j.k==='catch'||j.k==='night'?20000:j.k==='fish'?(FI(j.f)&&FI(j.f).r==='U'?18000:15000):17000;
+const tqPay=j=>{const lv=repLv(),k=lv>=4?1.25:lv>=1?1.1:1;return Math.round(tqBase(j)*k/100)*100};
+const TQ_BONUS=30000;
+function tqOnCatch(f){const q=S.tq;if(!q||q.d!==todayKey())return;const night=phaseOf(S.min)==='night';for(const j of q.jobs){if(j.done)continue;if(j.k==='catch'&&S.water===j.w)j.p=(j.p|0)+1;else if(j.k==='night'&&night)j.p=(j.p|0)+1}}
+function tqTake(cool,k,n){const c=S.cooler[k];if(!c)return;const per=c.val/c.n;c.n-=n;c.val=Math.max(0,c.val-per*n);if(c.n<=0)delete S.cooler[k];coolDirty=true}
+function tqHandIn(i){const q=TQ(),j=q.jobs[i];if(!j||j.done||tqHave(j)<j.n)return;
+  if(j.k==='fish')tqTake(S.cooler,j.f,j.n);else if(j.k==='rare'){const k=coolerIds().find(k=>FI(k).r==='R'&&!S.locked[k]);tqTake(S.cooler,k,1)}else if(j.k==='fruit')pantry()[j.fr]-=j.n;else if(j.k==='mat'){S.mats[j.mt]-=j.n;storeDirty=true;gearDirty=true}
+  const was=repLv(),pay=tqPay(j);j.done=1;S.coins+=pay;S.rep=repPts()+j.rp;sfx('coin');showToast(`${j.who}: “Thank you kindly!”`,`+$${money(pay)} · +${j.rp} reputation`);
+  const now=repLv();if(now>was){const L=REP_LV[now];setTimeout(()=>celebrate({lbl:'Town reputation up!',r:now>=4?'L':'R',name:L[1],sub:L[2],icon:svgI('crown','#ffd05a')}),600);if(now>=4&&!S.pillar){S.pillar=1;S.trophies.unshift({name:'Pillar of the Harbor',water:'pond',type:'count',score:`${repPts()} reputation`,day:S.day})}}
+  if(!q.bonus&&q.jobs.every(x=>x.done)){q.bonus=1;const bp=TQ_BONUS;S.coins+=bp;S.rep=repPts()+25;setTimeout(()=>celebrate({lbl:'Every job done!',r:'R',name:`+$${money(bp)} board bonus`,sub:'+25 reputation. New jobs go up at midnight',icon:svgI('crown','#ffd05a')}),700)}
+  try{renderCooler()}catch(e){}save();boardUI()}
+function boardUI(){const q=TQ(),B=$('plotBody'),lv=repLv(),L=REP_LV[lv],nx=REP_LV[lv+1],pts=repPts();$('plotEye').textContent='Lantern Harbor';$('plotTitle').textContent='Notice Board';
+  const pc=nx?Math.min(100,(pts-L[0])/(nx[0]-L[0])*100):100;
+  B.innerHTML=`<div class="tq-rep"><div><b>${L[1]}</b><small>${pts.toLocaleString()} reputation${nx?` · ${(nx[0]-pts).toLocaleString()} to ${nx[1]}`:''}</small></div><div class="hw-bar tq-bar"><i style="width:${pc}%"></i></div><small>${nx?`Next: ${nx[2]}`:L[2]}</small></div>
+    <ol class="tq-list">${q.jobs.map((j,i)=>{const h=tqHave(j),ready=!j.done&&h>=j.n,cnt=j.k==='catch'||j.k==='night'||j.n>1;return `<li class="${j.done?'done':''}"><span class="tq-pin" aria-hidden="true"></span><div><small>${esc(j.who)}</small><b>${tqText(j)}</b><span class="tq-meta">${j.done?'Done ✓':`${cnt?`${h}/${j.n} · `:''}$${money(tqPay(j))} · +${j.rp} reputation`}</span></div>${j.done?'':`<button class="${ready?'jig':'ghost'}" data-tq="${i}" ${ready?'':'disabled'}>${j.k==='catch'||j.k==='night'?'Turn in':'Hand in'}</button>`}</li>`}).join('')}</ol>
+    <p class="own-note">${q.bonus?'Board bonus collected today. ':`Finish every job today for a bonus of $${money(TQ_BONUS)} and +25 reputation. `}New jobs go up at midnight. Fish come out of your cooler, fruit from your pantry and materials from Storage.</p>`;
+  $('plotModal').hidden=false;B.querySelectorAll('[data-tq]').forEach(b=>b.onclick=()=>tqHandIn(+b.dataset.tq))}
+// ==FISH MARKET== three wanted fish a day, the same for everyone, bought at double price up to a daily amount.
+function marketWants(){const s=townSeed(),pool=FISH.filter(f=>!f.quest&&!f.ev&&'CUR'.includes(f.r)),out=[];
+  const groups=[pool.filter(f=>f.at==='pond'||f.at==='lake'),pool.filter(f=>f.at==='river'||f.at==='deep'),pool];let h=s;
+  for(const g of groups){const c=g.filter(f=>!out.includes(f));if(!c.length)continue;out.push(c[h%c.length]);h=Math.floor(h/7)+13}return out}
+const mkCap=f=>Math.round(({C:12,U:8,R:3}[f.r]||5)*(repLv()>=3?1.5:1));
+function marketSell(id,n){const st=townDay(),f=FI(id),c=S.cooler[id];st.mk=st.mk||{};if(!c||!f||S.locked[id])return;n=Math.min(n,c.n,mkCap(f)-(st.mk[id]|0));if(n<=0)return;
+  const per=c.val/c.n,v=Math.round(per*n*2);tqTake(S.cooler,id,n);st.mk[id]=(st.mk[id]|0)+n;S.coins+=v;bountyEvent('sell',v);sfx('coin');showToast(`Sold ${n} ${f.n} at the market`,`+$${money(v)}`);try{renderCooler()}catch(e){}save();marketUI()}
+function marketUI(){const st=townDay(),B=$('plotBody');st.mk=st.mk||{};$('plotEye').textContent='Lantern Harbor';$('plotTitle').textContent='Fish Market';
+  B.innerHTML=`<p class="land-d">“Fresh fish wanted! Today we’re paying double for these. Same list for everyone in town, and it changes at midnight.”</p><div class="mk-list">${marketWants().map(f=>{const c=S.cooler[f.id],have=c?c.n:0,lk=!!S.locked[f.id],sold=st.mk[f.id]|0,cap=mkCap(f),left=Math.max(0,cap-sold),per=c?c.val/c.n:saleValue(f,(f.w[0]+f.w[1])/2);
+    return `<div class="mk-c">${fishSvg(RCOL[f.r])}<div><b class="rar-${f.r}">${f.n}</b><small>${RAR[f.r]} · ${W(f.at)?W(f.at).n:''} · about $${money(Math.round(per*2))} each</small><small>${left?`Buying ${left} more today`:'Bought all they need today'} · you have ${have}${lk?' (locked)':''}</small></div><div class="mk-b"><button class="ghost" data-mk="${f.id}" data-n="1" ${!have||!left||lk?'disabled':''}>Sell 1</button><button class="jig" data-mk="${f.id}" data-n="${Math.min(have,left)}" ${!have||!left||lk?'disabled':''}>Sell ${Math.min(have,left)||''}</button></div></div>`}).join('')}</div>${repLv()>=3?'<p class="own-note">Friend of the Harbor: the market buys 50% more from you.</p>':''}`;
+  $('plotModal').hidden=false;B.querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>marketSell(b.dataset.mk,+b.dataset.n))}
 function townSeed(){let h=0;for(const c of todayKey())h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)}
 function margeStock(){const s=townSeed(),r=Math.max(60,S.rate||0),pot=PKEYS[s%PKEYS.length],bob=T_BOBS[(s>>3)%T_BOBS.length],bm={U:[60,20000],R:[150,50000],E:[400,150000]}[bob.t]||[100,40000];
-  return {pot,potC:Math.max(3000,Math.round(r*15/100)*100),bob,bobC:Math.max(bm[1],Math.round(r*bm[0]/1000)*1000),bagC:Math.max(8000,Math.round(r*35/100)*100)}}
+  const k=repLv()>=3?.9:1;return {pot,potC:Math.round(Math.max(3000,Math.round(r*15/100)*100)*k),bob,bobC:Math.round(Math.max(bm[1],Math.round(r*bm[0]/1000)*1000)*k),bagC:Math.round(Math.max(8000,Math.round(r*35/100)*100)*k)}}
 function margeUI(){const st=townDay(),M=margeStock(),P=PNT(),own=(P.own[M.bob.id]|0)>0,B=$('plotBody');$('plotEye').textContent='Bait & Tackle · in person only';$('plotTitle').textContent='Marge’s Counter';
   const rn={U:'Uncommon',R:'Rare',E:'Epic'}[M.bob.t]||'';
   B.innerHTML=`<p class="land-d">“Today’s stock. It changes at midnight, and you won’t find any of it on your phone.”</p><div class="pj-wrap" style="display:grid;gap:10px">
@@ -6399,6 +6456,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:137,n:'Town jobs and the Fish Market',items:['The Notice Board in Lantern Harbor is up! Three jobs a day from the townsfolk: bring fish, a rare catch, fruit or materials, or catch fish at a certain water or after dark. New jobs go up at midnight.','Jobs pay $15,000 to $25,000 each depending on how hard they are, and finishing every job in a day adds a $30,000 board bonus. They also build your town reputation. Climb from Newcomer to Regular, Local, Friend of the Harbor and Pillar of the Harbor for better pay, a fourth daily job, 10% off at Marge’s and a trophy.','The Fish Market is open. Every day it posts three wanted fish, the same for everyone in town, and pays double for them up to a daily amount.','The Harvest Fair stall moves to the east end of the street by the Old Cannery, so it doesn’t block the market.']},
+ {v:136,n:'Harvest app fix',items:['Bug fix: the Harvest app was missing from the phone’s home screen. It now shows up next to the other apps when the festival starts on November 2.']},
  {v:135,n:'Harvest Fair',items:['During the Harvest Festival (November 2 to 30), Lantern Harbor’s main street is decked out with string lights, hay bales and pumpkins.','A Harvest Fair stall opens in front of the Fish Market. Tap it to play.','Apple bobbing: 20 seconds to grab as many apples as you can, tapping them when they bob up out of the water. Every apple is worth 6 prize tickets for the arcade.','Pie contest: once a day, bake a pie from a fish and a fruit and pull it out of the oven at the right moment. The judges pick a favorite fruit each day. Win a blue, red or white ribbon and prize money. Three blue ribbons earn the Blue Ribbon Baker 2026 trophy.']},
  {v:134,n:'Pet in the boat',items:['Bug fix: your pet now sits down inside the boat with you instead of perched on top of the side.']},
  {v:133,n:'Home on the map',items:['The Map now has a Home pin on your cabin and a Home card in the list, so you can head home from the same place you travel to everywhere else. It works just like the Return home button.']},
