@@ -6308,6 +6308,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:134,n:'Pet in the boat',items:['Bug fix: your pet now sits down inside the boat with you instead of perched on top of the side.']},
  {v:133,n:'Home on the map',items:['The Map now has a Home pin on your cabin and a Home card in the list, so you can head home from the same place you travel to everywhere else. It works just like the Return home button.']},
  {v:132,n:'Safer cloud saves',items:['Bug fix: switching devices could replace a big game with a smaller one when you tapped “Keep this game”. Now you see both games side by side (fish, species, money and when each was played), the one with more progress is highlighted, and keeping the smaller game takes a second tap.','Your cloud save can no longer be replaced by a game with far less progress unless you confirm it, even from an older copy of the game left open somewhere.','New: Earlier saves. Your cloud keeps your last few saves plus your biggest one. Find them under Your game on the title screen and restore one with two taps if a game ever gets replaced by mistake.']},
  {v:131,n:'Harvest Basket',items:['Four festival fish bite from November 2 to 30: the Acorn Sunfish at Dock Pond, the Maple Trout at Reed Lake, the Cranberry Darter at Fork River and the legendary Harvest Moon Carp at Deepwater Basin at night. They get their own Logbook section and count for the Museum.','The Harvest Basket: the whole lake fills one basket together by giving fish from their coolers. Rarer fish are worth more points, and festival fish count double.','Every quarter of the basket the lake fills pays everyone who gave at least 10 points: $25,000, then 3 Golden Scale Elixirs, then The Cornucopia (a festival-only yard piece), then $100,000 and a Harvest Basket 2026 trophy.','A new Harvest app on your phone shows the basket, the top helpers, the festival fish and your costume.']},
@@ -7602,8 +7603,9 @@ function boatTop(b,x,y,L,d,T,mv){const C=(c)=>HCol(c,d),glass=lit(d)?'#ffcf70':C
     if(mv&&!RM){ctx.fillStyle='rgba(255,255,255,.55)';for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(x+20-i*7-Math.random()*4,y+22+Math.random()*3,1.4+Math.random()*1.6,0,7);ctx.fill()}}return}}
 function drawBoat(d,T){try{drawBoat0(d,T);if(dockFishing()){const sl=S.sleep,b=S.boat;S.sleep=null;S.boat=0;PET_DOCK=true;try{drawBoat0(d,T)}finally{S.sleep=sl;S.boat=b;PET_DOCK=false}}}finally{drawRodFx()}}
 const INBOAT=8; // how far the angler stands down inside the boat
+const PET_IN=3; // and how far the pet sits down inside it
 function drawBoat0(d,T){
-  let mir=false,inBoat=false;const b=S.boat||((S.sleep&&S.sleep.at)||(TRV.on&&(TRV.to==='friend'||TRV.from==='friend'))?1:0),bob=Math.sin(T*1.6)*2.5*(1+AMB.rock*1.4);let ax,ay,pv=null,ang=0,deck=null;
+  let mir=false,inBoat=false,petIn=false;const b=S.boat||((S.sleep&&S.sleep.at)||(TRV.on&&(TRV.to==='friend'||TRV.from==='friend'))?1:0),bob=Math.sin(T*1.6)*2.5*(1+AMB.rock*1.4);let ax,ay,pv=null,ang=0,deck=null;
   const hullC=isRealm(S.water)&&!S.sleep?REALMS_BY[S.water].hull:[[0,0,0],[120,82,52],[118,126,130],[196,64,48],[236,234,224],[52,92,120],[236,238,242],[30,34,44]][b],hull=rgb(mix(hullC.map(v=>v*.3),hullC,d*.8+.2));
   if(b===0){ax=dockEnd()-8;ay=246}else{
     let x=[0,430,420,410,400,385,375,370][b];const bmv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98),y=262+bob-(b===7&&bmv?8:0),L=[0,90,110,130,150,180,190,200][b];if(S.sleep)x+=(dockEnd()+10-x)*boatK();if(TRV.on){x+=TRV.dx;if((TRV.cur??TRV.dir)<0){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1)}drawWake(x,y,L,d,T)}
@@ -7612,6 +7614,8 @@ function drawBoat0(d,T){
     if(AMB.rock>.08){ctx.strokeStyle=`rgba(255,255,255,${Math.min(.35,AMB.rock*.4)})`;ctx.lineWidth=1.2;const sp=1+(1-AMB.rock)*.6;ctx.beginPath();ctx.ellipse(x+L/2,y+15,L*.62*sp,6*sp,0,0,7);ctx.stroke()}
     pv=[x+L/2,y+12];ang=AMB.rock*.1*Math.sin(T*5.2);ctx.save();ctx.translate(pv[0],pv[1]);ctx.rotate(ang);ctx.translate(-pv[0],-pv[1]);
     if(!S.sleep||['boatIn','boatOut','pick'].includes(S.sleep.ph)){inBoat=true;drawAngler(x+L-36,y+INBOAT,d,T)}
+    // the pet sits down inside the boat too, so it's drawn before the hull
+    if(!S.sleep&&!TRV.on&&!PET_DOCK){petBoat(x+L-36,y+INBOAT,[b>=4?x+L*.62:x+L*.28,y-(b>=3?3:0)+PET_IN],d,T);petIn=true}
     const WDN=wardenOn()&&!isRealm(S.water);if(WDN)drawWarden(ctx,x,y,L,d,T,!!WDB().lit,!S.sleep&&!TRV.on&&!mir);else{const sk=skinEq();if(sk)drawPaint(ctx,x,y,L,b,d,T,sk);else{ctx.fillStyle=hull;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+L,y-(b>=3?6:0));ctx.lineTo(x+L-(b===2?4:16),y+14);ctx.lineTo(x+10,y+14);ctx.fill()}}if(isRealm(S.water)&&!S.sleep)realmBoatFx(x,y,L,d,T);
     if(!WDN&&(b===2||b===3)){const s=b===3?1:.8,mx=x+1,mv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98);
       ctx.fillStyle=rgb(mix([10,10,12],[46,48,54],d));ctx.fillRect(mx-5*s,y-1,3.2*s,19*s);
@@ -7624,7 +7628,7 @@ function drawBoat0(d,T){
   const R=(px,py)=>{if(!pv)return [px,py];const c=Math.cos(ang),sn=Math.sin(ang),dx=px-pv[0],dy=py-pv[1];return [pv[0]+dx*c-dy*sn,pv[1]+dx*sn+dy*c]};
   const done=()=>{if(pv)ctx.restore()};
   if(S.sleep&&!(b>0&&['boatIn','boatOut','pick'].includes(S.sleep.ph))){done();if(mir)ctx.restore();return}
-  if(!inBoat)drawAngler(ax,ay,d,T);LIVE.meXY=mir?null:[ax,ay];if(!S.sleep&&!TRV.on&&!PET_DOCK)petBoat(ax,ay,deck,d,T);
+  if(!inBoat)drawAngler(ax,ay,d,T);LIVE.meXY=mir?null:[ax,ay];if(!S.sleep&&!TRV.on&&!PET_DOCK&&!petIn)petBoat(ax,ay,deck,d,T);
   if(S.sleep||TRV.on){done();if(mir)ctx.restore();return}
   const p=cast.el/cast.dur,now=performance.now()/1000,ct=CATCH.on?(now-CATCH.t0)/CATCH.dur:2;
   const bend=CATCH.on&&ct<.84&&!CATCH.item?Math.min(14,4+Math.sqrt(CATCH.w)*1.6)*(1-ct*.6):CATCH.on&&ct<.84?3:0;

@@ -8,7 +8,17 @@ const srv=spawn(process.execPath,[path.join(HERE,'harness.mjs')],{env:{...proces
 await new Promise((ok,bad)=>{const t=setTimeout(()=>bad(new Error('harness did not start')),15000);srv.stdout.on('data',d=>{if(String(d).includes('harness on')){clearTimeout(t);ok()}});srv.on('exit',c=>bad(new Error('harness exited '+c)))});
 
 const results=[];let fails=0;
-async function check(name,fn){const t0=Date.now();try{const r=await Promise.race([fn(),new Promise((_,bad)=>setTimeout(()=>bad(new Error('timed out after 90s')),90000))]);if(r===false)throw new Error('returned false');results.push(['PASS',name]);console.log('✔ PASS  '+name+` (${((Date.now()-t0)/1000).toFixed(1)}s)`)}catch(e){fails++;const m=name+' — '+String(e.message||e).split('\n').slice(0,3).join(' | ');results.push(['FAIL',m]);console.log('✘ FAIL  '+m)}}
+// Checks are queued, then run two at a time (CONC, default 2). Checks that use the harness's shared push log
+// (__pushes, __cron, __seen) run one at a time after the rest. Pass words to run only matching checks:
+//   node tests/smoke.mjs harvest save      (any check whose name contains "harvest" or "save")
+// Checks that play real-time minigames or walk characters around get flaky when the CPU is shared, so they run alone too.
+const SOLO=['horseshoes','yard games','open house','case 5','hangouts','pet','mirror match','town','harvest basket'];
+const ONLY=process.argv.slice(2).map(s=>s.toLowerCase()),CONC=Math.max(1,+process.env.CONC||2),JOBS=[];
+function check(name,fn){if(ONLY.length&&!ONLY.some(w=>name.toLowerCase().includes(w)))return Promise.resolve();JOBS.push({name,fn,solo:/__pushes|__cron|__seen/.test(fn.toString())||SOLO.some(w=>name.toLowerCase().includes(w))});return Promise.resolve()}
+async function runCheck({name,fn}){const t0=Date.now();try{const r=await Promise.race([fn(),new Promise((_,bad)=>setTimeout(()=>bad(new Error('timed out after 150s')),150000))]);if(r===false)throw new Error('returned false');results.push(['PASS',name]);console.log('✔ PASS  '+name+` (${((Date.now()-t0)/1000).toFixed(1)}s)`)}catch(e){fails++;const m=name+' — '+String(e.message||e).split('\n').slice(0,3).join(' | ');results.push(['FAIL',m]);console.log('✘ FAIL  '+m)}}
+async function runAll(){const par=JOBS.filter(j=>!j.solo),solo=JOBS.filter(j=>j.solo);let k=0;
+  await Promise.all(Array.from({length:Math.min(CONC,par.length)},async()=>{while(k<par.length)await runCheck(par[k++])}));
+  for(const j of solo)await runCheck(j)}
 const ok=(c,msg)=>{if(!c)throw new Error(msg)};
 const today=new Date().toLocaleDateString('en-CA');
 const save=(o)=>Object.assign({coins:500000,shack:3,boat:2,water:'lake',min:720,day:30,total:900,log:{},recent:[],q:{step:7},streak:{last:today,count:1,claimed:true},last:Date.now(),set:{cut:'off'}},o);
@@ -389,5 +399,6 @@ await check('server: likes, Yard of the Week board, random yard, champion flag',
     const top=await api('yard/top',{id:B.id,key:B.key}),rnd=await api('yard/random',{id:B.id,key:B.key}),c=await api('cabin',{id:B.id,key:B.key,target:A.id});return {top:top.top.map(x=>x.name+':'+x.n),rnd:rnd.name,champ:c.champ,A:A.name,B:B.name}});
   ok(r.top.includes(r.A+':1'),'board '+r.top);ok(r.rnd&&r.rnd!==r.B,'random '+r.rnd);ok(r.champ===false,'champ flag');await p.context().close()});
 
+const T0=Date.now();await runAll();
 await b.close();srv.kill();
-console.log(`\n${results.length-fails}/${results.length} passed`);process.exit(fails?1:0);
+console.log(`\n${results.length-fails}/${results.length} passed in ${((Date.now()-T0)/1000).toFixed(0)}s`);process.exit(fails?1:0);

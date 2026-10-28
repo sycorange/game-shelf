@@ -21,6 +21,17 @@ node tests/smoke.mjs
 
 It prints a ✔ or ✘ line per check and ends with `N/N passed`. The exit code is 1 if anything failed.
 
+Checks run two at a time (set `CONC=1` to run them one by one, or higher on a bigger machine). Checks that play real-time
+minigames, walk characters around or use the shared push log run one at a time after the others, so they don't get flaky.
+
+To run only some checks while working on a feature, pass words from their names:
+
+```
+node tests/smoke.mjs harvest save     # only checks with "harvest" or "save" in the name
+```
+
+Run the whole suite before every push.
+
 ## What it covers
 
 - Yard: old decor converts into place, dragging in Decorate yard, buying land, fishing off the dock
