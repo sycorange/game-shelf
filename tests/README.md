@@ -74,7 +74,7 @@ Run the whole suite before every push.
 - Phone controls: the thumbstick walks, the action button enters places, Go to walks you there, and it turns off in Settings
 - Case 6, The Night Shift: the tin, statements only after dark, ledger pages, the cipher, the lamp, a wrong accusation locking the board and the right one closing the case, plus texting without an angler name
 - Case 7, The Town Under the Lake: the steeple, keepsakes, the bell code, the letters, the diving bell and the sonar dive, with its rewards and the steeple in your yard
-- Moon landings: the boat floats down on thrusters, and lifts off when your air runs out
+- Moon landings: the boat floats straight down on thrusters and straight up when you leave or your air runs out
 - Big games move: transfer codes take big saves, and a failed Move my game offers the save code instead
 - Big yards: visitors get every placed thing and the ground, even when the shared snapshot is past the old size limit
 - The Phoenix Collection: the Mythic set in Crate Expectations, the two-tap buy, the unveil, equipping, and the set-bonus firebird

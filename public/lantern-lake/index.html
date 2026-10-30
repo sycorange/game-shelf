@@ -5493,8 +5493,12 @@ const TRV={on:false,t0:0,from:'pond',to:'pond',dx:0,dir:1,moving:false,dur:5.2};
 const ISLE=id=>id==='pond'||id==='friend';
 function trvDirs(from,to){const ord=waterIdx(to)>waterIdx(from)?1:-1;return {dir:ord,dOut:ISLE(from)?1:ord,dIn:ISLE(to)?-1:ord}}
 const waterIdx=id=>{const i=WATERS.findIndex(w=>w.id===id);return id==='pond'?-1:id==='friend'?99:isRealm(id)?50:i};
-function travelTo(id){if(id===S.water||TRV.on)return;const from=S.water;realmSwap(from,id);S.water=id;cast.el=0;cast.dur=castDur();
-  if(!cutOn()||S.sleep){renderAll();save();return}
+function travelTo(id,opt){if(id===S.water||TRV.on||(MFX.ph==='lift'&&!(opt&&opt.instant)))return;
+  // the Moon: float straight down to the sea, and straight up when you leave (no sailing in from the side)
+  if(!(opt&&opt.instant)&&cutOn()&&!S.sleep&&!RM){if(S.water==='moon'&&id!=='moon'){mfxLift(id);return}
+    if(id==='moon'){const from=S.water;realmSwap(from,id);S.water=id;cast.el=0;cast.dur=castDur();renderAll();save();mfxLand();showToast('Through the Lunar Gate…','Sea of Tranquility');return}}
+  const from=S.water;realmSwap(from,id);S.water=id;cast.el=0;cast.dur=castDur();
+  if(!cutOn()||S.sleep||(opt&&opt.instant)){renderAll();save();return}
   Object.assign(TRV,{on:true,t0:performance.now()/1000,from,to:id,dx:0,...trvDirs(from,id),cur:trvDirs(from,id).dOut,moving:true,after:null,label:null});if(trvPortal())TRV.label=realmLabel();sfx('click');renderAll();save()}
 const C2=(n,dy,d,a)=>rgb(mix(n,dy,d),a);
 function snowCap(path,d){if(AMB.snowAcc>0){ctx.fillStyle=`rgba(236,242,250,${.7*AMB.snowAcc*(.45+.55*d)})`;path();ctx.fill()}}
@@ -6756,6 +6760,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:150,n:'Moon landings, straight up and down',items:['Your boat now floats straight down onto the Sea of Tranquility and straight back up when you leave, instead of sailing in from the side first. Leaving on purpose lifts off too, not just running out of air.']},
  {v:149,n:'A closer dive',items:['The Town Under the Lake: the sonar dive now looks at the drowned town up close, so the houses, the school and the church are big and easy to read.','The church has a proper steeple now: a bell tower with an arched belfry, a spire and a cross on top.']},
  {v:148,n:'Moon landings',items:['Arriving on the Sea of Tranquility, your boat now floats down from the sky on two thrusters. They cut out with a splash the moment you touch the silver sea.','Run out of air and the thrusters fire back up: your boat lifts off and flies out of sight before you’re back through the Lunar Gate.']},
  {v:147,n:'Bug fix: fruit prices',items:['Bug fix: fruit from your trees sold for far too much. It was priced off your income over the last few minutes with no limit, so a full yard of trees could bring in $10 million or more every 4 hours, and selling right after a big catch paid even more.','Fruit is now worth a third of a minute of your usual fishing income, up to $30,000 each. Your native fruit is still worth a fifth of that.','Fruit already in your pantry sells at the new price.']},
@@ -11208,7 +11213,7 @@ function mfxLand(){if(RM)return;Object.assign(MFX,{ph:'land',t0:performance.now(
 function mfxLift(to){if(MFX.ph==='lift')return;if(RM){travelTo(to);return}Object.assign(MFX,{ph:'lift',t0:performance.now()/1000,to});cast.el=0;CATCH.on=false;try{tone(110,.6,{type:'sawtooth',vol:.03});tone(160,1.6,{type:'sawtooth',vol:.035,delay:.5})}catch(e){}}
 function mfxOff(){if(!MFX.ph)return 0;const q=performance.now()/1000-MFX.t0;
   if(MFX.ph==='land'){const k=Math.min(1,q/MFX_LAND);if(k>=1){MFX.ph='';return 0}return -300*Math.pow(1-k,2.2)}
-  const k=Math.max(0,q-MFX_WARM)/MFX_LIFT;if(k>=1){const to=MFX.to;MFX.ph='';if(S.water==='moon'){S.o2=0;travelTo(to)}return -400}return -400*k*k}
+  const k=Math.max(0,q-MFX_WARM)/MFX_LIFT;if(k>=1){const to=MFX.to;MFX.ph='';if(S.water==='moon'){if((S.o2||0)<=0)S.o2=0;travelTo(to,{instant:true});showToast(`Back at ${W(to).n}`,'Lines in')}return -400}return -400*k*k}
 // two thrusters under the hull: on while you're in the air, off the moment you touch the sea
 function mfxThrust(x,y,L,T,mo){const air=mo<-1||(MFX.ph==='lift');
   if(MFX.ph==='land'&&!air)return;if(MFX.ph==='land'&&mo>-4&&!MFX.splash){MFX.splash=true;try{burst(x+L/2,y+14,['#cfe0ff','#ffffff','#9fd0ff'],40);sfx('splash')}catch(e){}}
