@@ -267,9 +267,40 @@ await check('case 5, The 3:33 Broadcast: opens after case 4 and plays through to
   ok(await p.evaluate(()=>Q5().step===7&&!!PNT().own.deadch&&!!PNT().own.b_antenna&&S.trophies[0].name==='Signal Found'),'solved with rewards');
   ok(await p.evaluate(()=>{const L=[];for(let i=0;i<4000;i++){const x=rollPull({wx:'clear'},'lake',600);if(x&&x.tape)L.push(x.tape)}return !L.includes('signal')}),'quest tape never drops randomly');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('case 6, The Night Shift: tin, statements after dark, ledger, cipher, lamp, a wrong accusation locks the board, the right one closes it',async()=>{const p=await page(VPS[1][1],save({coins:5e5,boat:4,min:600,day:40,mats:{rope:20,brass:10,scrap:10},q:{step:7,everSolved:true},q2:{step:7,everSolved:true},q3:{step:7,everSolved:true},q4:{step:7,everSolved:true,msgs:[],lies:{}},q5:{step:7,everSolved:true},tapes:{}}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);qStart()});ok(await p.evaluate(()=>Q6().step===1&&Q6().key>=3),'case opens');
+  ok(await p.evaluate(()=>{let n=0;for(let i=0;i<3000;i++){const x=rollPull({wx:'clear'},'lake',600);if(x&&x.q6==='tin')n++}return n>20}),'tins wash up while fishing');
+  await p.evaluate(()=>q6Item('tin',true));ok(await p.evaluate(()=>Q6().step===2),'tin found');
+  ok(await p.evaluate(()=>q6Talk('Old Pete').startsWith('Not in daylight')&&!Object.keys(Q6().heard).length),'nobody talks in daylight');
+  await p.evaluate(()=>{S.min=1200;for(const n of ['Old Pete','Harbormaster Hollis','Marge','Murphy'])q6Talk(n)});await p.waitForTimeout(3000);ok(await p.evaluate(()=>Q6().step===3&&Q6().clues.length===3),'four statements, ledger lead');
+  ok(await p.evaluate(()=>{const q=Q6(),c=q.clues[0];let n=0;for(let i=0;i<2000;i++){const x=rollPull({wx:'clear'},c.w,{dawn:330,day:600,dusk:1150,night:1300}[c.ph]);if(x&&x.q6==='page0')n++}return n>40}),'pages turn up at the right water and time');
+  await p.evaluate(()=>{q6Item('page0',false);q6Item('page1',false);q6Item('page2',false)});ok(await p.evaluate(()=>Q6().step===4),'all three pages');
+  await p.evaluate(()=>{openPhone();phShow('case')});await p.waitForTimeout(300);await p.click('[data-case="6"]');await p.waitForTimeout(200);ok(await p.isVisible('.q6ciph'),'cipher shows');
+  const key=await p.evaluate(()=>Q6().key);for(let i=1;i<key;i++)await p.click('#q6Up');await p.click('#q6Try');ok(await p.evaluate(()=>Q6().step===5),'cipher cracked');
+  await p.click('#q6Lamp');ok(await p.evaluate(()=>Q6().step===6&&Q6().lamp&&S.coins===3e5),'lamp restored');
+  await p.selectOption('[data-q6="who"]','gus');await p.selectOption('[data-q6="how"]','set');await p.selectOption('[data-q6="where"]','skiff');await p.click('#q6Acc');ok(await p.evaluate(()=>Q6().step===6&&Q6().lockDay===S.day&&document.getElementById('q6Acc').disabled),'wrong answer locks the board');
+  await p.evaluate(()=>{S.day++;renderCase()});await p.selectOption('[data-q6="who"]','eli');await p.selectOption('[data-q6="how"]','set');await p.selectOption('[data-q6="where"]','skiff');await p.click('#q6Acc');
+  ok(await p.evaluate(()=>Q6().step===7&&!!PNT().own.b_tin&&!!S.tapes.newsreel&&S.trophies[0].name==='The Night Shift'),'solved with rewards');
+  ok(await p.evaluate(()=>{S.q6={step:2,heard:{},pages:{},key:5,tin:true};delete S.mp.id;S.min=1300;S.day=99;renderCase();document.getElementById('q6Txt').click();return Object.keys(Q6().heard).length===1&&document.getElementById('q6Txt').disabled}),'no angler name: text one a night');
+  ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
+await check('case 7, The Town Under the Lake: steeple, keepsakes, the bell code, letters, diving bell and the sonar dive',async()=>{const p=await page(VPS[1][1],save({coins:1e6,boat:4,min:600,day:40,water:'lake',mats:{rope:20,scrap:20,titan:6,glass:10},q:{step:7,everSolved:true},q2:{step:7,everSolved:true},q3:{step:7,everSolved:true},q4:{step:7,everSolved:true,msgs:[],lies:{}},q5:{step:7,everSolved:true},q6:{step:7,everSolved:true},tapes:{}}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);qStart()});ok(await p.evaluate(()=>Q7().step===1),'case opens');
+  await p.evaluate(()=>{S.water='deep';q7OnCatch(FI('walleye')||FISH[0])});await p.waitForTimeout(1200);ok(await p.evaluate(()=>Q7().step===2),'saw the steeple');
+  ok(await p.evaluate(()=>{let n=0;for(let i=0;i<2000;i++){const x=rollPull({wx:'clear'},'deep',600);if(x&&x.q7)n++}return n>40}),'keepsakes turn up in Deepwater Basin');
+  await p.evaluate(()=>{q7Item('locket',false);q7Item('slate',false);q7Item('sign',false)});ok(await p.evaluate(()=>Q7().step===3&&!!Q7().code),'three keepsakes, bell lead');
+  await p.evaluate(()=>{S.water='lake';S.min=1300;q7OnCatch(FISH[0])});await p.waitForTimeout(2800);ok(await p.evaluate(()=>Q7().heard&&Q7().ringDay===S.day),'the bell rings on a night catch');
+  await p.evaluate(()=>{const c=Q7().code;S.water=['pond','lake','river','deep','bay'][c.w-1];S.min={dawn:330,day:600,dusk:1150,night:1300}[['dawn','day','dusk','night'][c.ph-1]];q7OnCatch(FISH[0])});await p.waitForTimeout(1300);ok(await p.evaluate(()=>Q7().step===4&&Q7().jar),'followed the bell to the letters');
+  await p.evaluate(()=>{openPhone();phShow('case')});await p.waitForTimeout(300);await p.click('[data-case="7"]');await p.click('#q7Read');ok(await p.evaluate(()=>Q7().step===5),'letters read');
+  await p.click('#q7Bell');ok(await p.evaluate(()=>Q7().step===6&&Q7().bell&&S.coins===6e5),'diving bell built');
+  await p.evaluate(()=>{S.water='deep';renderCase()});await p.click('#q7Dive');await p.waitForTimeout(400);ok(await p.isVisible('#dvCv'),'dive opens');
+  await p.click('#dvPing');await p.evaluate(()=>{window.__dv=0;for(const g of [[500,452],[884,455],[1384,455]])setTimeout(()=>{DV.x=g[0];DV.y=g[1];DV.vx=DV.vy=0},(window.__dv++)*300)});await p.waitForTimeout(3600);
+  ok(await p.evaluate(()=>Q7().step===7&&!!PNT().own.b_dbell&&!!S.decor.steeple&&!!S.tapes.hollow&&S.trophies[0].name==='Hollow Pines'),'solved with rewards');
+  ok(await p.evaluate(()=>S.yard&&S.yard.it.some(a=>a[0]==='steeple')),'steeple stands in the yard');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('casefile: opens on a shelf of case folders; a folder opens its case and All cases goes back',async()=>{const p=await page(VPS[1][1],save({q:{step:7,everSolved:true,seen:7},q2:{step:3,startDay:30,seen:2}}));
   await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);openPhone();phShow('case')});
-  ok(await p.evaluate(()=>document.querySelectorAll('.cf-folder').length===5&&document.querySelectorAll('.cf-folder.sealed').length===3&&!!document.querySelector('.cf-new')),'folders, sealed cases and a new-lead tag');
+  ok(await p.evaluate(()=>document.querySelectorAll('.cf-folder').length===caseList().length&&document.querySelectorAll('.cf-folder.sealed').length===caseList().length-2&&!!document.querySelector('.cf-new')),'folders, sealed cases and a new-lead tag');
   await p.click('[data-case="2"]');ok(await p.evaluate(()=>/EMERALD WAKE/.test(document.getElementById('caseBody').textContent)),'folder opens the case');
   await p.click('[data-case="0"]');ok(await p.evaluate(()=>!!document.querySelector('.cf-grid')&&!document.querySelector('.cf-new')),'back to the shelf, lead marked seen');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 

@@ -809,6 +809,11 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .ev{display:flex;flex-wrap:wrap;gap:6px}
 .ev span{border:1px solid #1e1a14;border-radius:4px;padding:2px 7px;font-size:.74rem;background:#fffbe8}
 .chk{display:grid;gap:2px;margin-top:4px;font-size:.78rem}.q5dead{display:grid;gap:8px;place-items:center;text-align:center;min-height:150px;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 2px,transparent 2px 4px),#07080c;border-radius:6px;padding:12px;color:#d8ffe8;font-family:monospace}.q5dead small{opacity:.7}.q5lines p{margin:2px 0;letter-spacing:.12em;opacity:0;animation:q5in .6s forwards}@keyframes q5in{to{opacity:1}}.q5logo{color:#9fe8c8;letter-spacing:.3em}
+.q6ciph{display:grid;gap:8px;margin-top:6px}.q6ct,.q6pt{font-family:monospace;font-size:.78rem;line-height:1.5;letter-spacing:.04em;margin:0;padding:8px;border-radius:6px;background:rgba(0,0,0,.06);word-break:break-word}.q6ct{color:#7a5a3a}.q6pt{color:#2a3a2a}.q6dial{display:flex;align-items:center;gap:12px;justify-content:center}.q6dial b{font:800 1.4rem monospace;min-width:2ch;text-align:center}.q6dial button{min-width:44px}
+.q6board{display:grid;gap:8px;margin-top:6px}.q6board label{display:grid;gap:3px;font-size:.8rem;font-weight:700}.q6board select{font:inherit;font-weight:400;padding:8px;border-radius:6px;background:#fffaf0;color:#2a2418;border:1px solid #b8a888}.q6say{margin:6px 0;font-size:.8rem}.q6say p{margin:2px 0 0;font-style:italic;line-height:1.4}
+.q7hymn{margin-top:6px;padding:8px;border-radius:6px;background:#2a2418;color:#f0e6c8;font-size:.74rem;display:grid;gap:4px}.q7hymn b{font-family:Georgia,serif;letter-spacing:.1em;text-transform:uppercase;font-size:.7rem}.q7hymn div{display:flex;flex-wrap:wrap;gap:4px 10px}.q7hymn span{width:100%;opacity:.7}.q7hymn i{font-style:normal}
+.q7let{display:grid;gap:8px;margin-top:6px}.q7let div{padding:8px;border-radius:6px;background:rgba(0,0,0,.05)}.q7let b{font-size:.78rem}.q7let p{margin:3px 0 0;font-size:.8rem;font-style:italic;line-height:1.45}
+.dv-pad{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:10px}.dv-dir{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,44px);gap:4px}.dv-dir button{font-size:1.1rem;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#dff;touch-action:none;user-select:none}.dv-dir [data-dv=u]{grid-column:2}.dv-dir [data-dv=l]{grid-column:1;grid-row:2}.dv-dir [data-dv=d]{grid-column:2;grid-row:2}.dv-dir [data-dv=r]{grid-column:3;grid-row:2}.dv-ping{min-width:110px;min-height:56px}
 .q5bars{display:grid;gap:6px;font-size:.82rem}.q5bars span{display:grid;gap:3px}.q5bars i{display:block;height:8px;border-radius:4px;background:#7affc8;width:0;transition:width .1s}.q5bars span:last-child i{background:#e8e8ee}
 .case-wx{margin:6px 0 0;font-size:.78rem;padding:6px 8px;border-radius:8px;background:rgba(122,138,216,.14)}
 .beastbox{max-width:440px;width:100%;display:grid;gap:12px;border:2px solid var(--r-m)}
@@ -2294,6 +2299,7 @@ const DECOR = [
   {id:'fence',cat:'land',n:'Picket Fence',c:160000,d:'Fresh white pickets along the front of the yard.'},
   {id:'hammock',cat:'land',n:'Hammock',c:300000,d:'Strung between two cedar posts.'},
   {id:'hottub',cat:'land',n:'Cedar Hot Tub',c:700000,d:'Steams on cold mornings.'},
+  {id:'steeple',cat:'land',cs:1,n:'Sunken Steeple',c:0,d:'The top of the Hollow Pines church, brought up from the bottom of the lake. Its bell still rings at night.'},
   {id:'lighthouse',cat:'land',n:'Lighthouse',c:5000000,d:'On the far point. Sweeps the water at night.'},
   {id:'flowerbox',cat:'house',n:'Window Flower Boxes',c:700,d:'Geraniums under every window.'},
   {id:'lantern',cat:'house',n:'Porch Lantern',c:2500,d:'Hangs by the door and glows at night.'},
@@ -2817,6 +2823,8 @@ function rollPull(m,water,minute){
   {const r3=q3Roll(m,water,minute);if(r3)return r3}
   {const r4=q4Roll(m,water,minute);if(r4)return r4}
   {const r5=q5Roll(m,water,minute);if(r5)return r5}
+  {const r6=q6Roll(m,water,minute);if(r6)return r6}
+  {const r7=q7Roll(m,water,minute);if(r7)return r7}
   if(q.step===2&&water==='lake'&&qph==='night'&&Math.random()<1/50)return {qi:'photo'};
   if(q.step===3&&water==='river'&&['fog','drizzle','rain','storm'].includes(m.wx)&&Math.random()<1/30)return {qi:'scale'};
   if(q.step===4&&!S.tapes.beast&&Math.random()<1/60)return {tape:'beast'};
@@ -2896,6 +2904,8 @@ function doCatch(){
   if(r.q3){q3Item(r.q3,true);return}
   if(r.q4){q4Item(r.q4,true);return}
   if(r.q5){q5Item(r.q5,true);return}
+  if(r.q6){startCatchAnim(1,'#e8dcb8',true);q6Item(r.q6,true);return}
+  if(r.q7){startCatchAnim(1,'#b8d0c0',true);q7Item(r.q7,true);return}
   if(r.ghost){startGhost();return}
   if(r.mat){sfx('pop');startCatchAnim(1,r.mat.col,true);addMat(r.mat,true);return}
   if(r.beast){openBeast();return}
@@ -2903,7 +2913,7 @@ function doCatch(){
   const val=Math.round(saleValue(f,w)*(m.gold?2:1)*(WX[S.wx.id].sellX||1)*(vr?VAR[vr].mult:1));
   const L=S.log[f.id]||(S.log[f.id]={n:0,big:0});
   const isNew=L.n===0, isRec=!isNew&&w>L.big;
-  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);q4OnCatch(f,w,vr);q5OnCatch(f);chalOnCatch(f,w);monOnCatch(w);tqOnCatch(f);liveOnCatch(f,w,vr);realmOnCatch(f);
+  L.n++; if(w>L.big)L.big=w;hwOnCatch(f,w);q3OnCatch(f);q4OnCatch(f,w,vr);q5OnCatch(f);try{q7OnCatch(f)}catch(e){}chalOnCatch(f,w);monOnCatch(w);tqOnCatch(f);liveOnCatch(f,w,vr);realmOnCatch(f);
   let newVar=false;if(vr){L.v=L.v||{};newVar=!L.v[vr];L.v[vr]=(L.v[vr]||0)+1}
   bountyEvent('catch',{f,w,water:S.water,ph:phaseOf(S.min)});
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
@@ -2935,6 +2945,8 @@ function offline(sec){
     if(r.q3){if(r.q3!=='keeper'){q3Item(r.q3,false);cols.push(r.q3==='key'?'the keeper’s key':'a letter in a bottle')}continue}
     if(r.q4){if(r.q4==='shard'){q4Item('shard',false);cols.push('a mirror shard')}continue}
     if(r.q5){q5Item(r.q5,false);cols.push('a radio part');continue}
+    if(r.q6){q6Item(r.q6,false);cols.push(r.q6==='tin'?'an old tin':'a ledger page');continue}
+    if(r.q7){q7Item(r.q7,false);cols.push('a keepsake from Hollow Pines');continue}
     if(r.ghost)continue;
     if(r.beast)continue;
     const c=r.fish,vr=rollVariant({});if(vr==='giant')c.w=+(c.f.w[1]*rnd(1.2,1.6)).toFixed(2);
@@ -3263,7 +3275,7 @@ function renderDecor(){
   n.textContent=S.boxes.length?`${S.boxes.length} box${S.boxes.length>1?'es are':' is'} waiting in your yard. Tap a box in the lake view to unpack it.`:'Orders arrive by drone and get dropped in your yard. Tap the box to unpack it and put it on display.';
   p.append(n);
   const SK=SG.map(g=>g.k);if((shopFilter==='hw'||shopFilter==='hv')&&!SK.includes(shopFilter))shopFilter='all';
-  const groups=[...SG.map(g=>[g.title,g.items,g.k]),...['land','house','dock'].map(c=>[CAT[c],DECOR.filter(x=>x.cat===c&&!isSeasonal(x)),false])];
+  const groups=[...SG.map(g=>[g.title,g.items,g.k]),...['land','house','dock'].map(c=>[CAT[c],DECOR.filter(x=>x.cat===c&&!isSeasonal(x)&&(!x.cs||owned(x.id))),false])];
   for(const [title,all,hw] of groups){
     let items=all;if(SK.includes(shopFilter)&&hw!==shopFilter)continue;if(['land','house','dock'].includes(shopFilter)){if(hw||title!==CAT[shopFilter])continue}if(shopFilter==='own')items=all.filter(x=>owned(x.id));
     if(!items.length)continue;
@@ -3806,6 +3818,8 @@ const DS_RODS=[RSK('bamboo','Bamboo','C','#c8b060'),RSK('cork','Classic Cork','C
   RSK('kraken','Kraken Rod','L','#3a1a5a','#c87aff','bubbles','#b05aff'),RSK('chrome','Chrome Rod','L','#c8d0d8','#ffffff','stars','#ffffff')].map(x=>({...x,ds:1}));
 const Q_BOBS=[{...BSK('antenna','Antenna Bobber','L','antenna','#2a2a30','#d8dde6'),quest:true}];
 Q_BOBS.push({...BSK('sun','Pocket Sun','M','sun','#ffd84a','#ff8a2a'),quest:true,sup:true});
+Q_BOBS.push({...BSK('dbell','Drowned Bell','L','dbell','#b08a3a','#5ab8a0'),quest:true});
+Q_BOBS.push({...BSK('tin','Cannery Tin','L','tin','#c8ccd2','#c83a2a'),quest:true});
 Q_BOBS.push({...BSK('phoenix','Phoenix Egg','M','phoenix','#d8301a','#ffc23a'),quest:true,phx:1});
 const Q_RODS=[{...RSK('starforged','Starforged','M','#1a1440','#ffe8a8','starforge','#ffd870'),quest:true,sup:true},
   {...RSK('legacy','Legacy','L','#5a3a22','#e8b030','legacy','#e8b030'),quest:true,pr:1},{...RSK('legacylit','Lit Legacy','M','#3a2418','#7affe0','legacy','#7affe0'),quest:true,pr:5},{...RSK('legacygold','Golden Legacy','M','#ffd05a','#ffffff','legacy','#fff2a0'),quest:true,pr:10}];
@@ -3875,6 +3889,8 @@ function drawBobber(c,x,y,sk,d,T,r){r=r||4.5;const on=lit(d);c.save();
   else if(p==='sun'){const pu=.8+.2*Math.sin(T*4);c.save();c.translate(x,y);c.rotate(T*.6);c.strokeStyle=sk.c2;c.lineWidth=r*.18;c.lineCap='round';for(let k=0;k<12;k++){const a=k*Math.PI/6,l=r*(1.5+.35*Math.sin(T*5+k*1.7));c.beginPath();c.moveTo(Math.cos(a)*r*1.12,Math.sin(a)*r*1.12);c.lineTo(Math.cos(a)*l,Math.sin(a)*l);c.stroke()}c.restore();
     c.shadowColor='#ffb030';c.shadowBlur=r*2.4*pu;const g=c.createRadialGradient(x-r*.25,y-r*.25,r*.1,x,y,r);g.addColorStop(0,'#ffffff');g.addColorStop(.45,sk.col);g.addColorStop(1,sk.c2);c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.shadowBlur=0}
   else if(p==='krakenb'){c.fillStyle=sk.col;c.lineWidth=r*.28;c.strokeStyle=sk.col;c.lineCap='round';for(let k=0;k<5;k++){const ax=x-r*.8+k*r*.4,w=Math.sin(T*3+k)*r*.35;c.beginPath();c.moveTo(ax,y+r*.2);c.quadraticCurveTo(ax+w,y+r*.9,ax-w*.5,y+r*1.5);c.stroke()}c.beginPath();c.ellipse(x,y-r*.1,r*.9,r*1.05,0,0,7);c.fill();c.fillStyle='#fff';for(const dx of [-.32,.32]){c.beginPath();c.arc(x+dx*r,y-r*.15,r*.22,0,7);c.fill()}c.fillStyle='#1a0a2a';for(const dx of [-.3,.34]){c.beginPath();c.arc(x+dx*r,y-r*.12,r*.1,0,7);c.fill()}c.fillStyle=sk.c2;c.beginPath();c.arc(x,y+r*.25,r*.12,0,Math.PI);c.fill()}
+  else if(p==='dbell'){const sw=Math.sin(T*2.2)*.18;c.save();c.translate(x,y-r*.9);c.rotate(sw);const g=c.createLinearGradient(-r,0,r,0);g.addColorStop(0,'#6a5020');g.addColorStop(.45,'#e0c070');g.addColorStop(1,'#6a5020');c.fillStyle=g;c.beginPath();c.moveTo(-r*1.05,r*1.7);c.quadraticCurveTo(-r*.9,0,0,0);c.quadraticCurveTo(r*.9,0,r*1.05,r*1.7);c.closePath();c.fill();c.fillStyle=sk.c2;c.globalAlpha=.6;c.fillRect(-r*.8,r*.9,r*.5,r*.4);c.fillRect(r*.2,r*.5,r*.4,r*.3);c.globalAlpha=1;c.fillStyle='#4a3a18';c.beginPath();c.arc(0,r*1.75,r*.25,0,7);c.fill();c.fillRect(-r*.15,-r*.35,r*.3,r*.4);c.restore()}
+  else if(p==='tin'){const g=c.createLinearGradient(x-r,0,x+r,0);g.addColorStop(0,'#8a9098');g.addColorStop(.45,'#f0f2f4');g.addColorStop(1,'#7a8088');c.fillStyle=g;c.fillRect(x-r*.85,y-r*.9,r*1.7,r*1.8);c.fillStyle=sk.c2;c.fillRect(x-r*.85,y-r*.35,r*1.7,r*.7);c.fillStyle='#fff6e0';c.font=`bold ${Math.max(3,r*.42)}px Georgia,serif`;c.textAlign='center';c.fillText('1961',x,y+r*.14);c.textAlign='left';c.fillStyle='#d8dce2';c.beginPath();c.ellipse(x,y-r*.9,r*.85,r*.28,0,0,7);c.fill();c.strokeStyle='#9aa0a8';c.lineWidth=Math.max(.4,r*.08);c.stroke()}
   else if(p==='phoenix'){const g=c.createLinearGradient(x,y-r*1.2,x,y+r);g.addColorStop(0,'#ffd23a');g.addColorStop(.5,sk.col);g.addColorStop(1,'#5a0e08');c.shadowColor='#ff6a1a';c.shadowBlur=on?r*2:r;c.fillStyle=g;c.beginPath();c.ellipse(x,y-r*.1,r*.85,r*1.15,0,0,7);c.fill();c.shadowBlur=0;
     c.strokeStyle='#ffe08a';c.lineWidth=Math.max(.4,r*.09);c.globalAlpha=.6+.4*Math.sin(T*4);c.beginPath();c.moveTo(x-r*.7,y-r*.2);c.lineTo(x-r*.3,y+r*.1);c.lineTo(x,y-r*.3);c.lineTo(x+r*.35,y+r*.05);c.lineTo(x+r*.75,y-r*.25);c.stroke();c.globalAlpha=1;
     for(const [col,s] of [['#ff5a1a',1],['#ffd23a',.6]]){const fl=Math.sin(T*9)*r*.12;c.fillStyle=col;c.beginPath();c.moveTo(x-r*.35*s,y-r*1.05);c.quadraticCurveTo(x-r*.4*s+fl,y-r*(1.5+.5*s),x+fl*1.5,y-r*(1.75+.55*s));c.quadraticCurveTo(x+r*.4*s+fl,y-r*(1.5+.5*s),x+r*.35*s,y-r*1.05);c.fill()}}
@@ -4046,6 +4062,8 @@ function renderLock(){
   if(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step)notes.push(['case','Casefile','New lead in the Lake Beast mystery']);
   {const q2=Q2();if(q2.step>0&&q2.step<7&&q2.seen!==q2.step)notes.push(['case','Casefile','New lead in the Emerald Wake case'])}
   {const q4=S.q4;if(q4&&q4.step>0&&q4.step<7&&q4.seen!==q4.step)notes.push(['case','Casefile','New lead in the Angler Who Isn’t There'])}
+  {const q6=S.q6;if(q6&&q6.step>0&&q6.step<7&&q6.seen!==q6.step)notes.push(['case','Casefile','New lead in the Night Shift'])}
+  {const q7=S.q7;if(q7&&q7.step>0&&q7.step<7&&q7.seen!==q7.step)notes.push(['case','Casefile','New lead in the Town Under the Lake'])}
   if(MPV.mail.length)notes.push(['friends','Friends',`${MPV.mail.length} gift${MPV.mail.length>1?'s':''} waiting in your mailbox`]);else if(mpCommClaimable())notes.push(['friends','Friends','The community goal is done. Claim your reward!']);
   const ct=coolTotals();if(ct.n)notes.push(['help','Cooler',`${ct.n} fish worth $${money(ct.v)} waiting to be sold`]);
   const np=radioLockCard()+musLockCard();
@@ -5080,6 +5098,8 @@ function renderHelp(){
    ['Cabin TV',`<p>Tap the TV in your cabin and use CH ▲▼ to flip channels. Channel 3 is Lake 7 (forecast and tournaments). Channel 4 is LLNN with news from around the lake. Channel 5 is Fish or Fake?, a daily quiz show: is each fish real or made up for Lantern Lake? It pays 5 prize tickets per right answer. Channel 6 is LLBA Tonight, with live scores, last night’s results and standings. Channel 8 is the Lake Shopping Channel, with one deal a day and the occasional TV-exclusive boat paint.</p>`],
    ['Fishdle',`<p>A daily puzzle in the Fishdle phone app: guess today’s mystery fish in 6 tries. Each guess shows whether its water, rarity, max size, bite times and weather match today’s fish (green), are close (yellow) or don’t (grey), with arrows pointing higher or lower. Everyone gets the same fish each day. Solving it pays 60 prize tickets for a first-try guess, down to 10 for a sixth. Tap Copy result to share your squares.</p>`],
    ['Lantern Pier Arcade',`<p>Visit the arcade from the Map tab or when you leave your cabin. Play Bobber Toss, Whack-a-Gar and Pinball to win prize tickets (up to 600 a day), try the Claw Machine (30 tickets) for plushies, and take your 3 daily tries at Putt of the Day, the same hole for everyone. Spend tickets at the Prize Counter on crates, plushies, a neon sign and arcade-only boat paints. Tickets never cost cash and prices never change. Weekly high-score boards crown a champion for each cabinet with a trophy.</p>`],
+   ['The Town Under the Lake',`<p>A seventh case opens after you close The Night Shift. Low water shows a church steeple in Deepwater Basin. Find three keepsakes there, listen for the drowned bell at night and read its rings off the hymn board, then build a diving bell and dive. Down there it’s dark: ping your sonar to see, and find the church, the school and the mayor’s house before your air runs out.</p>`],
+   ['The Night Shift',`<p>A sixth case opens after you close The 3:33 Broadcast. The old cannery burned on its last night shift in 1961 and the payroll vanished. Find a tin from that night, hear four townsfolk out after dark (or text them if you don’t have an angler name), crack the foreman’s ledger and name the culprit on the evidence board. A wrong answer locks the board until the next day.</p>`],
    ['The 3:33 Broadcast',`<p>A fifth case opens after you close The Angler Who Isn’t There. Your cabin TV turns itself on between 3 and 5 AM in game time. Be home and awake to record what it says, one broadcast a night. Then catch the fish it names in the right water at the right time of day, play the unlabeled tape it leaves you, pull up three radio parts at night and build a shortwave receiver. To finish, tune in at 3 AM: drag the dial to keep the needle on the drifting signal until it locks, three times.</p>`],
    ['The Angler Who Isn’t There',`<p>A fourth case opens after you close the Keeper’s Light. Someone on Reed Lake is wearing your face. Follow the leads (a text from your own number, a figure on the far water at dusk, lies in your own records, mirror shards at night) and craft a Silvered Lantern. The finale is Mirror Match on a clear night at Reed Lake: your reflection flashes a row of arrows and you press the opposite of each one in order (◀ becomes ▶, ▲ stays ▲). Tap the buttons or use the arrow keys. Win five rounds before three mistakes. The lies are only on your screen: your real stats, plaques and what friends see never change.</p>`],
    ['The Keeper’s Light',`<p>A third case opens after you close the Emerald Wake. Its finale is a storm rescue: when the lighthouse beam crosses the lost rowboat, tap Signal (or press Space). Three good signals bring the keeper home.</p>`],
@@ -5591,6 +5611,7 @@ function drawLocFore(loc,d,T){const wind=1+AMB.wind/25;
     const by=318+Math.sin(T*1.5)*3,bx=720;ctx.fillStyle='#c0392b';ctx.beginPath();ctx.moveTo(bx-9,by);ctx.lineTo(bx+9,by);ctx.lineTo(bx+5,by-26);ctx.lineTo(bx-5,by-26);ctx.fill();ctx.fillStyle='#e8e2d4';ctx.fillRect(bx-7,by-14,14,4);ctx.fillStyle='#333';ctx.fillRect(bx-1,by-34,2,8);
     const on=Math.sin(T*2.4)>.6;ctx.fillStyle=on?'#ff5a4a':'#5a1a14';ctx.beginPath();ctx.arc(bx,by-36,3,0,7);ctx.fill();if(on&&d<.5)glow(bx,by-36,20,.5,'255,90,74');
     ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(bx,by+1,13,3,0,0,7);ctx.stroke();
+    if(q7Steeple())q7SteepleDraw(d,T);
     return}
   if(loc==='bay'){
     // always a little misty here
@@ -5893,7 +5914,7 @@ function townClick(sx,sy,e){const h=hitAt(sx,sy),V=townView(),wx=sx/V.k+TOWN.cam
   if(h&&(h.kind==='tband'||h.kind==='tcan')){hideTip();const k=h.kind==='tband'?'band':'cannery';townTo(h.kind==='tband'?1030:2520,TW_Y0+14,()=>{TOWN.face=1;sfx('click');if(k==='cannery'&&tpDone('cannery'))canneryUI();else tpPanel(k)});return}
   if(h&&h.kind==='thv'){hideTip();townTo(HVF_X,TW_Y0+14,()=>{TOWN.face=1;sfx('click');hvFair()});return}
   if(h&&h.kind==='tbld'){const b=TBLD.find(x=>x.id===h.data);if(!b)return;hideTip();if(b.inside&&TROOMS[b.id])townTo(b.x,TW_Y0+6,()=>townEnter(b.id));else if(b.open)townTo(b.x,TW_Y0+6,()=>{sfx('click');b.open()});else{townTo(b.x,TW_Y0+14);showTip(h,e)}return}
-  if(h&&h.kind==='tnpc'){const n=TNPC[h.data];townTo(n.x+(TOWN.x<n.x?-40:40),n.y);n.bub={s:pick(n.lines),t:0};n.tx=null;n.wait=5;sfx('pop');return}
+  if(h&&h.kind==='tnpc'){const n=TNPC[h.data];townTo(n.x+(TOWN.x<n.x?-40:40),n.y);n.bub={s:q6Talk(n.n)||pick(n.lines),t:0};n.tx=null;n.wait=5;sfx('pop');return}
   if(h&&h.kind==='tpeer'){const p=TOWN.peers.get(h.data);if(p)showToast(p.name,'In town');return}
   hideTip();townTo(wx,wy)}
 function townTick(dt){if(!TOWN.on)return;if(TOWN.ws&&TOWN.ws.readyState===1&&performance.now()-(TOWN.ka||0)>25000){TOWN.ka=performance.now();try{TOWN.ws.send('ping')}catch(e){}}if(!townOK()){closeTown();return}
@@ -6033,7 +6054,7 @@ function townEnter(id){const R=TROOMS[id];if(!R||!TOWN.on)return;TOWN.sx=TOWN.x;
 function townExit(){const b=TBLD.find(x=>x.id===TOWN.z);TOWN.z='';Object.assign(TOWN,{x:b?b.x:TOWN.sx||400,y:TW_Y0+14,tx:null,ty:null,px:null,py:null,fade:1,after:null,sig:'',sent:0});{const V=townView();TOWN.cam=Math.max(0,Math.min(TW_W-V.VW,TOWN.x-V.VW/2))}sfx('click');hideTip();$('hchat').hidden=true;renderVisitBar(true)}
 function townInClick(id,e,h){const R=TROOMS[TOWN.z];
   if(id==='exit'){townTo(TROOM_DOOR+20,TW_Y0+6,townExit);return}
-  if(id==='keeper'){const k=R.keeper,z=TOWN.z;townTo(k.x+(z==='bar'?-60:0),TW_Y0+10,()=>{R.bub={s:pick(k.lines),t:0};if(z==='tackle')margeUI();else if(z==='post')parcelUI();else if(z==='station')l7UI();else if(z==='bar'&&triviaOpen())triviaUI()});sfx('pop');return}
+  if(id==='keeper'){const k=R.keeper,z=TOWN.z;townTo(k.x+(z==='bar'?-60:0),TW_Y0+10,()=>{const s6=q6Talk(k.n);R.bub={s:s6||pick(k.lines),t:0};if(s6&&s6.startsWith('About'))return;if(z==='tackle')margeUI();else if(z==='post')parcelUI();else if(z==='station')l7UI();else if(z==='bar'&&triviaOpen())triviaUI()});sfx('pop');return}
   if(id==='phone'){townTo(330,TW_Y0+10,l7UI);return}
   if(id==='cases'){townTo(205,TW_Y0+10,()=>{openPhone();phShow('case')});return}
   if(id==='boxes'){townTo(260,TW_Y0+10,()=>{MPV.tab='mail';openPhone();phShow('friends')});return}
@@ -6414,7 +6435,7 @@ function tpStreet(vis,d,T,night,V){const sq=vis.find(b=>b.id==='square'),cn=vis.
   if(cn&&(tpActive('cannery')||tpDone('cannery'))){RH2(V,cn.x-cn.w/2,TW_Y0-180,cn.w,180,'tcan',0);if(tpActive('cannery')&&TPS.cannery.goal)townTag(cn.x,TW_Y0-190,`Reopen: ${Math.min(100,Math.floor(TPS.cannery.total/TPS.cannery.goal*100))}%`,'rgba(170,90,30,.9)')}}
 // The cannery: up to 20 fish a day become cans worth 50% more. Sell them here or eat one for a full meal.
 const CANS=()=>{if(!S.cans||typeof S.cans!=='object')S.cans={n:0,v:0};return S.cans};
-function canFish(id,n){const st=townDay(),c=S.cooler[id];st.can=st.can|0;if(!c||S.locked[id])return;n=Math.min(n,c.n,20-st.can);if(n<=0)return;const per=c.val/c.n,K=CANS();tqTake(S.cooler,id,n);K.n+=n;K.v+=per*n*1.5;st.can+=n;sfx('pop');showToast(`Canned ${n} ${FI(id).n}`,`${K.n} can${K.n>1?'s':''} on the shelf`);try{renderCooler()}catch(e){}save();canneryUI()}
+function canFish(id,n){const st=townDay(),c=S.cooler[id];st.can=st.can|0;if(!c||S.locked[id])return;n=Math.min(n,c.n,20-st.can);if(n<=0)return;const per=c.val/c.n,K=CANS();tqTake(S.cooler,id,n);K.n+=n;K.v+=per*n*1.5;st.can+=n;sfx('pop');try{q6Tin()}catch(e){}showToast(`Canned ${n} ${FI(id).n}`,`${K.n} can${K.n>1?'s':''} on the shelf`);try{renderCooler()}catch(e){}save();canneryUI()}
 function canneryUI(){const st=townDay(),K=CANS(),B=$('plotBody'),left=20-(st.can|0),ids=coolerIds().filter(k=>!S.locked[k]).sort((a,b)=>S.cooler[b].val/S.cooler[b].n-S.cooler[a].val/S.cooler[a].n).slice(0,20);$('plotEye').textContent='Lantern Harbor';$('plotTitle').textContent='Lantern Cannery';
   B.innerHTML=`<p class="land-d">“Bring us fish and we’ll can ’em. Canned fish sells for half again what fresh does, and a can makes a fine meal.”</p>
     <div class="tp-sec"><b>Your cans: ${K.n.toLocaleString()}</b><small class="own-note">Worth $${money(Math.round(K.v))} in all</small><div class="xf-row"><button class="jig" id="canSell" ${K.n?'':'disabled'}>Sell all cans · $${money(Math.round(K.v))}</button><button class="ghost" id="canEat" ${K.n?'':'disabled'}>Eat a can (full meal)</button></div></div>
@@ -6637,6 +6658,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:145,n:'Case 7: The Town Under the Lake',items:['A seventh mystery for the Casefile app, unlocked by closing The Night Shift. Low water has uncovered a church steeple out in Deepwater Basin.','Pull up keepsakes from Hollow Pines, the valley town the lake drowned in 1938. Listen for its church bell at night, read the rings off the old hymn board and go where they send you.','Read what the townsfolk wrote, then build a diving bell.','The dive: a new sonar game. It’s pitch dark on the bottom, so ping to see the shapes around you and find the church, the school and the mayor’s house before your air runs out.','Rewards: cash, a trophy, the Sunken Steeple for your yard, the Drowned Bell bobber and a 1937 home movie for your VCR.']},
+ {v:144,n:'Case 6: The Night Shift',items:['A sixth mystery for the Casefile app, unlocked by closing The 3:33 Broadcast. In 1961 the old cannery burned on its last night shift and a week’s payroll vanished.','Find a tin from that night, then talk to Old Pete, Harbormaster Hollis, Marge and Murphy after dark. No angler name? Text them instead, one a night.','Fish up the foreman’s ledger, crack his cipher and restore the night watchman’s lamp.','Then name the culprit on the evidence board: who, how, and where the money went. Guess wrong and the town stops listening until tomorrow.','Rewards: cash, a trophy, the Cannery Tin bobber and a 1961 newsreel for your VCR.']},
  {v:143,n:'Bug fix: moving big games',items:['Bug fix: Move my game on the old address did nothing for some players with big games. The server now takes much bigger games, for moving, transfer codes and cloud saves.','Bug fix: if moving still fails, you get your save code to copy over by hand instead of a quick message that disappears.','Bug fix: a very big house and yard could stop your game from syncing with friends. That limit is raised too.']},
  {v:142,n:'Bug fix: visitors see your whole yard',items:['Bug fix: big yards showed up half-empty for visitors. Friends only saw the first 120 things in your yard, and if you had a lot of house and yard to share they saw just 40 with no paths or ground. Now visitors see up to 600 things plus all your ground. Open the game once after this update so your yard is shared again.']},
  {v:141,n:'The Phoenix Collection',items:['A new Mythic set you buy outright, never from a crate: find it at the top of the Crate Expectations app.','Phoenix Prow ($50,000,000): a firebird of a boat with a carved head on the bow, wings that beat, a trailing tail and embers rising. It glows like a bonfire after dark, and it replaces the cabin on bigger boats so nothing hides the wings.','Flame Feather ($30,000,000): a rod like a burning tail feather. Wings of flame open over every fish you land.','Phoenix Egg ($20,000,000): a smoldering bobber that bursts into fire when a fish bites.','Wear all three for the set bonus: heat shimmer on the water around your boat, and a firebird that crosses the sky whenever you land a legendary.','Other anglers on your lake see all of it.']},
@@ -7304,7 +7327,7 @@ const YI={
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
-  jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
+  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
   cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]}};
 const YIDS=Object.keys(YI),yQty=id=>YI[id].unit?yInv(id):YI[id].def.length;
 const YLAND=[{n:'Home Lot',x:-40,c:0},{n:'Side Meadow',x:-200,c:2500,d:'A sunny strip of grass next to your lot.'},{n:'Birch Glade',x:-360,c:15000,d:'Soft ground under the birches. Room for a lot more.'},
@@ -7351,6 +7374,10 @@ function yDraw(id,d,T,night,ph){
     for(const [px,py] of [[76,359],[95,361],[109,358]]){ctx.fillStyle=rgb(mix([60,30,10],[240,130,40],d));ctx.beginPath();ctx.ellipse(px,py,5,3.6,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([20,30,10],[70,110,40],d));ctx.fillRect(px-.6,py-5.5,1.4,2.5)}}
   else if(id==='fence'){ctx.fillStyle=rgb(mix([60,62,66],[244,242,234],d));ctx.fillRect(0,385,128,2);ctx.fillRect(0,391,128,2);for(let x=2;x<126;x+=8){ctx.fillRect(x,383,4,14);ctx.beginPath();ctx.moveTo(x,383);ctx.lineTo(x+2,380);ctx.lineTo(x+4,383);ctx.fill()}}
   else if(id==='birch')birchOne(d,T,ph);
+  else if(id==='steeple'){const x=186,y=330,st=rgb(mix([40,42,44],[150,150,142],d)),gr=rgb(mix([22,36,32],[80,116,100],d));ctx.fillStyle=rgb(mix([30,28,24],[110,100,84],d));ctx.fillRect(x-17,y-8,34,8);ctx.fillStyle=st;ctx.fillRect(x-12,y-44,24,36);ctx.fillStyle=rgb(mix([10,12,14],[40,44,50],d));ctx.fillRect(x-7,y-38,14,16);
+    const sw=Math.sin(T*1.1+ph)*.25*(night?1:.3);ctx.save();ctx.translate(x,y-36);ctx.rotate(sw);ctx.fillStyle=rgb(mix([60,52,30],[176,146,70],d));ctx.beginPath();ctx.moveTo(-5,8);ctx.quadraticCurveTo(-5,0,0,0);ctx.quadraticCurveTo(5,0,5,8);ctx.closePath();ctx.fill();ctx.restore();
+    ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(x-15,y-44);ctx.lineTo(x,y-80);ctx.lineTo(x+15,y-44);ctx.fill();ctx.strokeStyle=rgb(mix([40,40,40],[120,110,90],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,y-80);ctx.lineTo(x,y-90);ctx.moveTo(x-4,y-86);ctx.lineTo(x+4,y-86);ctx.stroke();
+    ctx.fillStyle=rgb(mix([20,40,30],[90,140,90],d));for(let i=0;i<6;i++){ctx.fillRect(x-12+((i*7)%22),y-30+((i*11)%22),2,4+(i%3)*2)}if(night){ctx.globalCompositeOperation='lighter';glow(x,y-32,22,.25+.15*Math.sin(T*1.1+ph),'200,230,210');ctx.globalCompositeOperation='source-over'}}
   else if(id==='jacks'||id==='scarecrow'||id==='tombstones'||id==='cauldron')hwLandOne(id,d,T);
   else if(id==='cornstalks'||id==='harvtable'||id==='cornucopia')hvLandOne(id,d,T);
   else if(YI[id]&&YI[id].fruit)treeDraw(YI[id].fruit,d,T,YCUR);
@@ -9134,6 +9161,8 @@ const TAPES={
   frogrobics:{n:'Frog-robics',sub:'Workout video',r:'R',col:'#ff9ad8',dur:28,draw:tapeAerobics,d:'Three frogs in leg warmers want you to feel the burn.'},
   beast:{n:'In Search of the Lake Beast',sub:'Documentary',r:'L',col:'#d8c8a0',dur:32,draw:tapeBeast,d:'Grainy photos, a sightings map and a 1989 sonar contact. The truth is down there.'},
   slam:{n:"Lake Slam '91",sub:'Wrestling',r:'C',col:'#ffd05a',dur:32,draw:tapeWrestle,d:'The Bass Crusher takes on El Lucio, live from the Reed Lake Fairgrounds.'},
+  hollow:{n:'Hollow Pines Day, 1937',sub:'Home movie',r:'L',col:'#c8d8c0',dur:30,draw:tapeHollow,quest:true,d:'Somebody filmed the town fair the summer before the valley flooded.'},
+  newsreel:{n:'News of the Week, 1961',sub:'Newsreel',r:'L',col:'#e8d6b0',dur:30,draw:tapeNewsreel,quest:true,d:'The Lantern Harbor newsreel about the cannery fire. Somebody kept it all these years.'},
   signal:{n:'(unlabeled)',sub:'Lake 7 recording',r:'L',col:'#9fe8c8',dur:30,draw:tapeSignal,quest:true,d:'Somebody taped the Lake 7 sign-off on Oct 27, 1987. It doesn’t sign off.'},
 };
 const cassSvg=`<svg viewBox="0 0 44 26" aria-hidden="true"><rect x="1" y="2" width="42" height="22" rx="1.5" fill="#121216"/><rect x="3" y="4" width="38" height="2" fill="#2a2a30"/><rect x="5" y="8" width="15" height="10" rx=".5" fill="#efe6d6"/><rect x="22" y="9" width="17" height="9" rx="1" fill="#3a3a46"/><circle cx="26.5" cy="13.5" r="3.2" fill="#1a1a1a" stroke="#aaa" stroke-width=".6"/><circle cx="34.5" cy="13.5" r="2" fill="#1a1a1a" stroke="#aaa" stroke-width=".6"/><rect x="1" y="20" width="42" height="4" fill="#0a0a0c"/></svg>`;
@@ -9182,6 +9211,8 @@ function tapeCover(k){
   if(k==='frogrobics')return T0('#2a0a5a',`<circle cx="31" cy="64" r="16" fill="#ffd05a"/><rect y="64" width="62" height="16" fill="#120a2a"/><ellipse cx="31" cy="50" rx="7" ry="9" fill="#4ab83a"/><ellipse cx="31" cy="38" rx="8" ry="5" fill="#4ab83a"/><rect x="23" y="36" width="16" height="2" fill="#ff5ac8"/><circle cx="27" cy="34" r="2.6" fill="#fff"/><circle cx="35" cy="34" r="2.6" fill="#fff"/><path d="M24 46l-8-8M38 46l8-8" stroke="#3aa83a" stroke-width="2.4"/>`,tt(['FROG-ROBICS'],18,8.5,'#ff5ac8','Impact,Arial Black,sans-serif',900),'#120a2a');
   if(k==='beast')return T0('#2a2218',`<rect x="6" y="28" width="50" height="42" fill="#c8b890"/><rect x="9" y="31" width="44" height="30" fill="#6a6050"/><path d="M12 58q6-4 10-1 3-10 6-14 2-2 4 0-1 4-3 6 1 5 2 9 4-2 7 0 4-2 8 0" stroke="#1a1610" stroke-width="2" fill="none"/>`,tt(['IN SEARCH OF','THE LAKE','BEAST'],10,6.5,'#f0e0b8'),'#1a140c');
   if(k==='slam')return T0('#140808',`<path d="M31 22l-6 14h5l-4 12 10-16h-5l4-10z" fill="#ffd05a"/><g fill="#d03a2a"><circle cx="17" cy="48" r="5"/><rect x="11" y="53" width="12" height="16" rx="3"/></g><g fill="#3a7ad0"><circle cx="45" cy="48" r="5"/><rect x="39" y="53" width="12" height="16" rx="3"/></g><rect x="0" y="70" width="62" height="2" fill="#ddd"/><rect x="0" y="74" width="62" height="2" fill="#ddd"/>`,tt(['LAKE',"SLAM '91"],13,10,'#ffd05a','Impact,Arial Black,sans-serif',900),'#3a0a0a');
+  if(k==='hollow')return T0('#2a3a2e','<rect x="8" y="14" width="46" height="50" fill="#8aa088"/><path d="M24 50h14V34l-7-14-7 14z" fill="#e0e4d0"/><rect y="50" x="8" width="46" height="14" fill="#4a6a5a"/>','<text x="31" y="74" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#d8e4d0">1937</text>');
+  if(k==='newsreel')return T0('#3a2e22','<rect x="8" y="14" width="46" height="50" fill="#5a4a38"/><path d="M14 60l10-22 6 10 6-16 8 28z" fill="#e8a050"/><text x="31" y="28" text-anchor="middle" font-family="Georgia,serif" font-size="8" fill="#f0e0c0">1961</text>','<text x="31" y="74" text-anchor="middle" font-family="Georgia,serif" font-size="7" fill="#e8d6b0">NEWSREEL</text>');
   if(k==='signal')return T0('#e8e4d8','<rect x="8" y="14" width="46" height="50" fill="#f4f0e2" stroke="#c8c0a8"/><text x="31" y="44" text-anchor="middle" font-family="monospace" font-size="13" fill="#3a3a3a">3:33</text>','<text x="31" y="74" text-anchor="middle" font-family="monospace" font-size="6" fill="#6a6a6a">DO NOT ERASE</text>');
   return T0('#2a2a30','<rect x="8" y="10" width="46" height="62" fill="#3a3a42"/>','<text x="31" y="48" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="#5a5a66">?</text>');
 }
@@ -9330,7 +9361,7 @@ const QSTEPS=[null,
   {t:'Beast bait',d:'Nothing ordinary will tempt it. Craft a Beast Lure from 3 strange scales, one Legendary fish from your cooler, and $25,000.'},
   {t:'The showdown',d:'The sonar contact was 212 feet down in Deepwater Basin. Fish there at night during a thunderstorm or fog (check the TV forecast). When it bites, hold on.',w:'deep'},
   {t:'Case closed',d:'You landed the Lake Beast. Old Pete Dunmore owes you an apology.'}];
-function qStart(){q2Start();q3Start();q4Start();q5Start();if(S.q.step===0&&S.total>=25){S.q.step=1;S.q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Lake Beast',sub:'Open the Casefile app on your phone',icon:magSvg});save()}}
+function qStart(){q2Start();q3Start();q4Start();q5Start();q6Start();q7Start();if(S.q.step===0&&S.total>=25){S.q.step=1;S.q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Lake Beast',sub:'Open the Casefile app on your phone',icon:magSvg});save()}}
 function questAdvance(n,quiet){if(S.q.step>=n)return;S.q.step=n;if(n===7)caseSolved(S.q);const st=QSTEPS[n];if(st&&!quiet)celebrate({lbl:n===7?'Case closed!':'Mystery updated',r:'M',name:st.t,sub:n===7?'The Lake Beast is yours':'New lead in your Casefile',icon:magSvg});save()}
 function questItem(k,live){
   if(k==='photo'){S.q.photo=true;if(live){celebrate({lbl:'Clue found!',r:'M',name:'A torn photograph',sub:'Huge scales on a riverbank…',icon:photoSvg});burst(BOB.x,BOB.y-10,['#ff8fb8','#fff'],30)}questAdvance(3,live)}
@@ -9341,8 +9372,8 @@ function craftLure(){const lg=coolerIds().find(k=>FI(k).r==='L');if(S.q.step!==5
   S.coins-=25000;S.q.scales-=3;const e=S.cooler[lg];e.val-=e.val/e.n;e.lbs-=e.lbs/e.n;e.n--;if(e.n<=0)delete S.cooler[lg];coolDirty=true;S.q.lure=true;questAdvance(6);renderCase()}
 // Casefile: a landing page of case folders; inside a case, a back button returns to it.
 function caseTabs(){const L=caseList(),i=L.findIndex(c=>c.id===CASEV);return `<div class="case-back"><button data-case="0">‹ All cases</button><span>Case ${i+1} of ${L.length}</span></div>`}
-const CASE_NO={1:'1974-LB',2:'1952-EW',3:'1986-KL',4:'2026-AW',5:'1987-L7'},CASE_Q=id=>id===1?S.q:id===2?Q2():id===3?Q3():id===4?Q4():Q5();
-const CASE_LOCK={2:'Close The Lake Beast first',3:'Close The Emerald Wake first',4:'Close The Keeper’s Light first',5:'Close The Angler Who Isn’t There first'};
+const CASE_NO={1:'1974-LB',2:'1952-EW',3:'1986-KL',4:'2026-AW',5:'1987-L7',6:'1961-NS',7:'1938-HP'},CASE_Q=id=>id===1?S.q:id===2?Q2():id===3?Q3():id===4?Q4():id===6?Q6():id===7?Q7():Q5();
+const CASE_LOCK={2:'Close The Lake Beast first',3:'Close The Emerald Wake first',4:'Close The Keeper’s Light first',5:'Close The Angler Who Isn’t There first',6:'Close The 3:33 Broadcast first',7:'Close The Night Shift first'};
 function caseLanding(){const L=caseList();
   return `<div class="cf-head"><b>CASEFILE</b><small>${L.filter(c=>c.done).length} of ${L.length} closed</small></div><div class="cf-grid">${L.map(c=>{const q=CASE_Q(c.id)||{},st=q.step||0,news=c.open&&st>0&&st<7&&(q.seen||0)<st;
     const status=!c.open?'SEALED':st===7?'CLOSED':st===0?'RUMOR':'OPEN',line=!c.open?CASE_LOCK[c.id]:st===7?(q.last?`Solved in ${q.last} day${q.last>1?'s':''}`:'Solved')+(q.best!=null?` · best ${q.best}`:''):st===0?`Catch ${Math.max(0,25-S.total)} more fish to hear the rumor`:`Lead ${st} of 6`;
@@ -9353,7 +9384,7 @@ function nextWxText(ids){const k0=wxBlock();if(ids.includes(wxOfBlock(k0)))retur
 const caseWxTip=(ids,label)=>`<p class="case-wx">🔮 Next ${label}: <b>${nextWxText(ids)}</b>, for about 12 minutes. Turn on ${label} alerts in Settings → App and alerts to get a heads-up.${tourLive()?' <b>Finish your tournament first:</b> nothing from this case shows up during one.':''}</p>`;
 function renderCase(){
   if(!CASEV||!caseList().find(c=>c.id===CASEV&&c.open)){CASEV=0;$('caseBody').innerHTML=caseLanding();bindCaseTabs();return}
-  const tabs=caseTabs();if(CASEV===5){const p=$('caseBody');p.innerHTML=tabs+renderCase5();bindCaseTabs();bindRestart();const rb=$('radioBtn');if(rb)rb.onclick=craftReceiver;return}if(CASEV===4){const p=$('caseBody');p.innerHTML=tabs+renderCase4();bindCaseTabs();bindRestart();const lb=$('lanternBtn');if(lb)lb.onclick=craftLantern;return}if(CASEV===3){const p=$('caseBody');p.innerHTML=tabs+renderCase3();bindCaseTabs();bindRestart();const ob=$('oilBtn');if(ob)ob.onclick=craftOil;return}if(CASEV===2){const p=$('caseBody');p.innerHTML=tabs+renderCase2();bindCaseTabs();bindRestart();const sb=$('spiritBtn');if(sb)sb.onclick=craftSpirit;return}
+  const tabs=caseTabs();if(CASEV===7){const p=$('caseBody');p.innerHTML=tabs+renderCase7();bindCaseTabs();bindRestart();bindCase7();return}if(CASEV===6){const p=$('caseBody');p.innerHTML=tabs+renderCase6();bindCaseTabs();bindRestart();bindCase6();return}if(CASEV===5){const p=$('caseBody');p.innerHTML=tabs+renderCase5();bindCaseTabs();bindRestart();const rb=$('radioBtn');if(rb)rb.onclick=craftReceiver;return}if(CASEV===4){const p=$('caseBody');p.innerHTML=tabs+renderCase4();bindCaseTabs();bindRestart();const lb=$('lanternBtn');if(lb)lb.onclick=craftLantern;return}if(CASEV===3){const p=$('caseBody');p.innerHTML=tabs+renderCase3();bindCaseTabs();bindRestart();const ob=$('oilBtn');if(ob)ob.onclick=craftOil;return}if(CASEV===2){const p=$('caseBody');p.innerHTML=tabs+renderCase2();bindCaseTabs();bindRestart();const sb=$('spiritBtn');if(sb)sb.onclick=craftSpirit;return}
   const q=S.q;q.seen=q.step;const p=$('caseBody');
   const ok=v=>v?'✓':'✗';
   let html=`<div class="paper"><div class="mast"><h2>THE LAKE BEAST</h2><small><span>Case no. 1974-LB</span><span>${q.step===7?'Closed':q.step?'Open':'Rumor'}</span></small></div>`;
@@ -9427,10 +9458,12 @@ function drawGhostWake(d,T){const q=S.q2;if(!q||!q.ghost)return;const now=perfor
   ctx.restore()}
 var CASEV=0;
 const c1Solved=()=>!!(S.q&&(S.q.everSolved||S.q.step===7));
-function caseList(){return [{id:1,n:'The Lake Beast',open:true,done:S.q.step===7},{id:2,n:'The Emerald Wake',open:c1Solved(),done:Q2().step===7},{id:3,n:'The Keeper’s Light',open:c2Solved(),done:Q3().step===7},{id:4,n:'The Angler Who Isn’t There',open:c3Solved(),done:Q4().step===7},{id:5,n:'The 3:33 Broadcast',open:c4Solved(),done:Q5().step===7}]}
+function caseList(){return [{id:1,n:'The Lake Beast',open:true,done:S.q.step===7},{id:2,n:'The Emerald Wake',open:c1Solved(),done:Q2().step===7},{id:3,n:'The Keeper’s Light',open:c2Solved(),done:Q3().step===7},{id:4,n:'The Angler Who Isn’t There',open:c3Solved(),done:Q4().step===7},{id:5,n:'The 3:33 Broadcast',open:c4Solved(),done:Q5().step===7},{id:6,n:'The Night Shift',open:c5Solved(),done:Q6().step===7},{id:7,n:'The Town Under the Lake',open:c6Solved(),done:Q7().step===7}]}
 function caseSolved(q){q.everSolved=true;q.runs=(q.runs||0)+1;if(q.startDay==null){q.last=null;return}const days=Math.max(1,S.day-q.startDay+1);q.last=days;
   if(q.best==null||days<q.best){const had=q.best!=null;q.best=days;if(had)setTimeout(()=>showToast(`New case record: ${days} day${days>1?'s':''}!`,'Casefile'),2500)}}
 function caseRestart(id){if(id===1){const o=S.q;S.q={step:1,startDay:S.day,scales:0,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=1}
+  else if(id===7){const o=Q7();S.q7={step:2,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true,keep:{}};CASEV=7}
+  else if(id===6){const o=Q6();S.q6={step:2,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true,tin:true,key:3+Math.floor(Math.random()*7),heard:{},pages:{}};CASEV=6}
   else if(id===5){const o=Q5();S.q5={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true,clues:q5Clues(S.day),got:{},parts:{}};CASEV=5}
   else if(id===4){const o=Q4();S.q4={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true,msgs:[],lies:{}};CASEV=4;setTimeout(()=>q4Text(1),3000)}
   else if(id===3){const o=Q3();S.q3={step:1,startDay:S.day,best:o.best,runs:o.runs,everSolved:true,replay:true};CASEV=3}
@@ -10129,6 +10162,214 @@ function mmLoop(now){if(!MM.on)return;const dt=Math.min(.05,(now-MM.last)/1000);
   $('mmMsg').textContent=MM.msg;$('mmHud').textContent=`Round ${Math.min(MM.round+1,MM_LEN.length)}/${MM_LEN.length} · Mistakes ${MM.miss}/3`;
   requestAnimationFrame(mmLoop)}
 
+// ==CASE 6== The Night Shift (1961). Opens after The 3:33 Broadcast. A whodunit at the old cannery:
+// a tin with a note, four townsfolk who remember the fire, the foreman's coded ledger, and a deduction board.
+const Q6STEPS=[null,
+  {t:'A can that shouldn’t exist',d:'A sealed tin stamped “NIGHT SHIFT · 1961” is out there with a note inside. Can a fish at the old cannery in Lantern Harbor, or keep fishing: tins like it have been washing up all over the lake.'},
+  {t:'Ask around',d:'The cannery burned on its last night shift in 1961, and the week’s payroll vanished. Four people in town remember that night, but they only talk about it after dark (6 PM to 5 AM): Old Pete and Harbormaster Hollis on the street, Marge at Bait & Tackle, Murphy behind his bar.'},
+  {t:'The foreman’s ledger',d:'Gus the foreman kept a ledger, and its pages went into the water the night of the fire. Fish where and when the evidence says to find all three.'},
+  {t:'The foreman’s cipher',d:'Gus wrote in code: every letter shifted along the alphabet by the same number. Find the number that makes the ledger readable.'},
+  {t:'The Watchman’s Lamp',d:'The old night watchman’s lamp still hangs in the cannery. Restore it to look at that night with fresh eyes: 8 Old Rope, 6 Brass Fittings, 6 Scrap Metal and $200,000.'},
+  {t:'Name the culprit',d:'Put the evidence together on the board: who took the payroll, how the fire started, and where the money went. A wrong answer and the town stops listening until tomorrow.'},
+  {t:'Case closed',d:'Eli Brandt, the night watchman, set the smokehouse fire to cover the theft and rowed the payroll across the lake. His skiff turned up the next spring on the far shore, empty.'}];
+const Q6WHO={pete:'Old Pete',hollis:'Harbormaster Hollis',marge:'Marge',murphy:'Murphy'},Q6BY={'Old Pete':'pete','Harbormaster Hollis':'hollis',Marge:'marge',Murphy:'murphy'};
+const q6Say=(k,q)=>({pete:'I was nineteen, a deckhand. Eli the watchman was supposed to meet me on the dock at eleven. He never showed. Ten minutes later the smokehouse was on fire.',
+  hollis:'My father was harbormaster. His log says a skiff left the cannery dock at 11:40 with no lights, rowing for the far shore. Nobody ever claimed it.',
+  marge:'My mother Ruth kept the books. She locked the payroll in the foreman’s locker at ten, like every Friday. There were only two keys: the foreman’s and the night watchman’s.',
+  murphy:`Gus the foreman sat on that stool till one in the morning, crying about losing his job. Locker ${q.key}, that was his. He kept everything in it, even his ledger.`})[k];
+const Q6MSG='ELI KEPT ASKING ABOUT THE PAYROLL LOCKER. SOMEBODY PROPPED THE SMOKEHOUSE DOOR OPEN. HIS SKIFF IS TIED BEHIND THE DOCK.';
+const Q6BOARD=[['who','Who took the payroll?',[['gus','Gus Varga, the foreman'],['eli','Eli Brandt, the night watchman'],['ruth','Ruth, the bookkeeper'],['pete','Pete, the young deckhand']],'eli'],
+  ['how','How did the fire start?',[['boiler','The boiler blew'],['accident','A lamp tipped over by accident'],['set','It was set on purpose, as a distraction'],['lightning','Lightning hit the roof']],'set'],
+  ['where','Where did the money go?',[['burned','It burned in the fire'],['locker','It’s still in locker '+'#'],['skiff','Across the lake in a skiff'],['harbor','Thrown in the harbor']],'skiff']];
+function Q6(){if(!S.q6||typeof S.q6!=='object')S.q6={step:0};const q=S.q6;q.heard=q.heard||{};q.pages=q.pages||{};return q}
+const c6Solved=()=>!!(S.q6&&(S.q6.everSolved||S.q6.step===7));
+const q6Night=()=>S.min>=1080||S.min<300;
+const q6Shift=(s,n)=>s.replace(/[A-Z]/g,c=>String.fromCharCode((c.charCodeAt(0)-65+n+26)%26+65));
+// three ledger pages: a water you can reach and a time of day each
+function q6Clues(seed){const R=tvSeed('q6'+seed),ws=['pond','lake','river','deep','bay'].filter(w=>S.boat>=W(w).boat),ph=['dawn','day','dusk','night'],out=[];
+  for(let i=0;i<3;i++){const left=ws.filter(w=>!out.some(o=>o.w===w));const pool=left.length?left:ws;out.push({w:pool[Math.floor(R()*pool.length)],ph:ph[Math.floor(R()*4)]})}return out}
+function q6Start(){const q=Q6();if(q.step===0&&c5Solved()){q.step=1;q.startDay=S.day;q.key=3+Math.floor(Math.random()*7);celebrate({lbl:'New mystery!',r:'M',name:'The Night Shift',sub:'A sixth case is open in the Casefile app',icon:magSvg});CASEV=6;
+  setTimeout(()=>{if(typeof phNotify==='function')phNotify('case','Lantern Ledger','Cannery fire still a mystery, 65 years on')},4000);save()}}
+function q6Advance(n,quiet){const q=Q6();if(q.step>=n)return;q.step=n;if(n===3&&!q.clues)q.clues=q6Clues(S.day);if(n===7)caseSolved(q);const st=Q6STEPS[n];
+  if(st&&!quiet)celebrate({lbl:n===7?'Case closed!':'Mystery updated',r:'M',name:st.t,sub:n===7?'The night shift can rest':'New lead in your Casefile',icon:magSvg});save()}
+// step 1: the tin turns up while canning, or at random while fishing
+function q6Tin(live){const q=S.q6;if(!q||q.step!==1)return;q.tin=true;if(live!==false){celebrate({lbl:'Clue found!',r:'M',name:'A tin stamped NIGHT SHIFT · 1961',sub:'Inside, on cannery paper: “It wasn’t an accident.”',icon:svgI('can','#b8bcc4')});sfx('ominous')}q6Advance(2,live===false);save()}
+// step 2: the four statements, in person after dark (or by text without an angler name)
+function q6Talk(name){const q=S.q6,k=Q6BY[name];if(!q||q.step!==2||!k)return null;if(!q6Night())return 'Not in daylight. Find me after dark.';if(q.heard[k])return 'I’ve told you all I know about that night.';
+  q.heard[k]=S.day;sfx('ominous');const n=Object.keys(q.heard).length;const gist={pete:'Eli the watchman never showed up on the dock.',hollis:'A skiff with no lights left at 11:40.',marge:'Only two keys opened the payroll locker.',murphy:`Gus was at the bar all night. Locker ${q.key} was his.`}[k];setTimeout(()=>celebrate({lbl:`Statement ${n} of 4 · ${Q6WHO[k]}`,r:'M',name:gist,sub:'Read it all in your Casefile',icon:magSvg}),700);if(n>=4)setTimeout(()=>q6Advance(3),2600);save();return 'About that night in ’61…'}
+const q6Texting=()=>!(S.mp&&S.mp.id);
+function q6TextNext(){const q=Q6();if(q.step!==2||!q6Night()||q.txtDay===S.day)return;const k=Object.keys(Q6WHO).find(x=>!q.heard[x]);if(!k)return;q.txtDay=S.day;q6Talk(Q6WHO[k]);renderCase()}
+// step 3: ledger pages
+function q6Roll(m,water,minute){const q=S.q6;if(!q)return null;if(isRealm(water))return null;
+  if(q.step===1&&Math.random()<1/40)return {q6:'tin'};
+  if(q.step===3&&q.clues){const ph=phaseOf(minute),i=q.clues.findIndex((c,j)=>!q.pages[j]&&c.w===water&&c.ph===ph);if(i>=0&&Math.random()<1/18)return {q6:'page'+i}}return null}
+function q6Item(k,live){const q=Q6();if(k==='tin'){q6Tin(live);return}const i=+k.slice(4);if(q.step!==3||q.pages[i])return;q.pages[i]=1;const n=Object.keys(q.pages).length;
+  if(live){celebrate({lbl:'Clue found!',r:'M',name:`Ledger page (${n} of 3)`,sub:'Soggy, scorched, and written in nonsense letters',icon:svgI('paper','#e8dcb8')});burst(BOB.x,BOB.y-10,['#e8dcb8','#ffffff'],20)}if(n>=3)q6Advance(4,!live);save()}
+// step 4: the cipher
+function q6Try(n){const q=Q6();if(q.step!==4)return;q.dial=n;if(n===q.key){sfx('chime','R');q6Advance(5)}else{sfx('miss');showToast('Still gibberish. Try another number.','The foreman’s cipher')}renderCase()}
+function craftWatchLamp(){const q=Q6();if(q.step!==5||(S.mats.rope||0)<8||(S.mats.brass||0)<6||(S.mats.scrap||0)<6||S.coins<200000)return;S.mats.rope-=8;S.mats.brass-=6;S.mats.scrap-=6;S.coins-=200000;q.lamp=true;storeDirty=true;sfx('craft');q6Advance(6);renderCase()}
+// step 6: the deduction board
+function q6Accuse(pick){const q=Q6();if(q.step!==6||q.lockDay===S.day)return;const right=Q6BOARD.filter(([k,,,a])=>pick[k]===a).length;q.tries=(q.tries||0)+1;
+  if(right===3){q6Solve();return}q.lockDay=S.day;q.lastRight=right;sfx('miss');showToast(`${right} of 3 right. The town stops listening. Sleep on it and try again tomorrow.`,'The Night Shift');save();renderCase()}
+function q6Solve(){const q=Q6(),prize=Math.round(350000*caseReplayMult(q));S.coins+=prize;
+  if(!q.replay){S.trophies.unshift({name:'The Night Shift',water:'lake',type:'big',score:'Named the culprit',day:S.day});const P=PNT();P.own.b_tin=(P.own.b_tin||0)+1;if(!S.tapes.newsreel)S.tapes.newsreel=S.day}
+  q.doneDay=S.day;q6Advance(7,true);sfx('fanfare');
+  celebrate({lbl:'Case closed!',r:'M',name:'It was the night watchman',sub:q.replay?`+$${money(prize)} · solved in ${q.last||'?'} day${q.last===1?'':'s'}`:`+$${money(prize)}, a trophy, the Cannery Tin bobber (Crate Expectations, Locker) and a 1961 newsreel for your VCR`,icon:magSvg});save()}
+function renderCase6(){const q=Q6();q.seen=q.step;const ok=v=>v?'✓':'✗';
+  let html=`<div class="paper"><div class="mast"><h2>THE NIGHT SHIFT</h2><small><span>Case no. 1961-NS</span><span>${q.step===7?'Closed':q.step?'Open':'Locked'}</span></small></div>`;
+  if(!q.step)return html+`<p style="font-size:.84rem;line-height:1.45;margin:0">Sealed. Close The 3:33 Broadcast first.</p></div>`;
+  html+=caseRecordHTML(q,6)+`<div class="ptitle">Leads</div>`;
+  for(let i=1;i<=7;i++){const st=Q6STEPS[i],done=q.step>i||(i===7&&q.step===7),cur=q.step===i&&i<7;if(i===7&&q.step<7)continue;let extra='';
+    if(cur&&i===2){extra+=`<div class="chk">${Object.keys(Q6WHO).map(k=>`<span>${ok(q.heard[k])} ${Q6WHO[k]}</span>`).join('')}<span>${ok(q6Night())} After dark (now ${fmtClock(S.min)})</span></div>`;
+      if(q6Texting())extra+=`<p class="case-wx">📱 No angler name yet, so you can’t walk around town. Text them instead: one answer a night.</p><button class="sbtn" id="q6Txt" ${q6Night()&&q.txtDay!==S.day?'':'disabled'}>${q.txtDay===S.day?'Texted tonight. Try again tomorrow night':q6Night()?'Text the next person':'Wait until after dark'}</button>`}
+    if(cur&&i===3)extra+=`<div class="chk">${(q.clues||[]).map((c,k)=>`<span>${ok(q.pages[k])} Page ${k+1}: ${W(c.w).n} · ${PH[c.ph]}${S.boat<W(c.w).boat?' (needs a bigger boat)':''}</span>`).join('')}</div>`;
+    if(cur&&i===4){const d=q.dial||1;extra+=`<div class="q6ciph"><p class="q6ct">${q6Shift(Q6MSG,q.key)}</p><div class="q6dial"><button class="sbtn" id="q6Dn" aria-label="Shift down">−</button><b>${d}</b><button class="sbtn" id="q6Up" aria-label="Shift up">+</button></div><p class="q6pt">${q6Shift(q6Shift(Q6MSG,q.key),-d)}</p><button class="sbtn" id="q6Try">This one reads right</button></div><p class="case-wx">🗝️ Somebody in town mentioned a number that mattered to Gus.</p>`}
+    if(cur&&i===5){const can=(S.mats.rope||0)>=8&&(S.mats.brass||0)>=6&&(S.mats.scrap||0)>=6&&S.coins>=200000;extra+=`<div class="chk"><span>${ok((S.mats.rope||0)>=8)} 8 Old Rope (${S.mats.rope||0})</span><span>${ok((S.mats.brass||0)>=6)} 6 Brass Fittings (${S.mats.brass||0})</span><span>${ok((S.mats.scrap||0)>=6)} 6 Scrap Metal (${S.mats.scrap||0})</span><span>${ok(S.coins>=200000)} $200,000</span></div><button class="sbtn" id="q6Lamp" ${can?'':'disabled'}>Restore the lamp</button>`}
+    if(cur&&i===6){const lk=q.lockDay===S.day;extra+=`<div class="q6board">${Q6BOARD.map(([k,lab,opts])=>`<label><span>${lab}</span><select data-q6="${k}" ${lk?'disabled':''}><option value="">Choose…</option>${opts.map(([v,t])=>`<option value="${v}">${t.replace('#',q.key)}</option>`).join('')}</select></label>`).join('')}<button class="sbtn" id="q6Acc" ${lk?'disabled':''}>${lk?`${q.lastRight} of 3 right. Try again tomorrow`:'Make the accusation'}</button></div>`}
+    html+=`<div class="case-step${cur?' cur':''}${!done&&!cur?' lock':''}"><span class="mk">${done?'✓':cur?'➤':'?'}</span><div><b>${done||cur?st.t:'Unknown lead'}</b>${done||cur?`<p>${st.d}</p>`:''}${extra}</div></div>`}
+  const ev=[];if(q.tin||q.step>=2)ev.push('Tin: “It wasn’t an accident.”');const np=Object.keys(q.pages||{}).length;if(np||q.step>=4)ev.push(`Ledger pages ×${q.step>=4?3:np}`);if(q.step>=5)ev.push('Decoded ledger');if(q.lamp)ev.push('The Watchman’s Lamp');
+  let says='';for(const k of Object.keys(Q6WHO))if(q.heard[k]||q.step>=3)says+=`<div class="q6say"><b>${Q6WHO[k]}</b><p>“${esc(q6Say(k,q))}”</p></div>`;
+  return html+`<div class="ptitle">Evidence</div><div class="ev">${ev.map(e=>`<span>${e}</span>`).join('')}</div>${says?`<div class="ptitle">Statements</div>${says}`:''}${q.step>=5?`<div class="ptitle">Gus’s ledger, decoded</div><p class="q6pt">${Q6MSG}</p>`:''}</div>`}
+function bindCase6(){const q=Q6(),on=(id,f)=>{const e=$(id);if(e)e.onclick=f};on('q6Txt',q6TextNext);on('q6Lamp',craftWatchLamp);
+  on('q6Up',()=>{q.dial=(q.dial||1)%25+1;sfx('click');renderCase()});on('q6Dn',()=>{q.dial=((q.dial||1)+23)%25+1;sfx('click');renderCase()});on('q6Try',()=>q6Try(q.dial||1));
+  on('q6Acc',()=>{const pick={};document.querySelectorAll('[data-q6]').forEach(s=>pick[s.dataset.q6]=s.value);if(Object.values(pick).some(v=>!v)){showToast('Pick an answer for all three first.','The Night Shift');return}q6Accuse(pick)})}
+// the tape: a 1961 newsreel about the fire
+function tapeNewsreel(x,t){const sep=(r,g,b)=>`rgb(${r},${g},${b})`;x.fillStyle=sep(40,32,24);x.fillRect(0,0,320,240);
+  if(t<5){x.fillStyle=sep(230,214,184);x.font='bold 22px Georgia,serif';x.textAlign='center';x.fillText('LANTERN HARBOR',160,96);x.font='14px Georgia,serif';x.fillText('NEWS OF THE WEEK',160,120);x.font='11px Georgia,serif';x.fillText('OCTOBER 1961',160,150);x.textAlign='left'}
+  else if(t<15){x.fillStyle=sep(36,30,24);x.fillRect(0,0,320,240);for(let i=0;i<5;i++){const sy=40-((t*8+i*14)%60),sx=110+i*24+Math.sin(t+i)*6;x.fillStyle=`rgba(90,80,70,${.5-i*.06})`;x.beginPath();x.arc(sx,sy+10,26+i*3,0,7);x.fill()}
+    x.fillStyle=sep(22,18,14);x.fillRect(70,100,180,100);x.beginPath();x.moveTo(60,100);x.lineTo(160,64);x.lineTo(260,100);x.fill();x.fillStyle=sep(210,140,70);for(let i=0;i<4;i++)x.fillRect(86+i*40,130,22,26);
+    for(const [col,k] of [[sep(200,110,50),1],[sep(240,190,110),.65],[sep(255,240,200),.35]])for(let i=0;i<9;i++){const fx=84+i*19,fh=(46+Math.sin(t*7+i*1.9)*14+((i*37)%11))*k;x.fillStyle=col;x.beginPath();x.moveTo(fx-11*k,96);x.quadraticCurveTo(fx-6*k+Math.sin(t*9+i)*3,96-fh*.6,fx+Math.sin(t*6+i)*4,96-fh);x.quadraticCurveTo(fx+6*k,96-fh*.6,fx+11*k,96);x.fill()}
+    x.fillStyle=sep(30,26,20);x.fillRect(0,196,320,44);x.fillStyle='rgba(0,0,0,.55)';x.fillRect(0,200,320,32);x.fillStyle=sep(240,228,200);x.font='12px Georgia,serif';x.fillText('Fire guts the cannery. A week’s payroll is missing.',12,220)}
+  else if(t<24){x.fillStyle=sep(120,110,92);x.fillRect(0,120,320,120);x.fillStyle=sep(170,160,140);x.fillRect(0,0,320,120);x.fillStyle=sep(70,56,40);x.beginPath();x.moveTo(110,150);x.lineTo(220,150);x.lineTo(205,170);x.lineTo(125,170);x.fill();
+    x.fillStyle='rgba(0,0,0,.55)';x.fillRect(0,200,320,32);x.fillStyle=sep(240,228,200);x.font='12px Georgia,serif';x.fillText('Spring 1962: a skiff washes up on the far shore. Empty.',12,220)}
+  else{x.fillStyle=sep(230,214,184);x.font='bold 18px Georgia,serif';x.textAlign='center';x.fillText('THE END',160,120);x.textAlign='left'}
+  for(let i=0;i<220;i++){x.fillStyle=`rgba(255,240,210,${Math.random()*.18})`;x.fillRect(Math.random()*320,Math.random()*240,1,1)}if(Math.random()<.2){x.fillStyle='rgba(255,240,210,.25)';x.fillRect(Math.random()*320,0,1,240)}}
+// ==CASE 7== The Town Under the Lake (1938). Opens after The Night Shift. A steeple rises out of Deepwater Basin,
+// keepsakes from the drowned town of Hollow Pines, a bell that rings in code, the survivors' letters and a sonar dive.
+const Q7STEPS=[null,
+  {t:'Low water',d:'A dry spell has pulled the lake down, and out in Deepwater Basin a church steeple has broken the surface. Go and see it for yourself: catch a fish in Deepwater Basin.'},
+  {t:'Hollow Pines',d:'Before 1938 there was no lake here, just a valley town called Hollow Pines. The dam flooded it, and the town is still down there. Fish Deepwater Basin to pull up three keepsakes from its houses.'},
+  {t:'The bell rings',d:'At night the drowned church bell rings across the water. Land a fish at night and listen. The first rings name a water and the second a time of day, by the old church hymn board below. Then catch a fish there, then.'},
+  {t:'The survivors’ letters',d:'Where the bell led you, a sealed jar of letters came up on your line. The people of Hollow Pines didn’t vanish. Read what they wrote.'},
+  {t:'Build a diving bell',d:'One letter says the whole town is still standing on the bottom, “just as we left it.” Build a diving bell to go and see: 12 Scrap Metal, 4 Titanium Scrap, 6 Sea Glass, 10 Old Rope and $400,000.'},
+  {t:'The dive',d:'Lower the bell in Deepwater Basin. It’s pitch dark down there: ping your sonar to see the shapes around you, and find the church, the school and the mayor’s house before your air runs out.'},
+  {t:'Case closed',d:'You brought the church register, the class photo and the town charter back up. Hollow Pines is remembered. And the letters all end the same way: “Come and visit us on the island.”'}];
+const Q7KEEP=[['locket','A tarnished locket','A couple’s photo inside, dated June 1936.'],['slate','A school slate','“HOLLOW PINES SCHOOL” scratched in the frame.'],['sign','A door number, 12','Brass, off the mayor’s front door.']];
+const Q7WATERS=['pond','lake','river','deep','bay'],Q7PH=['dawn','day','dusk','night'];
+const Q7LETTERS=[['Ada Whitlock, 1938','We rowed the last of the furniture out today. The church stays. Reverend says a church doesn’t need people to be a church.'],
+  ['Tom Whitlock, 1939','The island is cold but the fishing is good. We named it Pine Island, for home. Pa says we can see the steeple from the shore when the water’s low.'],
+  ['Mayor Oskar Brandvold, 1941','The whole town is still down there, just as we left it. The register is in the church, the photo in the school, the charter in my office. Somebody should bring them up one day.']];
+function Q7(){if(!S.q7||typeof S.q7!=='object')S.q7={step:0};const q=S.q7;q.keep=q.keep||{};return q}
+const c7Solved=()=>!!(S.q7&&(S.q7.everSolved||S.q7.step===7));
+const q7Steeple=()=>{const q=S.q7;return !!(q&&q.step>=1&&q.step<7)};
+function q7Code(){const ws=Q7WATERS.filter(w=>S.boat>=W(w).boat);const w=ws[Math.floor(Math.random()*ws.length)];return {w:Q7WATERS.indexOf(w)+1,ph:1+Math.floor(Math.random()*4)}}
+function q7Start(){const q=Q7();if(q.step===0&&c6Solved()){q.step=1;q.startDay=S.day;celebrate({lbl:'New mystery!',r:'M',name:'The Town Under the Lake',sub:'A seventh case is open in the Casefile app',icon:magSvg});CASEV=7;
+  setTimeout(()=>{if(typeof phNotify==='function')phNotify('case','Lantern Ledger','Low water reveals a steeple in Deepwater Basin')},4000);save()}}
+function q7Advance(n,quiet){const q=Q7();if(q.step>=n)return;q.step=n;if(n===3&&!q.code)q.code=q7Code();if(n===7)caseSolved(q);const st=Q7STEPS[n];
+  if(st&&!quiet)celebrate({lbl:n===7?'Case closed!':'Mystery updated',r:'M',name:st.t,sub:n===7?'Hollow Pines is remembered':'New lead in your Casefile',icon:magSvg});save()}
+function q7Roll(m,water,minute){const q=S.q7;if(!q||q.step!==2||water!=='deep')return null;const left=Q7KEEP.filter(k=>!q.keep[k[0]]);if(left.length&&Math.random()<1/20)return {q7:left[Math.floor(Math.random()*left.length)][0]};return null}
+function q7Item(k,live){const q=Q7();if(q.step!==2||q.keep[k])return;q.keep[k]=1;const K=Q7KEEP.find(x=>x[0]===k),n=Object.keys(q.keep).length;
+  if(live){celebrate({lbl:'Clue found!',r:'M',name:`${K[1]} (${n} of 3)`,sub:K[2],icon:svgI('coin','#b8a070')});burst(BOB.x,BOB.y-10,['#b8d0c0','#ffffff'],20)}if(n>=3)q7Advance(3,!live);save()}
+// the bell: N strikes for the water, a pause, then N strikes for the time of day
+function q7Ring(){const q=Q7();if(q.code&&S.boat<W(Q7WATERS[q.code.w-1]).boat)q.code=q7Code();const c=q.code;if(!c)return;q.heard=true;q.ringDay=S.day;
+  try{let t=0;for(const n of [c.w,c.ph]){for(let i=0;i<n;i++){tone(196,2.2,{type:'sine',vol:.09,delay:t});tone(392,1.4,{type:'sine',vol:.035,delay:t});tone(523,.9,{type:'triangle',vol:.02,delay:t});t+=.9}t+=1.6}}catch(e){}
+  celebrate({lbl:'The drowned bell rings',r:'M',name:`${'🔔'.repeat(c.w)}  ·  ${'🔔'.repeat(c.ph)}`,sub:`${c.w} ring${c.w>1?'s':''}, a pause, then ${c.ph}. Check the hymn board in your Casefile.`,icon:magSvg});save()}
+function q7OnCatch(f){const q=S.q7;if(!q)return;
+  if(q.step===1&&S.water==='deep'){setTimeout(()=>q7Advance(2),900);return}
+  if(q.step!==3||isRealm(S.water))return;const ph=phaseOf(S.min);
+  if(q.heard&&q.code&&S.water===Q7WATERS[q.code.w-1]&&ph===Q7PH[q.code.ph-1]){q.jar=true;setTimeout(()=>{celebrate({lbl:'Clue found!',r:'M',name:'A sealed jar of letters',sub:'Wax on the lid. Dry paper inside.',icon:svgI('paper','#e8dcb8')});q7Advance(4,true);renderCase()},900);save();return}
+  if(ph==='night'&&q.ringDay!==S.day)setTimeout(q7Ring,2200)}
+function q7ReadLetters(){const q=Q7();if(q.step!==4)return;q.read=true;sfx('click');q7Advance(5);renderCase()}
+function craftDiveBell(){const q=Q7(),m=S.mats;if(q.step!==5||(m.scrap||0)<12||(m.titan||0)<4||(m.glass||0)<6||(m.rope||0)<10||S.coins<400000)return;m.scrap-=12;m.titan-=4;m.glass-=6;m.rope-=10;S.coins-=400000;q.bell=true;storeDirty=true;sfx('craft');q7Advance(6);renderCase()}
+// the steeple tip in Deepwater Basin while the case is open
+function q7SteepleDraw(d,T){const x=232,y=262+Math.sin(T*.6)*.6,C=(a,b)=>rgb(mix(a,b,d));ctx.save();
+  ctx.fillStyle=C([30,34,38],[150,148,140]);ctx.fillRect(x-9,y-26,18,26);ctx.fillStyle=C([14,16,20],[60,64,70]);ctx.fillRect(x-5,y-22,10,12);
+  ctx.fillStyle=C([24,40,36],[88,120,104]);ctx.beginPath();ctx.moveTo(x-11,y-26);ctx.lineTo(x,y-58);ctx.lineTo(x+11,y-26);ctx.fill();
+  ctx.strokeStyle=C([40,40,40],[110,100,80]);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,y-58);ctx.lineTo(x,y-68);ctx.moveTo(x-4,y-64);ctx.lineTo(x+4,y-64);ctx.stroke();
+  ctx.fillStyle=C([70,60,30],[170,140,60]);ctx.beginPath();ctx.arc(x,y-14,3.2,Math.PI,0);ctx.fill();
+  ctx.strokeStyle=`rgba(255,255,255,${.25+.15*d})`;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(x,y+1,16+Math.sin(T*1.4)*2,3,0,0,7);ctx.stroke();
+  const q=S.q7;if(q&&q.ringDay===S.day&&!lit(d)&&Math.sin(T*1.2)>.7){ctx.globalCompositeOperation='lighter';glow(x,y-14,24,.35,'200,230,210');ctx.globalCompositeOperation='source-over'}ctx.restore()}
+// ---- the dive: a sonar minigame
+const DV={on:false};
+const DV_W=1800,DV_FLOOR=470;
+const DV_OBJ=[{x:240,y:400,w:80,h:70,k:'house'},{x:380,y:420,w:60,h:50,k:'house'},{x:520,y:350,w:90,h:120,k:'church',n:'The church'},{x:552,y:120,w:26,h:230,k:'tower'},
+  {x:700,y:430,w:40,h:40,k:'rock'},{x:780,y:300,w:10,h:170,k:'tree'},{x:900,y:390,w:150,h:80,k:'school',n:'The school'},{x:1110,y:410,w:70,h:60,k:'house'},{x:1230,y:320,w:10,h:150,k:'tree'},
+  {x:1300,y:440,w:50,h:30,k:'rock'},{x:1400,y:370,w:130,h:100,k:'mayor',n:'The mayor’s house'},{x:1600,y:405,w:80,h:65,k:'house'},{x:1000,y:200,w:60,h:22,k:'rock'},{x:640,y:230,w:50,h:20,k:'rock'}];
+const DV_GOAL=[{x:500,y:452,n:'The church register'},{x:884,y:455,n:'A class photo'},{x:1384,y:455,n:'The town charter'}];
+function dvOpen(){const q=Q7();if(q.step!==6||!q.bell||DV.on)return;if(S.water!=='deep'){showToast('Lower the bell in Deepwater Basin.','The Town Under the Lake');return}
+  try{closePhone()}catch(e){}
+  Object.assign(DV,{on:true,x:90,y:70,vx:0,vy:0,air:120,pings:[],got:{},hit:0,cool:0,last:performance.now(),keys:{},done:false,msg:'Ping to see. Find the church, the school and the mayor’s house.'});
+  const B=$('plotBody');$('plotEye').textContent='The Town Under the Lake';$('plotTitle').textContent='The dive';
+  B.innerHTML=`<p class="land-d" id="dvMsg"></p><canvas id="dvCv" width="1280" height="720" style="width:100%;border-radius:10px;background:#02070a;touch-action:none"></canvas>
+    <div class="dv-pad"><div class="dv-dir"><button data-dv="u" aria-label="Up">▲</button><button data-dv="l" aria-label="Left">◀</button><button data-dv="d" aria-label="Down">▼</button><button data-dv="r" aria-label="Right">▶</button></div><button class="jig dv-ping" id="dvPing">Ping</button></div><button class="ghost" id="dvAgain" hidden>Dive again</button>`;
+  $('plotModal').hidden=false;sfx('ominous');
+  B.querySelectorAll('[data-dv]').forEach(b=>{const k=b.dataset.dv,on=e=>{e.preventDefault();DV.keys[k]=1},off=()=>{DV.keys[k]=0};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off)});
+  $('dvPing').onclick=dvPing;$('dvAgain').onclick=()=>{DV.on=false;dvOpen()};
+  const km={ArrowUp:'u',w:'u',ArrowDown:'d',s:'d',ArrowLeft:'l',a:'l',ArrowRight:'r',d:'r'};
+  DV.kd=e=>{if(!DV.on)return;if(e.key===' '){e.preventDefault();dvPing();return}const k=km[e.key];if(k){e.preventDefault();DV.keys[k]=1}};DV.ku=e=>{const k=km[e.key];if(k)DV.keys[k]=0};
+  addEventListener('keydown',DV.kd);addEventListener('keyup',DV.ku);cancelAnimationFrame(DV.raf);DV.raf=requestAnimationFrame(dvLoop)}
+function dvStop(){DV.on=false;cancelAnimationFrame(DV.raf);removeEventListener('keydown',DV.kd);removeEventListener('keyup',DV.ku)}
+function dvPing(){if(!DV.on||DV.done||DV.cool>0)return;DV.cool=1;DV.pings.push({x:DV.x,y:DV.y,t:performance.now()/1000});if(DV.pings.length>4)DV.pings.shift();try{tone(1180,.25,{type:'sine',vol:.05});tone(900,.4,{type:'sine',vol:.02,delay:.15})}catch(e){}
+  for(const g of DV_GOAL){const dd=Math.hypot(g.x-DV.x,g.y-DV.y);if(dd<900)try{tone(660,.18,{type:'triangle',vol:.03,delay:dd/420})}catch(e){}}}
+const dvNear=(o,x,y)=>Math.hypot(Math.max(o.x-x,0,x-(o.x+o.w)),Math.max(o.y-y,0,y-(o.y+o.h)));
+function dvSeen(x,y,now,o){let a=0;for(const p of DV.pings){const age=now-p.t,dd=o?dvNear(o,p.x,p.y):Math.hypot(x-p.x,y-p.y),r=age*420;if(r>=dd){const since=age-dd/420;a=Math.max(a,1-since/3.2)}}const own=o?dvNear(o,DV.x,DV.y):Math.hypot(x-DV.x,y-DV.y);return Math.max(0,a,own<70?.35*(1-own/70):0)}
+function dvLoop(now){if(!DV.on)return;if($('plotModal').hidden){dvStop();return}const dt=Math.min(.05,(now-DV.last)/1000);DV.last=now;const T=now/1000,K=DV.keys;
+  if(!DV.done){const ax=(K.r?1:0)-(K.l?1:0),ay=(K.d?1:0)-(K.u?1:0);DV.vx+=ax*240*dt;DV.vy+=ay*240*dt+8*dt;DV.vx*=Math.pow(.25,dt);DV.vy*=Math.pow(.25,dt);const sp=Math.hypot(DV.vx,DV.vy);if(sp>110){DV.vx*=110/sp;DV.vy*=110/sp}
+    let nx=DV.x+DV.vx*dt,ny=DV.y+DV.vy*dt;nx=Math.max(20,Math.min(DV_W-20,nx));ny=Math.max(30,Math.min(DV_FLOOR-14,ny));
+    for(const o of DV_OBJ)if(dvNear(o,nx,ny)<14){nx=DV.x;ny=DV.y;DV.vx*=-.5;DV.vy*=-.5;if(DV.hit<=0){DV.hit=.7;DV.air-=4;try{sfx('miss')}catch(e){}DV.msg='Bump! The bell clangs off something. (−4 air)'}break}
+    DV.x=nx;DV.y=ny;DV.air-=dt;DV.hit-=dt;DV.cool-=dt;
+    DV_GOAL.forEach((g,i)=>{if(!DV.got[i]&&Math.hypot(g.x-DV.x,g.y-DV.y)<30){DV.got[i]=1;try{sfx('chime','R')}catch(e){}const n=Object.keys(DV.got).length;DV.msg=`${g.n}! (${n} of 3)`;if(n>=3){DV.done=true;DV.msg='All three. Bringing the bell up…';setTimeout(()=>{dvStop();$('plotModal').hidden=true;q7Solve()},1600)}}});
+    if(DV.air<=0&&!DV.done){DV.done=true;DV.air=0;DV.msg='Out of air. They haul the bell back up. Rest, then try again.';try{sfx('miss')}catch(e){}$('dvAgain').hidden=false}}
+  const cv=$('dvCv');if(!cv){dvStop();return}const c=cv.getContext('2d'),VW=640,VH=360;c.setTransform(2,0,0,2,0,0);const cam=Math.max(0,Math.min(DV_W-VW,DV.x-VW/2)),camY=Math.max(0,Math.min(DV_FLOOR+30-VH,DV.y-VH/2));
+  const g=c.createLinearGradient(0,0,0,VH);g.addColorStop(0,'#06222a');g.addColorStop(1,'#010507');c.fillStyle=g;c.fillRect(0,0,VW,VH);c.save();c.translate(-cam,-camY);
+  if(camY<40){c.fillStyle='rgba(120,200,210,.12)';c.fillRect(cam,0,VW,24)}
+  for(const p of DV.pings){const age=Math.max(0,T-p.t),r=age*420;if(age<2.4){c.strokeStyle=`rgba(120,255,200,${.5*(1-age/2.4)})`;c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,r,0,7);c.stroke()}}
+  {const fa=dvSeen(cam+VW/2,DV_FLOOR,T,{x:cam-50,y:DV_FLOOR,w:VW+100,h:60});c.fillStyle=`rgba(60,110,90,${.15+.5*fa})`;c.fillRect(cam-10,DV_FLOOR,VW+20,60)}
+  for(const o of DV_OBJ){const a=dvSeen(0,0,T,o);if(a<=.01)continue;c.strokeStyle=`rgba(120,255,200,${a})`;c.fillStyle=`rgba(30,70,60,${a*.5})`;c.lineWidth=2;
+    if(o.k==='tree'){c.beginPath();c.moveTo(o.x+5,o.y+o.h);c.lineTo(o.x+5,o.y);for(let i=0;i<4;i++){c.moveTo(o.x+5,o.y+20+i*28);c.lineTo(o.x+5+(i%2?-22:22),o.y+6+i*28)}c.stroke()}
+    else if(o.k==='rock'){c.beginPath();c.ellipse(o.x+o.w/2,o.y+o.h/2,o.w/2,o.h/2,0,0,7);c.fill();c.stroke()}
+    else if(o.k==='tower'){c.fillRect(o.x,o.y,o.w,o.h);c.strokeRect(o.x,o.y,o.w,o.h);c.beginPath();c.moveTo(o.x-4,o.y);c.lineTo(o.x+o.w/2,o.y-40);c.lineTo(o.x+o.w+4,o.y);c.stroke()}
+    else{c.fillRect(o.x,o.y,o.w,o.h);c.strokeRect(o.x,o.y,o.w,o.h);c.beginPath();c.moveTo(o.x-6,o.y);c.lineTo(o.x+o.w/2,o.y-26);c.lineTo(o.x+o.w+6,o.y);c.stroke();c.strokeRect(o.x+o.w/2-8,o.y+o.h-26,16,26);
+      if(o.n){c.fillStyle=`rgba(200,255,230,${a})`;c.font='bold 12px sans-serif';c.textAlign='center';c.fillText(o.n,o.x+o.w/2,o.y-32);c.textAlign='left'}}}
+  DV_GOAL.forEach((gl,i)=>{if(DV.got[i])return;const a=dvSeen(gl.x,gl.y,T);if(a<=.01)return;const pu=.6+.4*Math.sin(T*5+i);c.fillStyle=`rgba(255,230,140,${a*pu})`;c.beginPath();c.arc(gl.x,gl.y,6,0,7);c.fill();c.strokeStyle=`rgba(255,230,140,${a*.6})`;c.beginPath();c.arc(gl.x,gl.y,12+pu*4,0,7);c.stroke()});
+  c.strokeStyle='rgba(180,200,200,.35)';c.lineWidth=1;c.beginPath();c.moveTo(DV.x,DV.y-16);c.lineTo(DV.x,0);c.stroke();
+  const bg=c.createRadialGradient(DV.x,DV.y,4,DV.x,DV.y,80);bg.addColorStop(0,'rgba(180,230,220,.18)');bg.addColorStop(1,'rgba(180,230,220,0)');c.fillStyle=bg;c.beginPath();c.arc(DV.x,DV.y,80,0,7);c.fill();
+  c.fillStyle=DV.hit>0?'#c87050':'#8a7a5a';c.beginPath();c.moveTo(DV.x-14,DV.y+12);c.quadraticCurveTo(DV.x-14,DV.y-16,DV.x,DV.y-16);c.quadraticCurveTo(DV.x+14,DV.y-16,DV.x+14,DV.y+12);c.closePath();c.fill();
+  c.fillStyle='rgba(200,255,240,.8)';c.beginPath();c.arc(DV.x,DV.y-2,5,0,7);c.fill();for(let i=0;i<3;i++){const q=(T*.8+i/3)%1;c.fillStyle=`rgba(200,240,255,${.5*(1-q)})`;c.beginPath();c.arc(DV.x+Math.sin(T*3+i)*4,DV.y-18-q*40,1.5+i*.4,0,7);c.fill()}
+  c.restore();
+  c.fillStyle='rgba(0,0,0,.45)';c.fillRect(10,10,190,40);c.fillStyle='#cfeee8';c.font='bold 11px sans-serif';c.fillText(`Air ${Math.max(0,Math.ceil(DV.air))}s · Found ${Object.keys(DV.got).length}/3`,18,26);c.fillStyle='rgba(255,255,255,.15)';c.fillRect(18,34,174,8);c.fillStyle=DV.air<30?'#ff7a5a':'#7affc8';c.fillRect(18,34,174*Math.max(0,DV.air)/120,8);
+  if(DV.cool>0){c.fillStyle='rgba(255,255,255,.12)';c.fillRect(VW-110,14,96*(1-DV.cool),6)}
+  const m=$('dvMsg');if(m&&m.textContent!==DV.msg)m.textContent=DV.msg;DV.raf=requestAnimationFrame(dvLoop)}
+function q7Solve(){const q=Q7(),prize=Math.round(450000*caseReplayMult(q));S.coins+=prize;
+  if(!q.replay){S.trophies.unshift({name:'Hollow Pines',water:'deep',type:'big',score:'Brought the town home',day:S.day});const P=PNT();P.own.b_dbell=(P.own.b_dbell||0)+1;S.decor.steeple=1;if(!S.tapes.hollow)S.tapes.hollow=S.day;try{yardSync()}catch(e){}}
+  q.doneDay=S.day;q7Advance(7,true);sfx('fanfare');
+  celebrate({lbl:'Case closed!',r:'M',name:'Hollow Pines is remembered',sub:q.replay?`+$${money(prize)} · solved in ${q.last||'?'} day${q.last===1?'':'s'}`:`+$${money(prize)}, a trophy, the Sunken Steeple for your yard, the Drowned Bell bobber and a 1937 home movie for your VCR`,icon:magSvg});save()}
+function renderCase7(){const q=Q7();q.seen=q.step;const ok=v=>v?'✓':'✗';
+  let html=`<div class="paper"><div class="mast"><h2>THE TOWN UNDER THE LAKE</h2><small><span>Case no. 1938-HP</span><span>${q.step===7?'Closed':q.step?'Open':'Locked'}</span></small></div>`;
+  if(!q.step)return html+`<p style="font-size:.84rem;line-height:1.45;margin:0">Sealed. Close The Night Shift first.</p></div>`;
+  html+=caseRecordHTML(q,7)+`<div class="ptitle">Leads</div>`;
+  for(let i=1;i<=7;i++){const st=Q7STEPS[i],done=q.step>i||(i===7&&q.step===7),cur=q.step===i&&i<7;if(i===7&&q.step<7)continue;let extra='';
+    if(cur&&i===1)extra+=`<div class="chk"><span>${ok(S.water==='deep')} Fishing Deepwater Basin${S.boat<3?' (needs a bigger boat)':''}</span></div>`;
+    if(cur&&i===2)extra+=`<div class="chk">${Q7KEEP.map(k=>`<span>${ok(q.keep[k[0]])} ${k[1]}</span>`).join('')}<span>${ok(S.water==='deep')} Fishing Deepwater Basin</span></div>`;
+    if(cur&&i===3){const c=q.code;extra+=`<div class="chk"><span>${ok(q.heard)} Heard the bell${q.heard&&c?`: ${'🔔'.repeat(c.w)} · ${'🔔'.repeat(c.ph)}`:''}</span><span>${ok(phaseOf(S.min)==='night')} Night (now ${PH[phaseOf(S.min)].toLowerCase()})</span></div><div class="q7hymn"><b>Hymn board</b><div><span>First rings</span>${Q7WATERS.map((w,k)=>`<i>${k+1} · ${W(w).n}</i>`).join('')}</div><div><span>Then</span>${Q7PH.map((p,k)=>`<i>${k+1} · ${PH[p]}</i>`).join('')}</div></div>`}
+    if(cur&&i===4)extra+=`<div class="q7let">${Q7LETTERS.map(([who,txt])=>`<div><b>${who}</b><p>“${txt}”</p></div>`).join('')}</div><button class="sbtn" id="q7Read">I’ve read them</button>`;
+    if(cur&&i===5){const m=S.mats,can=(m.scrap||0)>=12&&(m.titan||0)>=4&&(m.glass||0)>=6&&(m.rope||0)>=10&&S.coins>=400000;extra+=`<div class="chk"><span>${ok((m.scrap||0)>=12)} 12 Scrap Metal (${m.scrap||0})</span><span>${ok((m.titan||0)>=4)} 4 Titanium Scrap (${m.titan||0})</span><span>${ok((m.glass||0)>=6)} 6 Sea Glass (${m.glass||0})</span><span>${ok((m.rope||0)>=10)} 10 Old Rope (${m.rope||0})</span><span>${ok(S.coins>=400000)} $400,000</span></div><button class="sbtn" id="q7Bell" ${can?'':'disabled'}>Build the diving bell</button>`}
+    if(cur&&i===6)extra+=`<div class="chk"><span>${ok(S.water==='deep')} At Deepwater Basin</span></div><p>Move with the arrows (or WASD) and tap Ping (or Space) to see. Bumping into things costs air.</p><button class="sbtn" id="q7Dive" ${S.water==='deep'?'':'disabled'}>Lower the bell</button>`;
+    html+=`<div class="case-step${cur?' cur':''}${!done&&!cur?' lock':''}"><span class="mk">${done?'✓':cur?'➤':'?'}</span><div><b>${done||cur?st.t:'Unknown lead'}</b>${done||cur?`<p>${st.d}</p>`:''}${extra}</div></div>`}
+  const ev=[];const nk=Object.keys(q.keep||{}).length;if(nk||q.step>=3)ev.push(`Keepsakes ×${q.step>=3?3:nk}`);if(q.jar||q.step>=4)ev.push('A jar of letters');if(q.bell)ev.push('Diving bell');if(q.step===7)ev.push('Register, photo and charter');
+  return html+`<div class="ptitle">Evidence</div><div class="ev">${ev.map(e=>`<span>${e}</span>`).join('')}</div>${q.step>=5?`<div class="ptitle">The letters</div><div class="q7let">${Q7LETTERS.map(([who,txt])=>`<div><b>${who}</b><p>“${txt}”</p></div>`).join('')}</div>`:''}</div>`}
+function bindCase7(){const on=(id,f)=>{const e=$(id);if(e)e.onclick=f};on('q7Read',q7ReadLetters);on('q7Bell',craftDiveBell);on('q7Dive',dvOpen)}
+// the tape: a 1937 home movie of Hollow Pines Day
+function tapeHollow(x,t){const tint=(r,g,b,a)=>`rgba(${r},${g},${b},${a==null?1:a})`;x.fillStyle=tint(30,36,30);x.fillRect(0,0,320,240);
+  if(t<5){x.fillStyle=tint(220,224,200);x.font='bold 20px Georgia,serif';x.textAlign='center';x.fillText('HOLLOW PINES DAY',160,100);x.font='13px Georgia,serif';x.fillText('Summer 1937',160,126);x.textAlign='left'}
+  else if(t<14){x.fillStyle=tint(150,170,150);x.fillRect(0,0,320,150);x.fillStyle=tint(80,96,76);x.fillRect(0,150,320,90);
+    x.fillStyle=tint(210,214,196);x.fillRect(130,80,60,70);x.fillRect(150,40,20,40);x.beginPath();x.moveTo(146,40);x.lineTo(160,8);x.lineTo(174,40);x.fill();x.fillStyle=tint(60,60,50);x.fillRect(154,120,12,30);
+    for(let i=0;i<12;i++){const px=40+i*22+Math.sin(t*2+i)*3,py=176+(i%3)*8;x.fillStyle=tint(40,44,36);x.fillRect(px,py,5,12);x.beginPath();x.arc(px+2.5,py-3,3,0,7);x.fill()}
+    x.fillStyle=tint(200,190,150);x.fillRect(40,160,240,10);x.fillStyle=tint(60,50,40);x.font='bold 8px Georgia,serif';x.textAlign='center';x.fillText('WELCOME TO HOLLOW PINES DAY',160,168);x.textAlign='left'}
+  else if(t<23){x.fillStyle=tint(140,160,140);x.fillRect(0,0,320,240);x.fillStyle=tint(70,86,66);for(let i=0;i<9;i++){const tx=i*40+10;x.beginPath();x.moveTo(tx,170);x.lineTo(tx+16,90+(i%3)*12);x.lineTo(tx+32,170);x.fill()}
+    x.fillStyle=tint(100,120,110);x.fillRect(0,170,320,70);x.fillStyle='rgba(0,0,0,.5)';x.fillRect(0,200,320,32);x.fillStyle=tint(230,232,214);x.font='12px Georgia,serif';x.fillText('The valley, the year before the water came.',12,220)}
+  else{x.fillStyle=tint(220,224,200);x.font='bold 16px Georgia,serif';x.textAlign='center';x.fillText('Come and visit us on the island.',160,120);x.textAlign='left'}
+  for(let i=0;i<200;i++){x.fillStyle=`rgba(230,240,220,${Math.random()*.16})`;x.fillRect(Math.random()*320,Math.random()*240,1,1)}x.fillStyle=`rgba(0,0,0,${.05+Math.random()*.08})`;x.fillRect(0,0,320,240)}
 // ==ARCADE== Lantern Pier Arcade: a boat trip away. Cabinets pay prize tickets for skill (never cash, never bought), up to
 // 600 a day. Tickets spend at the Prize Counter at fixed prices, so a new angler and a rich one pay the same. Putt of the
 // Day is one mini-golf hole, the same for everyone each day, with 3 tries. High scores go to weekly/daily boards.

@@ -71,6 +71,8 @@ Run the whole suite before every push.
 - Town jobs and the Fish Market: Notice Board jobs pay and build reputation, the market pays double for wanted fish up to a daily cap
 - Town projects: the bandstand and cannery rebuilds, builder trophies, the evening concert and canning fish
 - Phone controls: the thumbstick walks, the action button enters places, Go to walks you there, and it turns off in Settings
+- Case 6, The Night Shift: the tin, statements only after dark, ledger pages, the cipher, the lamp, a wrong accusation locking the board and the right one closing the case, plus texting without an angler name
+- Case 7, The Town Under the Lake: the steeple, keepsakes, the bell code, the letters, the diving bell and the sonar dive, with its rewards and the steeple in your yard
 - Big games move: transfer codes take big saves, and a failed Move my game offers the save code instead
 - Big yards: visitors get every placed thing and the ground, even when the shared snapshot is past the old size limit
 - The Phoenix Collection: the Mythic set in Crate Expectations, the two-tap buy, the unveil, equipping, and the set-bonus firebird
