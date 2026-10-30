@@ -5494,6 +5494,8 @@ const ISLE=id=>id==='pond'||id==='friend';
 function trvDirs(from,to){const ord=waterIdx(to)>waterIdx(from)?1:-1;return {dir:ord,dOut:ISLE(from)?1:ord,dIn:ISLE(to)?-1:ord}}
 const waterIdx=id=>{const i=WATERS.findIndex(w=>w.id===id);return id==='pond'?-1:id==='friend'?99:isRealm(id)?50:i};
 function travelTo(id,opt){if(id===S.water||TRV.on||(MFX.ph==='lift'&&!(opt&&opt.instant)))return;
+  // Bug fix (v151): a gate you built before prestiging no longer lets you through without the boat it needs
+  {const tw=W(id);if(tw&&S.boat<tw.boat&&!(isRealm(S.water)&&!isRealm(id))){showToast(`You need a ${GEAR.boat.items[tw.boat].n} to get there.`,tw.n);return}}
   // the Moon: float straight down to the sea, and straight up when you leave (no sailing in from the side)
   if(!(opt&&opt.instant)&&cutOn()&&!S.sleep&&!RM){if(S.water==='moon'&&id!=='moon'){mfxLift(id);return}
     if(id==='moon'){const from=S.water;realmSwap(from,id);S.water=id;cast.el=0;cast.dur=castDur();renderAll();save();mfxLand();showToast('Through the Lunar Gate…','Sea of Tranquility');return}}
@@ -6760,6 +6762,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:151,n:'Bug fix: realm gates after Prestige',items:['Bug fix: after you prestiged, gates you had already built still let you through to the Sea of Tranquility, the Ember Lake and the Cloud Sea with your starter boat. Now you need the right boat again first. Your gates stay built, so you don’t pay for them twice.']},
  {v:150,n:'Moon landings, straight up and down',items:['Your boat now floats straight down onto the Sea of Tranquility and straight back up when you leave, instead of sailing in from the side first. Leaving on purpose lifts off too, not just running out of air.']},
  {v:149,n:'A closer dive',items:['The Town Under the Lake: the sonar dive now looks at the drowned town up close, so the houses, the school and the church are big and easy to read.','The church has a proper steeple now: a bell tower with an arched belfry, a spire and a cross on top.']},
  {v:148,n:'Moon landings',items:['Arriving on the Sea of Tranquility, your boat now floats down from the sky on two thrusters. They cut out with a splash the moment you touch the silver sea.','Run out of air and the thrusters fire back up: your boat lifts off and flies out of sight before you’re back through the Lunar Gate.']},
@@ -11331,7 +11334,7 @@ function realmWatersHTML(){let h=`<div class="sec-h realm-h" style="grid-column:
   for(const r of REALMS){const own=gateOwned(r.id),act=S.water===r.id,sp=FISH.filter(f=>f.at===r.id),got=sp.filter(f=>S.log[f.id]).length,boatOk=S.boat>=r.boat;
     h+=`<div class="card water realm r-${r.id}${act?' active':''}"><span class="eyebrow">${own?`${got}/${sp.length} species logged`:r.gate}</span><h3>${r.n}</h3><p>${r.d}</p>`;
     if(!own){h+=`<p class="need">${boatOk?'Build the gate to open it.':`Needs a ${GEAR.boat.items[r.boat].n} and the materials below.`}</p>${costHTML(r.cost)}<button class="go" data-gate="${r.id}" ${gateCan(r)?'':'disabled'}>Build the ${r.gate}</button>`}
-    else{h+=`<button class="go" data-realm="${r.id}" ${act||TRV.on?'disabled':''}>${act?'Fishing here':'Step through the gate'}</button>`;
+    else{h+=`${boatOk?'':`<p class="need">Your gate is still here, but you need a ${GEAR.boat.items[r.boat].n} again to go through.</p>`}<button class="go" data-realm="${r.id}" ${act||TRV.on||!boatOk?'disabled':''}>${act?'Fishing here':'Step through the gate'}</button>`;
       for(const g of RGEAR.filter(x=>x.realm===r.id)){const has=rgear(g.id),lock=g.need&&!rgear(g.need);h+=`<div class="rgear${has?' have':''}"><b>${g.n}${has?' ✓':''}</b><small>${g.d}</small>${has?'':lock?`<small>Needs the ${RGEAR.find(x=>x.id===g.need).n} first.</small>`:costHTML(g.cost)+`<button class="sbtn" data-rgear="${g.id}" ${costOk(g.cost)?'':'disabled'}>Craft</button>`}</div>`}}
     h+='</div>'}
   return h}

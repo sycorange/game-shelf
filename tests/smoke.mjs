@@ -498,6 +498,12 @@ await check('moon: the boat lands on thrusters, and takes off when the air runs 
   await p.evaluate(()=>{S.o2=.1});await p.waitForTimeout(700);ok(await p.evaluate(()=>MFX.ph==='lift'),'out of air: lift-off');await p.waitForTimeout(3200);ok(await p.evaluate(()=>S.water!=='moon'&&!TRV.on),'flew straight up and home');
   await p.evaluate(()=>{travelTo('moon')});await p.waitForTimeout(3400);await p.evaluate(()=>travelTo('deep'));ok(await p.evaluate(()=>MFX.ph==='lift'&&S.water==='moon'),'leaving on purpose lifts off too');await p.waitForTimeout(3200);ok(await p.evaluate(()=>S.water==='deep'&&!TRV.on),'arrives home');ok(!errs.length,errs.join('; '));await c.close()});
 
+await check('prestige: built gates still need the right boat again before you can go through',async()=>{const p=await page(VPS[0][1],save({ret:1,boat:0,water:'pond',realm:{gates:{moon:1,hell:1},gear:{}}}));
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);travelTo('moon')});ok(await p.evaluate(()=>S.water==='pond'),'starter boat can’t go to the Moon');
+  await p.evaluate(()=>openTab('waters'));await p.waitForTimeout(300);ok(await p.evaluate(()=>{const b=document.querySelector('[data-realm="moon"]');return !!b&&b.disabled}),'gate button disabled');
+  await p.evaluate(()=>{S.boat=5;travelTo('moon')});await p.waitForTimeout(400);ok(await p.evaluate(()=>S.water==='moon'),'with the boat back, the gate works');
+  await p.evaluate(()=>{S.boat=5;travelTo('hell',{instant:true})});ok(await p.evaluate(()=>S.water!=='hell'),'the Ember Lake still needs its own boat');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
