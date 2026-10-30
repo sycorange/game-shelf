@@ -491,6 +491,12 @@ await check('big games move: transfer codes and cloud saves take big saves, and 
   await p.evaluate(()=>{const f=window.fetch;window.fetch=(u,o)=>String(u).includes('xfer/put')?Promise.resolve(new Response('{"error":"bad-save"}',{status:400})):String(u).includes('lanternlake.app')?Promise.resolve(new Response('{}')):f(u,o);const b=document.createElement('button');b.id='mvGo';document.body.append(b);return moveGame('mvGo')});
   await p.waitForTimeout(800);ok(await p.evaluate(()=>{const g=i=>document.getElementById(i);return !g('saveModal').hidden&&g('xfOff').open&&g('saveTxt').value.length>50}),'save code offered instead');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('moon: the boat lands on thrusters, and takes off when the air runs out',async()=>{const c=await b.newContext({viewport:VPS[0][1]});
+  await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({boat:5,water:'deep',realm:{gates:{moon:1},gear:{}},set:{}}));const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+  await p.goto(URL0);await p.waitForTimeout(800);await p.evaluate(()=>{if(!document.getElementById('titleScreen').hidden)document.getElementById('tGo').click()});await p.waitForTimeout(900);await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);travelTo('moon')});
+  let landed=false;for(let i=0;i<60&&!landed;i++){await p.waitForTimeout(200);landed=await p.evaluate(()=>MFX.ph==='land')}ok(landed,'lands on thrusters');await p.waitForTimeout(3200);ok(await p.evaluate(()=>S.water==='moon'&&MFX.ph===''),'touched down');
+  await p.evaluate(()=>{S.o2=.1});await p.waitForTimeout(700);ok(await p.evaluate(()=>MFX.ph==='lift'),'out of air: lift-off');await p.waitForTimeout(3200);ok(await p.evaluate(()=>S.water!=='moon'),'flew home through the gate');ok(!errs.length,errs.join('; '));await c.close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

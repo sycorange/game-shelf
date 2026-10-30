@@ -6756,6 +6756,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:149,n:'A closer dive',items:['The Town Under the Lake: the sonar dive now looks at the drowned town up close, so the houses, the school and the church are big and easy to read.','The church has a proper steeple now: a bell tower with an arched belfry, a spire and a cross on top.']},
+ {v:148,n:'Moon landings',items:['Arriving on the Sea of Tranquility, your boat now floats down from the sky on two thrusters. They cut out with a splash the moment you touch the silver sea.','Run out of air and the thrusters fire back up: your boat lifts off and flies out of sight before you’re back through the Lunar Gate.']},
  {v:147,n:'Bug fix: fruit prices',items:['Bug fix: fruit from your trees sold for far too much. It was priced off your income over the last few minutes with no limit, so a full yard of trees could bring in $10 million or more every 4 hours, and selling right after a big catch paid even more.','Fruit is now worth a third of a minute of your usual fishing income, up to $30,000 each. Your native fruit is still worth a fifth of that.','Fruit already in your pantry sells at the new price.']},
  {v:146,n:'The Ferry and Pine Island',items:['A third town project: once the cannery is open, everyone can chip in to fix the old ferry at the Ferry Landing. Builders get the Ferry Builder trophy.','When she runs, Old Pete takes you out to Pine Island for $5,000. The ride home is free.','Pine Island is a new place to walk around, with everyone on it shown live: the island dock, the cove, the Whitlock and Brandvold cabins where the Hollow Pines families settled, a campfire clearing and the Pine Point lighthouse.','Meet Wren Whitlock and Nils Brandvold. If you’ve closed The Town Under the Lake, they have something to say to you.','Pine Island gets a pin on the lake map once the ferry runs.']},
  {v:145,n:'Case 7: The Town Under the Lake',items:['A seventh mystery for the Casefile app, unlocked by closing The Night Shift. Low water has uncovered a church steeple out in Deepwater Basin.','Pull up keepsakes from Hollow Pines, the valley town the lake drowned in 1938. Listen for its church bell at night, read the rings off the old hymn board and go where they send you.','Read what the townsfolk wrote, then build a diving bell.','The dive: a new sonar game. It’s pitch dark on the bottom, so ping to see the shapes around you and find the church, the school and the mayor’s house before your air runs out.','Rewards: cash, a trophy, the Sunken Steeple for your yard, the Drowned Bell bobber and a 1937 home movie for your VCR.']},
@@ -7032,7 +7034,7 @@ function glow(x,y,r,a,c='255,196,96'){const g=ctx.createRadialGradient(x,y,0,x,y
 function flame(x,y,s,T){const f=Math.sin(T*13+x)*1.2;ctx.fillStyle='#ff7a2a';ctx.beginPath();ctx.moveTo(x-3*s,y);ctx.quadraticCurveTo(x,y-(9+f)*s,x+3*s,y);ctx.fill();ctx.fillStyle='#ffd05a';ctx.beginPath();ctx.moveTo(x-1.5*s,y);ctx.quadraticCurveTo(x,y-(5+f)*s,x+1.5*s,y);ctx.fill()}
 
 function draw(now){if(friendScene()){const real=S;S=Object.assign({},real,VT.ext);try{draw0(now)}finally{S=real}}else draw0(now);
-  if(TRV_END){TRV_END=false;TRV.on=false;TRV.dx=0;if(TRV.after){TRV_AF=TRV.after;TRV.after=null}else showToast(`Arrived at ${W(TRV.to).n}`,'Lines in')}
+  if(TRV_END){TRV_END=false;TRV.on=false;TRV.dx=0;if(TRV.to==='moon'&&S.water==='moon')mfxLand();if(TRV.after){TRV_AF=TRV.after;TRV.after=null}else showToast(`Arrived at ${W(TRV.to).n}`,'Lines in')}
   if(TRV_AF){const f=TRV_AF;TRV_AF=null;f()}}
 function draw0(now){
   const h=S.min/60,d=daylight(h),[top,bot]=skyAt(h),T=now/1000,night=1-Math.min(1,d*1.6);
@@ -8076,15 +8078,15 @@ function drawBoat0(d,T){
   let mir=false,inBoat=false,petIn=false;const b=S.boat||((S.sleep&&S.sleep.at)||(TRV.on&&(TRV.to==='friend'||TRV.from==='friend'))?1:0),bob=Math.sin(T*1.6)*2.5*(1+AMB.rock*1.4);let ax,ay,pv=null,ang=0,deck=null;
   const hullC=isRealm(S.water)&&!S.sleep?REALMS_BY[S.water].hull:[[0,0,0],[120,82,52],[118,126,130],[196,64,48],[236,234,224],[52,92,120],[236,238,242],[30,34,44]][b],hull=rgb(mix(hullC.map(v=>v*.3),hullC,d*.8+.2));
   if(b===0){ax=dockEnd()-8;ay=246}else{
-    let x=[0,430,420,410,400,385,375,370][b];const bmv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98),y=262+bob-(b===7&&bmv?8:0),L=[0,90,110,130,150,180,190,200][b];if(S.sleep)x+=(dockEnd()+10-x)*boatK();if(TRV.on){x+=TRV.dx;if((TRV.cur??TRV.dir)<0){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1)}drawWake(x,y,L,d,T)}
+    let x=[0,430,420,410,400,385,375,370][b];const bmv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98),mo=S.water==='moon'&&!S.sleep&&!TRV.on?mfxOff():0,y=262+bob-(b===7&&bmv?8:0)+mo,L=[0,90,110,130,150,180,190,200][b];if(S.sleep)x+=(dockEnd()+10-x)*boatK();if(TRV.on){x+=TRV.dx;if((TRV.cur??TRV.dir)<0){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1)}drawWake(x,y,L,d,T)}
     if(S.sleep&&!TRV.on){const ph=S.sleep.ph,k=boatK();if(!['boatOut','pick'].includes(ph)){mir=true;ctx.save();ctx.translate((x+L/2)*2,0);ctx.scale(-1,1);if(ph==='boatIn'&&k<.97)drawWake(x,y,L,d,T)}else if(ph==='boatOut'&&k>.03)drawWake(x,y,L,d,T)}
-    ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(x+L/2,y+16,L*.6,5,0,0,7);ctx.fill();if(phxSet()&&!RM&&!mir)phxHeat(x,y,L,T,d);
+    ctx.fillStyle=`rgba(0,0,0,${.25*Math.max(.2,1+mo/300)})`;ctx.beginPath();ctx.ellipse(x+L/2,y-mo+16,L*.6*Math.max(.4,1+mo/400),5,0,0,7);ctx.fill();if(phxSet()&&!RM&&!mir)phxHeat(x,y,L,T,d);
     if(AMB.rock>.08){ctx.strokeStyle=`rgba(255,255,255,${Math.min(.35,AMB.rock*.4)})`;ctx.lineWidth=1.2;const sp=1+(1-AMB.rock)*.6;ctx.beginPath();ctx.ellipse(x+L/2,y+15,L*.62*sp,6*sp,0,0,7);ctx.stroke()}
     pv=[x+L/2,y+12];ang=AMB.rock*.1*Math.sin(T*5.2);ctx.save();ctx.translate(pv[0],pv[1]);ctx.rotate(ang);ctx.translate(-pv[0],-pv[1]);
     if(!S.sleep||['boatIn','boatOut','pick'].includes(S.sleep.ph)){inBoat=true;drawAngler(x+L-36,y+INBOAT,d,T)}
     // the pet sits down inside the boat too, so it's drawn before the hull
     if(!S.sleep&&!TRV.on&&!PET_DOCK){petBoat(x+L-36,y+INBOAT,[b>=4?x+L*.62:x+L*.28,y-(b>=3?3:0)+PET_IN],d,T);petIn=true}
-    const WDN=wardenOn()&&!isRealm(S.water);if(WDN)drawWarden(ctx,x,y,L,d,T,!!WDB().lit,!S.sleep&&!TRV.on&&!mir);else{const sk=skinEq();if(sk)drawPaint(ctx,x,y,L,b,d,T,sk);else{ctx.fillStyle=hull;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+L,y-(b>=3?6:0));ctx.lineTo(x+L-(b===2?4:16),y+14);ctx.lineTo(x+10,y+14);ctx.fill()}}if(isRealm(S.water)&&!S.sleep)realmBoatFx(x,y,L,d,T);
+    const WDN=wardenOn()&&!isRealm(S.water);if(WDN)drawWarden(ctx,x,y,L,d,T,!!WDB().lit,!S.sleep&&!TRV.on&&!mir);else{const sk=skinEq();if(sk)drawPaint(ctx,x,y,L,b,d,T,sk);else{ctx.fillStyle=hull;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+L,y-(b>=3?6:0));ctx.lineTo(x+L-(b===2?4:16),y+14);ctx.lineTo(x+10,y+14);ctx.fill()}}if(isRealm(S.water)&&!S.sleep)realmBoatFx(x,y,L,d,T);if(S.water==='moon'&&MFX.ph&&!S.sleep)mfxThrust(x,y,L,T,mo);
     if(!WDN&&(b===2||b===3)){const s=b===3?1:.8,mx=x+1,mv=TRV.on||(!!S.sleep&&['boatIn','boatOut'].includes(S.sleep.ph)&&boatK()>.02&&boatK()<.98);
       ctx.fillStyle=rgb(mix([10,10,12],[46,48,54],d));ctx.fillRect(mx-5*s,y-1,3.2*s,19*s);
       ctx.fillStyle=rgb(mix([12,12,14],[34,36,40],d));rrect(mx-12*s,y-13*s,13*s,13*s,3*s);ctx.fill();ctx.fillStyle=rgb(mix([40,10,10],[210,60,48],d));ctx.fillRect(mx-11*s,y-9*s,11*s,2.2*s);
@@ -8098,7 +8100,7 @@ function drawBoat0(d,T){
   const done=()=>{if(pv)ctx.restore()};
   if(S.sleep&&!(b>0&&['boatIn','boatOut','pick'].includes(S.sleep.ph))){done();if(mir)ctx.restore();return}
   if(!inBoat)drawAngler(ax,ay,d,T);LIVE.meXY=mir?null:[ax,ay];if(!S.sleep&&!TRV.on&&!PET_DOCK&&!petIn)petBoat(ax,ay,deck,d,T);
-  if(S.sleep||TRV.on){done();if(mir)ctx.restore();return}
+  if(S.sleep||TRV.on||(MFX.ph&&S.water==='moon')){done();if(mir)ctx.restore();return}
   const p=cast.el/cast.dur,now=performance.now()/1000,ct=CATCH.on?(now-CATCH.t0)/CATCH.dur:2;
   const bend=CATCH.on&&ct<.84&&!CATCH.item?Math.min(14,4+Math.sqrt(CATCH.w)*1.6)*(1-ct*.6):CATCH.on&&ct<.84?3:0;
   const tipL=[ax+40-bend*.4,ay-58-Math.sin(T*2)*2+bend];
@@ -10394,8 +10396,8 @@ function q7SteepleDraw(d,T){const x=232,y=262+Math.sin(T*.6)*.6,C=(a,b)=>rgb(mix
   const q=S.q7;if(q&&q.ringDay===S.day&&!lit(d)&&Math.sin(T*1.2)>.7){ctx.globalCompositeOperation='lighter';glow(x,y-14,24,.35,'200,230,210');ctx.globalCompositeOperation='source-over'}ctx.restore()}
 // ---- the dive: a sonar minigame
 const DV={on:false};
-const DV_W=1800,DV_FLOOR=470;
-const DV_OBJ=[{x:240,y:400,w:80,h:70,k:'house'},{x:380,y:420,w:60,h:50,k:'house'},{x:520,y:350,w:90,h:120,k:'church',n:'The church'},{x:552,y:120,w:26,h:230,k:'tower'},
+const DV_W=1800,DV_FLOOR=470,DV_ZOOM=1.75;
+const DV_OBJ=[{x:240,y:400,w:80,h:70,k:'house'},{x:380,y:420,w:60,h:50,k:'house'},{x:520,y:350,w:90,h:120,k:'church',n:'The church'},{x:548,y:250,w:34,h:100,k:'tower'},
   {x:700,y:430,w:40,h:40,k:'rock'},{x:780,y:300,w:10,h:170,k:'tree'},{x:900,y:390,w:150,h:80,k:'school',n:'The school'},{x:1110,y:410,w:70,h:60,k:'house'},{x:1230,y:320,w:10,h:150,k:'tree'},
   {x:1300,y:440,w:50,h:30,k:'rock'},{x:1400,y:370,w:130,h:100,k:'mayor',n:'The mayor’s house'},{x:1600,y:405,w:80,h:65,k:'house'},{x:1000,y:200,w:60,h:22,k:'rock'},{x:640,y:230,w:50,h:20,k:'rock'}];
 const DV_GOAL=[{x:500,y:452,n:'The church register'},{x:884,y:455,n:'A class photo'},{x:1384,y:455,n:'The town charter'}];
@@ -10423,17 +10425,23 @@ function dvLoop(now){if(!DV.on)return;if($('plotModal').hidden){dvStop();return}
     DV.x=nx;DV.y=ny;DV.air-=dt;DV.hit-=dt;DV.cool-=dt;
     DV_GOAL.forEach((g,i)=>{if(!DV.got[i]&&Math.hypot(g.x-DV.x,g.y-DV.y)<30){DV.got[i]=1;try{sfx('chime','R')}catch(e){}const n=Object.keys(DV.got).length;DV.msg=`${g.n}! (${n} of 3)`;if(n>=3){DV.done=true;DV.msg='All three. Bringing the bell up…';setTimeout(()=>{dvStop();$('plotModal').hidden=true;q7Solve()},1600)}}});
     if(DV.air<=0&&!DV.done){DV.done=true;DV.air=0;DV.msg='Out of air. They haul the bell back up. Rest, then try again.';try{sfx('miss')}catch(e){}$('dvAgain').hidden=false}}
-  const cv=$('dvCv');if(!cv){dvStop();return}const c=cv.getContext('2d'),VW=640,VH=360;c.setTransform(2,0,0,2,0,0);const cam=Math.max(0,Math.min(DV_W-VW,DV.x-VW/2)),camY=Math.max(0,Math.min(DV_FLOOR+30-VH,DV.y-VH/2));
-  const g=c.createLinearGradient(0,0,0,VH);g.addColorStop(0,'#06222a');g.addColorStop(1,'#010507');c.fillStyle=g;c.fillRect(0,0,VW,VH);c.save();c.translate(-cam,-camY);
-  if(camY<40){c.fillStyle='rgba(120,200,210,.12)';c.fillRect(cam,0,VW,24)}
+  const cv=$('dvCv');if(!cv){dvStop();return}const c=cv.getContext('2d'),VW=640,VH=360;c.setTransform(2,0,0,2,0,0);const Z=DV_ZOOM,WV=VW/Z,WH=VH/Z,cam=Math.max(0,Math.min(DV_W-WV,DV.x-WV/2)),camY=Math.max(0,Math.min(DV_FLOOR+24-WH,DV.y-WH*.55));
+  const g=c.createLinearGradient(0,0,0,VH);g.addColorStop(0,'#06222a');g.addColorStop(1,'#010507');c.fillStyle=g;c.fillRect(0,0,VW,VH);c.save();c.scale(Z,Z);c.translate(-cam,-camY);
+  if(camY<40){c.fillStyle='rgba(120,200,210,.12)';c.fillRect(cam,0,WV,24)}
   for(const p of DV.pings){const age=Math.max(0,T-p.t),r=age*420;if(age<2.4){c.strokeStyle=`rgba(120,255,200,${.5*(1-age/2.4)})`;c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,r,0,7);c.stroke()}}
-  {const fa=dvSeen(cam+VW/2,DV_FLOOR,T,{x:cam-50,y:DV_FLOOR,w:VW+100,h:60});c.fillStyle=`rgba(60,110,90,${.15+.5*fa})`;c.fillRect(cam-10,DV_FLOOR,VW+20,60)}
-  for(const o of DV_OBJ){const a=dvSeen(0,0,T,o);if(a<=.01)continue;c.strokeStyle=`rgba(120,255,200,${a})`;c.fillStyle=`rgba(30,70,60,${a*.5})`;c.lineWidth=2;
+  {const fa=dvSeen(cam+WV/2,DV_FLOOR,T,{x:cam-50,y:DV_FLOOR,w:WV+100,h:60});c.fillStyle=`rgba(60,110,90,${.15+.5*fa})`;c.fillRect(cam-10,DV_FLOOR,WV+20,60)}
+  for(const o of DV_OBJ){const a=dvSeen(0,0,T,o);if(a<=.01)continue;c.strokeStyle=`rgba(120,255,200,${a})`;c.fillStyle=`rgba(30,70,60,${a*.5})`;c.lineWidth=1.5;
     if(o.k==='tree'){c.beginPath();c.moveTo(o.x+5,o.y+o.h);c.lineTo(o.x+5,o.y);for(let i=0;i<4;i++){c.moveTo(o.x+5,o.y+20+i*28);c.lineTo(o.x+5+(i%2?-22:22),o.y+6+i*28)}c.stroke()}
     else if(o.k==='rock'){c.beginPath();c.ellipse(o.x+o.w/2,o.y+o.h/2,o.w/2,o.h/2,0,0,7);c.fill();c.stroke()}
-    else if(o.k==='tower'){c.fillRect(o.x,o.y,o.w,o.h);c.strokeRect(o.x,o.y,o.w,o.h);c.beginPath();c.moveTo(o.x-4,o.y);c.lineTo(o.x+o.w/2,o.y-40);c.lineTo(o.x+o.w+4,o.y);c.stroke()}
+    else if(o.k==='tower'){const cx=o.x+o.w/2,dk=`rgba(3,16,18,${a})`,tn=`rgba(30,70,60,${a*.5})`,box=(x,y,w,h)=>{c.fillStyle=dk;c.fillRect(x,y,w,h);c.fillStyle=tn;c.fillRect(x,y,w,h);c.strokeRect(x,y,w,h)};
+      box(o.x,o.y,o.w,o.h);c.beginPath();c.moveTo(cx-8,o.y+46);c.lineTo(cx-8,o.y+24);c.arc(cx,o.y+24,8,Math.PI,0);c.lineTo(cx+8,o.y+46);c.stroke();
+      c.beginPath();c.moveTo(cx-5,o.y+40);c.quadraticCurveTo(cx-5,o.y+30,cx,o.y+30);c.quadraticCurveTo(cx+5,o.y+30,cx+5,o.y+40);c.closePath();c.stroke();
+      c.beginPath();c.arc(cx,o.y+66,6,0,7);c.stroke();box(o.x-4,o.y-5,o.w+8,5);
+      c.beginPath();c.moveTo(o.x-2,o.y-5);c.lineTo(cx,o.y-80);c.lineTo(o.x+o.w+2,o.y-5);c.closePath();c.fillStyle=dk;c.fill();c.fillStyle=tn;c.fill();c.stroke();
+      c.beginPath();c.moveTo(cx,o.y-80);c.lineTo(cx,o.y-98);c.moveTo(cx-6,o.y-91);c.lineTo(cx+6,o.y-91);c.stroke()}
     else{c.fillRect(o.x,o.y,o.w,o.h);c.strokeRect(o.x,o.y,o.w,o.h);c.beginPath();c.moveTo(o.x-6,o.y);c.lineTo(o.x+o.w/2,o.y-26);c.lineTo(o.x+o.w+6,o.y);c.stroke();c.strokeRect(o.x+o.w/2-8,o.y+o.h-26,16,26);
-      if(o.n){c.fillStyle=`rgba(200,255,230,${a})`;c.font='bold 12px sans-serif';c.textAlign='center';c.fillText(o.n,o.x+o.w/2,o.y-32);c.textAlign='left'}}}
+      if(o.k==='church')for(const wx of [o.x+14,o.x+o.w-26]){c.beginPath();c.moveTo(wx,o.y+60);c.lineTo(wx,o.y+34);c.quadraticCurveTo(wx,o.y+24,wx+6,o.y+24);c.quadraticCurveTo(wx+12,o.y+24,wx+12,o.y+34);c.lineTo(wx+12,o.y+60);c.closePath();c.stroke()}
+      if(o.n){c.fillStyle=`rgba(200,255,230,${a})`;c.font='bold 12px sans-serif';c.textAlign='center';c.fillText(o.n,o.k==='church'?o.x+o.w/2+52:o.x+o.w/2,o.k==='church'?o.y-60:o.y-32);c.textAlign='left'}}}
   DV_GOAL.forEach((gl,i)=>{if(DV.got[i])return;const a=dvSeen(gl.x,gl.y,T);if(a<=.01)return;const pu=.6+.4*Math.sin(T*5+i);c.fillStyle=`rgba(255,230,140,${a*pu})`;c.beginPath();c.arc(gl.x,gl.y,6,0,7);c.fill();c.strokeStyle=`rgba(255,230,140,${a*.6})`;c.beginPath();c.arc(gl.x,gl.y,12+pu*4,0,7);c.stroke()});
   c.strokeStyle='rgba(180,200,200,.35)';c.lineWidth=1;c.beginPath();c.moveTo(DV.x,DV.y-16);c.lineTo(DV.x,0);c.stroke();
   const bg=c.createRadialGradient(DV.x,DV.y,4,DV.x,DV.y,80);bg.addColorStop(0,'rgba(180,230,220,.18)');bg.addColorStop(1,'rgba(180,230,220,0)');c.fillStyle=bg;c.beginPath();c.arc(DV.x,DV.y,80,0,7);c.fill();
@@ -11193,11 +11201,27 @@ function realmSwap(from,to){if(!isRealm(from)&&isRealm(to)){S.realmFrom=from;S.r
   else if(isRealm(from)&&!isRealm(to)){if(S.realmWx)S.wx=S.realmWx;delete S.realmWx}
   if(to==='moon')S.o2=o2Max()}
 const o2Max=()=>rgear('moonbase')?Infinity:rgear('tank')?600:300;
+// Moon landings: the boat floats down on thrusters that cut out when it touches the sea, and takes off the same way
+// when your air runs out. MFX.ph is 'land' or 'lift'; the boat's height comes from mfxOff().
+const MFX={ph:'',t0:0,to:'',splash:false},MFX_LAND=2.8,MFX_WARM=.5,MFX_LIFT=2.2;
+function mfxLand(){if(RM)return;Object.assign(MFX,{ph:'land',t0:performance.now()/1000,splash:false});cast.el=0;try{tone(120,1.6,{type:'sawtooth',vol:.02})}catch(e){}}
+function mfxLift(to){if(MFX.ph==='lift')return;if(RM){travelTo(to);return}Object.assign(MFX,{ph:'lift',t0:performance.now()/1000,to});cast.el=0;CATCH.on=false;try{tone(110,.6,{type:'sawtooth',vol:.03});tone(160,1.6,{type:'sawtooth',vol:.035,delay:.5})}catch(e){}}
+function mfxOff(){if(!MFX.ph)return 0;const q=performance.now()/1000-MFX.t0;
+  if(MFX.ph==='land'){const k=Math.min(1,q/MFX_LAND);if(k>=1){MFX.ph='';return 0}return -300*Math.pow(1-k,2.2)}
+  const k=Math.max(0,q-MFX_WARM)/MFX_LIFT;if(k>=1){const to=MFX.to;MFX.ph='';if(S.water==='moon'){S.o2=0;travelTo(to)}return -400}return -400*k*k}
+// two thrusters under the hull: on while you're in the air, off the moment you touch the sea
+function mfxThrust(x,y,L,T,mo){const air=mo<-1||(MFX.ph==='lift');
+  if(MFX.ph==='land'&&!air)return;if(MFX.ph==='land'&&mo>-4&&!MFX.splash){MFX.splash=true;try{burst(x+L/2,y+14,['#cfe0ff','#ffffff','#9fd0ff'],40);sfx('splash')}catch(e){}}
+  if(!air)return;const fl=.75+.25*Math.sin(T*40)+(Math.random()-.5)*.2,len=(MFX.ph==='lift'?30:18)*fl;
+  for(const tx of [x+L*.24,x+L*.72]){ctx.fillStyle='#5a5e66';ctx.fillRect(tx-5,y+12,10,6);ctx.fillStyle='#3a3e46';ctx.fillRect(tx-6,y+17,12,3);
+    const g=ctx.createLinearGradient(0,y+20,0,y+20+len);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.3,'rgba(140,210,255,.9)');g.addColorStop(1,'rgba(80,140,255,0)');ctx.fillStyle=g;
+    ctx.beginPath();ctx.moveTo(tx-5,y+20);ctx.quadraticCurveTo(tx,y+20+len*1.15,tx+5,y+20);ctx.fill();ctx.globalCompositeOperation='lighter';glow(tx,y+24,22,.5,'140,200,255');ctx.globalCompositeOperation='source-over'}
+  if(mo>-60){ctx.fillStyle='rgba(220,230,255,.35)';for(let i=0;i<6;i++){const q=(T*2+i/6)%1;ctx.beginPath();ctx.arc(x+L/2+(i-2.5)*L*.18,y-mo+14-q*6,3+q*6,0,7);ctx.fill()}}}
 // Updrafts on the Cloud Sea
 const UPD={t:20,cur:null,force:0};
 function realmTick(dt){const w=S.water,busy=TRV.on||S.sleep||titleOn;
   if(w==='moon'&&!busy&&isFinite(o2Max())){const was=S.o2;S.o2=Math.max(0,(S.o2??o2Max())-dt);if(was>60&&S.o2<=60){showToast('Air running low: 1 minute left!','Oxygen');sfx('miss')}
-    if(S.o2<=0){showToast('Out of air! Back through the Lunar Gate.','Oxygen');travelTo(S.realmFrom&&!isRealm(S.realmFrom)?S.realmFrom:'deep');}}
+    if(S.o2<=0&&MFX.ph!=='lift'){showToast('Out of air! Thrusters on, back through the Lunar Gate.','Oxygen');mfxLift(S.realmFrom&&!isRealm(S.realmFrom)?S.realmFrom:'deep')}}
   if(w==='sky'&&!busy){if(UPD.cur){UPD.cur.t+=dt;if(UPD.cur.t>UPD.cur.dur)UPD.cur=null}else if((UPD.t-=dt*(rgear('kite')?2:1))<=0){UPD.t=rnd(35,70);UPD.cur={x:rnd(250,740),t:0,dur:9};showToast('An updraft! Tap it to scoop up a whole school.','Cloud Sea')}}
   else UPD.cur=null}
 function updraftScoop(){if(!UPD.cur)return;UPD.cur=null;UPD.force=3;sfx('whoosh');for(let i=0;i<3;i++)setTimeout(()=>doCatch(),i*380)}
@@ -11328,7 +11352,7 @@ function tick(now){if(SESS.paused)return;
   advanceClock(dt);
   if((WXT.t-=dt)<=0){WXT.t=1;wxSync(true)}
   vitalsTick(dt);
-  if((!S.sleep||dockFishing())&&!TRV.on){cast.el+=dt;if(cast.el>=cast.dur){cast.el=0;doCatch();cast.dur=castDur()}}
+  if((!S.sleep||dockFishing())&&!TRV.on&&!(MFX.ph&&S.water==='moon')){cast.el+=dt;if(cast.el>=cast.dur){cast.el=0;doCatch();cast.dur=castDur()}}
   tourTick(dt);ambient(dt);{const L=sceneLoc();scnTick(dt,L);hwPumpTick(dt,L)}totInsideTick(dt);liveTick(dt);q4Tick(dt);realmTick(dt);audioTick(dt);for(const q of AMB.drones)q.t+=dt;if(AMB.drones.some(q=>q.t>=4.2)){AMB.drones=AMB.drones.filter(q=>q.t<4.2);if(phView==='shop'&&!$('slotsModal').hidden)renderDecor()}
   let buffEnded=false;for(const k in S.buffs){S.buffs[k]-=dt;if(S.buffs[k]<=0){delete S.buffs[k];buffEnded=true;showToast(`${POT[k].n} wore off`)}}
   if(buffEnded){const fr=cast.el/cast.dur;cast.dur=castDur();cast.el=fr*cast.dur;renderHot()}
