@@ -36,7 +36,7 @@ Run the whole suite before every push.
 
 - Yard: old decor converts into place, dragging in Decorate yard, buying land, fishing off the dock
 - Paths, fences and house paint, and that the visitor snapshot packs and unpacks them correctly
-- Fruit trees, garden plots and the pantry
+- Fruit trees, garden plots and the pantry, including fruit prices coming from your long-term income and capping at $30,000
 - Cabin: old wall spots carry over, crafting and arranging furniture, themes
 - Basement: its own colors and themes, furniture shared with upstairs, visitors can go downstairs
 - Smokehouse: meals use the cheapest unlocked fish, give hunger and a boost, then cool down
