@@ -443,6 +443,17 @@ await check('town projects: rebuild the bandstand and reopen the cannery togethe
   await p.evaluate(()=>canneryUI());await p.click('[data-can="walleye"][data-n="20"]');ok(await p.evaluate(()=>CANS().n===20&&Math.round(CANS().v)===3000&&S.cooler.walleye.n===10),'canning: 20 a day, 50% more');
   const c0=await p.evaluate(()=>S.coins);await p.click('#canSell');ok(await p.evaluate(c0=>S.coins===c0+3000&&CANS().n===0,c0),'sell cans');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('ferry and Pine Island: the third town project, boarding for the fare, the crossing, walking the island, the islanders and the ride home',async()=>{const p=await page(VPS[1][1],save({coins:3e6,min:1300}));
+  const me=await p.evaluate(async()=>{const r=await api('hello',{name:'Fy'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});return r});
+  await p.evaluate(async me=>{for(const k of ['band','cannery','ferry']){for(let i=0;i<40;i++){const r=await api('tp',{id:me.id,key:me.key});if(r[k].done)break;await api('tp',{id:me.id,key:me.key,give:{p:k,pts:5000}})}}await tpLoad()},me);
+  ok(await p.evaluate(()=>tpDone('ferry')&&tpState().cur===null&&S.trophies.some(t=>t.name==='Ferry Builder')),'ferry fixed, builder trophy');
+  ok(await p.evaluate(()=>lakeMapHTML().includes('Pine Island')),'island pin on the map');
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);openTown()});await p.waitForTimeout(1200);await p.evaluate(()=>ferryUI());await p.click('#frBoard');
+  ok(await p.evaluate(()=>!!TOWN.cross&&S.coins===3e6-5000),'boarded for the fare');await p.waitForTimeout(5400);ok(await p.evaluate(()=>TOWN.z==='isle'&&!TOWN.cross),'arrived on Pine Island');
+  await p.evaluate(()=>{TOWN.x=1240;TOWN.y=430});await p.waitForTimeout(800);ok(await p.evaluate(()=>{isleTalk(0);return !!INPC[0].bub}),'islanders talk');
+  ok(await p.evaluate(()=>{TOWN.x=1400;return true}),'walks the island');await p.waitForTimeout(400);
+  await p.evaluate(()=>ferryCross('town'));await p.waitForTimeout(5400);ok(await p.evaluate(()=>TOWN.on&&TOWN.z===''&&S.coins===3e6-5000),'free ride home '+await p.evaluate(()=>JSON.stringify({on:TOWN.on,z:TOWN.z,c:S.coins,cr:TOWN.cross})));ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
+
 await check('phone controls: thumbstick walks, action button enters places, Go to walks you there, off in Settings',async()=>{const c=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({sleep:{ph:'yard',t:0,visit:true}}));const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.goto(URL0);await p.waitForTimeout(800);await p.evaluate(()=>{if(!document.getElementById('titleScreen').hidden)document.getElementById('tGo').click()});await p.waitForTimeout(900);await p.evaluate(()=>document.querySelectorAll('.away').forEach(m=>m.hidden=true));await p.waitForTimeout(400);

@@ -70,6 +70,7 @@ Run the whole suite before every push.
 - Harvest Fair: the festival stall in town, apple bobbing tickets and the once-a-day pie contest
 - Town jobs and the Fish Market: Notice Board jobs pay and build reputation, the market pays double for wanted fish up to a daily cap
 - Town projects: the bandstand and cannery rebuilds, builder trophies, the evening concert and canning fish
+- Ferry and Pine Island: the third town project, boarding for the fare, the crossing, walking the island, the islanders and the free ride home
 - Phone controls: the thumbstick walks, the action button enters places, Go to walks you there, and it turns off in Settings
 - Case 6, The Night Shift: the tin, statements only after dark, ledger pages, the cipher, the lamp, a wrong accusation locking the board and the right one closing the case, plus texting without an angler name
 - Case 7, The Town Under the Lake: the steeple, keepsakes, the bell code, the letters, the diving bell and the sonar dive, with its rewards and the steeple in your yard

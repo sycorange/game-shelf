@@ -271,9 +271,9 @@ async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.wai
     if(ins.meta&&ins.meta.changes===1&&(me.pub??1)!==0)await later(async()=>{const c=await dcCfg(db);await dcPost(db,'catches',{embeds:[{color:lv>=10?0xc070e0:lv>=7?0xffd05a:lv>=4?0xdfe8f4:0xe0904a,title:`★ ${me.name} reached Prestige ${R[lv]}!`,description:`A fresh lake and a ${lv>=10?'rainbow':lv>=7?'gold':lv>=4?'silver':'bronze'} star. Every sale is worth +${lv*10}% for good.`+dcLink(c)}]})});
     return json({ok:true})}
   // Town projects: the whole lake rebuilds the bandstand, then the old cannery. Points: $1,000 = 1, materials by rarity.
-  if(p==='tp'){const PJ=['band','cannery'],state={};
+  if(p==='tp'){const PJ=['band','cannery','ferry'],state={},TPG={band:[10000,600],cannery:[15000,900],ferry:[20000,1200]};
     const goalOf=async k=>{let g=await db.prepare('SELECT v FROM cfg WHERE k=?').bind('tp:'+k+':goal').first();
-      if(!g){const n=await db.prepare('SELECT COUNT(*) AS c FROM players WHERE seen>?').bind(now-7*864e5).first();const goal=Math.max(k==='band'?10000:15000,Math.round((n.c|0)*(k==='band'?600:900)/500)*500);
+      if(!g){const n=await db.prepare('SELECT COUNT(*) AS c FROM players WHERE seen>?').bind(now-7*864e5).first();const goal=Math.max(TPG[k][0],Math.round((n.c|0)*TPG[k][1]/500)*500);
         await db.prepare('INSERT OR IGNORE INTO cfg(k,v) VALUES(?,?)').bind('tp:'+k+':goal',String(goal)).run();g=await db.prepare('SELECT v FROM cfg WHERE k=?').bind('tp:'+k+':goal').first()}return +g.v};
     const doneOf=async k=>{const r=await db.prepare('SELECT v FROM cfg WHERE k=?').bind('tp:'+k+':done').first();return r?+r.v:0};
     let cur=null;for(const k of PJ){const dn=await doneOf(k);state[k]={done:dn};if(!dn&&!cur)cur=k}
@@ -286,8 +286,7 @@ async function extraRoutes(p,db,me,b,now,url,ctx){const later=f=>{if(ctx)ctx.wai
       let done=0;if((+tot.s||0)>=goal){await db.prepare('INSERT OR IGNORE INTO cfg(k,v) VALUES(?,?)').bind('tp:'+k+':done',String(now)).run();done=await doneOf(k)}
       Object.assign(state[k],{goal,total:Math.round(+tot.s||0),n:tot.n|0,done,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:Math.round(x.w),me:x.pid===me.id}))})}
     for(const k of PJ){const m=await db.prepare('SELECT w FROM evbest WHERE ev=? AND pid=?').bind('tp:'+k,me.id).first();state[k].mine=Math.round(m?m.w:0)}
-    if(state.band.done&&!state.cannery.done&&cur!=='cannery')cur='cannery';
-    return json({cur:state.band.done?(state.cannery.done?null:'cannery'):'band',...state})}
+    return json({cur:PJ.find(k=>!state[k].done)||null,...state})}
   if(p==='guest/sign'){const to=String(b.to||'');if(!to||to===me.id)return json({error:'bad-target'},400);
     const t=await db.prepare('SELECT id FROM players WHERE id=?').bind(to).first();if(!t)return json({error:'no-player'},404);
     const r=await db.prepare('INSERT OR IGNORE INTO guest(to_pid,from_pid,from_name,st,note,day,ts) VALUES(?,?,?,?,?,?,?)').bind(to,me.id,me.name,Math.max(0,Math.min(11,b.st|0)),clean(b.note,80),dayKey(now),now).run();
