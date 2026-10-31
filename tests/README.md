@@ -75,6 +75,7 @@ Run the whole suite before every push.
 - Case 6, The Night Shift: the tin, statements only after dark, ledger pages, the cipher, the lamp, a wrong accusation locking the board and the right one closing the case, plus texting without an angler name
 - Case 7, The Town Under the Lake: the steeple, keepsakes, the bell code, the letters, the diving bell and the sonar dive, with its rewards and the steeple in your yard
 - Prestige and realm gates: a gate you built before prestiging needs the right boat again
+- The dive on phones: holding an arrow moves the diving bell without selecting text
 - Moon landings: the boat floats straight down on thrusters and straight up when you leave or your air runs out
 - Big games move: transfer codes take big saves, and a failed Move my game offers the save code instead
 - Big yards: visitors get every placed thing and the ground, even when the shared snapshot is past the old size limit

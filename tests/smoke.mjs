@@ -504,6 +504,15 @@ await check('prestige: built gates still need the right boat again before you ca
   await p.evaluate(()=>{S.boat=5;travelTo('moon')});await p.waitForTimeout(400);ok(await p.evaluate(()=>S.water==='moon'),'with the boat back, the gate works');
   await p.evaluate(()=>{S.boat=5;travelTo('hell',{instant:true})});ok(await p.evaluate(()=>S.water!=='hell'),'the Ember Lake still needs its own boat');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('phone dive: holding an arrow moves the diving bell and never selects the button text',async()=>{const c=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
+  await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({water:'deep',boat:4,q:{step:7,everSolved:true},q2:{step:7,everSolved:true},q3:{step:7,everSolved:true},q4:{step:7,everSolved:true,msgs:[],lies:{}},q5:{step:7,everSolved:true},q6:{step:7,everSolved:true},q7:{step:6,startDay:1,keep:{locket:1,slate:1,sign:1},bell:true,read:true}}));
+  const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(URL0);await p.waitForTimeout(800);await p.evaluate(()=>{if(!document.getElementById('titleScreen').hidden)document.getElementById('tGo').click()});await p.waitForTimeout(900);
+  await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);dvOpen()});await p.waitForTimeout(400);
+  const bx=await p.locator('[data-dv="r"]').boundingBox(),x0=await p.evaluate(()=>DV.x),cdp=await c.newCDPSession(p),pt=[{x:bx.x+bx.width/2,y:bx.y+bx.height/2}];
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:pt});await p.waitForTimeout(1200);
+  ok(await p.evaluate(x0=>DV.x>x0+30,x0),'holding ▶ moves the bell');ok(await p.evaluate(()=>!String(getSelection())&&document.querySelector('[data-dv="r"]').classList.contains('on')),'no text selected, button lit');
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await p.waitForTimeout(200);ok(await p.evaluate(()=>!DV.keys.r),'letting go stops it');ok(!errs.length,errs.join('; '));await c.close()});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
