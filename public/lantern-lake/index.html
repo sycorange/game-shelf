@@ -6762,6 +6762,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:153,n:'Bug fix: staying in the realms',items:['Bug fix: going idle or reopening the game sent you back to Lantern Lake from the Sea of Tranquility, the Ember Lake and the Cloud Sea, even with the Moon Base’s unlimited air. Now you stay where you were. On the Moon without the Moon Base, your air still runs down while you’re away, and you come home when it runs out.']},
  {v:152,n:'Bug fix: the dive on phones',items:['Bug fix: in The Town Under the Lake, holding an arrow button on a phone highlighted the arrows instead of moving the diving bell. Holding an arrow now keeps the bell moving, and the button lights up while you hold it.']},
  {v:151,n:'Bug fix: realm gates after Prestige',items:['Bug fix: after you prestiged, gates you had already built still let you through to the Sea of Tranquility, the Ember Lake and the Cloud Sea with your starter boat. Now you need the right boat again first. Your gates stay built, so you don’t pay for them twice.']},
  {v:150,n:'Moon landings, straight up and down',items:['Your boat now floats straight down onto the Sea of Tranquility and straight back up when you leave, instead of sailing in from the side first. Leaving on purpose lifts off too, not just running out of air.']},
@@ -11398,7 +11399,10 @@ function start(data){
   for(const [k,v] of Object.entries(fresh()))if(S[k]===undefined)S[k]=v;
   S.boat=Math.min(S.boat,GEAR.boat.items.length-1);S.shack=Math.min(S.shack,GEAR.shack.items.length-1);yardSync();
   if(!W(S.water))S.water='pond';
-  if(isRealm(S.water)){if(S.realmWx)S.wx=S.realmWx;delete S.realmWx;S.water=S.realmFrom&&!isRealm(S.realmFrom)?S.realmFrom:'deep'}
+  // Bug fix (v153): reopening the game (or coming back after going idle) used to send you home from the realms, even with
+  // the Moon Base's unlimited air. Now you stay as long as the gate, your boat and (on the Moon) your air allow it.
+  if(isRealm(S.water)){const r=REALMS_BY[S.water],stay=gateOwned(S.water)&&S.boat>=r.boat&&(S.water!=='moon'||!isFinite(o2Max())||(+S.o2||0)>0);
+    if(!stay){if(S.realmWx)S.wx=S.realmWx;delete S.realmWx;S.water=S.realmFrom&&!isRealm(S.realmFrom)?S.realmFrom:'deep'}}
   if(S.sleep&&(S.sleep.at||['door','pick','inside'].includes(S.sleep.ph)))S.sleep=null;
   SETS();applyDock();applyPhHide();try{prGrant()}catch(e){}applyPhTheme();applyTextSize();if(!S.guide&&S.total===0&&S.day<=1&&!(S.mp&&S.mp.id))S.guide={step:0,apps:{}};if(S.q&&S.q.step===7)S.q.everSolved=true;if(S.tour&&S.tour.ghost&&S.q2)S.q2.ghost={t0:0};else if(S.q2)S.q2.ghost=null;try{sbInit()}catch(e){}
   if(!Array.isArray(S.hot))S.hot=[];while(S.hot.length<5)S.hot.push(null);

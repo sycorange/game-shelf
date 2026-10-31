@@ -76,6 +76,7 @@ Run the whole suite before every push.
 - Case 7, The Town Under the Lake: the steeple, keepsakes, the bell code, the letters, the diving bell and the sonar dive, with its rewards and the steeple in your yard
 - Prestige and realm gates: a gate you built before prestiging needs the right boat again
 - The dive on phones: holding an arrow moves the diving bell without selecting text
+- Realms on reopen: you stay on the Moon (with the Moon Base or air left) and in the other realms, unless your air, gate or boat says otherwise
 - Moon landings: the boat floats straight down on thrusters and straight up when you leave or your air runs out
 - Big games move: transfer codes take big saves, and a failed Move my game offers the save code instead
 - Big yards: visitors get every placed thing and the ground, even when the shared snapshot is past the old size limit

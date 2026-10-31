@@ -513,6 +513,10 @@ await check('phone dive: holding an arrow moves the diving bell and never select
   ok(await p.evaluate(x0=>DV.x>x0+30,x0),'holding ▶ moves the bell');ok(await p.evaluate(()=>!String(getSelection())&&document.querySelector('[data-dv="r"]').classList.contains('on')),'no text selected, button lit');
   await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await p.waitForTimeout(200);ok(await p.evaluate(()=>!DV.keys.r),'letting go stops it');ok(!errs.length,errs.join('; '));await c.close()});
 
+await check('realms: reopening the game keeps you on the Moon with the Moon Base, and in the other realms',async()=>{
+  for(const [nm,extra,want] of [['moon base',{water:'moon',realm:{gates:{moon:1},gear:{tank:1,moonbase:1}},o2:null},'moon'],['air left',{water:'moon',realm:{gates:{moon:1},gear:{}},o2:200},'moon'],['no air',{water:'moon',realm:{gates:{moon:1},gear:{}},o2:0},'deep'],['cloud sea',{water:'sky',boat:7,realm:{gates:{sky:1},gear:{}}},'sky'],['boat too small',{water:'sky',boat:3,realm:{gates:{sky:1},gear:{}}},'deep']]){
+    const p=await page(VPS[0][1],save(Object.assign({boat:5,realmFrom:'deep',last:Date.now()},extra)));ok(await p.evaluate(w=>S.water===w,want),nm+': '+(await p.evaluate(()=>S.water)));ok(!p.errs.length,p.errs.join('; '));await p.context().close()}});
+
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
