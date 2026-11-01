@@ -2415,12 +2415,13 @@ const svgI=(k,c)=>`<svg viewBox="0 0 32 32" aria-hidden="true">${I[k](c)}</svg>`
 I.mug=c=>`<rect x="10" y="6" width="12" height="22" rx="3" fill="${c}"/><rect x="10" y="6" width="12" height="5" rx="2" fill="#c8ccd2"/><rect x="12" y="15" width="8" height="6" rx="1" fill="#f4e8d4"/><path d="M14 4q1-2 0-3M18 4q1-2 0-3" stroke="#d8d8d8" stroke-width="1.4" fill="none" stroke-linecap="round"/>`;
 // ==SEASON== Halloween 2026 runs Oct 20 through Nov 1 (local time). Everything that checks hwOn() switches itself off after that.
 // To test outside the dates, open the game with ?season=hw (or ?season=off, ?season=auto to clear).
-const HW_FROM=new Date(2026,9,20).getTime(),HW_TO=new Date(2026,10,2).getTime(),HW_ID='hw26';
+// Moved up (v154): Halloween ends and the Harvest Festival starts at one fixed moment, 06:30 UTC on November 1 (1:30 AM Eastern).
+const HW_FROM=new Date(2026,9,20).getTime(),HW_TO=Date.UTC(2026,10,1,6,30),HW_ID='hw26';
 const SEASON_FORCE=(()=>{try{const q=new URL(location.href).searchParams.get('season');if(q==='auto')localStorage.removeItem('ll-season');else if(q)localStorage.setItem('ll-season',q);return localStorage.getItem('ll-season')||''}catch(e){return ''}})();
 const HWL=()=>hwOn()?'Halloween':'Halloween keepsake';
 const hwOn=()=>SEASON_FORCE==='hw'?true:SEASON_FORCE?false:(Date.now()>=HW_FROM&&Date.now()<HW_TO);
 // ==HARVEST== Harvest Festival 2026 runs Nov 2 through Nov 30 (local time), right after Halloween. Test with ?season=hv.
-const HV_FROM=new Date(2026,10,2).getTime(),HV_TO=new Date(2026,11,1).getTime(),HV_ID='hv26';
+const HV_FROM=HW_TO,HV_TO=new Date(2026,11,1).getTime(),HV_ID='hv26';
 const hvOn=()=>SEASON_FORCE==='hv'?true:SEASON_FORCE?false:(Date.now()>=HV_FROM&&Date.now()<HV_TO);
 const HV=()=>{if(!S.hv||typeof S.hv!=='object')S.hv={};return S.hv};
 const hvDaysLeft=()=>Math.max(1,Math.ceil((HV_TO-Date.now())/864e5));
@@ -6762,6 +6763,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:154,n:'The Harvest Festival starts early',items:['The Harvest Festival is here a day early! Halloween has wrapped up, the Ghost Gar contest prizes are paid out, and the festival fish, the Harvest Basket and the Harvest Fair are open now through November 30.']},
  {v:153,n:'Bug fix: staying in the realms',items:['Bug fix: going idle or reopening the game sent you back to Lantern Lake from the Sea of Tranquility, the Ember Lake and the Cloud Sea, even with the Moon Base’s unlimited air. Now you stay where you were. On the Moon without the Moon Base, your air still runs down while you’re away, and you come home when it runs out.']},
  {v:152,n:'Bug fix: the dive on phones',items:['Bug fix: in The Town Under the Lake, holding an arrow button on a phone highlighted the arrows instead of moving the diving bell. Holding an arrow now keeps the bell moving, and the button lights up while you hold it.']},
  {v:151,n:'Bug fix: realm gates after Prestige',items:['Bug fix: after you prestiged, gates you had already built still let you through to the Sea of Tranquility, the Ember Lake and the Cloud Sea with your starter boat. Now you need the right boat again first. Your gates stay built, so you don’t pay for them twice.']},

@@ -183,7 +183,7 @@ async function pinBoard(db,me,now){await pinAward(db,now);const day=pinDay(now);
   const players=await db.prepare('SELECT COUNT(*) AS c FROM pinday WHERE day=?').bind(day).first();
   return {day,left:pinLeft(now),players:players.c|0,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',score:x.score,me:x.pid===me.id})),me:mine?{score:mine.score,rank}:null,champ:champ?{name:champ.name,score:champ.score,day:champ.day,me:champ.pid===me.id}:null}}
 // ==EXTRAS== Halloween contest, weekly lake monster, guestbooks and yard likes, 1v1 challenges, bug reports and owner tools.
-const HW_EV='hw26',HW_END=Date.UTC(2026,10,2,5,0,0); // midnight Eastern, November 2 2026
+const HW_EV='hw26',HW_END=Date.UTC(2026,10,1,6,30,0); // moved up: 1:30 AM Eastern, November 1 2026 (same moment as the game)
 const HW_PRIZE=[100000,50000,25000];
 const MON_NAMES=['Old Gnasher','Big Bertha','The Reed Lake Ripper','Moss-Back Mike','Queen Muskellunge','The Midnight Snapper','Lord Whiskers','Sir Chomps-a-Lot'];
 const monName=wk=>MON_NAMES[(+wk)%MON_NAMES.length];
