@@ -83,6 +83,7 @@ Run the whole suite before every push.
 - The Phoenix Collection: the Mythic set in Crate Expectations, the two-tap buy, the unveil, equipping, and the set-bonus firebird
 - Prestige: the preview, the reset keeps your house and pets, the Legacy rod, costume and trophy, the next cost doubles, and old retirees convert
 - Harvest shop 2: the new festival decor draws, dock pieces slide in the Dock tab and stop at the dock end, and friends get your dock layout
+- Decorate picking: tapping the item itself selects it, tapping the same spot again reaches the item behind, the nudge buttons, and tapping the ground lets go
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

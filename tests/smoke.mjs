@@ -35,6 +35,9 @@ for(const [tag,vp] of VPS){
     const it=await p.evaluate(()=>yardList().map(a=>a[0]));ok(it.filter(x=>x==='flowers').length===5&&it.includes('jacks')&&it.filter(x=>x.startsWith('tree_')).length===2,'conversion '+it.join());
     await p.evaluate(()=>yedEnter());await p.waitForTimeout(800);
     const r=await p.evaluate(()=>{const a=yardList().find(a=>a[0]==='gnome'),T=getCAMT(),cv=document.querySelector('#cv'),R=cv.getBoundingClientRect(),sx=(wx,wy)=>[R.left+((wx*T.z+T.ox)*BASE.s+BASE.ox)/cv.width*R.width,R.top+((wy*T.z+T.oy)*BASE.s+BASE.oy)/cv.height*R.height];return {f:sx(a[1],a[2]-10),t:sx(a[1]-20,a[2]+20),a:[...a]}});
+    await p.mouse.move(...r.f);await p.mouse.down();await p.mouse.move(r.f[0]+40,r.f[1]+30,{steps:4});await p.mouse.up();ok(await p.evaluate(a=>{const g=yardList().find(b=>b[0]==='gnome');return g[1]===a[1]&&g[2]===a[2]},r.a),'gnome moved before it was selected');
+    Object.assign(r,await p.evaluate(()=>{const a=yardList().find(a=>a[0]==='gnome'),bb=yBoxM(a),T=getCAMT(),cv=document.querySelector('#cv'),R=cv.getBoundingClientRect(),sx=(wx,wy)=>[R.left+((wx*T.z+T.ox)*BASE.s+BASE.ox)/cv.width*R.width,R.top+((wy*T.z+T.oy)*BASE.s+BASE.oy)/cv.height*R.height];return {f:sx(bb[0]+bb[2]/2,bb[1]+bb[3]*.6),t:sx(a[1]-20,a[2]+20),a:[...a],bb}}));
+    await p.mouse.click(...r.f);await p.waitForTimeout(200);ok(await p.evaluate(()=>yardList()[YED.sel]&&yardList()[YED.sel][0]==='gnome'),'tap selects the gnome '+JSON.stringify(r.bb));
     await p.mouse.move(...r.f);await p.mouse.down();await p.mouse.move(r.f[0]+6,r.f[1]+6,{steps:2});await p.mouse.move(...r.t,{steps:6});await p.mouse.up();
     const g=await p.evaluate(()=>yardList().find(a=>a[0]==='gnome'));ok(g[1]!==r.a[1]||g[2]!==r.a[2],'gnome did not move');
     await p.evaluate(()=>{yedExit();openLand(1)});await p.click('#landBuy');ok(await p.evaluate(()=>S.yard.land===1&&S.coins===47500),'land purchase');
@@ -531,6 +534,16 @@ await check('harvest shop 2: new decor draws, dock items slide and clamp, friend
   ok(await p.evaluate(()=>{const h=HITS.find(h=>h.kind==='ydeco'&&h.data==='bench');return !!h}),'bench still tappable');
   ok(await p.evaluate(()=>mpCabin().ext.dockX.bench===S.dockX.bench),'shared with friends');
   await p.waitForTimeout(400);ok(!errs.length,errs.join('; '));await c.close()});
+await check('decorate: tap the item itself to select, tap again for the one behind, nudge, tap ground to let go',async()=>{const p=await page(VPS[0][1],save({decor:{gnome:1,mailbox:1},sleep:{ph:'yard',t:0,visit:true},yard:{land:0,it:[['gnome',60,330,0],['mailbox',62,326,0]]}}));await p.waitForTimeout(1200);
+  await p.evaluate(()=>yedEnter());await p.waitForTimeout(600);
+  const at=async(wx,wy)=>p.evaluate(([wx,wy])=>{const T=getCAMT(),cv=document.querySelector('#cv'),R=cv.getBoundingClientRect();return [R.left+((wx*T.z+T.ox)*BASE.s+BASE.ox)/cv.width*R.width,R.top+((wy*T.z+T.oy)*BASE.s+BASE.oy)/cv.height*R.height]},[wx,wy]);
+  const both=await p.evaluate(()=>{const L=yardList();for(let y=300;y<332;y++)for(let x=40;x<84;x++){const c=yardCands(x,y);if(c.length===2)return [x,y,c.map(i=>L[i][0])]}return null});ok(both,'no spot where both overlap');
+  await p.mouse.click(...await at(both[0],both[1]));await p.waitForTimeout(150);const first=await p.evaluate(()=>yardList()[YED.sel][0]);ok(first===both[2][0],'front item first '+first);
+  await p.mouse.click(...await at(both[0],both[1]));await p.waitForTimeout(150);ok(await p.evaluate(()=>yardList()[YED.sel][0])===both[2][1],'second tap reaches the one behind');
+  const before=await p.evaluate(()=>[...yardList()[YED.sel]]);await p.click('[data-ym="2,0"]');await p.click('[data-ym="0,2"]');
+  ok(await p.evaluate(b=>{const a=yardList()[YED.sel];return a[1]===b[1]+2&&a[2]===b[2]+2},before),'nudge buttons');
+  const empty=await p.evaluate(()=>{for(let x=150;x>-200;x-=4)if(!yardCands(x,360).length)return x;return null});await p.mouse.click(...await at(empty,360));await p.waitForTimeout(150);ok(await p.evaluate(()=>YED.sel)===-1,'tapping ground lets go');
+  ok(!p.errs.length,p.errs.join('; '))});
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
