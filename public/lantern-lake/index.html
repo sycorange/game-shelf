@@ -5668,7 +5668,7 @@ function mpStats(){const _mus=musMine();let big=null;for(const [id,L] of Object.
 // What visitors see of your place. Bug fix (v142): big yards used to be cut to 120 things, or 40 with no ground once the
 // snapshot passed 20,000 characters, so friends saw half a yard. Now up to 600 things and a much larger snapshot.
 const YARD_SHARE=600,CAB_MAX=150000;
-function mpCabin(){return {pet:curPet(),cab:CAB(),leg:legendsCaught().map(f=>f.id),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,native:nativeOf(),decor:Object.keys(S.decor).filter(has),yard:yardOk(S.yard)?{land:yardLand(),it:S.yard.it.filter(a=>yHas(a[0])).slice(0,YARD_SHARE).map(a=>{const o=[a[0],Math.round(a[1]),Math.round(a[2]),a[3]?1:0];if(a[4])o.push(Math.round(+a[4]));if(a[5])o.push(a[5]);return o}),g:yGroundPack(S.yard.g),hc:S.yard.hc||{}}:null,dockX:dockXPack()},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
+function mpCabin(){return {pet:curPet(),cab:CAB(),leg:legendsCaught().map(f=>f.id),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,native:nativeOf(),decor:Object.keys(S.decor).filter(has),yard:yardOk(S.yard)?{land:yardLand(),it:S.yard.it.filter(a=>yHas(a[0])).slice(0,YARD_SHARE).map(a=>{const o=[a[0],Math.round(a[1]),Math.round(a[2]),a[3]?1:0];if(a[6]){o.push(Math.round(+a[4]||0),a[5]||0,+a[6])}else{if(a[4])o.push(Math.round(+a[4]));if(a[5])o.push(a[5])}return o}),g:yGroundPack(S.yard.g),hc:S.yard.hc||{}}:null,dockX:dockXPack()},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
 async function mpSync(force){const m=mpS();if(SESS.paused||!m.id||MPV.busy)return;if(!SESS.claimed&&!titleOn)await sessClaim();if(SESS.paused)return;if(!force&&Date.now()-MPV.last<(afk()?600000:110000))return;if(MPV.online===false&&!force)return;
   MPV.busy=true;
   try{const best={};for(const [id,L] of Object.entries(S.log))if(L&&L.big>(m.sentBest[id]||0)&&FI(id))best[id]=+L.big.toFixed(2);
@@ -6774,6 +6774,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:158,n:'Layers in Decorate',items:['When yard items overlap, you can now choose which one is in front. Select an item in Decorate and tap To front or To back. Friends see your yard layered the same way.']},
+ {v:157,n:'Bug fix: big harvest pieces near the house',items:['Bug fix: the Maple Tree, Hayride Wagon, Apple Barrel & Cider Press, Wheelbarrow of Pumpkins and Pumpkin Patch stopped well short of the house when you dragged them up the yard. They now go right up to the house like everything else. Ones you’ve already placed stay where they are.']},
  {v:156,n:'Easier moving in Decorate',items:['Moving things in your yard is easier. Tap an item to select it, then drag it. Only the selected item moves, so a crowded yard is no longer a fight to grab the right one. Dragging empty ground moves the view, and tapping empty ground lets go of the selection.','Where items overlap, tap the same spot again to pick the one behind.','The selected item now has ◀ ▲ ▼ ▶ buttons for fine placement.','Bug fix: the outlines around yard items were often off to one side of the item. They now fit each item exactly, and you select an item by tapping the item itself.']},
  {v:155,n:'More for the Harvest, and a movable dock',items:['Ten new Harvest Festival pieces in the Shop: a Pumpkin Patch, a Wheelbarrow of Pumpkins, an Apple Barrel & Cider Press, a Maple Tree that drops its leaves, a Hayride Wagon, a Fall Garland for your roofline, a Porch Rocker & Plaid Blanket, Paper Lanterns for the dock, a Pet House Harvest Trim, and a Fishing Turkey who fishes off your dock.','You can now move things on your dock. Open Decorate, pick the new Dock tab, choose an item and slide it left or right. Friends see your dock the way you set it.','Bug fix: the Hay Bales & Gourds and the Potted Mums sat down in the water below the dock. They now sit up on the dock.']},
  {v:154,n:'The Harvest Festival starts early',items:['The Harvest Festival is here a day early! Halloween has wrapped up, the Ghost Gar contest prizes are paid out, and the festival fish, the Harvest Basket and the Harvest Fair are open now through November 30.']},
@@ -7511,7 +7513,9 @@ const YI={
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
   steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
   cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]},
-  pumpkinpatch:{ox:34,oy:370,w:54,h:16,def:[[34,370]]},wheelbarrow:{ox:78,oy:314,w:46,h:34,def:[[78,314]]},ciderpress:{ox:12,oy:306,w:64,h:48,def:[[12,306]]},maple:{ox:-12,oy:222,w:48,h:76,def:[[-12,222]]},hayride:{ox:48,oy:332,w:92,h:64,def:[[48,332]]}};
+  pumpkinpatch:{ox:61,oy:385,w:56,h:14,def:[[61,385]]},wheelbarrow:{ox:100,oy:347,w:44,h:33,def:[[100,347]]},ciderpress:{ox:44,oy:352,w:60,h:46,def:[[44,352]]},maple:{ox:14,oy:296,w:57,h:83,def:[[14,296]]},hayride:{ox:94,oy:396,w:89,h:62,def:[[94,396]]}};
+// v156 and earlier anchored these five at their top-left corner, so they couldn't come up to the house. Saves shift them once so they stay put.
+const YRE={pumpkinpatch:[27,15],wheelbarrow:[22,33],ciderpress:[32,46],maple:[26,74],hayride:[46,64]};
 const YIDS=Object.keys(YI),yQty=id=>YI[id].unit?yInv(id):YI[id].def.length;
 const YLAND=[{n:'Home Lot',x:-40,c:0},{n:'Side Meadow',x:-200,c:2500,d:'A sunny strip of grass next to your lot.'},{n:'Birch Glade',x:-360,c:15000,d:'Soft ground under the birches. Room for a lot more.'},
   {n:'Pine Woods',x:-520,c:60000,d:'A quiet stand of pines further inland.'},{n:'Hilltop',x:-700,c:200000,d:'The far end of the property, with a view back over the lake.'}];
@@ -7520,10 +7524,10 @@ const YED={on:false,sel:-1,drag:null,skip:false};
 function yardOk(Y){return !!Y&&typeof Y==='object'&&Array.isArray(Y.it)}
 function yardParse(y){if(!yardOk(y))return null;const g={},hc={};if(typeof y.g==='string')yGroundUnpack(y.g,g);
   if(y.hc&&typeof y.hc==='object')for(const [r] of HROLES){const v=y.hc[r]|0;if(v>0&&v<HPAL.length)hc[r]=v}
-  return {land:Math.max(0,Math.min(YLAND.length-1,y.land|0)),it:y.it.filter(a=>Array.isArray(a)&&YI[a[0]]&&isFinite(a[1])&&isFinite(a[2])).slice(0,YARD_SHARE).map(a=>{const o=[a[0],Math.max(-830,Math.min(200,+a[1])),Math.max(230,Math.min(400,+a[2])),a[3]?1:0];if(isFinite(a[4])&&+a[4]>0)o.push(+a[4]);if(o[4]&&(CROPS[a[5]]||GHC[a[5]]))o.push(a[5]);return o}),g,hc}}
+  return {land:Math.max(0,Math.min(YLAND.length-1,y.land|0)),it:y.it.filter(a=>Array.isArray(a)&&YI[a[0]]&&isFinite(a[1])&&isFinite(a[2])).slice(0,YARD_SHARE).map(a=>{const o=[a[0],Math.max(-830,Math.min(200,+a[1])),Math.max(230,Math.min(400,+a[2])),a[3]?1:0],t=isFinite(a[4])&&+a[4]>0?+a[4]:0,c=t&&(CROPS[a[5]]||GHC[a[5]])?a[5]:0,z=isFinite(a[6])?Math.max(-200,Math.min(200,+a[6])):0;if(t||c||z)o.push(t);if(c||z)o.push(c);if(z)o.push(z);return o}),g,hc}}
 function yardDefault(src){const out=[];for(const id of YIDS)if(src(id))for(const [x,y] of YI[id].def)out.push([id,x,y,0]);return out}
 // Gives every newly owned land item a spot (its classic one). Items you've put away stay in storage.
-function yardSync(){if(!yardOk(S.yard)){S.yard={land:0,it:[],got:{}}}const Y=S.yard;Y.got=Y.got||{};for(const k of ['g','gu','inv','hc'])if(!Y[k]||typeof Y[k]!=='object'||Array.isArray(Y[k]))Y[k]={};Y.land=Math.max(0,Math.min(YLAND.length-1,Y.land|0));
+function yardSync(){if(!yardOk(S.yard)){S.yard={land:0,it:[],got:{}}}const Y=S.yard;if(!Y.re157){for(const a of Y.it){const r=Array.isArray(a)&&YRE[a[0]];if(r){const c=yardClamp(a[0],+a[1]+(a[3]?-r[0]:r[0]),+a[2]+r[1]);a[1]=c[0];a[2]=c[1]}}Y.re157=1}Y.got=Y.got||{};for(const k of ['g','gu','inv','hc'])if(!Y[k]||typeof Y[k]!=='object'||Array.isArray(Y[k]))Y[k]={};Y.land=Math.max(0,Math.min(YLAND.length-1,Y.land|0));
   Y.it=Y.it.filter(a=>Array.isArray(a)&&YI[a[0]]&&isFinite(a[1])&&isFinite(a[2]));
   yardSyncNative();
   for(const id of YIDS)if(S.decor[id]&&!Y.got[id]){Y.got[id]=1;for(const [x,y] of YI[id].def)if(Y.it.filter(a=>a[0]===id).length<yQty(id))Y.it.push([id,x,y,0])}}
@@ -7538,7 +7542,7 @@ function yardClamp(id,x,y){const I=YI[id],hw=I.w/2;y=Math.max(id==='birch'?240:2
 const yBox=a=>{const I=YI[a[0]];return [a[1]-I.w/2,a[2]-I.h,I.w,I.h]};
 // ==YARD PICKING== Each placed item is drawn once off-screen to learn exactly which pixels it covers. Taps select by those
 // pixels (front item first; tapping the same spot again reaches the one behind), and the outline hugs the drawing.
-const YMC=new Map(),YMX=170,YMY=240,YMW=340,YMH=300;let YMCV=null;
+const YMC=new Map(),YMX=170,YMY=240,YMW=340,YMH=340;let YMCV=null;
 function yMeasure(a){const id=a[0],I=YI[id];if(!I)return null;const f=a[3]?1:0,k=id+'|'+f+'|'+(a[5]||'')+'|'+(a[4]?1:0),now=performance.now(),m0=YMC.get(k);if(m0&&now-m0.t<15000)return m0;
   if(!YMCV){YMCV=document.createElement('canvas');YMCV.width=YMW*2;YMCV.height=YMH*2}const c=YMCV.getContext('2d',{willReadFrequently:true});c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,YMCV.width,YMCV.height);c.setTransform(2,0,0,2,YMX*2,YMY*2);
   const real=ctx,hl=HITS.length,yc=YCUR;ctx=c;try{c.save();if(f)c.scale(-1,1);c.translate(-I.ox,-I.oy);YCUR=a;yDraw(id,1,0,false,0)}catch(e){}finally{try{c.restore()}catch(_){}ctx=real;HITS.length=hl;YCUR=yc}
@@ -7549,8 +7553,16 @@ function yMeasure(a){const id=a[0],I=YI[id];if(!I)return null;const f=a[3]?1:0,k
 function yBoxM(a){const m=yMeasure(a);return m&&!m.none?[a[1]+m.x0,a[2]+m.y0,m.w,m.h]:yBox(a)}
 function yHitPx(a,x,y,r){const m=yMeasure(a);if(!m||m.none){const [bx,by,bw,bh]=yBox(a);return x>=bx-r&&x<=bx+bw+r&&y>=by-r&&y<=by+bh+r}
   const lx=Math.round(x-a[1]-m.x0),ly=Math.round(y-a[2]-m.y0);for(let v=Math.max(0,ly-r);v<=Math.min(m.h-1,ly+r);v++)for(let u=Math.max(0,lx-r);u<=Math.min(m.w-1,lx+r);u++)if(m.mk[v*m.w+u])return true;return false}
-function yardCands(x,y){const L=yardList(),r=Math.max(2,Math.round(7/Math.max(1,CAMT.z))),out=[];for(let i=0;i<L.length;i++)if(yHas(L[i][0])&&yHitPx(L[i],x,y,r))out.push(i);return out.sort((i,j)=>L[j][2]-L[i][2]||j-i)}
+function yardCands(x,y){const L=yardList(),r=Math.max(2,Math.round(7/Math.max(1,CAMT.z))),out=[];for(let i=0;i<L.length;i++)if(yHas(L[i][0])&&yHitPx(L[i],x,y,r))out.push(i);return out.sort((i,j)=>yKey(L[j])-yKey(L[i])||j-i)}
 function yardPick(x,y){const c=yardCands(x,y),lt=YED.lastTap,same=lt&&Math.hypot(lt[0]-x,lt[1]-y)<6;YED.lastTap=[x,y];if(!c.length)return -1;const k=c.indexOf(YED.sel);if(k<0)return c[0];return same?c[(k+1)%c.length]:YED.sel}
+// Layering: items draw back to front by how far down the yard they stand. a[6] shifts that so you can bring one in front of
+// (or send it behind) whatever it overlaps. a[4] and a[5] (timer, crop) are padded with 0 so the layer has a fixed slot.
+const yKey=a=>+a[2]+(+a[6]||0);
+function yedLayer(dir){const L=yardList(),a=L[YED.sel];if(!a)return;const b=yBoxM(a),k0=yKey(a),ov=[];
+  L.forEach((o,i)=>{if(i===YED.sel||!yHas(o[0]))return;const c=yBoxM(o);if(c[0]<b[0]+b[2]&&b[0]<c[0]+c[2]&&c[1]<b[1]+b[3]&&b[1]<c[1]+c[3])ov.push(yKey(o))});
+  if(!ov.length){showToast('Nothing overlaps it','Layers only matter where items overlap');return}
+  const t=dir>0?Math.max(...ov)+.5:Math.min(...ov)-.5;if(dir>0?k0>t-.5:k0<t+.5){sfx('click');return}
+  const z=Math.max(-200,Math.min(200,Math.round((t-a[2])*10)/10));while(a.length<6)a.push(0);a[4]=a[4]||0;a[5]=a[5]||0;if(z)a[6]=z;else a.length=6;sfx('click');save()}
 function yedNudge(dx,dy){const L=yardList(),a=L[YED.sel];if(!a)return;const [cx,cy]=yardClamp(a[0],a[1]+dx,a[2]+dy);a[1]=cx;a[2]=cy;sfx('click');save()}
 function birchOne(d,T,ph){const top=142,sw=Math.sin(T*.8+ph)*(1.5+AMB.wind/15);
   ctx.fillStyle=rgb(mix([60,62,58],[236,232,220],d));ctx.fillRect(-2.5,top,5,242-top);
@@ -7593,8 +7605,8 @@ function yDraw(id,d,T,night,ph){
 let YACT=null;
 function yardActors(d,T){const A=YACT;if(!A)return;const c=yardCtx();if(c){const P=c==='friend'?(VT&&VT.ext&&VT.ext.pet):curPet();if(P&&!(c==='friend'&&houseHere()&&[...HOUSE.peers.values()].some(p=>p.host&&p.pet)))A.push({y:PET_RT.ctx===c&&PET_RT.y!=null?PET_RT.y:310,fn:()=>petYard(d,T)})}
   const wc=walkCtx();if(wc)A.push({y:WALK.ctx===wc&&WALK.y!=null?WALK.y:246,fn:()=>{walkDraw(d,T,wc);WALK.drawnT=T}});houseActors(d,T);chickenActors(A,d,T)}
-function drawYard(d,T,night,back){const L=yardList(),own=yardCtx()==='home';const idx=L.map((a,i)=>i).filter(i=>(L[i][2]<250)===back&&yHas(L[i][0])).sort((a,b)=>L[a][2]-L[b][2]);
-  if(!back&&YACT&&YACT.length){const all=idx.map(i=>({y:L[i][2],i})).concat(YACT.map(a=>({y:a.y+.01,fn:a.fn}))).sort((a,b)=>a.y-b.y);for(const e of all){if(e.fn)e.fn();else drawYardItem(L,e.i,d,T,night,own)}return}
+function drawYard(d,T,night,back){const L=yardList(),own=yardCtx()==='home';const idx=L.map((a,i)=>i).filter(i=>(L[i][2]<250)===back&&yHas(L[i][0])).sort((a,b)=>yKey(L[a])-yKey(L[b])||a-b);
+  if(!back&&YACT&&YACT.length){const all=idx.map(i=>({y:yKey(L[i]),i})).concat(YACT.map(a=>({y:a.y+.01,fn:a.fn}))).sort((a,b)=>a.y-b.y);for(const e of all){if(e.fn)e.fn();else drawYardItem(L,e.i,d,T,night,own)}return}
   for(const i of idx)drawYardItem(L,i,d,T,night,own)}
 function drawYardItem(L,i,d,T,night,own){{const [id,x,y,f]=L[i],I=YI[id];ctx.save();ctx.translate(x,y);if(f)ctx.scale(-1,1);ctx.translate(-I.ox,-I.oy);L[i]._i=i;YCUR=L[i];try{yDraw(id,d,T,night,x*.37)}finally{ctx.restore()}{const ut=yUpgOf(id);if(ut){const [bx,by,bw,bh]=yBox(L[i]);decoFx(ut,bx,by,bw,bh,T,d)}}
     if(YED.on&&own&&(YED.tab||'decor')!=='paths'&&YED.tab!=='house'){const [bx,by,bw,bh]=yBoxM(L[i]),s=i===YED.sel;ctx.save();ctx.setLineDash(s?[3,2]:[2,3]);ctx.lineWidth=s?1.2:.5;ctx.strokeStyle=s?'#ffd05a':'rgba(255,255,255,.2)';ctx.strokeRect(bx-1.5,by-1.5,bw+3,bh+3);ctx.restore()}}}
@@ -8104,7 +8116,7 @@ function renderYed(){const b=$('yedBar');if(!YED.on){b.hidden=true;return}const 
     paths:YED.brush&&YED.brush!=='pan'?'Drag across the ground to paint. Pick Move view to look around.':'Pick a path, then drag across your yard to paint it.',house:'Pick a part of your house, then a color. Repainting is free.',dock:'Pick something on your dock, then slide it left or right.'}[tab];
   let h=`<div class="yed-top"><div class="yed-tabs">${tabs.map(([k,n])=>`<button class="yed-tab${k===tab?' on':''}" data-yt="${k}">${n}</button>`).join('')}</div><button class="jig" id="yedDone">Done</button></div>`;
   const dsel=tab==='dock'&&Object.keys(DOCKMV).filter(id=>has(id)).includes(YED.dsel)?YED.dsel:(tab==='dock'?(Object.keys(DOCKMV).find(id=>has(id))||''):'');
-  h+=`<div class="yed-sel">${dsel?`<i>${esc(nm(dsel))}</i><button class="ghost" data-yn="-16">◀◀</button><button class="ghost" data-yn="-4">◀</button><button class="ghost" data-yn="4">▶</button><button class="ghost" data-yn="16">▶▶</button><button class="ghost" data-yn="0">Reset</button>`:it?`<i>${esc(nm(it[0]))}</i><button class="ghost" data-ym="-2,0">◀</button><button class="ghost" data-ym="0,-2">▲</button><button class="ghost" data-ym="0,2">▼</button><button class="ghost" data-ym="2,0">▶</button><button class="ghost" id="yedFlip">Flip</button><button class="ghost" id="yedAway">Put away</button>`:`<span>${hint}</span>`}</div><div class="yed-tray${tab==='house'?' hp':''}">`;
+  h+=`<div class="yed-sel">${dsel?`<i>${esc(nm(dsel))}</i><button class="ghost" data-yn="-16">◀◀</button><button class="ghost" data-yn="-4">◀</button><button class="ghost" data-yn="4">▶</button><button class="ghost" data-yn="16">▶▶</button><button class="ghost" data-yn="0">Reset</button>`:it?`<i>${esc(nm(it[0]))}</i><button class="ghost" data-ym="-2,0">◀</button><button class="ghost" data-ym="0,-2">▲</button><button class="ghost" data-ym="0,2">▼</button><button class="ghost" data-ym="2,0">▶</button><button class="ghost" data-yz="1">To front</button><button class="ghost" data-yz="-1">To back</button><button class="ghost" id="yedFlip">Flip</button><button class="ghost" id="yedAway">Put away</button>`:`<span>${hint}</span>`}</div><div class="yed-tray${tab==='house'?' hp':''}">`;
   if(tab==='decor'){const st=yardStore().filter(([id])=>!YUNIT[id]);h+=st.length?st.map(([id,n])=>`<button class="yed-it" data-yp="${id}">${esc(nm(id))}${n>1?` <small>×${n}</small>`:''}</button>`).join(''):`<span class="yed-none">Everything you own is out. Order more yard decor from the Shop.</span>`}
   else if(tab==='build'||tab==='games'||tab==='farm'||tab==='hang'||tab==='show'){h+=Object.entries(YUNIT).filter(([id])=>tab==='games'?!!YGAMES[id]:tab==='farm'?!!YFARM[id]:tab==='hang'?!!YHANG[id]:tab==='show'?!!YSHOW[id]:!YGAMES[id]&&!YFARM[id]&&!YHANG[id]&&!YSHOW[id]).map(([id,u])=>{const sp=yInv(id)-L.filter(a=>a[0]===id).length,so=seasonOk(id);return `<button class="yed-it" data-yb="${id}" ${sp>0||(S.coins>=u.c&&so)?'':'disabled'}${u.d?` title="${u.d}"`:''}>${u.n} <small>${sp>0?`×${sp} ready`:so?ym(u.c):YSHOW[id]&&YSHOW[id].season[0]===11?'December to February':'September to November'}</small></button>`}).join('')}
   else if(tab==='paths'){const br=YED.brush||'pan';h+=`<button class="yed-it${br==='pan'?' on':''}" data-yg="pan">✋ Move view</button><button class="yed-it${br==='erase'?' on':''}" data-yg="erase">Eraser</button>`+Object.entries(YGT).map(([k,g])=>{const own=!g.c||(Y.gu&&Y.gu[k]);return `<button class="yed-it yed-gt${br===k?' on':''}" data-yg="${k}" ${own||S.coins>=g.c?'':'disabled'}><span class="yed-chip" style="background:rgb(${g.col})"></span>${g.n}${own?'':` <small>${ym(g.c)}</small>`}</button>`}).join('')}
@@ -8116,6 +8128,7 @@ function renderYed(){const b=$('yedBar');if(!YED.on){b.hidden=true;return}const 
   b.querySelectorAll('[data-yt]').forEach(x=>x.onclick=e=>{e.stopPropagation();YED.tab=x.dataset.yt;YED.sel=-1;if(YED.tab!=='paths')YED.brush='pan';if(YED.tab==='house'){CAM.tx=90;CAM.ty=200;camClamp()}if(YED.tab==='dock'){CAM.tx=Math.min(300,(140+dockEnd())/2);CAM.ty=240;camClamp()}renderYed()});
   b.querySelectorAll('[data-yk]').forEach(x=>x.onclick=e=>{e.stopPropagation();YED.dsel=x.dataset.yk;sfx('click');renderYed()});
   b.querySelectorAll('[data-yn]').forEach(x=>x.onclick=e=>{e.stopPropagation();const id=YED.dsel,n=+x.dataset.yn;if(!id)return;if(n)dockNudge(id,n);else{if(S.dockX)delete S.dockX[id];sfx('click');save();renderYed()}});
+  b.querySelectorAll('[data-yz]').forEach(x=>x.onclick=e=>{e.stopPropagation();yedLayer(+x.dataset.yz)});
   b.querySelectorAll('[data-ym]').forEach(x=>x.onclick=e=>{e.stopPropagation();const [dx,dy]=x.dataset.ym.split(',').map(Number);yedNudge(dx,dy)});
   if(it){$('yedFlip').onclick=e=>{e.stopPropagation();it[3]=it[3]?0:1;save()};$('yedAway').onclick=e=>{e.stopPropagation();S.yard.it.splice(YED.sel,1);YED.sel=-1;renderYed();save()}}
   b.querySelectorAll('[data-yp]').forEach(x=>x.onclick=e=>{e.stopPropagation();yedPlace(x.dataset.yp)});
