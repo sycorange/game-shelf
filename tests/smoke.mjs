@@ -517,6 +517,20 @@ await check('realms: reopening the game keeps you on the Moon with the Moon Base
   for(const [nm,extra,want] of [['moon base',{water:'moon',realm:{gates:{moon:1},gear:{tank:1,moonbase:1}},o2:null},'moon'],['air left',{water:'moon',realm:{gates:{moon:1},gear:{}},o2:200},'moon'],['no air',{water:'moon',realm:{gates:{moon:1},gear:{}},o2:0},'deep'],['cloud sea',{water:'sky',boat:7,realm:{gates:{sky:1},gear:{}}},'sky'],['boat too small',{water:'sky',boat:3,realm:{gates:{sky:1},gear:{}}},'deep']]){
     const p=await page(VPS[0][1],save(Object.assign({boat:5,realmFrom:'deep',last:Date.now()},extra)));ok(await p.evaluate(w=>S.water===w,want),nm+': '+(await p.evaluate(()=>S.water)));ok(!p.errs.length,p.errs.join('; '));await p.context().close()}});
 
+await check('harvest shop 2: new decor draws, dock items slide and clamp, friends see the dock',async()=>{const c=await b.newContext({viewport:VPS[0][1]});
+  await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({decor:{pumpkinpatch:1,wheelbarrow:1,ciderpress:1,maple:1,hayride:1,garland:1,porchrocker:1,lanterns:1,turkey:1,pettrim:1,hay:1,bench:1,kayak:1},sleep:{ph:'yard',t:0,visit:true}}));
+  const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));await p.goto(URL0.replace('season=off','season=hv'));await p.waitForTimeout(800);await p.click('#tGo');await p.waitForTimeout(1500);
+  await p.evaluate(()=>document.querySelectorAll('.away').forEach(m=>m.hidden=true));
+  ok(await p.evaluate(()=>['pumpkinpatch','wheelbarrow','ciderpress','maple','hayride'].every(id=>yardList().some(a=>a[0]===id))),'land pieces placed');
+  await p.evaluate(()=>{yedEnter();document.querySelector('[data-yt="dock"]').click()});await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>['turkey','hay','bench','kayak'].every(id=>document.querySelector(`[data-yk="${id}"]`))&&!document.querySelector('[data-yk="crabs"]')),'dock tab lists owned pieces');
+  await p.evaluate(()=>document.querySelector('[data-yk="bench"]').click());for(let i=0;i<20;i++)await p.click('[data-yn="16"]');
+  const bx=await p.evaluate(()=>S.dockX.bench);ok(bx>0&&bx<=70,'bench clamps at the dock end '+bx);
+  await p.evaluate(()=>document.querySelector('[data-yk="kayak"]').click());for(let i=0;i<5;i++)await p.click('[data-yn="16"]');ok(await p.evaluate(()=>S.dockX.kayak===80),'kayak floats past the dock');
+  await p.click('[data-yn="0"]');ok(await p.evaluate(()=>!('kayak' in S.dockX)),'reset');
+  ok(await p.evaluate(()=>{const h=HITS.find(h=>h.kind==='ydeco'&&h.data==='bench');return !!h}),'bench still tappable');
+  ok(await p.evaluate(()=>mpCabin().ext.dockX.bench===S.dockX.bench),'shared with friends');
+  await p.waitForTimeout(400);ok(!errs.length,errs.join('; '));await c.close()});
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);

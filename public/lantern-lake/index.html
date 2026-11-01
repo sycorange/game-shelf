@@ -951,7 +951,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .yedbar{min-width:0;max-width:100%;box-sizing:border-box;margin:8px 0 0;background:rgba(10,22,28,.88);border:1px solid var(--line);border-radius:14px;padding:8px 10px;color:#edf2ea;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;flex-direction:column;gap:6px}
 .yed-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.yed-top i{font-style:normal;color:#ffd05a;font-weight:700}
 .yed-top .ghost,.yed-top .jig{padding:4px 10px;font-size:.8rem}
-.yed-tray{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.yed-it{flex:none;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#edf2ea;border-radius:10px;padding:5px 10px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap}.yed-it:hover{background:rgba(255,255,255,.16)}.yed-it small{opacity:.7}
+.yed-tray{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.yed-dock{display:flex;gap:6px;flex:none;margin-left:4px;padding-left:10px;border-left:1px solid var(--line)}.yed-it{flex:none;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#edf2ea;border-radius:10px;padding:5px 10px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap}.yed-it:hover{background:rgba(255,255,255,.16)}.yed-it small{opacity:.7}
 .yed-none{font-size:.8rem;opacity:.75}
 .yed-top{justify-content:space-between;flex-wrap:nowrap}.yed-tabs{display:flex;gap:4px;overflow-x:auto;min-width:0;flex:1}.yed-tab{flex:none;background:none;border:1px solid transparent;color:#cfe0da;font:inherit;font-size:.82rem;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
 .yed-tab.on{background:rgba(255,208,90,.16);border-color:rgba(255,208,90,.5);color:#ffd05a}.yed-tab:hover{background:rgba(255,255,255,.08)}
@@ -2337,6 +2337,16 @@ const DECOR = [
   {id:'sillpie',cat:'house',hv:1,n:'Pie on the Windowsill',c:20000,d:'Cooling by the window. It steams in the cold air.'},
   {id:'cornucopia',cat:'land',hv:1,basket:1,n:'The Cornucopia',c:0,d:'A woven horn spilling over with gourds, apples and corn. From the 2026 Harvest Basket.'},
   {id:'mums',cat:'dock',hv:1,n:'Potted Mums',c:5000,d:'Orange and gold mums at the foot of the dock.'},
+  {id:'pumpkinpatch',cat:'land',hv:1,n:'Pumpkin Patch',c:4000,d:'A little patch of vines with pumpkins of every size.'},
+  {id:'wheelbarrow',cat:'land',hv:1,n:'Wheelbarrow of Pumpkins',c:10000,d:'An old wooden wheelbarrow, heaped with the pick of the patch.'},
+  {id:'garland',cat:'house',hv:1,n:'Fall Garland',c:6000,d:'Strings of autumn leaves along the roofline.'},
+  {id:'pettrim',cat:'land',hv:1,n:'Pet House Harvest Trim',c:7500,d:'A leaf wreath, a corn bundle and two little pumpkins for your pet house. Needs the pet house.'},
+  {id:'lanterns',cat:'dock',hv:1,n:'Paper Lanterns',c:12000,d:'Orange and red paper lanterns strung along the dock. They glow at night.'},
+  {id:'porchrocker',cat:'house',hv:1,n:'Porch Rocker & Plaid Blanket',c:15000,d:'A rocker by the front door with a red plaid blanket over the back.'},
+  {id:'turkey',cat:'dock',hv:1,n:'Fishing Turkey',c:25000,d:'A turkey in a pilgrim hat who fishes off your dock. Every so often he gets a bite.'},
+  {id:'ciderpress',cat:'land',hv:1,n:'Apple Barrel & Cider Press',c:30000,d:'A barrel of fresh apples and a press that turns them into cider.'},
+  {id:'maple',cat:'land',hv:1,n:'Maple Tree',c:60000,d:'A blazing red and orange maple. Leaves drift down in the wind.'},
+  {id:'hayride',cat:'land',hv:1,n:'Hayride Wagon',c:150000,d:'A red wagon piled with hay bales and a lantern on a post.'},
 ];
 const CAT = {land:'Yard',house:'House',dock:'Dock'};
 const RIVALS = ['Earl Tackett','June Bramble','Rusty Hollis','Marisol Vega','Old Pete Dunmore','Dot Callahan','Hank Weller','Priya Nair','Gus Lindqvist','Tammy Reel','Walt Okafor','Bea Strand'];
@@ -4577,7 +4587,7 @@ function visitMuseum(){const m=mpS();if(!m.id){showToast('Pick an angler name in
   if(TRV.on){showToast('Wait until the boat stops');return}
   if(S.tour&&S.tour.phase==='live'){showToast('Finish or leave your tournament first');return}
   if(S.sleep&&!['awake','yard'].includes(S.sleep.ph)){showToast('Wait until you’re up and about');return}
-  VT={museum:true,id:'museum',name:'Museum',c:null,ext:{shack:7,decor:{},off:{},boxes:[],trophies:[],yard:null}};
+  VT={museum:true,id:'museum',name:'Museum',c:null,ext:{shack:7,decor:{},off:{},boxes:[],trophies:[],yard:null,dockX:{}}};
   musFetch(true);$('tripModal').hidden=true;closePhone();hideTip();showToast('Heading to the Lantern Lake Museum','By boat');
   if(S.sleep&&S.sleep.ph==='yard'){VT.go=true;yardOut()}else if(S.sleep&&S.sleep.ph==='awake'){VT.go=true;leaveHouse()}else boatTrip(S.water,'friend',friendArrive)}
 $('musClose').onclick=()=>{$('musModal').hidden=true};$('musModal').onclick=e=>{if(e.target.id==='musModal')$('musModal').hidden=true};
@@ -5658,7 +5668,7 @@ function mpStats(){const _mus=musMine();let big=null;for(const [id,L] of Object.
 // What visitors see of your place. Bug fix (v142): big yards used to be cut to 120 things, or 40 with no ground once the
 // snapshot passed 20,000 characters, so friends saw half a yard. Now up to 600 things and a much larger snapshot.
 const YARD_SHARE=600,CAB_MAX=150000;
-function mpCabin(){return {pet:curPet(),cab:CAB(),leg:legendsCaught().map(f=>f.id),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,native:nativeOf(),decor:Object.keys(S.decor).filter(has),yard:yardOk(S.yard)?{land:yardLand(),it:S.yard.it.filter(a=>yHas(a[0])).slice(0,YARD_SHARE).map(a=>{const o=[a[0],Math.round(a[1]),Math.round(a[2]),a[3]?1:0];if(a[4])o.push(Math.round(+a[4]));if(a[5])o.push(a[5]);return o}),g:yGroundPack(S.yard.g),hc:S.yard.hc||{}}:null},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
+function mpCabin(){return {pet:curPet(),cab:CAB(),leg:legendsCaught().map(f=>f.id),trophies:shownTrophies().map(t=>({name:t.name,water:t.water,type:t.type,target:t.target,score:t.score,day:t.day})),coll:Object.keys(S.coll).filter(k=>S.coll[k]&&S.coll[k].n),collShow:shownColl().map(c=>c.id),ext:{shack:S.shack,native:nativeOf(),decor:Object.keys(S.decor).filter(has),yard:yardOk(S.yard)?{land:yardLand(),it:S.yard.it.filter(a=>yHas(a[0])).slice(0,YARD_SHARE).map(a=>{const o=[a[0],Math.round(a[1]),Math.round(a[2]),a[3]?1:0];if(a[4])o.push(Math.round(+a[4]));if(a[5])o.push(a[5]);return o}),g:yGroundPack(S.yard.g),hc:S.yard.hc||{}}:null,dockX:dockXPack()},top:topFish().map(o=>({id:o.f.id,w:o.w})),tv:S.tvInput,tape:S.tape}}
 async function mpSync(force){const m=mpS();if(SESS.paused||!m.id||MPV.busy)return;if(!SESS.claimed&&!titleOn)await sessClaim();if(SESS.paused)return;if(!force&&Date.now()-MPV.last<(afk()?600000:110000))return;if(MPV.online===false&&!force)return;
   MPV.busy=true;
   try{const best={};for(const [id,L] of Object.entries(S.log))if(L&&L.big>(m.sentBest[id]||0)&&FI(id))best[id]=+L.big.toFixed(2);
@@ -5809,7 +5819,7 @@ async function visitCabin(id){const me=mpS();if(isRealm(S.water)){showToast('Com
   if(S.sleep&&!['awake','yard'].includes(S.sleep.ph)){showToast('Wait until you’re up and about');return}
   try{const r=await api('cabin',{id:me.id,key:me.key,target:id});const c=JSON.parse(r.cabin),ext=c.ext||{};
     if(VT||TRV.on||(S.sleep&&!['awake','yard'].includes(S.sleep.ph)))return;
-    VT={id,name:r.name,c,ext:{shack:Math.max(0,Math.min(GEAR.shack.items.length-1,ext.shack??1)),decor:Object.fromEntries((Array.isArray(ext.decor)?ext.decor:[]).filter(k=>DECOR.some(x=>x.id===k)).map(k=>[k,1])),off:{},boxes:[],trophies:Array.isArray(c.trophies)?c.trophies:[],yard:yardParse(ext.yard),native:FRUITS[ext.native]?ext.native:null,pet:petParse(c.pet)},champ:!!r.champ,wins:r.wins|0,house:!!r.house};
+    VT={id,name:r.name,c,ext:{shack:Math.max(0,Math.min(GEAR.shack.items.length-1,ext.shack??1)),decor:Object.fromEntries((Array.isArray(ext.decor)?ext.decor:[]).filter(k=>DECOR.some(x=>x.id===k)).map(k=>[k,1])),off:{},boxes:[],trophies:Array.isArray(c.trophies)?c.trophies:[],yard:yardParse(ext.yard),native:FRUITS[ext.native]?ext.native:null,pet:petParse(c.pet),dockX:dockXParse(ext.dockX)},champ:!!r.champ,wins:r.wins|0,house:!!r.house};
     closePhone();hideTip();showToast(`Heading to ${r.name}’s place`,'By boat');
     if(S.sleep&&S.sleep.ph==='yard'){VT.go=true;yardOut()}else if(S.sleep&&S.sleep.ph==='awake'){VT.go=true;leaveHouse()}else boatTrip(S.water,'friend',friendArrive)}
   catch(e){showToast(e.message==='no-cabin'?'That angler hasn’t opened the game since this update.':e.message==='private'?'That cabin is private.':'Couldn’t load that cabin.')}}
@@ -6647,10 +6657,11 @@ function yardHits(){const G=shackGeo(),e=dockEnd(),P=(x,y,w,h,kind,data)=>HITS.p
   const n=S.trophies.length;if(n){if(G.t===0)P(44,232,Math.min(n,6)*8+4,11,'ytro',n);else{const max=Math.floor((G.door-G.x-6)/8);P(G.x+2,229,Math.min(n,max)*8+4,11,'ytro',n)}}
   if(!YED.on)yardHitsPlaced(P);else if(yardCtx()==='home'){const L2=YLAND[yardLand()+1];if(L2)P(yardLeft()-98,258,36,44,'yland',yardLand()+1)}
   D('lighthouse',[718,150,56,84]);D('barge',[624,234,54,18]);D('ghostship',[538,170,64,62]);D('floatjacks',[250,302,112,30]);
-  D('decoys',[283,278,68,13]);D('kayak',[172,256,66,13]);D('hay',[155,250,36,21]);D('bench',[162,228,28,18]);D('crabs',[198,229,20,18]);
-  D('cleaning',[230,228,20,18]);D('lifering',[187,227,14,20]);D('bollards',[157,238,9,9],[221,238,9,9],[e-7,238,9,9]);
-  D('docklights',[139,218,8,28],[e-7,218,8,28]);D('skeleton',[177,225,14,32]);D('rocker',[142,225,18,23]);
-  {const py=has('bollards')?240:246;D('pelican',[211,py-21,31,22])}
+  const DM=(id,b)=>D(id,[b[0]+dockX(id),b[1],b[2],b[3]]);
+  DM('decoys',[283,278,68,13]);DM('kayak',[172,256,66,13]);DM('hay',[155,226,36,21]);DM('bench',[162,228,28,18]);DM('crabs',[198,229,20,18]);
+  DM('cleaning',[230,228,20,18]);DM('lifering',[187,227,14,20]);D('bollards',[157,238,9,9],[221,238,9,9],[e-7,238,9,9]);
+  D('docklights',[139,218,8,28],[e-7,218,8,28]);DM('skeleton',[177,225,14,32]);DM('rocker',[142,225,18,23]);DM('mums',[186,229,20,18]);DM('turkey',[234,220,30,27]);D('lanterns',[144,214,e-148,14]);
+  {const py=has('bollards')?240:246;DM('pelican',[211,py-21,31,22])}
   if(fr&&!(VT&&VT.arcade))P(VT&&VT.museum?174:150,203,52,42,'ysign')}
 function yardTip(h){if(h.kind==='ypeer'){const p=HOUSE.peers.get(h.data);return p?`<b>${p.host?'🏡 ':''}${esc(p.name)}</b><small>Tap for options</small>`:''}if(h.kind==='ygame'){const K=YGAMES[h.data.id];return `<b>${K.n}</b><small>${K.d} Tap to play.</small>`}if(h.kind==='ypet')return `<b>${esc(h.data)}</b><small>Tap to pet</small>`;const fr=S.sleep&&S.sleep.at==='friend',who=fr&&VT?(VT.arcade?'The arcade’s':VT.museum?'The museum’s':esc(VT.name)+'’s'):'Your';
   if(h.kind==='yhouse'&&h.data===7)return '<b>Lantern Lake Museum</b><small>Tap the door to go inside and donate</small>';
@@ -6763,6 +6774,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:155,n:'More for the Harvest, and a movable dock',items:['Ten new Harvest Festival pieces in the Shop: a Pumpkin Patch, a Wheelbarrow of Pumpkins, an Apple Barrel & Cider Press, a Maple Tree that drops its leaves, a Hayride Wagon, a Fall Garland for your roofline, a Porch Rocker & Plaid Blanket, Paper Lanterns for the dock, a Pet House Harvest Trim, and a Fishing Turkey who fishes off your dock.','You can now move things on your dock. Open Decorate, pick the new Dock tab, choose an item and slide it left or right. Friends see your dock the way you set it.','Bug fix: the Hay Bales & Gourds and the Potted Mums sat down in the water below the dock. They now sit up on the dock.']},
  {v:154,n:'The Harvest Festival starts early',items:['The Harvest Festival is here a day early! Halloween has wrapped up, the Ghost Gar contest prizes are paid out, and the festival fish, the Harvest Basket and the Harvest Fair are open now through November 30.']},
  {v:153,n:'Bug fix: staying in the realms',items:['Bug fix: going idle or reopening the game sent you back to Lantern Lake from the Sea of Tranquility, the Ember Lake and the Cloud Sea, even with the Moon Base’s unlimited air. Now you stay where you were. On the Moon without the Moon Base, your air still runs down while you’re away, and you come home when it runs out.']},
  {v:152,n:'Bug fix: the dive on phones',items:['Bug fix: in The Town Under the Lake, holding an arrow button on a phone highlighted the arrows instead of moving the diving bell. Holding an arrow now keeps the bell moving, and the button lights up while you hold it.']},
@@ -7254,7 +7266,7 @@ function drawShack0(d,h,T){
   if(has('chimes')){const cx=x-3,cy=y+3;ctx.strokeStyle=dark;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx,cy+5);ctx.stroke();ctx.fillStyle=rgb(mix([60,60,60],[200,200,190],d));
     for(let i=0;i<4;i++){const sw=Math.sin(T*2.2+i)*1.5;ctx.fillRect(cx-4+i*2.5+sw,cy+6,1,6+i%2*2)}}
   if(has('lantern')){const lx=G.door+17,ly=222;ctx.fillStyle=dark;ctx.fillRect(lx-1,ly-4,3,1.5);ctx.fillStyle=lit(d)?'#ffdc8a':'#c8b890';ctx.fillRect(lx-1.5,ly-2,4,6);if(lit(d))glow(lx,ly+1,20,.5*(1-d))}
-  hwHouse(G,wins,d,T);hvHouse(G,wins,d,T);
+  hwHouse(G,wins,d,T);hvHouse(G,wins,d,T);hvHouse2(G,wins,d,T);
   drawTrophies(G);
 }
 function drawTrophies(G){
@@ -7264,24 +7276,79 @@ function drawTrophies(G){
   const max=Math.floor((G.door-G.x-6)/8);ctx.fillStyle='rgba(60,36,20,.9)';ctx.fillRect(G.x+2,238,Math.min(n,max)*8+2,2);
   for(let i=0;i<Math.min(n,max);i++)cup(G.x+7+i*8,238);
 }
+// ==HARVEST SHOP 2== More festival decor, and dock pieces you can slide along the dock in Decorate.
+// Each movable dock piece has its usual spot (x0..x1); S.dockX[id] is how far it has been slid. Water pieces float further out.
+const DOCKMV={rocker:['Rocking Chair',142,160],bench:['Dock Bench',162,190],skeleton:['Skeleton Angler',177,191],lifering:['Life Ring',187,201],crabs:['Crab Traps',198,218],pelican:['Resident Pelican',211,242],cleaning:['Fish Cleaning Station',230,250],hay:['Hay Bales & Gourds',155,191],mums:['Potted Mums',186,206],turkey:['Fishing Turkey',236,254],kayak:['Kayak',172,238,1],decoys:['Duck Decoys',283,351,1]};
+function dockX(id){const m=DOCKMV[id];if(!m)return 0;const e=dockEnd(),lo=140-m[1],hi=(m[3]?Math.max(e,430):e)-m[2],src=S.dockX&&typeof S.dockX==='object'?S.dockX:{},o=+src[id]||0;return hi<lo?lo:Math.max(lo,Math.min(hi,o))}
+function dockXParse(o){const r={};if(o&&typeof o==='object')for(const k of Object.keys(DOCKMV)){const v=Math.round(+o[k]);if(isFinite(v)&&v&&Math.abs(v)<400)r[k]=v}return r}
+function dockXPack(){const r={};for(const k of Object.keys(DOCKMV)){const v=dockX(k);if(v)r[k]=v}return r}
+function dk(id,f,dy){if(!has(id))return;const o=dockX(id);if(o||dy){ctx.save();ctx.translate(o,dy||0);try{f()}finally{ctx.restore()}}else f()}
+function dockNudge(id,n){if(!DOCKMV[id])return;if(!S.dockX||typeof S.dockX!=='object')S.dockX={};const before=dockX(id);S.dockX[id]=before+n;S.dockX[id]=dockX(id);if(!S.dockX[id])delete S.dockX[id];sfx('click');save();renderYed()}
+const hvC=(c,d)=>rgb(mix(c.map(v=>v*.2),c,d*.85+.1));
+function hvLand2(id,d,T){
+  if(id==='pumpkinpatch'){ctx.strokeStyle=hvC([70,120,50],d);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(34,384);for(let x=34;x<=86;x+=4)ctx.lineTo(x,382+Math.sin(x*.4)*2);ctx.stroke();
+    for(let i=0;i<7;i++){ctx.fillStyle=hvC([80,130,56],d);ctx.beginPath();ctx.ellipse(38+i*8,379+Math.sin(i)*2,3.4,2,i*.6,0,7);ctx.fill()}
+    for(const [x,r,c] of [[42,4.6,[236,128,36]],[55,6,[232,118,30]],[68,3.6,[240,150,50]],[79,5,[226,108,30]],[49,2.6,[240,200,90]]]){ctx.fillStyle=hvC(c,d);ctx.beginPath();ctx.ellipse(x,384-r*.8,r*1.15,r*.85,0,0,7);ctx.fill();ctx.strokeStyle=hvC(c.map(v=>v*.8),d);ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(x,384-r*1.6);ctx.lineTo(x,384);ctx.stroke();ctx.fillStyle=hvC([80,110,40],d);ctx.fillRect(x-.6,384-r*1.8,1.2,2)}}
+  if(id==='wheelbarrow'){const wd=hvC([150,104,62],d),dk2=hvC([90,60,36],d);ctx.strokeStyle=dk2;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(108,336);ctx.lineTo(122,334);ctx.moveTo(104,338);ctx.lineTo(108,346);ctx.stroke();
+    ctx.fillStyle=wd;ctx.beginPath();ctx.moveTo(78,328);ctx.lineTo(112,330);ctx.lineTo(106,340);ctx.lineTo(84,340);ctx.closePath();ctx.fill();ctx.strokeStyle=dk2;ctx.lineWidth=.6;for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(79+i*1.6,330+i*2.6);ctx.lineTo(111-i*1.6,331+i*2.6);ctx.stroke()}
+    ctx.fillStyle=hvC([50,40,34],d);ctx.beginPath();ctx.arc(86,342,4.6,0,7);ctx.fill();ctx.fillStyle=hvC([120,110,100],d);ctx.beginPath();ctx.arc(86,342,1.6,0,7);ctx.fill();
+    for(const [x,y,r,c] of [[88,325,4.4,[236,128,36]],[97,323,5,[230,116,30]],[106,326,3.6,[240,160,60]],[93,318,3.2,[240,200,90]],[102,317,2.6,[120,160,70]]]){ctx.fillStyle=hvC(c,d);ctx.beginPath();ctx.ellipse(x,y,r*1.1,r*.85,0,0,7);ctx.fill()}}
+  if(id==='ciderpress'){const wd=hvC([146,98,56],d),dk2=hvC([86,58,34],d);ctx.fillStyle=wd;ctx.beginPath();ctx.ellipse(22,342,8,10,0,0,7);ctx.fill();ctx.fillRect(14,332,16,20);ctx.strokeStyle=dk2;ctx.lineWidth=1;for(const y of [336,346]){ctx.beginPath();ctx.moveTo(14,y);ctx.lineTo(30,y);ctx.stroke()}
+    for(const [x,y,c] of [[18,330,[200,40,40]],[23,329,[214,60,40]],[27,331,[180,190,60]],[21,327,[220,70,50]]]){ctx.fillStyle=hvC(c,d);ctx.beginPath();ctx.arc(x,y,2.4,0,7);ctx.fill()}
+    ctx.fillStyle=dk2;ctx.fillRect(40,318,3,34);ctx.fillRect(60,318,3,34);ctx.fillRect(38,316,27,4);ctx.fillStyle=hvC([110,110,116],d);ctx.fillRect(50.5,320,2,12);ctx.fillStyle=wd;ctx.fillRect(44,332,15,4);ctx.fillStyle=dk2;ctx.beginPath();ctx.ellipse(51.5,348,9,3.4,0,0,7);ctx.fill();ctx.fillRect(43,340,17,8);
+    ctx.save();ctx.translate(51.5,312);ctx.rotate(T*.8);ctx.strokeStyle=hvC([110,110,116],d);ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(0,0,5,0,7);ctx.moveTo(-5,0);ctx.lineTo(5,0);ctx.moveTo(0,-5);ctx.lineTo(0,5);ctx.stroke();ctx.restore();
+    ctx.fillStyle=hvC([196,150,80],d);ctx.beginPath();ctx.moveTo(66,352);ctx.lineTo(66,344);ctx.quadraticCurveTo(66,340,70,340);ctx.quadraticCurveTo(74,340,74,344);ctx.lineTo(74,352);ctx.closePath();ctx.fill();ctx.fillStyle=hvC([140,96,46],d);ctx.fillRect(68.6,337,2.8,3)}
+  if(id==='maple'){ctx.fillStyle=hvC([96,66,44],d);ctx.beginPath();ctx.moveTo(8,296);ctx.lineTo(10,250);ctx.lineTo(14,250);ctx.lineTo(17,296);ctx.fill();ctx.strokeStyle=hvC([96,66,44],d);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(12,262);ctx.lineTo(0,248);ctx.moveTo(13,258);ctx.lineTo(26,246);ctx.stroke();
+    const sw=Math.sin(T*.7)*(1+AMB.wind/18),C=[[226,84,40],[238,128,36],[214,60,40],[244,170,50],[200,50,36]];for(let i=0;i<16;i++){const a=i*2.4,r=8+((i*7)%14),cx=12+Math.cos(a)*r*1.3+sw*.6,cy=236+Math.sin(a)*r*.9;ctx.fillStyle=hvC(C[i%5],d);ctx.beginPath();ctx.arc(cx,cy,9-(i%3)*1.5,0,7);ctx.fill()}
+    if(!RM)for(let i=0;i<5;i++){const q=(T*.12+i/5)%1,lx=12+Math.sin(i*3.1)*22+q*30*(1+AMB.wind/20),ly=244+q*56;ctx.save();ctx.translate(lx,ly);ctx.rotate(T*2+i);ctx.globalAlpha=1-q*.6;ctx.fillStyle=hvC(C[i%5],d);ctx.beginPath();ctx.ellipse(0,0,2.4,1.2,0,0,7);ctx.fill();ctx.restore()}}
+  if(id==='hayride'){const red=hvC([176,48,40],d),dk2=hvC([70,40,30],d);ctx.fillStyle=red;ctx.fillRect(62,370,76,12);ctx.fillStyle=dk2;ctx.fillRect(62,370,76,2);for(let x=66;x<138;x+=10)ctx.fillRect(x,372,1,10);ctx.strokeStyle=dk2;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(62,378);ctx.lineTo(50,386);ctx.stroke();
+    for(const wx of [74,126]){ctx.fillStyle=hvC([60,46,36],d);ctx.beginPath();ctx.arc(wx,388,7.5,0,7);ctx.fill();ctx.strokeStyle=hvC([150,120,80],d);ctx.lineWidth=.8;for(let k=0;k<6;k++){const a=k*Math.PI/3;ctx.beginPath();ctx.moveTo(wx,388);ctx.lineTo(wx+Math.cos(a)*6.5,388+Math.sin(a)*6.5);ctx.stroke()}}
+    const hay=hvC([214,180,90],d),hay2=hvC([170,140,60],d);for(const [x,y,w] of [[66,360,22],[90,360,22],[114,360,20],[78,350,22],[102,350,22]]){ctx.fillStyle=hay;ctx.fillRect(x,y,w,10);ctx.fillStyle=hay2;ctx.fillRect(x,y+3,w,.8);ctx.fillRect(x,y+6.5,w,.8)}
+    ctx.fillStyle=dk2;ctx.fillRect(134,334,2,36);ctx.fillRect(130,334,8,2);ctx.fillStyle=lit(d)?'#ffcf70':hvC([200,180,120],d);ctx.fillRect(131,337,6,7);ctx.fillStyle=dk2;ctx.fillRect(130.5,336,7,1.4);if(lit(d)){ctx.globalCompositeOperation='lighter';glow(134,340,30,.5,'255,200,110');ctx.globalCompositeOperation='source-over'}
+    for(const [x,y,c] of [[86,348,[236,128,36]],[121,348,[240,160,60]]]){ctx.fillStyle=hvC(c,d);ctx.beginPath();ctx.ellipse(x,y,4,3,0,0,7);ctx.fill()}}}
+function hvHouse2(G,wins,d,T){
+  if(has('garland')&&G.t>0){const {x,y,w}=G,C=[[226,84,40],[238,140,40],[214,170,60],[200,60,36]];const seg=(x0,y0,x1,y1,n)=>{for(let i=0;i<n;i++){const p0=i/n,p1=(i+1)/n,ax=x0+(x1-x0)*p0,ay=y0+(y1-y0)*p0,bx=x0+(x1-x0)*p1,by=y0+(y1-y0)*p1,mx=(ax+bx)/2,my=(ay+by)/2+3;
+      ctx.strokeStyle=hvC([140,100,50],d);ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(mx,my+2,bx,by);ctx.stroke();for(let k=0;k<3;k++){const q=(k+1)/4,lx=ax+(bx-ax)*q,ly=ay+(by-ay)*q+Math.sin(q*Math.PI)*3.6;ctx.fillStyle=hvC(C[(i+k)%4],d);ctx.beginPath();ctx.ellipse(lx,ly,1.9,1.2,(i+k)*.8,0,7);ctx.fill()}}};
+    seg(x-8,y+2,G.px,G.py,8);seg(G.px,G.py,x+w+8,y+2,8)}
+  if(has('porchrocker')&&G.t>0){const rx=Math.max(G.x+10,G.door-16),ry=242,wd=hvC([120,80,48],d);ctx.save();ctx.translate(rx,ry);ctx.rotate(Math.sin(T*1.3)*.07);ctx.strokeStyle=wd;ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(-7,-1);ctx.quadraticCurveTo(0,2,7,-1);ctx.stroke();
+    ctx.fillStyle=wd;ctx.fillRect(-5,-8,10,2);ctx.fillRect(-5,-8,1.5,7);ctx.fillRect(3.5,-8,1.5,7);ctx.fillRect(-5,-17,2,10);ctx.fillRect(-5,-17,6,1.6);
+    ctx.fillStyle=hvC([176,48,40],d);ctx.fillRect(-4,-14,8,7);ctx.fillStyle=hvC([40,60,40],d);for(let i=0;i<3;i++){ctx.fillRect(-4,-13+i*2.4,8,.7)}ctx.fillRect(-1.5,-14,.7,7);ctx.fillRect(1.6,-14,.7,7);ctx.restore()}}
+function hvDock2(d,T){const e=dockEnd();
+  if(has('lanterns')){const x0=146,x1=e-6,C=[[236,108,40],[214,60,44],[244,176,60]];ctx.strokeStyle=rgb(mix([30,26,22],[90,70,50],d));ctx.lineWidth=1;for(const px of [x0,x1]){ctx.fillStyle=rgb(mix([30,22,16],[110,78,48],d));ctx.fillRect(px-1,216,2,30)}
+    ctx.beginPath();for(let i=0;i<=20;i++){const p=i/20,lx=x0+(x1-x0)*p,ly=217+Math.sin(p*Math.PI)*9;i?ctx.lineTo(lx,ly):ctx.moveTo(lx,ly)}ctx.stroke();
+    const n=Math.max(3,Math.floor((x1-x0)/18));for(let i=1;i<n;i++){const p=i/n,lx=x0+(x1-x0)*p,ly=217+Math.sin(p*Math.PI)*9,sw=Math.sin(T*1.6+i)*(1+AMB.wind/16),c=C[i%3];ctx.save();ctx.translate(lx,ly);ctx.rotate(sw*.06);ctx.strokeStyle='rgba(60,50,40,.6)';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,3);ctx.stroke();
+      ctx.fillStyle=lit(d)?rgb(mix(c,[255,230,160],.35)):rgb(mix(c.map(v=>v*.3),c,d*.8+.2));ctx.beginPath();ctx.ellipse(0,7.5,3.6,4.6,0,0,7);ctx.fill();ctx.fillStyle='rgba(0,0,0,.25)';ctx.fillRect(-2.6,2.8,5.2,1.2);ctx.fillRect(-2.6,11.6,5.2,1.2);ctx.restore();
+      if(lit(d)){ctx.globalCompositeOperation='lighter';glow(lx,ly+7,16,.4*(1-d),c.join(','));ctx.globalCompositeOperation='source-over'}}}
+  dk('turkey',()=>{const tx=246,ty=246,br=hvC([110,70,40],d),fan=[[176,60,36],[214,140,50],[120,80,40],[230,180,80],[150,90,40]];
+    for(let i=0;i<9;i++){const a=-Math.PI*.95+i*Math.PI*.9/8;ctx.fillStyle=hvC(fan[i%5],d);ctx.beginPath();ctx.ellipse(tx-3+Math.cos(a)*8,ty-10+Math.sin(a)*8,2.4,6.4,a+Math.PI/2,0,7);ctx.fill()}
+    ctx.fillStyle=br;ctx.beginPath();ctx.ellipse(tx,ty-6,6,5,0,0,7);ctx.fill();ctx.fillStyle=hvC([130,90,50],d);ctx.fillRect(tx+3,ty-15,2.4,7);ctx.fillStyle=hvC([150,110,80],d);ctx.beginPath();ctx.arc(tx+4.5,ty-16,2.6,0,7);ctx.fill();
+    ctx.fillStyle=hvC([214,50,40],d);ctx.beginPath();ctx.ellipse(tx+6,ty-13.5,1.1,2.2,.2,0,7);ctx.fill();ctx.fillStyle='#e8a030';ctx.beginPath();ctx.moveTo(tx+6.6,ty-16.6);ctx.lineTo(tx+9,ty-16);ctx.lineTo(tx+6.6,ty-15.2);ctx.fill();ctx.fillStyle='#111';ctx.fillRect(tx+4.6,ty-17,1,1);
+    ctx.fillStyle=hvC([30,30,30],d);ctx.fillRect(tx+2,ty-21,5,1.4);ctx.fillRect(tx+3,ty-25,3,4);ctx.fillStyle=hvC([200,170,60],d);ctx.fillRect(tx+3.6,ty-22.4,1.8,1);
+    const bob=Math.sin(T*1.1)*1.5,tug=(T%7)<.6?Math.sin(T*30)*2:0;ctx.strokeStyle=hvC([110,80,50],d);ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(tx+5,ty-7);ctx.lineTo(tx+20,ty-24+tug);ctx.stroke();
+    ctx.strokeStyle='rgba(230,230,230,.55)';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(tx+20,ty-24+tug);ctx.quadraticCurveTo(tx+26,ty-6,tx+28,ty+30+bob);ctx.stroke();ctx.fillStyle='#ff7a3d';ctx.beginPath();ctx.arc(tx+28,ty+30+bob,1.6,0,7);ctx.fill();
+    ctx.fillStyle=hvC([220,170,60],d);ctx.fillRect(tx-2,ty-1.5,1.2,2);ctx.fillRect(tx+1,ty-1.5,1.2,2)})}
+function petTrimDraw(d){if(!has('pettrim'))return;const g=c=>hvC(c,d),C=[[226,84,40],[238,140,40],[214,170,60],[200,60,36]];
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;ctx.fillStyle=g(C[i%4]);ctx.beginPath();ctx.ellipse(Math.cos(a)*3.2,-21+Math.sin(a)*3.2,1.5,1,a,0,7);ctx.fill()}ctx.fillStyle=g([180,40,36]);ctx.beginPath();ctx.moveTo(0,-18);ctx.lineTo(-2,-15.6);ctx.lineTo(2,-15.6);ctx.fill();
+  ctx.fillStyle=g([236,128,36]);ctx.beginPath();ctx.ellipse(16,-3,4.4,3.4,0,0,7);ctx.fill();ctx.fillStyle=g([80,110,40]);ctx.fillRect(15.4,-7.6,1.2,2);ctx.fillStyle=g([240,200,90]);ctx.beginPath();ctx.ellipse(21,-2,2.4,1.9,0,0,7);ctx.fill();
+  ctx.strokeStyle=g([214,180,104]);ctx.lineWidth=1;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(-15+i*.8,0);ctx.lineTo(-19+i*1.6,-20-(i%2)*3);ctx.stroke()}}
 function drawDock(d,T){
   const e=dockEnd(),wood=rgb(mix([40,30,26],[124,86,58],d)),dark=rgb(mix([24,18,16],[76,52,36],d));
-  if(has('kayak')){const by=263+Math.sin(T*1.5)*1;ctx.fillStyle=rgb(mix([40,20,10],[240,120,40],d));ctx.beginPath();ctx.ellipse(205,by,32,3.5,0,0,7);ctx.fill();ctx.fillStyle=dark;ctx.beginPath();ctx.ellipse(205,by-1.5,7,1.6,0,0,7);ctx.fill();ctx.strokeStyle=rgb(mix([30,30,30],[220,220,210],d));ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(190,by-4);ctx.lineTo(220,by);ctx.stroke()}
+  dk('kayak',()=>{const by=263+Math.sin(T*1.5)*1;ctx.fillStyle=rgb(mix([40,20,10],[240,120,40],d));ctx.beginPath();ctx.ellipse(205,by,32,3.5,0,0,7);ctx.fill();ctx.fillStyle=dark;ctx.beginPath();ctx.ellipse(205,by-1.5,7,1.6,0,0,7);ctx.fill();ctx.strokeStyle=rgb(mix([30,30,30],[220,220,210],d));ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(190,by-4);ctx.lineTo(220,by);ctx.stroke()})
   ctx.fillStyle=dark;ctx.fillRect(140,248,e-140,7);for(let x=150;x<e;x+=26)ctx.fillRect(x,255,4,22);
   ctx.fillStyle=wood;ctx.fillRect(140,246,e-140,4);
   if(AMB.snowAcc>0){ctx.fillStyle=`rgba(240,244,250,${.85*AMB.snowAcc})`;ctx.fillRect(140,244.5,e-140,2.5)}
   if(S.shack>=4){for(const lx of [270,312]){ctx.fillStyle=dark;ctx.fillRect(lx,222,3,24);ctx.fillStyle=lit(d)?'#ffcf70':'#d8d0b0';ctx.beginPath();ctx.arc(lx+1.5,221,4,0,7);ctx.fill();if(lit(d))glow(lx+1.5,221,20,.3)}}
-  if(has('decoys'))for(const [i,dx] of [[0,292],[1,316],[2,340]]){const y=285+Math.sin(T*1.7+i)*1.5;ctx.fillStyle=rgb(mix([30,22,16],[120,84,50],d));ctx.beginPath();ctx.ellipse(dx,y,6,3,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([10,30,20],[40,120,70],d));ctx.beginPath();ctx.arc(dx+5,y-3,2.2,0,7);ctx.fill();ctx.fillStyle='#e8b030';ctx.fillRect(dx+7,y-3.5,2.5,1.2)}
-  if(has('rocker')){ctx.save();ctx.translate(151,246);ctx.rotate(Math.sin(T*1.6)*.06);ctx.strokeStyle=dark;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-7,-1);ctx.quadraticCurveTo(0,2,7,-1);ctx.stroke();ctx.fillStyle=wood;ctx.fillRect(-5,-8,9,2);ctx.fillRect(-5,-19,2,13);ctx.fillRect(-4,-6,1.5,5);ctx.fillRect(2.5,-6,1.5,5);ctx.restore()}
-  if(has('bench')){ctx.fillStyle=wood;ctx.fillRect(164,238,24,2.5);ctx.fillRect(164,231,24,2);ctx.fillStyle=dark;ctx.fillRect(166,240,2,6);ctx.fillRect(184,240,2,6);ctx.fillRect(165,233,1.5,6);ctx.fillRect(185.5,233,1.5,6)}
-  if(has('lifering')){ctx.fillStyle=dark;ctx.fillRect(193,228,3,18);const cx=194.5,cy=235;ctx.lineWidth=3;for(let i=0;i<4;i++){ctx.strokeStyle=i%2?'#f4f0e6':'#e04a3a';ctx.beginPath();ctx.arc(cx,cy,4.5,i*Math.PI/2,(i+1)*Math.PI/2);ctx.stroke()}}
-  if(has('crabs')){ctx.strokeStyle=rgb(mix([40,40,40],[170,170,160],d));ctx.lineWidth=.8;for(const [bx,by,bw,bh] of [[200,238,16,8],[202,231,12,7]]){ctx.strokeRect(bx,by,bw,bh);for(let i=bx+3;i<bx+bw;i+=3){ctx.beginPath();ctx.moveTo(i,by);ctx.lineTo(i,by+bh);ctx.stroke()}}}
+  dk('decoys',()=>{for(const [i,dx] of [[0,292],[1,316],[2,340]]){const y=285+Math.sin(T*1.7+i)*1.5;ctx.fillStyle=rgb(mix([30,22,16],[120,84,50],d));ctx.beginPath();ctx.ellipse(dx,y,6,3,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([10,30,20],[40,120,70],d));ctx.beginPath();ctx.arc(dx+5,y-3,2.2,0,7);ctx.fill();ctx.fillStyle='#e8b030';ctx.fillRect(dx+7,y-3.5,2.5,1.2)}})
+  dk('rocker',()=>{ctx.save();ctx.translate(151,246);ctx.rotate(Math.sin(T*1.6)*.06);ctx.strokeStyle=dark;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-7,-1);ctx.quadraticCurveTo(0,2,7,-1);ctx.stroke();ctx.fillStyle=wood;ctx.fillRect(-5,-8,9,2);ctx.fillRect(-5,-19,2,13);ctx.fillRect(-4,-6,1.5,5);ctx.fillRect(2.5,-6,1.5,5);ctx.restore()})
+  dk('bench',()=>{ctx.fillStyle=wood;ctx.fillRect(164,238,24,2.5);ctx.fillRect(164,231,24,2);ctx.fillStyle=dark;ctx.fillRect(166,240,2,6);ctx.fillRect(184,240,2,6);ctx.fillRect(165,233,1.5,6);ctx.fillRect(185.5,233,1.5,6)})
+  dk('lifering',()=>{ctx.fillStyle=dark;ctx.fillRect(193,228,3,18);const cx=194.5,cy=235;ctx.lineWidth=3;for(let i=0;i<4;i++){ctx.strokeStyle=i%2?'#f4f0e6':'#e04a3a';ctx.beginPath();ctx.arc(cx,cy,4.5,i*Math.PI/2,(i+1)*Math.PI/2);ctx.stroke()}})
+  dk('crabs',()=>{ctx.strokeStyle=rgb(mix([40,40,40],[170,170,160],d));ctx.lineWidth=.8;for(const [bx,by,bw,bh] of [[200,238,16,8],[202,231,12,7]]){ctx.strokeRect(bx,by,bw,bh);for(let i=bx+3;i<bx+bw;i+=3){ctx.beginPath();ctx.moveTo(i,by);ctx.lineTo(i,by+bh);ctx.stroke()}}})
   if(has('bollards'))for(const bx of [160,224,e-4]){ctx.fillStyle=rgb(mix([10,10,12],[40,40,46],d));ctx.fillRect(bx-2,240,4,6);ctx.strokeStyle=rgb(mix([40,36,30],[200,180,130],d));ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(bx+5,245,3,1.3,0,0,7);ctx.stroke()}
-  if(has('pelican')){const py=has('bollards')?240:246,fl=(T%9)<1.2?Math.sin(T*14)*5:0;ctx.fillStyle=rgb(mix([60,60,64],[236,232,222],d));ctx.beginPath();ctx.ellipse(226,py-6,6,4.5,0,0,7);ctx.fill();
+  dk('pelican',()=>{const py=has('bollards')?240:246,fl=(T%9)<1.2?Math.sin(T*14)*5:0;ctx.fillStyle=rgb(mix([60,60,64],[236,232,222],d));ctx.beginPath();ctx.ellipse(226,py-6,6,4.5,0,0,7);ctx.fill();
     ctx.fillStyle=rgb(mix([40,40,44],[180,176,168],d));ctx.beginPath();ctx.moveTo(222,py-8);ctx.lineTo(214,py-10-fl);ctx.lineTo(228,py-5);ctx.fill();
     ctx.fillStyle=rgb(mix([60,60,64],[236,232,222],d));ctx.fillRect(229,py-15,2,8);ctx.beginPath();ctx.arc(230,py-16,2.5,0,7);ctx.fill();ctx.fillStyle='#e8a030';ctx.beginPath();ctx.moveTo(231,py-17);ctx.lineTo(240,py-14);ctx.lineTo(231,py-14);ctx.fill();
-    ctx.fillStyle='#1a1a1a';ctx.fillRect(226,py-2,1,2);ctx.fillRect(228,py-2,1,2)}
-  if(has('cleaning')){ctx.fillStyle=rgb(mix([40,40,44],[190,190,186],d));ctx.fillRect(232,235,16,2.5);ctx.fillStyle=dark;ctx.fillRect(233,237,1.5,9);ctx.fillRect(245.5,237,1.5,9);ctx.fillStyle=rgb(mix([30,30,34],[120,120,124],d));ctx.fillRect(240,231,1.2,4);ctx.fillRect(240,231,4,1.2)}
+    ctx.fillStyle='#1a1a1a';ctx.fillRect(226,py-2,1,2);ctx.fillRect(228,py-2,1,2)})
+  dk('cleaning',()=>{ctx.fillStyle=rgb(mix([40,40,44],[190,190,186],d));ctx.fillRect(232,235,16,2.5);ctx.fillStyle=dark;ctx.fillRect(233,237,1.5,9);ctx.fillRect(245.5,237,1.5,9);ctx.fillStyle=rgb(mix([30,30,34],[120,120,124],d));ctx.fillRect(240,231,1.2,4);ctx.fillRect(240,231,4,1.2)})
   if(has('docklights'))for(const lx of [143,e-3]){ctx.fillStyle=dark;ctx.fillRect(lx-1,224,2,22);ctx.fillStyle=lit(d)?'#ffe08a':'#d8d0b0';ctx.beginPath();ctx.arc(lx,223,3,0,7);ctx.fill();if(lit(d)){glow(lx,223,22,.45*(1-d));glow(lx,262,16,.18*(1-d))}}
 }
 // ==PETS== One companion follows you: naps in the yard, rides in the boat, curls up in the cabin. Visitors see it too.
@@ -7442,7 +7509,8 @@ const YI={
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
   steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
-  cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]}};
+  cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]},
+  pumpkinpatch:{ox:34,oy:370,w:54,h:16,def:[[34,370]]},wheelbarrow:{ox:78,oy:314,w:46,h:34,def:[[78,314]]},ciderpress:{ox:12,oy:306,w:64,h:48,def:[[12,306]]},maple:{ox:-12,oy:222,w:48,h:76,def:[[-12,222]]},hayride:{ox:48,oy:332,w:92,h:64,def:[[48,332]]}};
 const YIDS=Object.keys(YI),yQty=id=>YI[id].unit?yInv(id):YI[id].def.length;
 const YLAND=[{n:'Home Lot',x:-40,c:0},{n:'Side Meadow',x:-200,c:2500,d:'A sunny strip of grass next to your lot.'},{n:'Birch Glade',x:-360,c:15000,d:'Soft ground under the birches. Room for a lot more.'},
   {n:'Pine Woods',x:-520,c:60000,d:'A quiet stand of pines further inland.'},{n:'Hilltop',x:-700,c:200000,d:'The far end of the property, with a view back over the lake.'}];
@@ -7494,9 +7562,10 @@ function yDraw(id,d,T,night,ph){
     ctx.fillStyle=rgb(mix([20,40,30],[90,140,90],d));for(let i=0;i<6;i++){ctx.fillRect(x-12+((i*7)%22),y-30+((i*11)%22),2,4+(i%3)*2)}if(night){ctx.globalCompositeOperation='lighter';glow(x,y-32,22,.25+.15*Math.sin(T*1.1+ph),'200,230,210');ctx.globalCompositeOperation='source-over'}}
   else if(id==='jacks'||id==='scarecrow'||id==='tombstones'||id==='cauldron')hwLandOne(id,d,T);
   else if(id==='cornstalks'||id==='harvtable'||id==='cornucopia')hvLandOne(id,d,T);
+  else if(id==='pumpkinpatch'||id==='wheelbarrow'||id==='ciderpress'||id==='maple'||id==='hayride')hvLand2(id,d,T);
   else if(YI[id]&&YI[id].fruit)treeDraw(YI[id].fruit,d,T,YCUR);
   else if(id==='plot')plotDraw(d,T,YCUR);
-  else if(id==='pethouse')petHouseDraw(d);
+  else if(id==='pethouse'){petHouseDraw(d);petTrimDraw(d)}
   else if(id==='horseshoes'||id==='putting')y3GameDraw(id,d,T);
   else if(YGAMES[id])ygItemDraw(id,d,T,YCUR);
   else if(YSHOW[id])showDraw(id,d,T,YCUR);
@@ -8014,18 +8083,23 @@ function yedExit(){if(!YED.on)return;YED.on=false;YED.sel=-1;YED.drag=null;$('ye
 function yedPlace(id){if(!yardOk(S.yard))return;const n=yardStore().find(s=>s[0]===id);if(!n)return;let [x,y]=yardClamp(id,CAM.cx,CAM.cy+40);{const w=YI[id].w,L=yardList(),busy=(x,y)=>L.some(o=>o[0]===id&&Math.abs(o[1]-x)<w-1&&Math.abs(o[2]-y)<6);for(let k=0;k<12&&busy(x,y);k++){const n=yardClamp(id,x+w,y);if(n[0]===x){[x,y]=yardClamp(id,x,y+14)}else[x,y]=n}}S.yard.it.push(YI[id].fruit?[id,x,y,0,Date.now()]:[id,x,y,0]);YED.sel=S.yard.it.length-1;sfx('pop');renderYed();save()}
 function renderYed(){const b=$('yedBar');if(!YED.on){b.hidden=true;return}const L=yardList(),tab=YED.tab||'decor',it=tab==='decor'||tab==='build'||tab==='games'||tab==='farm'||tab==='hang'||tab==='show'?L[YED.sel]:null,Y=S.yard;
   const nm=id=>{const x=DECOR.find(z=>z.id===id);return x?x.n:YUNIT[id]?YUNIT[id].n:id};
-  const tabs=[['decor','Decor'],['farm','Homestead'],['hang','Hangouts'],['show','Show-off & seasonal'],['build','Fences & hedges'],['games','Games'],['paths','Paths'],['house','House paint']];
+  const tabs=[['decor','Decor'],['farm','Homestead'],['hang','Hangouts'],['show','Show-off & seasonal'],['build','Fences & hedges'],['games','Games'],['paths','Paths'],['dock','Dock'],['house','House paint']];
   const hint={show:'Show off your best catch and decorate for the season. Leaf piles are sold in autumn and snowmen in winter. The ones you own stay all year.',hang:'Places to spend time, best with Open House guests. Place one, then tap it in your yard.',farm:'Things that make something while you’re away. Place one, then tap it in your yard to collect.',games:'Yard games double as decor. Place them, then tap one in your yard to play.',decor:'Drag things to move them. Tap one to select it.'+(nativeOf()?` Your native fruit: ${FRUITS[nativeOf()].n.toLowerCase()}.`:''),build:'Buy pieces and drag them into place. Fences and hedges snap together end to end.',
-    paths:YED.brush&&YED.brush!=='pan'?'Drag across the ground to paint. Pick Move view to look around.':'Pick a path, then drag across your yard to paint it.',house:'Pick a part of your house, then a color. Repainting is free.'}[tab];
+    paths:YED.brush&&YED.brush!=='pan'?'Drag across the ground to paint. Pick Move view to look around.':'Pick a path, then drag across your yard to paint it.',house:'Pick a part of your house, then a color. Repainting is free.',dock:'Pick something on your dock, then slide it left or right.'}[tab];
   let h=`<div class="yed-top"><div class="yed-tabs">${tabs.map(([k,n])=>`<button class="yed-tab${k===tab?' on':''}" data-yt="${k}">${n}</button>`).join('')}</div><button class="jig" id="yedDone">Done</button></div>`;
-  h+=`<div class="yed-sel">${it?`<i>${esc(nm(it[0]))}</i><button class="ghost" id="yedFlip">Flip</button><button class="ghost" id="yedAway">Put away</button>`:`<span>${hint}</span>`}</div><div class="yed-tray${tab==='house'?' hp':''}">`;
+  const dsel=tab==='dock'&&Object.keys(DOCKMV).filter(id=>has(id)).includes(YED.dsel)?YED.dsel:(tab==='dock'?(Object.keys(DOCKMV).find(id=>has(id))||''):'');
+  h+=`<div class="yed-sel">${dsel?`<i>${esc(nm(dsel))}</i><button class="ghost" data-yn="-16">◀◀</button><button class="ghost" data-yn="-4">◀</button><button class="ghost" data-yn="4">▶</button><button class="ghost" data-yn="16">▶▶</button><button class="ghost" data-yn="0">Reset</button>`:it?`<i>${esc(nm(it[0]))}</i><button class="ghost" id="yedFlip">Flip</button><button class="ghost" id="yedAway">Put away</button>`:`<span>${hint}</span>`}</div><div class="yed-tray${tab==='house'?' hp':''}">`;
   if(tab==='decor'){const st=yardStore().filter(([id])=>!YUNIT[id]);h+=st.length?st.map(([id,n])=>`<button class="yed-it" data-yp="${id}">${esc(nm(id))}${n>1?` <small>×${n}</small>`:''}</button>`).join(''):`<span class="yed-none">Everything you own is out. Order more yard decor from the Shop.</span>`}
   else if(tab==='build'||tab==='games'||tab==='farm'||tab==='hang'||tab==='show'){h+=Object.entries(YUNIT).filter(([id])=>tab==='games'?!!YGAMES[id]:tab==='farm'?!!YFARM[id]:tab==='hang'?!!YHANG[id]:tab==='show'?!!YSHOW[id]:!YGAMES[id]&&!YFARM[id]&&!YHANG[id]&&!YSHOW[id]).map(([id,u])=>{const sp=yInv(id)-L.filter(a=>a[0]===id).length,so=seasonOk(id);return `<button class="yed-it" data-yb="${id}" ${sp>0||(S.coins>=u.c&&so)?'':'disabled'}${u.d?` title="${u.d}"`:''}>${u.n} <small>${sp>0?`×${sp} ready`:so?ym(u.c):YSHOW[id]&&YSHOW[id].season[0]===11?'December to February':'September to November'}</small></button>`}).join('')}
   else if(tab==='paths'){const br=YED.brush||'pan';h+=`<button class="yed-it${br==='pan'?' on':''}" data-yg="pan">✋ Move view</button><button class="yed-it${br==='erase'?' on':''}" data-yg="erase">Eraser</button>`+Object.entries(YGT).map(([k,g])=>{const own=!g.c||(Y.gu&&Y.gu[k]);return `<button class="yed-it yed-gt${br===k?' on':''}" data-yg="${k}" ${own||S.coins>=g.c?'':'disabled'}><span class="yed-chip" style="background:rgb(${g.col})"></span>${g.n}${own?'':` <small>${ym(g.c)}</small>`}</button>`}).join('')}
+  else if(tab==='dock'){const own=Object.keys(DOCKMV).filter(id=>has(id));if(!own.includes(YED.dsel))YED.dsel=own[0]||'';const ds=YED.dsel;
+    h+=own.length?own.map(id=>`<button class="yed-it${id===ds?' on':''}" data-yk="${id}">${esc(nm(id))}</button>`).join(''):`<span class="yed-none">Nothing on your dock can be moved yet. Dock decor is in the Shop.</span>`}
   else{const R=HROLE[S.shack]||{},r=YED.role&&R[YED.role]?YED.role:(HROLES.find(([k])=>R[k])||['wall'])[0];YED.role=r;const cur=(Y.hc&&Y.hc[r])|0;h+=`<div class="yed-roles">${HROLES.map(([k,n])=>`<button class="yed-it${k===r?' on':''}" data-yr="${k}" ${R[k]?'':'disabled'}>${n}</button>`).join('')}</div><div class="yed-sws">${HPAL.map((c,i)=>`<button class="yed-sw${i===cur?' on':''}" data-yc="${i}" title="${HPN[i]}" aria-label="${HPN[i]}" style="${c?`background:rgb(${c})`:''}" ${R[r]?'':'disabled'}>${c?'':'↺'}</button>`).join('')}</div>`}
   h+='</div>';b.innerHTML=h;b.hidden=false;
   $('yedDone').onclick=e=>{e.stopPropagation();yedExit()};
-  b.querySelectorAll('[data-yt]').forEach(x=>x.onclick=e=>{e.stopPropagation();YED.tab=x.dataset.yt;YED.sel=-1;if(YED.tab!=='paths')YED.brush='pan';if(YED.tab==='house'){CAM.tx=90;CAM.ty=200;camClamp()}renderYed()});
+  b.querySelectorAll('[data-yt]').forEach(x=>x.onclick=e=>{e.stopPropagation();YED.tab=x.dataset.yt;YED.sel=-1;if(YED.tab!=='paths')YED.brush='pan';if(YED.tab==='house'){CAM.tx=90;CAM.ty=200;camClamp()}if(YED.tab==='dock'){CAM.tx=Math.min(300,(140+dockEnd())/2);CAM.ty=240;camClamp()}renderYed()});
+  b.querySelectorAll('[data-yk]').forEach(x=>x.onclick=e=>{e.stopPropagation();YED.dsel=x.dataset.yk;sfx('click');renderYed()});
+  b.querySelectorAll('[data-yn]').forEach(x=>x.onclick=e=>{e.stopPropagation();const id=YED.dsel,n=+x.dataset.yn;if(!id)return;if(n)dockNudge(id,n);else{if(S.dockX)delete S.dockX[id];sfx('click');save();renderYed()}});
   if(it){$('yedFlip').onclick=e=>{e.stopPropagation();it[3]=it[3]?0:1;save()};$('yedAway').onclick=e=>{e.stopPropagation();S.yard.it.splice(YED.sel,1);YED.sel=-1;renderYed();save()}}
   b.querySelectorAll('[data-yp]').forEach(x=>x.onclick=e=>{e.stopPropagation();yedPlace(x.dataset.yp)});
   b.querySelectorAll('[data-yb]').forEach(x=>x.onclick=e=>{e.stopPropagation();const id=x.dataset.yb,u=YUNIT[id],sp=yInv(id)-yardList().filter(a=>a[0]===id).length;
@@ -9829,14 +9903,15 @@ function hwHouse(G,wins,d,T){
     ctx.beginPath();ctx.ellipse(bx,by,1.6,1.2,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx-6,by-fl);ctx.lineTo(bx-3,by+1);ctx.lineTo(bx,by+.5);ctx.lineTo(bx+3,by+1);ctx.lineTo(bx+6,by-fl);ctx.fill()}
 }
 function hwDock(d,T){
-  if(has('hay')){ctx.fillStyle=rgb(mix([50,44,20],[214,180,90],d));ctx.fillRect(157,261,19,9);ctx.fillRect(160,253,13,8);ctx.fillStyle=rgb(mix([40,34,14],[170,140,60],d));for(const yy of [264,267,256,259])ctx.fillRect(157,yy,19,.8);
-    ctx.fillStyle=rgb(mix([50,40,10],[230,190,60],d));ctx.beginPath();ctx.ellipse(181,267,3.5,2.6,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([20,40,20],[90,150,80],d));ctx.beginPath();ctx.ellipse(186,268,2.6,2.2,0,0,7);ctx.fill()}
-  if(has('skeleton')){const bone=rgb(mix([80,80,76],[236,232,214],d)),sx=183;ctx.fillStyle=bone;ctx.strokeStyle=bone;ctx.lineWidth=1.2;
+  dk('hay',()=>{ctx.fillStyle=rgb(mix([50,44,20],[214,180,90],d));ctx.fillRect(157,261,19,9);ctx.fillRect(160,253,13,8);ctx.fillStyle=rgb(mix([40,34,14],[170,140,60],d));for(const yy of [264,267,256,259])ctx.fillRect(157,yy,19,.8);
+    ctx.fillStyle=rgb(mix([50,40,10],[230,190,60],d));ctx.beginPath();ctx.ellipse(181,267,3.5,2.6,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([20,40,20],[90,150,80],d));ctx.beginPath();ctx.ellipse(186,268,2.6,2.2,0,0,7);ctx.fill()},-24)
+  dk('skeleton',()=>{const bone=rgb(mix([80,80,76],[236,232,214],d)),sx=183;ctx.fillStyle=bone;ctx.strokeStyle=bone;ctx.lineWidth=1.2;
     ctx.beginPath();ctx.arc(sx,231,3.6,0,7);ctx.fill();ctx.fillStyle='#111';ctx.fillRect(sx-1.8,230,1.3,1.3);ctx.fillRect(sx+.6,230,1.3,1.3);ctx.fillRect(sx-1,233,2,.8);
     ctx.beginPath();ctx.moveTo(sx,235);ctx.lineTo(sx,244);for(let i=0;i<3;i++){ctx.moveTo(sx-3,237+i*2.4);ctx.lineTo(sx+3,237+i*2.4)}ctx.moveTo(sx,244);ctx.lineTo(sx+2,254);ctx.moveTo(sx,244);ctx.lineTo(sx-2,255);ctx.moveTo(sx,237);ctx.lineTo(sx+5,240);ctx.stroke();
-    ctx.strokeStyle=rgb(mix([30,24,20],[90,60,36],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(sx+5,240);ctx.lineTo(sx+24,224);ctx.stroke();ctx.strokeStyle='rgba(220,220,220,.4)';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(sx+24,224);ctx.lineTo(sx+30,282);ctx.stroke()}
-  if(has('mums'))for(const [mx,my,k] of [[192,272,0],[202,269,1]]){ctx.fillStyle=rgb(mix([40,22,16],[176,96,60],d));ctx.beginPath();ctx.moveTo(mx-4,my-5);ctx.lineTo(mx+4,my-5);ctx.lineTo(mx+3,my);ctx.lineTo(mx-3,my);ctx.fill();
-    const fc=k?[240,186,62]:[230,118,40];for(let i=0;i<9;i++){const a=i/9*Math.PI,r=3.4+(i%2);ctx.fillStyle=rgb(mix(fc.map(v=>v*.2),fc,d*.85+.1));ctx.beginPath();ctx.arc(mx+Math.cos(a)*r*1.2,my-6-Math.sin(a)*r,1.7,0,7);ctx.fill()}}
+    ctx.strokeStyle=rgb(mix([30,24,20],[90,60,36],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(sx+5,240);ctx.lineTo(sx+24,224);ctx.stroke();ctx.strokeStyle='rgba(220,220,220,.4)';ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(sx+24,224);ctx.lineTo(sx+30,282);ctx.stroke()})
+  dk('mums',()=>{for(const [mx,my,k] of [[192,272,0],[202,269,1]]){ctx.fillStyle=rgb(mix([40,22,16],[176,96,60],d));ctx.beginPath();ctx.moveTo(mx-4,my-5);ctx.lineTo(mx+4,my-5);ctx.lineTo(mx+3,my);ctx.lineTo(mx-3,my);ctx.fill();
+    const fc=k?[240,186,62]:[230,118,40];for(let i=0;i<9;i++){const a=i/9*Math.PI,r=3.4+(i%2);ctx.fillStyle=rgb(mix(fc.map(v=>v*.2),fc,d*.85+.1));ctx.beginPath();ctx.arc(mx+Math.cos(a)*r*1.2,my-6-Math.sin(a)*r,1.7,0,7);ctx.fill()}}},-26)
+  hvDock2(d,T);
   if(has('floatjacks'))for(let i=0;i<4;i++)jack(262+i*30,316+(i%2)*10+Math.sin(T*1.4+i)*1.5,.85,d,T);
 }
 function drawGhostShip(d,T){
@@ -10512,7 +10587,7 @@ function visitArcade(){if(isRealm(S.water)){showToast('Come back to Lantern Lake
   if(VT||VISIT){showToast('You’re already out visiting');return}if(TRV.on){showToast('Wait until the boat stops');return}
   if(S.tour&&S.tour.phase==='live'){showToast('Finish or leave your tournament first');return}
   if(S.sleep&&!['awake','yard'].includes(S.sleep.ph)){showToast('Wait until you’re up and about');return}
-  VT={arcade:true,id:'arcade',name:'Arcade',c:null,ext:{shack:8,decor:{},off:{},boxes:[],trophies:[],yard:null}};
+  VT={arcade:true,id:'arcade',name:'Arcade',c:null,ext:{shack:8,decor:{},off:{},boxes:[],trophies:[],yard:null,dockX:{}}};
   $('tripModal').hidden=true;closePhone();hideTip();showToast('Heading to the Lantern Pier Arcade','By boat');
   if(S.sleep&&S.sleep.ph==='yard'){VT.go=true;yardOut()}else if(S.sleep&&S.sleep.ph==='awake'){VT.go=true;leaveHouse()}else boatTrip(S.water,'friend',friendArrive)}
 // --- prizes
