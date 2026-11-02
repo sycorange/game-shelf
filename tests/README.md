@@ -81,7 +81,7 @@ Run the whole suite before every push.
 - Big games move: transfer codes take big saves, and a failed Move my game offers the save code instead
 - Big yards: visitors get every placed thing and the ground, even when the shared snapshot is past the old size limit
 - The Phoenix Collection: the Mythic set in Crate Expectations, the two-tap buy, the unveil, equipping, and the set-bonus firebird
-- Prestige: the preview, the reset keeps your house and pets, the Legacy rod, costume and trophy, the next cost doubles, and old retirees convert
+- Prestige: the preview, the reset keeps your house and pets, your income starts fresh (so slots can’t pay out the old income), the Legacy rod, costume and trophy, the next cost doubles, and old retirees convert
 - Harvest shop 2: the new festival decor draws, dock pieces slide in the Dock tab and stop at the dock end, and friends get your dock layout
 - Decorate picking: tapping the item itself selects it, tapping the same spot again reaches the item behind, the nudge buttons, To front / To back (shared with friends), and tapping the ground lets go
 - Big harvest yard pieces: they stand on their base so they can go right up to the house, and ones placed before the fix stay where they were

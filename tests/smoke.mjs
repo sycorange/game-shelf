@@ -401,7 +401,7 @@ await check('Harvest Basket: festival fish, giving fish, lake-wide total, tier r
   ok(await p.evaluate(()=>{let n=0;for(let i=0;i<4000;i++){const e=hwFishRoll('deep',23*60,null);if(e&&e.f.id==='mooncarp')n++}return n>0}),'Harvest Moon Carp never bites');
   await p.evaluate(()=>{openPhone();phShow('hv')});await p.waitForTimeout(300);ok(await p.isVisible('#hvBody [data-hvg="bluegill"]'),'give list');
   await p.click('#hvBody [data-hvg="bluegill"][data-n="1"]');ok(await p.evaluate(()=>S.cooler.bluegill.n===4&&HV().pts===1&&mpS().hvb===1),'give one');
-  await p.click('#hvAll');await p.click('#hvAll');ok(await p.evaluate(()=>!Object.keys(S.cooler).some(k=>S.cooler[k].n>0)&&HV().pts>=10),'give all '+await p.evaluate(()=>JSON.stringify([S.cooler,HV().pts,S.water])));
+  for(let k=0;k<4;k++){await p.click('#hvAll');await p.click('#hvAll');await p.waitForTimeout(150);if(await p.evaluate(()=>!Object.keys(S.cooler).some(k=>S.cooler[k].n>0)))break}ok(await p.evaluate(()=>!Object.keys(S.cooler).some(k=>S.cooler[k].n>0)&&HV().pts>=10),'give all '+await p.evaluate(()=>JSON.stringify([S.cooler,HV().pts,S.water])));
   await p.evaluate(()=>mpSync(true));await p.waitForTimeout(800);ok(await p.evaluate(()=>!mpS().hvb&&MPV.hvb&&MPV.hvb.mine>=40),'sent to the lake '+await p.evaluate(()=>JSON.stringify([mpS().hvb,MPV.hvb])));
   const c0=await p.evaluate(()=>S.coins);await p.evaluate(()=>{MPV.hvb={goal:100,total:60,n:1,mine:40,top:[]};hvClaim()});ok(await p.evaluate(c0=>S.coins===c0+25000&&(S.pots.gold|0)>=3&&HV().tiers[0]&&HV().tiers[1]&&!HV().tiers[2],c0),'tier rewards');
   await p.evaluate(()=>{MPV.hvb.total=100;hvClaim()});ok(await p.evaluate(()=>S.boxes.some(b=>b.id==='cornucopia')&&S.trophies.some(t=>t.name==='Harvest Basket 2026')),'top tiers');ok(!errs.length,errs.join('; '));await c.close()});
@@ -473,9 +473,10 @@ await check('phone controls: thumbstick walks, action button enters places, Go t
   await p.evaluate(()=>townGoUI());await p.click('[data-go="1240"]');await p.waitForTimeout(6000);ok(await p.evaluate(()=>!TOWN.z&&Math.abs(TOWN.x-1240)<4),'Go to walks there');
   await p.evaluate(()=>{SETS().joy=false});await p.waitForTimeout(400);ok(!(await p.isVisible('#joy')),'thumbstick off in Settings');ok(!errs.length,errs.join('; '));await c.close()});
 
-await check('prestige: preview, reset keeps house and pets, star, flag, Legacy rod, costume, old retirees convert',async()=>{const p=await page(VPS[0][1],save({coins:1e7+5,rod:5,boat:3,shack:6,cooler:{walleye:{n:3,val:300}}}));
+await check('prestige: preview, reset keeps house and pets, income starts fresh, star, flag, Legacy rod, costume, old retirees convert',async()=>{const p=await page(VPS[0][1],save({coins:1e7+5,rod:5,boat:3,shack:6,rate:900000,rateL:800000,cooler:{walleye:{n:3,val:300}}}));
   await p.evaluate(()=>prPreview());ok(await p.isVisible('.pr-prev #prGo:not([disabled])'),'preview with Prestige button');await p.click('#prGo');ok(await p.evaluate(()=>prLv()===0),'two taps needed');await p.click('#prGo');await p.waitForTimeout(500);
   ok(await p.evaluate(()=>prLv()===1&&S.coins===1000&&S.boat===0&&S.rod===0&&S.shack===6&&!Object.keys(S.cooler).length),'reset gear, kept house');
+  ok(await p.evaluate(()=>S.rate===0&&S.rateL==null&&slotRate()<20000),'income starts fresh, so slots can’t pay out the old income '+await p.evaluate(()=>slotRate()));
   ok(await p.evaluate(()=>(PNT().own.r_legacy|0)===1&&HW().wear==='pcap'&&S.trophies[0].name==='Prestige I'),'Legacy rod, cap, trophy');ok(await p.isVisible('.pr-show'),'big moment');await p.click('#prOk');
   ok(await p.evaluate(()=>prCost(2)===2e7&&mpStats().pr===1),'next costs double, star shared');ok(!p.errs.length,p.errs.join('; '));await p.context().close();
   const q=await page(VPS[0][1],save({ret:5}));ok(await q.evaluate(()=>prLv()===5&&(PNT().own.r_legacy|0)===1&&(PNT().own.r_legacylit|0)===1),'retiree converts with rods');ok(!q.errs.length,q.errs.join('; '));await q.context().close()});

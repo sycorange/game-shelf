@@ -6861,6 +6861,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:163,n:'Bug fix: slots right after a prestige',items:['Bug fix: right after a prestige, the slot machine still paid out based on your income from before you prestiged, so a few spins could win back tens of millions. Your income now starts fresh when you prestige, and slots, fruit and other income-based prizes follow your new lake.']},
  {v:162,n:'Bug fix: tall windows on iPhone',items:['Bug fix: on iPhone, the bottom of tall windows like the Crafting table sat behind Safari’s toolbar, so you couldn’t scroll down to the last rows (such as making Abyssal Iron). Windows now fit the part of the screen you can actually see.']},
  {v:161,n:'Bug fix: time away in the realms',items:['Bug fix: since you started staying in the realms while away, the whole time away (up to 24 hours) paid at realm prices, far more than anywhere else. Now only the first hour away pays realm prices. After that your line is back on the water you came through the gate from, and you still wake up in the realm. Money already earned is yours to keep.']},
  {v:160,n:'Bug fix: Pine Island looks right',items:['Bug fix: Pine Island was drawn too small next to you. The cabins, pines, lighthouse and moored ferry are bigger now, the lighthouse is wider and stands centered on its rocks, and the island has rounded, sandy shores instead of ending in a sharp edge.','Bug fix: the ferry’s smokestack floated in front of the boat, and the cabin chimneys didn’t reach their roofs. Both sit where they should now.']},
@@ -10130,6 +10131,8 @@ function prGrant(){const L=prLv(),P=PNT();let any=false;for(const [n,id] of [[1,
 function prestigeNow(){const L=prLv()+1;if(L>PR_MAX||S.coins<prCost(L))return;const paid=S.coins;S.ret=L;
   S.trophies.unshift({name:`Prestige ${PR_ROMAN[L]}`,water:'pond',type:'count',score:`$${money(paid)}`,day:S.day});
   Object.assign(S,{coins:1000,rod:0,lure:0,boat:0,water:'pond',cooler:{},junk:{},mats:{},pots:{},buffs:{},locked:{},pin:null,tour:null,sleep:null});S.hot=[null,null,null,null,null];
+  // Bug fix (v163): your income average carried over, so slots (and fruit) paid out at your old income right after a prestige.
+  S.rate=0;S.rateL=null;S.crate=0;earnAcc=0;catchAcc=0;
   prGrant();if(L===1||L===3||L===6||L===10){const k={1:'pcap',3:'psweat',6:'pkeep',10:'pgold'}[L];HW().wear=k}
   cast={el:0,dur:castDur()};renderAll();save();renderDecor();prShow(L);
   try{for(let i=0;i<14;i++)setTimeout(()=>{try{AMB.rockets.push({x:rnd(160,700),y:240,vy:-rnd(140,190),ty:rnd(50,120),c:pick(FWC)})}catch(e){}},i*180)}catch(e){}
