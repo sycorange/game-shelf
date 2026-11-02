@@ -85,6 +85,7 @@ Run the whole suite before every push.
 - Harvest shop 2: the new festival decor draws, dock pieces slide in the Dock tab and stop at the dock end, and friends get your dock layout
 - Decorate picking: tapping the item itself selects it, tapping the same spot again reaches the item behind, the nudge buttons, To front / To back (shared with friends), and tapping the ground lets go
 - Big harvest yard pieces: they stand on their base so they can go right up to the house, and ones placed before the fix stay where they were
+- Pine Island part 2: fishing the Cove, digging once a day for relics and the town sign, the campfire story and stamina, and Nils’s key for Case 7
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

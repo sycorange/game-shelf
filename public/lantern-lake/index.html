@@ -2299,6 +2299,7 @@ const DECOR = [
   {id:'fence',cat:'land',n:'Picket Fence',c:160000,d:'Fresh white pickets along the front of the yard.'},
   {id:'hammock',cat:'land',n:'Hammock',c:300000,d:'Strung between two cedar posts.'},
   {id:'hottub',cat:'land',n:'Cedar Hot Tub',c:700000,d:'Steams on cold mornings.'},
+  {id:'hpsign',cat:'land',cs:1,n:'Hollow Pines Town Sign',c:0,d:'The old sign from the road into Hollow Pines. Wren’s thank-you for finding all four relics on Pine Island.'},
   {id:'steeple',cat:'land',cs:1,n:'Sunken Steeple',c:0,d:'The top of the Hollow Pines church, brought up from the bottom of the lake. Its bell still rings at night.'},
   {id:'lighthouse',cat:'land',n:'Lighthouse',c:5000000,d:'On the far point. Sweeps the water at night.'},
   {id:'flowerbox',cat:'house',n:'Window Flower Boxes',c:700,d:'Geraniums under every window.'},
@@ -2443,6 +2444,10 @@ const HW=()=>{if(!S.hw||typeof S.hw!=='object')S.hw={pk:0,candy:0,wear:null,gg:0
 I.pumpkin=c=>`<ellipse cx="16" cy="19" rx="12" ry="9" fill="${c}"/><path d="M16 10v18M10 11q-3 8 0 16M22 11q3 8 0 16" stroke="rgba(0,0,0,.18)" stroke-width="1.4" fill="none"/><path d="M15 10q1-5 4-6" stroke="#4a7a2a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
 const pumpkinSvg=svgI('pumpkin','#ff8a2a');
 // Limited-time fish. Kept out of FISH so the logbook totals stay the same once the event ends.
+// Pine Island Cove: only caught from the Cove on the island, never from your boat.
+{const A='dawn day dusk night';FISH.push(F('pineperch','Pine Perch',.3,2.5,16,'C','dawn day dusk','isle'),F('covechub','Cove Chub',.5,4,12,'C','day dusk night','isle'),
+  F('steeplebass','Steeple Bass',1,10,18,'U','dawn dusk','isle'),F('isleshiner','Island Shiner',.1,1,60,'U','dusk night','isle'),
+  F('mayorpike','Mayor’s Pike',3,28,14,'R','day','isle'),F('hollowchar','Hollow Pines Char',2,16,30,'R','night dawn','isle'))}
 const EVFISH=[
   Object.assign(F('jacksun','Jack-o’-Lantern Sunfish',.3,2.4,45,'U','day dusk','pond'),{ev:HW_ID,col:'#ff8a2a'}),
   Object.assign(F('ghostgar','Ghost Gar',4,40,32,'R','dusk night','lake'),{ev:HW_ID,col:'#cfe8ff'}),
@@ -2810,7 +2815,8 @@ const slotRate=()=>{const e=estRate();return S.rateL==null?e*.5:Math.min(e,Math.
 const SLOT_CAP_MIN=120;function slotDay(){const d=localDay();if(!S.slotDay||S.slotDay.d!==d)S.slotDay={d,won:0};return S.slotDay}
 const fmtClock=m=>{let h=Math.floor(m/60),mm=Math.floor(m%60);if(S&&S.set&&S.set.h24)return `${String(h%24).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;const ap=h<12?'AM':'PM';h=h%12||12;return `${h}:${String(mm).padStart(2,'0')} ${ap}`};
 const money=n=>Math.floor(n).toLocaleString('en-US');
-const W=id=>WATERS.find(w=>w.id===id)||REALMS_BY[id];
+const ISLE_WATER={id:'isle',n:'Pine Island Cove',boat:0,d:'Still water behind the point on Pine Island. Take the ferry from Lantern Harbor.'};
+const W=id=>WATERS.find(w=>w.id===id)||REALMS_BY[id]||(id==='isle'?ISLE_WATER:undefined);
 const FI=id=>FISH.find(f=>f.id===id)||EVFISH.find(f=>f.id===id);
 const owned=id=>!!S.decor[id];
 const has=id=>!!S.decor[id]&&!S.off[id];
@@ -3393,7 +3399,7 @@ function renderLog(){
   hvLogSection(p);hwLogSection(p);
   const fn=LOGF[logF][1];let shown=0;
   if(logF==='now'){const w=W(S.water);p.insertAdjacentHTML('beforeend',`<p class="empty" style="margin:0 0 8px">Fish that can bite at ${w.n} right now (${PH[ph].toLowerCase()}, ${WX[S.wx.id].n.toLowerCase()}). Changes with the time, weather and water.</p>`)}
-  for(const w of WATERS){
+  for(const w of [...WATERS,ISLE_WATER]){
     const sp=FISH.filter(f=>f.at===w.id&&fn(f));if(!sp.length)continue;shown+=sp.length;
     const all=FISH.filter(f=>f.at===w.id);
     const h=document.createElement('div');h.className='sec-h';
@@ -6076,10 +6082,11 @@ function townTip(h){if(h.kind==='tisl'||h.kind==='tisn')return isleTip(h);if(h.k
 // so everyone on it shows up live, the same way rooms work.
 const ISLE_W=1800,FERRY_FARE=5000,ISLE_DOCK=170;
 const ISLE_SPOTS=[{id:'dock',x:ISLE_DOCK,n:'Island Dock',sub:'Old Pete’s ferry back to Lantern Harbor. The ride home is free.'},
-  {id:'cove',x:440,n:'The Cove',sub:'Still water behind the point. Old Pete swears the fish out here are like nowhere else.'},
+  {id:'cove',x:440,n:'The Cove',sub:'Still water behind the point, with six fish found nowhere else. Tap to fish.'},
   {id:'whit',x:720,n:'Whitlock Cabin',sub:'Built in 1938 from timber floated over from the valley.'},
   {id:'brand',x:990,n:'Brandvold Cabin',sub:'The old mayor’s family. The porch light is always on.'},
-  {id:'fire',x:1240,n:'Campfire Clearing',sub:'The islanders light it every evening.'},
+  {id:'dig',x:1160,n:'The Old Shoreline',sub:'Things from Hollow Pines still wash up here. Dig once a day.'},
+  {id:'fire',x:1300,n:'Campfire Clearing',sub:'The islanders light it every evening, 6 PM to 5 AM. Sit with them for a story.'},
   {id:'light',x:1600,n:'Pine Point Light',sub:'No keeper since 1972. Nils Brandvold keeps it lit anyway.'}];
 const INPC=[{n:'Wren Whitlock',ov:'windy',g:'f',home:620,x:640,y:450,lines:['Welcome to Pine Island. Mind the roots on the path.','Great-grandpa Tom named this island, for home.','When the water’s low you can see the old steeple from our dock.','Pete’s ferry runs whenever Pete feels like it. Which is always, these days.'],c7:'You brought up the town charter! Grandma would have cried.'},
   {n:'Nils Brandvold',ov:'fog',g:'m',home:1420,x:1440,y:446,lines:['My grandfather was the last mayor of Hollow Pines.','The lighthouse hasn’t had a keeper since ’72. I just keep it lit.','The foghorn’s broken. The gulls do a fair impression.','Folks over in Lantern Harbor forget we’re out here.'],c7:'The charter sits on my mantel now. Thank you for bringing it home.'}];
@@ -6093,23 +6100,93 @@ function ferryArrive(to){TOWN.cross=null;if(to==='isle'){TOWN.z='isle';Object.as
     if(!S.isleSeen){S.isleSeen=1;setTimeout(()=>showToast('Welcome to Pine Island! Walk the path, meet the islanders, and take the ferry home from the dock.','Pine Island'),700)}save()}
   else{TOWN.z='';Object.assign(TOWN,{x:200,y:TW_Y0+16,tx:null,ty:null,face:1,px:null,py:null,fade:1,after:null,sig:'',sent:0});TOWN.cam=0}
   sfx('click');renderVisitBar(true)}
-function isleTalk(i){const n=INPC[i];if(!n)return;townTo(n.x+(TOWN.x<n.x?-40:40),n.y);n.bub={s:c7Solved()&&n.c7&&Math.random()<.5?n.c7:pick(n.lines),t:0};n.tx=null;n.wait=5;sfx('pop')}
-function isleSpot(id,h,e){const s=ISLE_SPOTS.find(x=>x.id===id);if(!s)return;if(id==='dock'){townTo(ISLE_DOCK+40,TW_Y0+14,()=>{TOWN.face=-1;ferryCross('town')});return}townTo(s.x,TW_Y0+14);showTip(h,e)}
+function isleTalk(i){const n=INPC[i];if(!n)return;if(n.n[0]==='N'&&c7Solved()&&!ISLS().key){townTo(n.x+(TOWN.x<n.x?-40:40),n.y,()=>isleKey());n.bub={s:'Hold on, I have something for you.',t:0};n.tx=null;n.wait=6;sfx('pop');return}townTo(n.x+(TOWN.x<n.x?-40:40),n.y);n.bub={s:c7Solved()&&n.c7&&Math.random()<.5?n.c7:pick(n.lines),t:0};n.tx=null;n.wait=5;sfx('pop')}
+function isleSpot(id,h,e){const s=ISLE_SPOTS.find(x=>x.id===id);if(!s)return;if(id==='dock'){townTo(ISLE_DOCK+40,TW_Y0+14,()=>{TOWN.face=-1;ferryCross('town')});return}if(isleSpotGo(id))return;townTo(s.x,TW_Y0+14);showTip(h,e)}
 function isleTip(h){if(h.kind==='tisl'){const s=ISLE_SPOTS.find(x=>x.id===h.data);return s?`<b>${s.id==='dock'?'Ferry home':s.n}</b><small>${s.sub}</small>`:''}if(h.kind==='tisn'){const n=INPC[h.data];return n?`<b>${n.n}</b><small>Tap to say hi</small>`:''}return ''}
 function isleTick(dt){for(const n of INPC){if(n.bub&&(n.bub.t+=dt)>4.5)n.bub=null;if(n.wait>0){n.wait-=dt;n.mv=0;continue}if(n.tx==null){n.tx=Math.max(300,Math.min(ISLE_W-260,n.home+(Math.random()-.5)*240));n.ty=TW_Y0+8+Math.random()*(TW_Y1-TW_Y0-8)}
   const dx=n.tx-n.x,dy=n.ty-n.y,dd=Math.hypot(dx,dy),st=36*dt;if(dd<st+.5){n.tx=null;n.wait=2+Math.random()*6;n.mv=0}else{n.x+=dx/dd*st;n.y+=dy/dd*st;n.f=dx>0?1:-1;n.mv=1}if(!n.bub&&n.wait<=0&&Math.random()<dt/45)n.bub={s:pick(n.lines),t:0}}}
+// ==PINE ISLAND, PART 2== Fish the Cove (its own six species), dig the old shoreline once a day for Hollow Pines relics,
+// sit by the campfire in the evening for the islanders' stories, and Nils's thank-you for closing Case 7.
+const ISLS=()=>{if(!S.isle||typeof S.isle!=='object')S.isle={};const I=S.isle;I.relics=Array.isArray(I.relics)?I.relics:[];I.story=I.story|0;I.digs=I.digs|0;return I};
+const HP_RELICS=[{id:'clapper',n:'Schoolhouse Bell Clapper',d:'Rang the children in every morning until the water came.'},{id:'token',n:'General Store Token',d:'“Good for 5¢ in trade, Brandvold & Sons.” Worn smooth.'},{id:'tinboat',n:'A Child’s Tin Boat',d:'Red paint, one wheel missing. Someone carved “T.W.” on the bottom.'},{id:'hymnal',n:'Hymnal Page',d:'Hymn 212, “Shall We Gather at the River.” The ink has run but you can still read it.'}];
+const ISLE_STORIES=[['Wren','The night before the valley flooded, the whole town held a dance in the church. Grandma said nobody wanted to go home.'],
+  ['Nils','My grandfather rowed back out the first winter, when the ice was clear. He said he could see the main street under his boots.'],
+  ['Wren','Great-grandpa Tom floated every log for our cabin across from the old shore. Took him the whole summer of ’38.'],
+  ['Nils','The church bell rang by itself the day the dam closed. Folks say the current did it. Folks say a lot of things.'],
+  ['Wren','Old Pete was a boy when he started running the ferry. He’s never once been late. Early, sometimes.'],
+  ['Nils','There’s a fish in the Cove the old-timers called the Hollow Pines Char. Comes up at night, smells the campfire smoke.'],
+  ['Wren','On the coldest nights you can hear the steeple bell from the lighthouse. Nils swears it plays a hymn.'],
+  ['Nils','Every family that came over planted one pine by their door. Count them and you’ll know how many made it.']];
+function isleSpotGo(id){const s=ISLE_SPOTS.find(x=>x.id===id);if(!s)return false;
+  if(id==='cove'){townTo(s.x-38,TW_Y0+10,()=>{TOWN.face=-1;coveUI()});return true}
+  if(id==='dig'){townTo(s.x-26,TW_Y0+16,()=>{TOWN.face=1;digUI()});return true}
+  if(id==='fire'){if(!isleNight())return false;townTo(s.x-46,TW_Y0+16,()=>{TOWN.face=1;fireUI()});return true}
+  return false}
+// --- the Cove: cast, wait for the bobber to dip, then reel in before it lets go
+const COVE={st:'idle',bite:0,end:0,msg:'',raf:0};
+function coveUI(){const B=$('plotBody');$('plotEye').textContent='Pine Island';$('plotTitle').textContent='The Cove';COVE.st='idle';COVE.msg='Cast out, wait for the bobber to dip, then reel in fast.';
+  const sp=FISH.filter(f=>f.at==='isle'),got=sp.filter(f=>S.log[f.id]).length;
+  B.innerHTML=`<p class="land-d">Still water behind the point. Six kinds of fish live in here and nowhere else. ${got}/${sp.length} logged.</p><canvas id="cvCv" width="640" height="260" style="width:100%;border-radius:10px;display:block;touch-action:manipulation"></canvas><p class="own-note" id="cvMsg" style="min-height:2.6em"></p><div class="xf-row"><button class="jig" id="cvBtn">Cast</button><button class="ghost" id="cvDone">Done</button></div>`;
+  $('plotModal').hidden=false;$('cvDone').onclick=()=>{$('plotModal').hidden=true};const btn=$('cvBtn');btn.onclick=coveTap;$('cvCv').onclick=()=>{if(COVE.st!=='idle')coveTap()};coveRender();cancelAnimationFrame(COVE.raf);COVE.raf=requestAnimationFrame(coveLoop)}
+function coveTap(){const now=performance.now()/1000;
+  if(COVE.st==='idle'){COVE.st='wait';COVE.bite=now+1.8+Math.random()*3.7;COVE.msg='Waiting for a bite…';sfx('click')}
+  else if(COVE.st==='wait'){COVE.st='idle';COVE.msg='Too soon! You spooked it. Cast again.';sfx('miss')}
+  else if(COVE.st==='bite'){if(now>COVE.end){COVE.st='idle';COVE.msg='It let go. Cast again.';sfx('miss')}else{COVE.st='idle';COVE.msg=coveCatch()}}
+  coveRender()}
+function coveCatch(){const m=mods();let c=null;for(let i=0;i<8&&!c;i++)c=rollCatch('isle',S.min,S.lure,S.rod,m);if(!c)return 'It got away. Cast again.';
+  const f=c.f,vr=rollVariant(m);let w=c.w;if(vr==='giant')w=+(f.w[1]*rnd(1.2,1.6)).toFixed(2);
+  const val=Math.round(saleValue(f,w)*(m.gold?2:1)*(vr?VAR[vr].mult:1)),L=S.log[f.id]||(S.log[f.id]={n:0,big:0}),isNew=L.n===0,isRec=!isNew&&w>L.big;L.n++;if(w>L.big)L.big=w;if(vr){L.v=L.v||{};L.v[vr]=(L.v[vr]||0)+1}
+  addCooler(f,w,val);S.total++;pushRecent({id:f.id,w,val,v:vr});renderLogSoon();save();
+  if(vr||f.r==='R')celebrate({lbl:vr?`${VAR[vr].n} ${f.n}!`:'Rare catch!',r:vr==='golden'?'L':'R',name:f.n,sub:`${w} lb · worth $${money(val)}${isNew?' · New species':isRec?' · New record':''}`,icon:fishSvg(vr&&vr!=='giant'?VAR[vr].col:RCOL[f.r])});else sfx('splash');
+  const sp=FISH.filter(x=>x.at==='isle');if(isNew&&sp.every(x=>S.log[x.id]))setTimeout(()=>showToast('Every fish in the Cove is in your logbook! Claim the set in your logbook.','Pine Island Cove'),900);
+  return `${vr?VAR[vr].n+' ':''}<b>${f.n}</b>, ${w} lb · $${money(val)} to the cooler${isNew?' · New species!':isRec?' · New record!':''}`}
+function coveLoop(){const cv=$('cvCv');if(!cv||!cv.isConnected||$('plotModal').hidden){COVE.st='idle';return}const now=performance.now()/1000;
+  if(COVE.st==='wait'&&now>=COVE.bite){COVE.st='bite';COVE.end=now+.95+Math.min(.5,S.rod*.06);COVE.msg='<b>Bite! Reel in!</b>';sfx('pop');coveRender()}
+  if(COVE.st==='bite'&&now>COVE.end+.25){COVE.st='idle';COVE.msg='It let go. Cast again.';coveRender()}
+  const c=cv.getContext("2d"),d=daylight(S.min/60),T=now;c.setTransform(2,0,0,2,0,0);const g=c.createLinearGradient(0,0,0,130);g.addColorStop(0,rgb(mix([12,24,40],[120,170,196],d)));g.addColorStop(1,rgb(mix([6,14,26],[60,110,140],d)));c.fillStyle=g;c.fillRect(0,0,320,130);
+  c.fillStyle=rgb(mix([14,30,22],[56,96,60],d));for(let i=0;i<9;i++){const x=i*40-10;c.beginPath();c.moveTo(x,34);c.lineTo(x+18,0);c.lineTo(x+36,34);c.fill()}c.fillRect(0,30,320,8);
+  c.strokeStyle=`rgba(255,255,255,${.12+.1*d})`;c.lineWidth=1;for(let i=0;i<8;i++){const x=(i*53+T*8)%340-20,y=50+(i*17)%70;c.beginPath();c.moveTo(x,y);c.lineTo(x+18,y);c.stroke()}
+  if(COVE.st!=='idle'){const bx=200,by=84,dip=COVE.st==='bite'?7+Math.sin(T*30)*2:Math.sin(T*2.4)*1.2;c.strokeStyle='rgba(240,240,240,.6)';c.beginPath();c.moveTo(0,10);c.quadraticCurveTo(120,30,bx,by+dip-6);c.stroke();
+    c.fillStyle='#fff';c.beginPath();c.arc(bx,by+dip-3,3.2,Math.PI,0);c.fill();c.fillStyle='#e8402a';c.beginPath();c.arc(bx,by+dip-3,3.2,0,Math.PI);c.fill();
+    c.strokeStyle='rgba(255,255,255,.35)';for(let i=0;i<2;i++){const r=((T*.8+i/2)%1);c.globalAlpha=1-r;c.beginPath();c.ellipse(bx,by+1,5+r*(COVE.st==='bite'?26:12),1.5+r*3,0,0,7);c.stroke()}c.globalAlpha=1}
+  COVE.raf=requestAnimationFrame(coveLoop)}
+function coveRender(){const m=$('cvMsg'),b=$('cvBtn');if(!m||!b)return;m.innerHTML=COVE.msg;b.textContent=COVE.st==='idle'?'Cast':'Reel in!';b.classList.toggle('pulse',COVE.st==='bite')}
+// --- the old shoreline: dig once a day
+function digUI(){const I=ISLS(),B=$('plotBody'),today=localDay(),done=I.dig===today;$('plotEye').textContent='Pine Island';$('plotTitle').textContent='The Old Shoreline';
+  B.innerHTML=`<p class="land-d">The island’s first shoreline, before the valley flooded. Things from Hollow Pines still wash up and settle here. ${done?'You’ve dug here today. Come back tomorrow.':'You can dig here once a day.'}</p><div class="hp-relics">${HP_RELICS.map(r=>{const has=I.relics.includes(r.id);return `<div style="padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:${has?'rgba(200,160,96,.16)':'rgba(255,255,255,.04)'};margin-bottom:6px"><b style="color:${has?'#f0d8a8':'var(--muted)'}">${has?r.n:'Hollow Pines relic'}</b><small style="display:block;color:var(--muted)">${has?r.d:'Not found yet'}</small></div>`}).join('')}</div><p class="own-note">Relics found: ${I.relics.length}/${HP_RELICS.length}${I.relics.length<HP_RELICS.length?' · find all four for something from Wren.':' · Wren’s gift is in your yard.'}</p><div class="xf-row"><button class="jig" id="dgGo" ${done?'disabled':''}>Dig</button><button class="ghost" id="dgNo">Done</button></div><p class="own-note" id="dgOut"></p>`;
+  $('plotModal').hidden=false;$('dgNo').onclick=()=>{$('plotModal').hidden=true};$('dgGo').onclick=()=>{const out=digNow();if(out){$('dgOut').innerHTML=out;$('dgGo').disabled=true}}}
+function digNow(){const I=ISLS(),today=localDay();if(I.dig===today)return '';I.dig=today;I.digs++;const got=[];
+  const pool=MATS.filter(m=>(m.r==='C'||m.r==='U')&&!isRealm(m.at)&&m.at!=='moon'&&m.at!=='hell'&&m.at!=='sky');for(let i=0;i<2;i++){const mt=pool[Math.floor(Math.random()*pool.length)],n=mt.r==='C'?2+Math.floor(Math.random()*3):1+Math.floor(Math.random()*2);S.mats[mt.id]=(S.mats[mt.id]||0)+n;got.push(`${n} ${mt.n}`)}
+  if(Math.random()<.6){const c=Math.round((3000+Math.random()*9000)/100)*100;S.coins+=c;got.push(`$${money(c)}`)}
+  const miss=HP_RELICS.filter(r=>!I.relics.includes(r.id));let rel=null;if(miss.length&&(Math.random()<.35||I.digs%4===0)){rel=miss[0];I.relics.push(rel.id);got.unshift(`<b>${rel.n}</b>`)}
+  storeDirty=true;gearDirty=true;sfx(rel?'chime':'coin');
+  if(rel){celebrate({lbl:'Hollow Pines relic!',r:'R',name:rel.n,sub:rel.d,icon:svgI('shard','#c8a060')});if(I.relics.length===HP_RELICS.length&&!S.decor.hpsign){S.decor.hpsign=1;yardSync();setTimeout(()=>showToast('Wren gave you the old Hollow Pines town sign. It’s in your yard.','All four relics found'),1200)}}
+  save();try{renderAll()}catch(e){}return 'You dug up: '+got.join(', ')+'.'}
+// --- the campfire, lit from 6 PM to 5 AM
+function fireUI(){const I=ISLS(),B=$('plotBody'),today=localDay();$('plotEye').textContent='Pine Island';$('plotTitle').textContent='Around the Campfire';
+  let warm='';if(I.fire!==today){I.fire=today;S.stamina=Math.min(100,(S.stamina||0)+30);warm='<p class="own-note">The fire warms you up: +30 stamina.</p>';sfx('chime');save()}
+  for(const n of INPC){n.tx=1300+(n.n[0]==='W'?40:-90)+Math.random()*10;n.ty=TW_Y0+14;n.wait=0}
+  const show=()=>{const [who,t]=ISLE_STORIES[I.story%ISLE_STORIES.length];$('frStory').innerHTML=`<b>${who==='Wren'?'Wren Whitlock':'Nils Brandvold'}:</b> “${t}”`};
+  B.innerHTML=`<p class="land-d">The islanders gather here every evening. Pull up a log.</p>${warm}<p class="land-d" id="frStory" style="font-style:italic"></p><div class="xf-row"><button class="jig" id="frMore">Another story</button><button class="ghost" id="frBye">Head off</button></div>`;
+  $('plotModal').hidden=false;show();$('frBye').onclick=()=>{$('plotModal').hidden=true};$('frMore').onclick=()=>{I.story++;show();sfx('click');save()}}
+// --- Nils's thank-you for Case 7
+function isleKey(){const I=ISLS();if(I.key||!c7Solved())return false;I.key=1;S.trophies.unshift({name:'Key to Hollow Pines',water:'deep',type:'big',score:'From Nils Brandvold, for bringing the charter home',day:S.day});
+  celebrate({lbl:'A gift from Nils',r:'L',name:'Key to Hollow Pines',sub:'“Grandfather locked the town hall the day we left. It’s yours now.” It’s on your trophy shelf.',icon:svgI('ingot','#d8b060')});save();try{renderAll()}catch(e){}return true}
+function hpSignDraw(d){const wd=rgb(mix([40,28,18],[150,104,62],d)),dk=rgb(mix([24,16,10],[86,58,34],d));ctx.fillStyle=dk;ctx.fillRect(-17,-30,3,30);ctx.fillRect(14,-30,3,30);ctx.fillStyle=wd;ctx.fillRect(-22,-32,44,17);ctx.strokeStyle=dk;ctx.lineWidth=.8;ctx.strokeRect(-22,-32,44,17);
+  ctx.fillStyle=rgb(mix([60,54,40],[244,236,214],d));ctx.font='bold 5.4px Georgia,serif';ctx.textAlign='center';ctx.fillText('HOLLOW PINES',0,-25);ctx.font='4px Georgia,serif';ctx.fillText('EST. 1871',0,-19);ctx.textAlign='left';
+  ctx.fillStyle=rgb(mix([20,36,24],[70,120,64],d));for(const x of [-14,14])for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(x+(i-1.5)*3,-1,2.4,1.6,i,0,7);ctx.fill()}}
 // the ferry itself: a little white steam ferry with a red stripe
 function drawFerry(x,y,d,T,s,smoke){const C=(a,b)=>rgb(mix(a,b,d));ctx.save();ctx.translate(x,y);ctx.scale(s,s);
   ctx.fillStyle=C([60,20,18],[178,46,36]);ctx.beginPath();ctx.moveTo(-70,0);ctx.lineTo(74,0);ctx.lineTo(60,22);ctx.lineTo(-62,22);ctx.closePath();ctx.fill();ctx.fillStyle=C([40,44,48],[236,234,226]);ctx.fillRect(-70,-6,144,8);
   ctx.fillStyle=C([44,46,50],[240,238,230]);ctx.fillRect(-46,-38,70,32);ctx.fillStyle=C([30,30,34],[70,76,84]);ctx.fillRect(-50,-42,78,5);
   const lit=d<.5;for(let i=0;i<4;i++){ctx.fillStyle=lit?'#ffd88a':C([40,50,60],[140,180,200]);ctx.fillRect(-40+i*16,-30,10,10)}
-  ctx.fillStyle=C([30,24,20],[60,52,46]);ctx.fillRect(30,-58,12,22);ctx.fillStyle=C([60,20,18],[178,46,36]);ctx.fillRect(30,-58,12,5);
+  ctx.fillStyle=C([30,24,20],[60,52,46]);ctx.fillRect(-4,-64,13,24);ctx.fillStyle=C([60,20,18],[178,46,36]);ctx.fillRect(-4,-64,13,5);
   ctx.strokeStyle=C([60,50,40],[200,190,170]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-60,-6);ctx.lineTo(-60,-30);ctx.stroke();ctx.fillStyle=C([40,40,40],[240,230,200]);ctx.font='bold 9px Georgia,serif';ctx.fillText('PINE ISLAND',-34,14);
-  ctx.restore();if(smoke)for(let i=0;i<5;i++){const q=(T*.35+i/5)%1;ctx.fillStyle=`rgba(${d<.5?'90,90,100':'220,220,226'},${.45*(1-q)})`;ctx.beginPath();ctx.arc(x+36*s-q*30*s,y-60*s-q*50*s,(5+q*12)*s,0,7);ctx.fill()}
+  ctx.restore();if(smoke)for(let i=0;i<5;i++){const q=(T*.35+i/5)%1;ctx.fillStyle=`rgba(${d<.5?'90,90,100':'220,220,226'},${.45*(1-q)})`;ctx.beginPath();ctx.arc(x+2*s-q*30*s,y-66*s-q*50*s,(5+q*12)*s,0,7);ctx.fill()}
   if(d<.5){ctx.globalCompositeOperation='lighter';glow(x-10*s,y-28*s,50*s,.25,'255,210,140');ctx.globalCompositeOperation='source-over'}}
 function islePine(x,base,s,dim,i){ctx.fillStyle=dim('#4a3420');ctx.fillRect(x-2*s,base-14*s,4*s,14*s);ctx.fillStyle=dim(i%3?'#2e5a36':'#28503a');for(let k=0;k<3;k++){const w=(22-k*5)*s,y0=base-12*s-k*16*s;ctx.beginPath();ctx.moveTo(x-w,y0);ctx.lineTo(x,y0-26*s);ctx.lineTo(x+w,y0);ctx.fill()}}
-function isleCabin(x,base,dim,lit,night,T,name){ctx.fillStyle=dim('#7a5232');ctx.fillRect(x-70,base-90,140,90);ctx.strokeStyle=dim('#4a301c');ctx.lineWidth=2;for(let i=1;i<8;i++){ctx.beginPath();ctx.moveTo(x-70,base-90+i*11.5);ctx.lineTo(x+70,base-90+i*11.5);ctx.stroke()}
-  ctx.fillStyle=dim('#3a2a20');ctx.beginPath();ctx.moveTo(x-84,base-88);ctx.lineTo(x,base-140);ctx.lineTo(x+84,base-88);ctx.fill();ctx.fillStyle=dim('#5a4a40');ctx.fillRect(x+34,base-150,14,36);
+function isleCabin(x,base,dim,lit,night,T,name){ctx.fillStyle=dim('#5a4a40');ctx.fillRect(x+34,base-150,14,52);ctx.fillStyle=dim('#4a3a32');ctx.fillRect(x+32,base-152,18,5);ctx.fillStyle=dim('#7a5232');ctx.fillRect(x-70,base-90,140,90);ctx.strokeStyle=dim('#4a301c');ctx.lineWidth=2;for(let i=1;i<8;i++){ctx.beginPath();ctx.moveTo(x-70,base-90+i*11.5);ctx.lineTo(x+70,base-90+i*11.5);ctx.stroke()}
+  ctx.fillStyle=dim('#3a2a20');ctx.beginPath();ctx.moveTo(x-84,base-88);ctx.lineTo(x,base-140);ctx.lineTo(x+84,base-88);ctx.fill();
   for(let i=0;i<3;i++){const q=(T*.3+i/3)%1;ctx.fillStyle=`rgba(${night>.3?'110,110,120':'210,210,214'},${.4*(1-q)})`;ctx.beginPath();ctx.arc(x+41-q*20,base-156-q*40,5+q*10,0,7);ctx.fill()}
   for(const wx of [x-52,x+22]){ctx.fillStyle=lit?'#ffd88a':dim('#9ab8c8');ctx.fillRect(wx,base-66,28,24);ctx.strokeStyle=dim('#3a2a1a');ctx.strokeRect(wx,base-66,28,24);if(lit){ctx.globalCompositeOperation='lighter';glow(wx+14,base-54,34,.2*night,'255,200,120');ctx.globalCompositeOperation='source-over'}}
   ctx.fillStyle=dim('#3a2416');ctx.fillRect(x-14,base-52,26,52);ctx.fillStyle=dim('#6a4a2a');ctx.fillRect(x-80,base-4,160,6);ctx.fillStyle=dim('#e8d8a8');ctx.fillRect(x-30,base-104,60,12);ctx.fillStyle=dim('#3a2a14');ctx.font='bold 8px Georgia,serif';ctx.textAlign='center';ctx.fillText(name,x,base-95);ctx.textAlign='left'}
@@ -6120,25 +6197,31 @@ function drawIsle(d,T,V,top,bot){const cam=TOWN.cam,night=1-Math.min(1,d*1.6),li
   ctx.fillStyle=rgb(mix([10,20,34],[70,120,150],d));ctx.fillRect(cam-10,276,V.VW+20,240);
   ctx.strokeStyle=`rgba(255,255,255,${.1+.1*d})`;ctx.lineWidth=1;for(let i=0;i<14;i++){const x=cam+((i*137+T*12)%(V.VW+60))-30,y=290+(i*13)%40;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+26,y);ctx.stroke()}
   // the island: a bank of pines, then the path
-  const L0=300,R0=ISLE_W-90;ctx.fillStyle=dim('#3e6a3a');ctx.beginPath();ctx.moveTo(L0-60,base+110);ctx.lineTo(L0-40,base-40);ctx.quadraticCurveTo(L0+200,base-80,900,base-70);ctx.quadraticCurveTo(1400,base-90,R0,base-60);ctx.lineTo(R0+60,base+110);ctx.fill();
-  for(let i=0,x=L0;x<R0;x+=46,i++){if(Math.abs(x-720)<110||Math.abs(x-990)<110||Math.abs(x-1600)<70||Math.abs(x-440)<70)continue;if(x<cam-60||x>cam+V.VW+60)continue;islePine(x,base-46-((i*17)%12),1.5+((i*7)%4)*.12,dim,i)}
-  ctx.fillStyle=dim('#5a7a42');ctx.fillRect(L0-40,base-2,R0-L0+80,112);ctx.fillStyle=dim('#b8a078');ctx.beginPath();ctx.moveTo(L0-60,base+20);ctx.bezierCurveTo(700,base+4,1100,base+40,R0+40,base+18);ctx.lineTo(R0+40,base+60);ctx.bezierCurveTo(1100,base+80,700,base+44,L0-60,base+62);ctx.fill();
+  const L0=300,R0=ISLE_W-90;ctx.fillStyle=dim('#3e6a3a');ctx.beginPath();ctx.moveTo(L0-50,base+4);ctx.quadraticCurveTo(L0-44,base-46,L0+110,base-62);ctx.quadraticCurveTo(L0+300,base-82,900,base-72);ctx.quadraticCurveTo(1400,base-92,R0-120,base-64);ctx.quadraticCurveTo(R0+44,base-48,R0+50,base+4);ctx.fill();
+  for(let i=0,x=L0+10;x<R0-50;x+=50,i++){if(Math.abs(x-720)<140||Math.abs(x-990)<140||Math.abs(x-1160)<30||Math.abs(x-1600)<90||Math.abs(x-440)<70)continue;if(x<cam-90||x>cam+V.VW+90)continue;islePine(x,base-52-((i*17)%12),2.05+((i*7)%4)*.14,dim,i)}
+  {const isl=(o)=>{ctx.beginPath();ctx.moveTo(L0-64-o,base+120);ctx.bezierCurveTo(L0-80-o,base+40,L0-70-o,base-6-o,L0-10,base-6-o);ctx.lineTo(R0-30,base-6-o);ctx.bezierCurveTo(R0+56+o,base-6-o,R0+66+o,base+40,R0+52+o,base+120);ctx.closePath()};
+    ctx.fillStyle=dim('#c8b48a');isl(7);ctx.fill();ctx.fillStyle=`rgba(255,255,255,${.18+.12*d})`;isl(9);ctx.save();ctx.lineWidth=2;ctx.strokeStyle=`rgba(255,255,255,${.12+.1*d})`;ctx.stroke();ctx.restore();
+    ctx.fillStyle=dim('#5a7a42');isl(0);ctx.fill();ctx.save();isl(0);ctx.clip();ctx.fillStyle=dim('#b8a078');ctx.beginPath();ctx.moveTo(L0-90,base+20);ctx.bezierCurveTo(700,base+4,1100,base+40,R0+70,base+18);ctx.lineTo(R0+70,base+60);ctx.bezierCurveTo(1100,base+80,700,base+44,L0-90,base+62);ctx.fill();ctx.restore()}
   // the dock and the moored ferry
   ctx.fillStyle=dim('#6a4a30');ctx.fillRect(20,base+8,L0-10,12);for(let i=0;i<6;i++)ctx.fillRect(30+i*50,base+8,6,60);
-  if(!TOWN.cross)drawFerry(ISLE_DOCK-70,base+22+Math.sin(T*1.3)*1.5,d,T,.9,true);
+  if(!TOWN.cross)drawFerry(ISLE_DOCK-60,base+24+Math.sin(T*1.3)*1.5,d,T,1.35,true);
   // the cove
   {const s=ISLE_SPOTS[1];ctx.fillStyle=rgb(mix([10,22,36],[80,130,160],d));ctx.beginPath();ctx.ellipse(s.x,base+6,90,16,0,0,7);ctx.fill();ctx.strokeStyle=`rgba(255,255,255,${.2+.1*d})`;ctx.lineWidth=1;for(let i=0;i<3;i++){const r=(T*.4+i/3)%1;ctx.globalAlpha=1-r;ctx.beginPath();ctx.ellipse(s.x+20,base+6,6+r*30,2+r*5,0,0,7);ctx.stroke()}ctx.globalAlpha=1;
     ctx.fillStyle=dim('#6a4a30');ctx.fillRect(s.x-60,base-4,44,6);ctx.fillRect(s.x-58,base+2,4,14);ctx.fillRect(s.x-22,base+2,4,14);ctx.strokeStyle=dim('#5a7a3a');ctx.lineWidth=2;for(let i=0;i<7;i++){const rx=s.x+40+i*7;ctx.beginPath();ctx.moveTo(rx,base+8);ctx.lineTo(rx+Math.sin(T+i)*2,base-14-(i%3)*5);ctx.stroke()}}
-  isleCabin(720,base,dim,lit,night,T,'WHITLOCK');isleCabin(990,base,dim,lit,night,T,'BRANDVOLD');
+  for(const [cx,nm] of [[720,'WHITLOCK'],[990,'BRANDVOLD']]){ctx.save();ctx.translate(cx,base+2);ctx.scale(1.45,1.45);ctx.translate(-cx,-base);isleCabin(cx,base,dim,lit,night,T,nm);ctx.restore()}
+  // the old shoreline dig spot
+  {const x=1160,y=base+30,fresh=ISLS().dig!==localDay();ctx.fillStyle=dim('#7a5a3a');ctx.beginPath();ctx.ellipse(x,y,22,7,0,Math.PI,0);ctx.fill();ctx.fillStyle=dim('#5a4028');ctx.beginPath();ctx.ellipse(x,y,22,3,0,0,7);ctx.fill();
+    ctx.strokeStyle=dim('#6a4a2a');ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x+14,y-4);ctx.lineTo(x+26,y-34);ctx.stroke();ctx.fillStyle=dim('#8a8e94');ctx.beginPath();ctx.moveTo(x+10,y-2);ctx.lineTo(x+18,y-8);ctx.lineTo(x+14,y+4);ctx.fill();
+    if(fresh)for(let i=0;i<3;i++){const q=(T*.8+i/3)%1;ctx.fillStyle=`rgba(255,240,170,${1-q})`;const sx=x-10+i*9,sy=y-8-q*10;ctx.fillRect(sx-.8,sy-3,1.6,6);ctx.fillRect(sx-3,sy-.8,6,1.6)}}
   // the campfire clearing
-  {const x=1240;ctx.fillStyle=dim('#6a4a2a');ctx.fillRect(x-70,base+4,44,10);ctx.fillRect(x+26,base+4,44,10);ctx.fillStyle=dim('#7a7a74');for(let i=0;i<8;i++){const a=i/8*Math.PI*2;ctx.beginPath();ctx.ellipse(x+Math.cos(a)*16,base+16+Math.sin(a)*5,4,3,0,0,7);ctx.fill()}
+  {const x=1300;ctx.fillStyle=dim('#6a4a2a');ctx.fillRect(x-70,base+4,44,10);ctx.fillRect(x+26,base+4,44,10);ctx.fillStyle=dim('#7a7a74');for(let i=0;i<8;i++){const a=i/8*Math.PI*2;ctx.beginPath();ctx.ellipse(x+Math.cos(a)*16,base+16+Math.sin(a)*5,4,3,0,0,7);ctx.fill()}
     if(isleNight()){for(const [c,k] of [['#d8401a',1.5],['#ff7a1a',1.1],['#ffc23a',.7],['#fff0b0',.35]])for(let j=-1;j<=1;j++){const ox=j*9*k,h=(34+Math.sin(T*7+j*2)*8)*k*(j?0.7:1);ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x+ox-9*k,base+16);ctx.quadraticCurveTo(x+ox-6*k+Math.sin(T*9+j)*3,base+16-h*.55,x+ox+Math.sin(T*7+j)*3,base+16-h);ctx.quadraticCurveTo(x+ox+6*k,base+16-h*.55,x+ox+9*k,base+16);ctx.fill()}for(let i=0;i<6;i++){const q=(T*.7+i/6)%1;ctx.fillStyle=`rgba(255,${200-q*120},80,${1-q})`;ctx.beginPath();ctx.arc(x+Math.sin(T*2+i)*10,base-10-q*70,1.6,0,7);ctx.fill()}ctx.globalCompositeOperation='lighter';glow(x,base,150,.5,'255,150,60');ctx.globalCompositeOperation='source-over'}
     else{ctx.fillStyle=dim('#3a2a20');ctx.fillRect(x-8,base+12,16,4);for(let i=0;i<3;i++){const q=(T*.3+i/3)%1;ctx.fillStyle=`rgba(200,200,204,${.3*(1-q)})`;ctx.beginPath();ctx.arc(x+Math.sin(T+i)*4,base+6-q*50,3+q*8,0,7);ctx.fill()}}}
   // the lighthouse on the point
-  {const x=1600;ctx.fillStyle=dim('#6a6a64');ctx.beginPath();ctx.moveTo(x-60,base+10);ctx.quadraticCurveTo(x-30,base-40,x+40,base-30);ctx.lineTo(x+80,base+10);ctx.fill();ctx.fillStyle=dim('#f0ece2');ctx.beginPath();ctx.moveTo(x-16,base-30);ctx.lineTo(x-10,base-200);ctx.lineTo(x+10,base-200);ctx.lineTo(x+16,base-30);ctx.fill();
-    ctx.fillStyle=dim('#c8281a');for(const y of [base-80,base-140])ctx.fillRect(x-14,y,28,16);ctx.fillStyle=dim('#2a2a30');ctx.fillRect(x-16,base-214,32,14);ctx.fillStyle=lit?'#fff2b0':dim('#d8d8c8');ctx.fillRect(x-10,base-228,20,14);ctx.fillStyle=dim('#2a2a30');ctx.beginPath();ctx.moveTo(x-14,base-228);ctx.lineTo(x,base-242);ctx.lineTo(x+14,base-228);ctx.fill();
-    if(lit){const a=T*.9,dir=Math.cos(a);ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(255,240,190,${.22*Math.abs(dir)*night})`;ctx.beginPath();ctx.moveTo(x,base-221);ctx.lineTo(x+dir*520,base-280);ctx.lineTo(x+dir*520,base-160);ctx.fill();glow(x,base-221,40,.6*night,'255,240,190');ctx.globalCompositeOperation='source-over'}}
-  for(const s of ISLE_SPOTS){const w=s.id==='whit'||s.id==='brand'?170:s.id==='light'?90:s.id==='dock'?220:150,h=s.id==='light'?250:s.id==='whit'||s.id==='brand'?160:110;RH2(V,s.x-w/2,base-h+30,w,h,'tisl',s.id)}
+  {const x=1600,lk=V.VH>=480?1.45:V.VH>=430?1.3:1.17;ctx.save();ctx.translate(x,base+10);ctx.scale(lk,lk);ctx.translate(-x,-base-10);ctx.fillStyle=dim('#6a6a64');ctx.beginPath();ctx.moveTo(x-74,base+10);ctx.quadraticCurveTo(x-62,base-30,x-26,base-34);ctx.lineTo(x+26,base-34);ctx.quadraticCurveTo(x+62,base-30,x+74,base+10);ctx.fill();ctx.fillStyle=dim('#7c7c76');ctx.beginPath();ctx.ellipse(x-30,base-18,10,5,0,0,7);ctx.ellipse(x+34,base-12,12,6,0,0,7);ctx.fill();const tw=()=>{ctx.beginPath();ctx.moveTo(x-25,base-32);ctx.lineTo(x-15,base-200);ctx.lineTo(x+15,base-200);ctx.lineTo(x+25,base-32);ctx.closePath()};ctx.fillStyle=dim('#f0ece2');tw();ctx.fill();ctx.save();tw();ctx.clip();ctx.fillStyle=dim('#c8281a');for(const y of [base-80,base-140])ctx.fillRect(x-30,y,60,16);ctx.fillStyle='rgba(0,0,0,.08)';ctx.fillRect(x+6,base-210,30,190);ctx.restore();
+    ctx.fillStyle=dim('#2a2a30');ctx.fillRect(x-22,base-212,44,12);ctx.fillRect(x-24,base-203,48,3);ctx.fillStyle=lit?'#fff2b0':dim('#d8d8c8');ctx.fillRect(x-13,base-228,26,16);ctx.fillStyle=dim('#2a2a30');ctx.fillRect(x-1,base-228,2,16);ctx.beginPath();ctx.moveTo(x-18,base-228);ctx.lineTo(x,base-244);ctx.lineTo(x+18,base-228);ctx.fill();ctx.fillRect(x-1,base-250,2,7);
+    if(lit){const a=T*.9,dir=Math.cos(a);ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(255,240,190,${.22*Math.abs(dir)*night})`;ctx.beginPath();ctx.moveTo(x,base-221);ctx.lineTo(x+dir*520,base-280);ctx.lineTo(x+dir*520,base-160);ctx.fill();glow(x,base-221,40,.6*night,'255,240,190');ctx.globalCompositeOperation='source-over'}ctx.restore()}
+  for(const s of ISLE_SPOTS){const w=s.id==='whit'||s.id==='brand'?240:s.id==='light'?120:s.id==='dock'?220:s.id==='dig'?70:120,h=s.id==='light'?370:s.id==='whit'||s.id==='brand'?230:110;RH2(V,s.x-w/2,base-h+30,w,h,'tisl',s.id)}
   townTag(ISLE_DOCK-40,base-58,'⛴ Ferry home','rgba(30,80,120,.88)')}
 // the crossing: a short ride with the ferry in the middle, the old shore falling behind and the new one coming up
 function drawCrossing(d,T,V,top,bot){const c=TOWN.cross,q=Math.min(1,c.t/c.dur),cam=TOWN.cam,VW=V.VW,toIsle=c.to==='isle';const g=ctx.createLinearGradient(0,0,0,300);g.addColorStop(0,rgb(top));g.addColorStop(1,rgb(bot));ctx.fillStyle=g;ctx.fillRect(cam-10,0,VW+20,320);
@@ -6161,7 +6244,7 @@ const TROOMS={
   bar:{n:'Murphy’s',keeper:{n:'Murphy',x:810,ov:'clear',g:'m',lines:['What’ll it be? Root beer’s on tap.','Old Pete still holds the darts record. Don’t tell him I said that.','Game’s on. Grab a stool.','Trivia night’s coming. I’m writing the questions myself.','Three darts a round. Bull’s-eye is fifty.']}},
   station:{n:'Lake 7 Station',keeper:{n:'DJ Nightjar',x:600,ov:'pj',g:'m',lines:['Lake 7, broadcasting since 1952.','We sign off at three. Usually.','Got a request? Pick up the red phone.','Some nights the transmitter turns itself on.','The case files? Bottom drawer. Don’t ask what’s in the top one.']}},
   post:{n:'Post Office',keeper:{n:'Fern',x:650,ov:'clear',g:'f',lines:['Parcels go out every evening.','Wrap it nice. Presentation matters.','Dot’s out on her route. Again.','Your P.O. box is number 117. It’s the shiny one.','We don’t ship live bait. Not after last time.']}}};
-function townBounds(){return TOWN.z==='isle'?[60,ISLE_W-90,TW_Y0,TW_Y1]:TOWN.z?[110,930,TW_Y0,TW_Y1]:[40,TW_W-40,TW_Y0,TW_Y1]}
+function townBounds(){return TOWN.z==='isle'?[60,ISLE_W-140,TW_Y0,TW_Y1]:TOWN.z?[110,930,TW_Y0,TW_Y1]:[40,TW_W-40,TW_Y0,TW_Y1]}
 function townEnter(id){const R=TROOMS[id];if(!R||!TOWN.on)return;TOWN.sx=TOWN.x;TOWN.z=id;Object.assign(TOWN,{x:TROOM_DOOR+40,y:430,tx:null,ty:null,face:1,px:null,py:null,fade:1,after:null,cam:0,sig:'',sent:0});R.bub=null;sfx('click');hideTip();$('hchat').hidden=true;renderVisitBar(true);
   setTimeout(()=>{if(TOWN.z===id&&!R.bub)R.bub={s:pick(R.keeper.lines),t:0}},900)}
 function townExit(){const b=TBLD.find(x=>x.id===TOWN.z);TOWN.z='';Object.assign(TOWN,{x:b?b.x:TOWN.sx||400,y:TW_Y0+14,tx:null,ty:null,px:null,py:null,fade:1,after:null,sig:'',sent:0});{const V=townView();TOWN.cam=Math.max(0,Math.min(TW_W-V.VW,TOWN.x-V.VW/2))}sfx('click');hideTip();$('hchat').hidden=true;renderVisitBar(true)}
@@ -6774,6 +6857,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:160,n:'Bug fix: Pine Island looks right',items:['Bug fix: Pine Island was drawn too small next to you. The cabins, pines, lighthouse and moored ferry are bigger now, the lighthouse is wider and stands centered on its rocks, and the island has rounded, sandy shores instead of ending in a sharp edge.','Bug fix: the ferry’s smokestack floated in front of the boat, and the cabin chimneys didn’t reach their roofs. Both sit where they should now.']},
+ {v:159,n:'Pine Island fix',items:['Pine Island has things to do now. Tap the Cove to fish it: cast, wait for the bobber to dip, and reel in fast. Six fish live there and nowhere else, and a full set in your logbook pays $100,000.','Dig at the Old Shoreline once a day for materials, coins and four relics from Hollow Pines. Find all four and Wren gives you the old Hollow Pines town sign for your yard.','In the evening (6 PM to 5 AM) the islanders light the campfire. Sit with them for their stories, and the first visit each day gives you +30 stamina.','If you’ve closed The Town Under the Lake, go and see Nils Brandvold. He has something for you.']},
  {v:158,n:'Layers in Decorate',items:['When yard items overlap, you can now choose which one is in front. Select an item in Decorate and tap To front or To back. Friends see your yard layered the same way.']},
  {v:157,n:'Bug fix: big harvest pieces near the house',items:['Bug fix: the Maple Tree, Hayride Wagon, Apple Barrel & Cider Press, Wheelbarrow of Pumpkins and Pumpkin Patch stopped well short of the house when you dragged them up the yard. They now go right up to the house like everything else. Ones you’ve already placed stay where they are.']},
  {v:156,n:'Easier moving in Decorate',items:['Moving things in your yard is easier. Tap an item to select it, then drag it. Only the selected item moves, so a crowded yard is no longer a fight to grab the right one. Dragging empty ground moves the view, and tapping empty ground lets go of the selection.','Where items overlap, tap the same spot again to pick the one behind.','The selected item now has ◀ ▲ ▼ ▶ buttons for fine placement.','Bug fix: the outlines around yard items were often off to one side of the item. They now fit each item exactly, and you select an item by tapping the item itself.']},
@@ -7511,7 +7596,7 @@ const YI={
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
-  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
+  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
   cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]},
   pumpkinpatch:{ox:61,oy:385,w:56,h:14,def:[[61,385]]},wheelbarrow:{ox:100,oy:347,w:44,h:33,def:[[100,347]]},ciderpress:{ox:44,oy:352,w:60,h:46,def:[[44,352]]},maple:{ox:14,oy:296,w:57,h:83,def:[[14,296]]},hayride:{ox:94,oy:396,w:89,h:62,def:[[94,396]]}};
 // v156 and earlier anchored these five at their top-left corner, so they couldn't come up to the house. Saves shift them once so they stay put.
@@ -7584,6 +7669,7 @@ function yDraw(id,d,T,night,ph){
     for(const [px,py] of [[76,359],[95,361],[109,358]]){ctx.fillStyle=rgb(mix([60,30,10],[240,130,40],d));ctx.beginPath();ctx.ellipse(px,py,5,3.6,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([20,30,10],[70,110,40],d));ctx.fillRect(px-.6,py-5.5,1.4,2.5)}}
   else if(id==='fence'){ctx.fillStyle=rgb(mix([60,62,66],[244,242,234],d));ctx.fillRect(0,385,128,2);ctx.fillRect(0,391,128,2);for(let x=2;x<126;x+=8){ctx.fillRect(x,383,4,14);ctx.beginPath();ctx.moveTo(x,383);ctx.lineTo(x+2,380);ctx.lineTo(x+4,383);ctx.fill()}}
   else if(id==='birch')birchOne(d,T,ph);
+  else if(id==='hpsign')hpSignDraw(d);
   else if(id==='steeple'){const x=186,y=330,st=rgb(mix([40,42,44],[150,150,142],d)),gr=rgb(mix([22,36,32],[80,116,100],d));ctx.fillStyle=rgb(mix([30,28,24],[110,100,84],d));ctx.fillRect(x-17,y-8,34,8);ctx.fillStyle=st;ctx.fillRect(x-12,y-44,24,36);ctx.fillStyle=rgb(mix([10,12,14],[40,44,50],d));ctx.fillRect(x-7,y-38,14,16);
     const sw=Math.sin(T*1.1+ph)*.25*(night?1:.3);ctx.save();ctx.translate(x,y-36);ctx.rotate(sw);ctx.fillStyle=rgb(mix([60,52,30],[176,146,70],d));ctx.beginPath();ctx.moveTo(-5,8);ctx.quadraticCurveTo(-5,0,0,0);ctx.quadraticCurveTo(5,0,5,8);ctx.closePath();ctx.fill();ctx.restore();
     ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(x-15,y-44);ctx.lineTo(x,y-80);ctx.lineTo(x+15,y-44);ctx.fill();ctx.strokeStyle=rgb(mix([40,40,40],[120,110,90],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,y-80);ctx.lineTo(x,y-90);ctx.moveTo(x-4,y-86);ctx.lineTo(x+4,y-86);ctx.stroke();
@@ -10076,7 +10162,7 @@ function drawMarina(d,T){const s=projLv('marina');if(!s)return;const wood=rgb(mi
   if(s>=4){ctx.fillStyle='#ffd05a';ctx.fillRect(748,212,48,10);ctx.fillStyle='#2a1206';ctx.font='bold 8px sans-serif';ctx.fillText('MARINA',753,220);if(lit(d))for(let i=0;i<6;i++){ctx.fillStyle=['#ff6b6b','#ffd05a','#7cc7dc'][i%3];ctx.beginPath();ctx.arc(672+i*22,246,1.4,0,7);ctx.fill()}}}
 
 // ==LOGBOOK SETS==
-const SET_RW={pond:5000,lake:25000,river:75000,deep:200000,bay:500000,moon:750000,hell:1500000,sky:3000000};
+const SET_RW={pond:5000,lake:25000,river:75000,deep:200000,bay:500000,isle:100000,moon:750000,hell:1500000,sky:3000000};
 function setDone(w){const all=FISH.filter(f=>f.at===w&&!f.quest);return all.length&&all.every(f=>S.log[f.id])}
 function setClaim(w){S.sets=S.sets||{};if(S.sets[w]||!setDone(w))return;S.sets[w]=S.day;const rw=SET_RW[w]||0;S.coins+=rw;S.trophies.unshift({name:`${W(w).n} Master`,water:w,type:'big',score:'Every species',day:S.day});
   sfx('fanfare');celebrate({lbl:'Logbook set complete!',r:'L',name:`${W(w).n} Master`,sub:`+$${money(rw)} and a trophy`,icon:cupSvg});save();renderLog();renderTrophies&&renderTrophies()}
