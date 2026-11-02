@@ -218,7 +218,21 @@ async function hvbPart(db,me,b,now){
   const [tot,top,mine]=await Promise.all([cached(db,'hvb:tot',MIN,async()=>await db.prepare('SELECT COALESCE(SUM(w),0) AS s,COUNT(*) AS n FROM evbest WHERE ev=?').bind(HVB_EV).first()),
     cached(db,'hvb:top',2*MIN,async()=>({results:(await db.prepare('SELECT e.pid,e.name,e.w,COALESCE(p.pub,1) AS pub FROM evbest e LEFT JOIN players p ON p.id=e.pid WHERE e.ev=? ORDER BY e.w DESC,e.ts ASC LIMIT 5').bind(HVB_EV).all()).results})),
     db.prepare('SELECT w FROM evbest WHERE ev=? AND pid=?').bind(HVB_EV,me.id).first()]);
-  return {goal:+g.v,total:Math.round(+tot.s||0),n:tot.n|0,mine:Math.round(mine?mine.w:0),ended:now>=HVB_END,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:Math.round(x.w),me:x.pid===me.id}))}}
+  // The Thanksgiving Feast (v165): past the first goal the basket keeps filling toward a second, much bigger goal, set once
+  // from how much the lake had given when it was first needed (15x that, at least 10x the first goal).
+  let g2=await db.prepare("SELECT v FROM cfg WHERE k='hvb:goal2'").first();
+  if(!g2&&(+tot.s||0)>=+g.v){const v=Math.max(+g.v*10,Math.ceil((+tot.s||0)*15/10000)*10000);await db.prepare("INSERT OR IGNORE INTO cfg(k,v) VALUES('hvb:goal2',?)").bind(String(v)).run();g2=await db.prepare("SELECT v FROM cfg WHERE k='hvb:goal2'").first()}
+  return {goal:+g.v,goal2:g2?+g2.v:0,total:Math.round(+tot.s||0),n:tot.n|0,mine:Math.round(mine?mine.w:0),ended:now>=HVB_END,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:Math.round(x.w),me:x.pid===me.id}))}}
+// Prize Turkey Show (v165): each angler's best show score (weight + plumage) until midnight Eastern after Thanksgiving.
+const HVT_EV='hv26t',HVT_END=Date.UTC(2026,10,27,5,0,0);
+async function hvtPart(db,me,b,now){
+  if(now>HVT_END+14*864e5)return null;
+  const v=Math.min(170,Math.max(0,+b.hvt||0));
+  if(v>0&&now<HVT_END)await db.batch([db.prepare('INSERT INTO evbest(ev,pid,name,w,ts) VALUES(?,?,?,?,?) ON CONFLICT(ev,pid) DO UPDATE SET w=MAX(evbest.w,excluded.w),name=excluded.name,ts=CASE WHEN excluded.w>evbest.w THEN excluded.ts ELSE evbest.ts END').bind(HVT_EV,me.id,me.name,v,now),db.prepare("DELETE FROM kvc WHERE k='hvt:top'")]);
+  const [top,mine]=await Promise.all([cached(db,'hvt:top',2*MIN,async()=>({results:(await db.prepare('SELECT e.pid,e.name,e.w,COALESCE(p.pub,1) AS pub FROM evbest e LEFT JOIN players p ON p.id=e.pid WHERE e.ev=? ORDER BY e.w DESC,e.ts ASC LIMIT 5').bind(HVT_EV).all()).results})),
+    db.prepare('SELECT w,ts FROM evbest WHERE ev=? AND pid=?').bind(HVT_EV,me.id).first()]);
+  let rank=0;if(mine){const r=await db.prepare('SELECT COUNT(*) AS c FROM evbest WHERE ev=? AND (w>? OR (w=? AND ts<?))').bind(HVT_EV,mine.w,mine.w,mine.ts).first();rank=(r.c|0)+1}
+  return {ended:now>=HVT_END,top:top.results.map(x=>({name:x.pid===me.id||x.pub?x.name:'Hidden angler',w:Math.round(x.w*10)/10,me:x.pid===me.id})),me:mine?{w:mine.w,rank}:null}}
 async function monPart(db,me,b,now,wk){
   let m=await db.prepare('SELECT maxhp,dead FROM mon WHERE week=?').bind(wk).first();
   if(!m){const n=await db.prepare('SELECT COUNT(*) AS c FROM players WHERE seen>?').bind(now-7*864e5).first();const maxhp=Math.max(3000,2500*(n.c|0));
@@ -252,6 +266,7 @@ async function syncExtras(db,me,b,now,wk){const out={};
   try{out.ev=await evPart(db,me,b,now)}catch(e){}
   try{out.mon=await monPart(db,me,b,now,wk)}catch(e){}
   try{if(b.hvq)out.hvb=await hvbPart(db,me,b,now)}catch(e){}
+  try{if(b.hvtq)out.hvt=await hvtPart(db,me,b,now)}catch(e){}
   try{out.gb=await yardPart(db,me,b,now,wk)}catch(e){}
   try{const iv=(await db.prepare('SELECT id,from_pid,from_name,ts FROM invites WHERE to_pid=? AND ts>? ORDER BY id DESC LIMIT 5').bind(me.id,now-15*60000).all()).results||[];if(iv.length){out.inv=iv;await db.prepare('DELETE FROM invites WHERE to_pid=? AND id<=?').bind(me.id,iv[0].id).run()}if(Math.random()<.02)await db.prepare('DELETE FROM invites WHERE ts<?').bind(now-864e5).run()}catch(e){}
   try{out.chal=await chalPart(db,me,b,now)}catch(e){}

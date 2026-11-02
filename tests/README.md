@@ -88,6 +88,7 @@ Run the whole suite before every push.
 - Pine Island part 2: fishing the Cove, digging once a day for relics and the town sign, the campfire story and stamina, and Nils’s key for Case 7
 - Time away in a realm: realm prices for the first hour only, then the water you came from, and you wake up still in the realm
 - Greenhouse and farm prices: they follow your steady income, a short spike doesn’t lift them, and each has a cap
+- The Great Gobble: the server sets the Thanksgiving Feast goal and keeps each turkey’s best show score, the Gobbler’s Ledger pays out by points given, feast rewards unlock the Great Gobbler, feeding and grooming once a day, show-day trophies and the pardoned turkey pet, the baker’s apron, and the Golden Gobbler set bonus
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

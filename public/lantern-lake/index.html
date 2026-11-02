@@ -951,6 +951,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .yedbar{min-width:0;max-width:100%;box-sizing:border-box;margin:8px 0 0;background:rgba(10,22,28,.88);border:1px solid var(--line);border-radius:14px;padding:8px 10px;color:#edf2ea;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;flex-direction:column;gap:6px}
 .yed-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.yed-top i{font-style:normal;color:#ffd05a;font-weight:700}
 .yed-top .ghost,.yed-top .jig{padding:4px 10px;font-size:.8rem}
+.tk-row{display:flex;gap:12px;align-items:center;margin:4px 0 8px}.tk-row canvas{flex:none;border-radius:10px;background:rgba(255,255,255,.06)}
 .yed-tray{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.yed-dock{display:flex;gap:6px;flex:none;margin-left:4px;padding-left:10px;border-left:1px solid var(--line)}.yed-it{flex:none;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#edf2ea;border-radius:10px;padding:5px 10px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap}.yed-it:hover{background:rgba(255,255,255,.16)}.yed-it small{opacity:.7}
 .yed-none{font-size:.8rem;opacity:.75}
 .yed-top{justify-content:space-between;flex-wrap:nowrap}.yed-tabs{display:flex;gap:4px;overflow-x:auto;min-width:0;flex:1}.yed-tab{flex:none;background:none;border:1px solid transparent;color:#cfe0da;font:inherit;font-size:.82rem;font-weight:700;padding:4px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
@@ -2299,6 +2300,8 @@ const DECOR = [
   {id:'fence',cat:'land',n:'Picket Fence',c:160000,d:'Fresh white pickets along the front of the yard.'},
   {id:'hammock',cat:'land',n:'Hammock',c:300000,d:'Strung between two cedar posts.'},
   {id:'hottub',cat:'land',n:'Cedar Hot Tub',c:700000,d:'Steams on cold mornings.'},
+  {id:'feasttable',cat:'land',cs:1,n:'The Thanksgiving Table',c:0,d:'A long feast table set for the whole family. From the 2026 Thanksgiving Feast.'},
+  {id:'goldturkey',cat:'land',cs:1,n:'Golden Turkey',c:0,d:'A gleaming gold turkey on a stone plinth. From the Gobbler’s Ledger.'},
   {id:'hpsign',cat:'land',cs:1,n:'Hollow Pines Town Sign',c:0,d:'The old sign from the road into Hollow Pines. Wren’s thank-you for finding all four relics on Pine Island.'},
   {id:'steeple',cat:'land',cs:1,n:'Sunken Steeple',c:0,d:'The top of the Hollow Pines church, brought up from the bottom of the lake. Its bell still rings at night.'},
   {id:'lighthouse',cat:'land',n:'Lighthouse',c:5000000,d:'On the far point. Sweeps the water at night.'},
@@ -2457,8 +2460,9 @@ const EVFISH=[
   Object.assign(F('mapletrout','Maple Trout',1,9,36,'R','dawn day dusk','lake'),{ev:HV_ID,col:'#d8502e'}),
   Object.assign(F('cranberry','Cranberry Darter',.1,.6,180,'U','day dusk','river'),{ev:HV_ID,col:'#c0304a'}),
   Object.assign(F('mooncarp','Harvest Moon Carp',8,60,26,'L','night','deep'),{ev:HV_ID,col:'#ffb04a'}),
+  Object.assign(F('greatgobbler','Great Gobbler',40,300,30,'L','dawn day dusk night','bay'),{ev:HV_ID,col:'#c8861a',gate:2}),
 ];
-const evLive=f=>(f.ev===HW_ID&&hwOn())||(f.ev===HV_ID&&hvOn());
+const evLive=f=>(f.ev===HW_ID&&hwOn())||(f.ev===HV_ID&&hvOn()&&(!f.gate||hvFeastHit(f.gate)));
 function hwFishRoll(water,minute,mods){if(!hwOn()&&!hvOn())return null;const ph=phaseOf(minute),ev=EVFISH.filter(f=>evLive(f)&&f.at===water&&f.t.includes(ph));
   if(!ev.length||Math.random()>.07*(mods&&mods.luck?1.5:1))return null;
   const f=pickW(ev.map(f=>({f,w:{C:6,U:4,R:2,L:.7}[f.r]}))).f;const k=mods&&mods.giant?Math.max(.7,1.8-S.rod*.22):Math.max(1.3,2.8-S.rod*.22);
@@ -2528,7 +2532,7 @@ function hvHouse(G,wins,d,T){
   if(has('sillpie')&&wins&&wins.length){const [wx,wy]=wins[0],by=wy+(wy===212?12:10),px=wx+7;ctx.fillStyle=rgb(mix([46,32,20],[206,150,82],d));ctx.beginPath();ctx.ellipse(px,by-1.4,5.4,2,0,Math.PI,0);ctx.fill();ctx.fillRect(px-5.6,by-1.6,11.2,1.6);
     ctx.fillStyle=rgb(mix([36,24,14],[160,102,50],d));ctx.fillRect(px-3,by-2.6,6,.7);for(let i=0;i<3;i++){const q=(T*.35+i/3)%1;ctx.fillStyle=`rgba(236,236,240,${.4*(1-q)})`;ctx.beginPath();ctx.arc(px-2+i*2+Math.sin(q*6+i)*1.5,by-4-q*12,1+q*1.6,0,7);ctx.fill()}}}
 // Costumes from holiday events. Earned ones stay wearable after the event; pick None in Settings to take it off.
-const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')},{k:'flannel',n:'Flannel & knit hat',ev:'Harvest',own:()=>!!(S.hv&&S.hv.flannel)},{k:'pcap',n:'Captain’s cap',ev:'Prestige I',own:()=>prLv()>=1},{k:'psweat',n:'Fisherman’s sweater',ev:'Prestige III',own:()=>prLv()>=3},{k:'pkeep',n:'Lighthouse keeper’s coat',ev:'Prestige VI',own:()=>prLv()>=6},{k:'pgold',n:'Golden captain’s hat',ev:'Prestige X',own:()=>prLv()>=10}];
+const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')},{k:'flannel',n:'Flannel & knit hat',ev:'Harvest',own:()=>!!(S.hv&&S.hv.flannel)},{k:'pilgrim',n:'Pilgrim hat',ev:'Harvest',own:()=>hvHasCos('pilgrim')},{k:'turkeysuit',n:'Turkey suit',ev:'Harvest',own:()=>hvHasCos('turkeysuit')},{k:'apron',n:'Baker’s apron',ev:'Harvest',own:()=>hvHasCos('apron')},{k:'pcap',n:'Captain’s cap',ev:'Prestige I',own:()=>prLv()>=1},{k:'psweat',n:'Fisherman’s sweater',ev:'Prestige III',own:()=>prLv()>=3},{k:'pkeep',n:'Lighthouse keeper’s coat',ev:'Prestige VI',own:()=>prLv()>=6},{k:'pgold',n:'Golden captain’s hat',ev:'Prestige X',own:()=>prLv()>=10}];
 const hwWear=()=>{const w=S.hw&&S.hw.wear,c=w&&COSTUMES.find(x=>x.k===w);return c&&c.own()?w:null};
 function drawCostume(ax,ay,d,T,k){const sh=c=>rgb(mix(c.map(v=>v*.3),c,d*.8+.2));
   const twinkle=(x,y,ph)=>{const a=Math.max(0,Math.sin(T*2.4+ph));if(a<.2)return;ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#fff8d0';ctx.beginPath();for(let i=0;i<8;i++){const an=i*Math.PI/4,r=i%2?.6:2.6*a;ctx.lineTo(x+Math.cos(an)*r,y+Math.sin(an)*r)}ctx.fill();ctx.restore()};
@@ -2540,6 +2544,13 @@ function drawCostume(ax,ay,d,T,k){const sh=c=>rgb(mix(c.map(v=>v*.3),c,d*.8+.2))
   if(k==='pkeep'){ctx.fillStyle=sh([244,200,40]);ctx.fillRect(ax-7,ay-22,14,22);ctx.fillStyle=sh([200,160,20]);ctx.fillRect(ax-.7,ay-22,1.4,22);for(let i=0;i<3;i++)ctx.fillRect(ax-2.5,ay-18+i*5,1.6,1.6);
     ctx.fillStyle=sh([244,200,40]);ctx.beginPath();ctx.arc(ax,ay-32,6.4,Math.PI,0);ctx.fill();ctx.beginPath();ctx.ellipse(ax-1,ay-31,10,2.4,-.08,0,7);ctx.fill();
     const lx=ax-11,ly=ay-12+Math.sin(T*2)*.8;ctx.fillStyle='#2a2a30';ctx.fillRect(lx-2.2,ly-4,4.4,1.2);ctx.fillStyle='#ffe8a8';ctx.fillRect(lx-2,ly-3,4,5);glow(lx,ly-1,16,.55+.15*Math.sin(T*5),'255,220,140');return}
+  if(k==='pilgrim'){ctx.fillStyle=sh([240,236,226]);ctx.beginPath();ctx.moveTo(ax-7,ay-22);ctx.lineTo(ax+7,ay-22);ctx.lineTo(ax+4,ay-17);ctx.lineTo(ax,ay-19);ctx.lineTo(ax-4,ay-17);ctx.fill();
+    ctx.fillStyle=sh([22,20,24]);ctx.beginPath();ctx.ellipse(ax,ay-33,10,2.4,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(ax-5.6,ay-33);ctx.lineTo(ax-4.6,ay-45);ctx.lineTo(ax+4.6,ay-45);ctx.lineTo(ax+5.6,ay-33);ctx.fill();ctx.fillStyle=sh([60,56,50]);ctx.fillRect(ax-5.4,ay-37,10.8,2.2);ctx.fillStyle=sh([232,196,80]);ctx.fillRect(ax-1.8,ay-37.6,3.6,3.4);ctx.fillStyle=sh([60,56,50]);ctx.fillRect(ax-.8,ay-36.8,1.6,1.8);return}
+  if(k==='turkeysuit'){const FC=[[150,82,40],[200,140,60],[120,64,34],[226,186,110],[176,48,40]];for(let i=0;i<9;i++){const a=-Math.PI*.95+i*Math.PI*.9/8+Math.sin(T*1.5)*.03;ctx.fillStyle=sh(FC[i%5]);ctx.beginPath();ctx.ellipse(ax+Math.cos(a)*13,ay-18+Math.sin(a)*13,3.4,8,a+Math.PI/2,0,7);ctx.fill()}
+    ctx.fillStyle=sh([96,58,34]);ctx.fillRect(ax-7,ay-23,14,22);ctx.fillStyle=sh([130,80,44]);for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(ax-4+i*2.6,ay-16+(i%2)*4,2,0,Math.PI);ctx.fill()}
+    ctx.fillStyle=sh([150,110,90]);ctx.beginPath();ctx.arc(ax,ay-31,7,Math.PI*1.05,Math.PI*-.05);ctx.fill();ctx.fillStyle=sh([216,48,42]);ctx.beginPath();ctx.ellipse(ax+3,ay-37,1.6,3,.3,0,7);ctx.fill();ctx.fillStyle=sh([232,160,48]);ctx.beginPath();ctx.moveTo(ax-1,ay-36);ctx.lineTo(ax+3,ay-35.5);ctx.lineTo(ax-1,ay-34.4);ctx.fill();return}
+  if(k==='apron'){ctx.fillStyle=sh([246,244,238]);ctx.fillRect(ax-5.5,ay-20,11,17);ctx.fillStyle=sh([210,90,70]);ctx.fillRect(ax-5.5,ay-12,11,1.2);ctx.fillRect(ax-2.4,ay-9,4.8,3.4);ctx.strokeStyle=sh([246,244,238]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(ax-5,ay-20);ctx.lineTo(ax-3,ay-25);ctx.moveTo(ax+5,ay-20);ctx.lineTo(ax+3,ay-25);ctx.stroke();
+    ctx.fillStyle=sh([246,244,238]);ctx.fillRect(ax-5.2,ay-37,10.4,5);for(const dx of [-4,0,4]){ctx.beginPath();ctx.arc(ax+dx,ay-38,3.2,0,7);ctx.fill()}return}
   if(k==='flannel'){ctx.fillStyle=sh([176,44,40]);ctx.fillRect(ax-6,ay-22,12,20);ctx.fillStyle=sh([60,20,22]);for(let i=0;i<4;i++)ctx.fillRect(ax-6,ay-20+i*5,12,1.3);for(const xx of [-3.5,1.5])ctx.fillRect(ax+xx,ay-22,1.3,20);
     ctx.fillStyle=sh([236,226,206]);ctx.beginPath();ctx.moveTo(ax-3,ay-22);ctx.lineTo(ax,ay-18);ctx.lineTo(ax+3,ay-22);ctx.fill();
     ctx.fillStyle=sh([214,140,40]);ctx.beginPath();ctx.arc(ax,ay-31,6.4,Math.PI,0);ctx.fill();ctx.fillRect(ax-6.6,ay-32,13.2,2.6);ctx.fillStyle=sh([150,80,30]);for(let i=0;i<5;i++)ctx.fillRect(ax-5.6+i*2.6,ay-36,1,4);
@@ -2936,7 +2947,7 @@ function doCatch(){
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
   const t=S.tour; if(t&&t.phase==='live'&&S.water===t.water) t.me=scoreAdd(t,t.me,f,w);
   rollDay();S.today.n++;if(!S.today.best||w>S.today.best.w)S.today.best={id:f.id,w};if(S.today.n>S.st.best.n)S.st.best={n:S.today.n,day:S.day};
-  pushRecent({id:f.id,w,val,v:vr,mus:mKept||undefined});if(f.r==='L'&&phxSet())phxBird();
+  pushRecent({id:f.id,w,val,v:vr,mus:mKept||undefined});if(f.r==='L'&&phxSet())phxBird();if((f.r==='R'||f.r==='L')&&gobSet())gobStrut();
   if(vr){celebrate({lbl:`${VAR[vr].n} ${f.n}!`,r:vr==='golden'?'L':'R',name:newVar?`New ${VAR[vr].n.toLowerCase()} variant for your logbook`:`${VAR[vr].n} variant`,sub:`${w} lb · worth $${money(val)}`,icon:fishSvg(vr==='giant'?RCOL[f.r]:VAR[vr].col)});burst(BOB.x,BOB.y-10,[VAR[vr].col,'#ffffff'],60)}
   else if(f.r==='R'||f.r==='L'){celebrate({lbl:`${RAR[f.r]} catch!`,r:f.r,name:f.n,sub:`${w} lb · worth $${money(val)}${isNew?' · New species':isRec?' · New record':''}`,icon:fishSvg(RCOL[f.r])});burst(BOB.x,BOB.y-10,[RCOL[f.r],'#ffffff','#ff7a3d'],f.r==='L'?70:35)}
   else sfx('splash'),showToast(`${w} lb ${f.n} · $${money(val)} to the cooler`,isNew?'New species!':isRec?'New record!':'');
@@ -3722,6 +3733,7 @@ const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff',
 // The Lantern Keeper kit (Mythic): a thank-you for Lantern Lake supporters. Looks only, never in crates, can't be mailed.
 QSKINS.push({...SK('leviathan','Aurora Leviathan','M','#081430','leviathan','#5affc8','#b07aff','glow'),quest:true,sup:true});
 // The Phoenix Collection (Mythic): bought outright in Crate Expectations, never in crates, can't be mailed.
+QSKINS.push({...SK('gobbler','Golden Gobbler','M','#6a3a14','gobbler','#ffd05a','#c8461f','glow'),quest:true,gob:1});
 QSKINS.push({...SK('phoenix','Phoenix Prow','M','#5a0e08','phoenix','#ff5a1a','#ffd23a','glow'),quest:true,phx:1});
 // Series 2: Deep Sea Expedition (a mixed case: paints, rod finishes and bobbers)
 const DS_PAINTS=[SK('varnish','Varnished Wood','C','#a8703a','wood','#7a4a22'),SK('seafoam','Seafoam','C','#8fd8c0'),SK('coralpink','Coral Pink','C','#ff8a80'),
@@ -3797,6 +3809,9 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
   else if(p==='stained'){const cols=['#d83a3a','#3a8ad8','#f4c02a','#3ab06a','#a05ad8','#ff8a2a'];for(let i=0;i*9<L+8;i++)for(let j=0;j*6<H+4;j++){c.fillStyle=cols[Math.floor(R()*6)];c.globalAlpha=.85;c.fillRect(x-4+i*9,top-2+j*6,9,6)}c.globalAlpha=1;c.strokeStyle='#141414';c.lineWidth=1;for(let i=0;i*9<L+8;i++){c.beginPath();c.moveTo(x-4+i*9,top-2);c.lineTo(x-4+i*9,y+16);c.stroke()}for(let j=0;j*6<H+4;j++){c.beginPath();c.moveTo(x-4,top-2+j*6);c.lineTo(x+L+4,top-2+j*6);c.stroke()}}
   else if(p==='kraken'){for(let i=0;i<4;i++){const bx=x+L*(.15+i*.22),w=Math.sin(T*1.6+i*1.4)*3;c.strokeStyle=sk.c2;c.lineWidth=2.6;c.lineCap='round';c.beginPath();c.moveTo(bx,y+16);c.bezierCurveTo(bx+4+w,y+6,bx-6-w,top+4,bx+3+w,top-1);c.stroke();c.fillStyle=sk.c3;for(let k=0;k<4;k++){const q=.2+k*.2;c.beginPath();c.arc(bx+(w*q)-1+k*.3,y+14-(y+15-top)*q,.7,0,7);c.fill()}}c.lineCap='butt'}
   else if(p==='chrome'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#f4f8ff');g.addColorStop(.3,'#9ab0c8');g.addColorStop(.5,'#e8eef6');g.addColorStop(.62,'#6a7a8a');g.addColorStop(1,'#d8e0ea');c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4)}
+  else if(p==='gobbler'){const g=c.createLinearGradient(x,0,x+L,0);g.addColorStop(0,'#4a240c');g.addColorStop(.5,'#8a4a1a');g.addColorStop(1,'#e8a83a');c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
+    for(let i=0;i<L/10;i++){const fx=x+4+i*10;c.fillStyle=i%3===0?'#ffd05a':i%3===1?'#c8461f':'#5a2a10';c.beginPath();c.moveTo(fx,top+H*.2);c.quadraticCurveTo(fx+5,top+H*.5,fx,top+H*.95);c.quadraticCurveTo(fx-3,top+H*.55,fx,top+H*.2);c.fill()}
+    c.fillStyle='rgba(255,240,180,.5)';c.fillRect(x-4,top-1,L+8,1.5)}
   else if(p==='phoenix'){const g=c.createLinearGradient(x,0,x+L,0);g.addColorStop(0,'#3a0604');g.addColorStop(.45,'#a0180a');g.addColorStop(.8,'#ff5a1a');g.addColorStop(1,'#ffc23a');c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     for(let j=0;j*3.4<H+4;j++)for(let i=0;i*5.5<L+10;i++){const u=i*5.5/L,fl=.5+.5*Math.sin(T*3+i*.7-j*1.3),fx0=x+i*5.5+(j%2)*2.75,fy=top+j*3.4;c.fillStyle=`hsla(${8+u*36+fl*10},100%,${34+u*22+fl*10}%,.75)`;c.beginPath();c.moveTo(fx0-2.6,fy);c.quadraticCurveTo(fx0,fy+4.2,fx0+2.6,fy);c.fill()}
     c.fillStyle='#ffd23a';c.fillRect(x-4,top-2,L+8,1.6);c.globalAlpha=.6;c.fillRect(x-4,y+9,L+8,.8);c.globalAlpha=1}
@@ -3809,6 +3824,7 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
   if(sk.fx==='glow'){c.save();c.globalAlpha=.25+.15*Math.sin(T*3);c.strokeStyle=sk.c2;c.lineWidth=1.5;c.shadowColor=sk.c2;c.shadowBlur=12;hullPath(c,x,y,L,b);c.stroke();c.restore()}
   if(sk.fx==='sparkle'&&!RM){c.save();const n=sk.t==='L'||sk.t==='M'?7:4;for(let i=0;i<n;i++){const ph=(T*.8+i/n)%1,a=Math.sin(ph*Math.PI);const sx=x+((i*0.618+.1)%1)*L,sy=top-2+((i*0.37)%1)*(H+2);
       c.globalAlpha=a;c.fillStyle=sk.p==='prism'?`hsl(${(i*50+T*90)%360},100%,80%)`:sk.p==='frost'||sk.p==='ice'?'#ffffff':'#fff6c8';star4(c,sx,sy,1.5+a*2.5)}c.restore()}
+  if(sk.p==='gobbler')gobParts(c,x,y,L,b,d,T);
   if(sk.p==='phoenix')phxParts(c,x,y,L,b,d,T)
 }
 const SKTH={};
@@ -3839,11 +3855,13 @@ const DS_RODS=[RSK('bamboo','Bamboo','C','#c8b060'),RSK('cork','Classic Cork','C
   RSK('kraken','Kraken Rod','L','#3a1a5a','#c87aff','bubbles','#b05aff'),RSK('chrome','Chrome Rod','L','#c8d0d8','#ffffff','stars','#ffffff')].map(x=>({...x,ds:1}));
 const Q_BOBS=[{...BSK('antenna','Antenna Bobber','L','antenna','#2a2a30','#d8dde6'),quest:true}];
 Q_BOBS.push({...BSK('sun','Pocket Sun','M','sun','#ffd84a','#ff8a2a'),quest:true,sup:true});
+Q_BOBS.push({...BSK('turkey','Turkey Bobber','L','turkey','#7a4a2a','#d8302a'),quest:true},{...BSK('cranberry','Cranberry Sauce','R','cran','#a8102a','#e85a70'),quest:true},{...BSK('gobbler','Golden Gobbler','M','turkey','#e8b030','#ff9a3a'),quest:true,gob:1});
 Q_BOBS.push({...BSK('dbell','Drowned Bell','L','dbell','#b08a3a','#5ab8a0'),quest:true});
 Q_BOBS.push({...BSK('tin','Cannery Tin','L','tin','#c8ccd2','#c83a2a'),quest:true});
 Q_BOBS.push({...BSK('phoenix','Phoenix Egg','M','phoenix','#d8301a','#ffc23a'),quest:true,phx:1});
 const Q_RODS=[{...RSK('starforged','Starforged','M','#1a1440','#ffe8a8','starforge','#ffd870'),quest:true,sup:true},
   {...RSK('legacy','Legacy','L','#5a3a22','#e8b030','legacy','#e8b030'),quest:true,pr:1},{...RSK('legacylit','Lit Legacy','M','#3a2418','#7affe0','legacy','#7affe0'),quest:true,pr:5},{...RSK('legacygold','Golden Legacy','M','#ffd05a','#ffffff','legacy','#fff2a0'),quest:true,pr:10}];
+Q_RODS.push({...RSK('wishbone','Wishbone','L','#f0e2c0','#c8a070','feathers','#ffe8b0'),quest:true},{...RSK('gobbler','Golden Gobbler','M','#c8861a','#ffe8a0','feathers','#ffd05a'),quest:true,gob:1});
 Q_RODS.push({...RSK('phoenix','Flame Feather','M','phoenix','#ffd23a','phoenix','#ff7a2a'),quest:true,phx:1});
 // Town-only bobbers from Marge's Counter (shown in the locker once owned)
 const T_BOBS=[BSK('neonpink','Neon Pink','U','glow','#ff6ae0','#ffd0f4'),BSK('neoncyan','Neon Cyan','U','glow','#4ae0ff','#d0f8ff'),BSK('harbor','Harbor Buoy','R','buoy','#1e3a5a','#e8b030'),BSK('hlight','Harbor Light','R','lighthouse','#c8281a','#f4f0e8'),BSK('slamp','Streetlamp','E','lantern','#2a2a30','#ffe8a8')].map(b=>({...b,quest:true,town:true}));
@@ -3912,6 +3930,10 @@ function drawBobber(c,x,y,sk,d,T,r){r=r||4.5;const on=lit(d);c.save();
   else if(p==='krakenb'){c.fillStyle=sk.col;c.lineWidth=r*.28;c.strokeStyle=sk.col;c.lineCap='round';for(let k=0;k<5;k++){const ax=x-r*.8+k*r*.4,w=Math.sin(T*3+k)*r*.35;c.beginPath();c.moveTo(ax,y+r*.2);c.quadraticCurveTo(ax+w,y+r*.9,ax-w*.5,y+r*1.5);c.stroke()}c.beginPath();c.ellipse(x,y-r*.1,r*.9,r*1.05,0,0,7);c.fill();c.fillStyle='#fff';for(const dx of [-.32,.32]){c.beginPath();c.arc(x+dx*r,y-r*.15,r*.22,0,7);c.fill()}c.fillStyle='#1a0a2a';for(const dx of [-.3,.34]){c.beginPath();c.arc(x+dx*r,y-r*.12,r*.1,0,7);c.fill()}c.fillStyle=sk.c2;c.beginPath();c.arc(x,y+r*.25,r*.12,0,Math.PI);c.fill()}
   else if(p==='dbell'){const sw=Math.sin(T*2.2)*.18;c.save();c.translate(x,y-r*.9);c.rotate(sw);const g=c.createLinearGradient(-r,0,r,0);g.addColorStop(0,'#6a5020');g.addColorStop(.45,'#e0c070');g.addColorStop(1,'#6a5020');c.fillStyle=g;c.beginPath();c.moveTo(-r*1.05,r*1.7);c.quadraticCurveTo(-r*.9,0,0,0);c.quadraticCurveTo(r*.9,0,r*1.05,r*1.7);c.closePath();c.fill();c.fillStyle=sk.c2;c.globalAlpha=.6;c.fillRect(-r*.8,r*.9,r*.5,r*.4);c.fillRect(r*.2,r*.5,r*.4,r*.3);c.globalAlpha=1;c.fillStyle='#4a3a18';c.beginPath();c.arc(0,r*1.75,r*.25,0,7);c.fill();c.fillRect(-r*.15,-r*.35,r*.3,r*.4);c.restore()}
   else if(p==='tin'){const g=c.createLinearGradient(x-r,0,x+r,0);g.addColorStop(0,'#8a9098');g.addColorStop(.45,'#f0f2f4');g.addColorStop(1,'#7a8088');c.fillStyle=g;c.fillRect(x-r*.85,y-r*.9,r*1.7,r*1.8);c.fillStyle=sk.c2;c.fillRect(x-r*.85,y-r*.35,r*1.7,r*.7);c.fillStyle='#fff6e0';c.font=`bold ${Math.max(3,r*.42)}px Georgia,serif`;c.textAlign='center';c.fillText('1961',x,y+r*.14);c.textAlign='left';c.fillStyle='#d8dce2';c.beginPath();c.ellipse(x,y-r*.9,r*.85,r*.28,0,0,7);c.fill();c.strokeStyle='#9aa0a8';c.lineWidth=Math.max(.4,r*.08);c.stroke()}
+  else if(p==='turkey'){const gold=sk.id==='b_gobbler',fn=Math.min(1,.4+(on?0:0)+.6*Math.abs(Math.sin(T*1.5)));if(gold){c.shadowColor='#ffd05a';c.shadowBlur=8+3*Math.sin(T*4)}
+    const FC=gold?['#ffd05a','#ff9a3a','#fff2b0']:['#8a4a1a','#c8861a','#e8c890'];for(let i=0;i<7;i++){const a=-Math.PI*.95+i*Math.PI*.9/6;c.fillStyle=FC[i%3];c.beginPath();c.ellipse(x-r*.3+Math.cos(a)*r*1.2,y-r*.3+Math.sin(a)*r*1.2*fn,r*.32,r*.75,a+Math.PI/2,0,7);c.fill()}
+    c.fillStyle=sk.col;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.fillStyle='#f4f0e6';c.beginPath();c.arc(x,y,r,0,Math.PI);c.fill();c.fillStyle=gold?'#fff2b0':'#b89a80';c.beginPath();c.arc(x+r*.7,y-r*.7,r*.42,0,7);c.fill();c.fillStyle=sk.c2;c.beginPath();c.ellipse(x+r*.95,y-r*.35,r*.14,r*.3,0,0,7);c.fill();c.shadowBlur=0}
+  else if(p==='cran'){c.fillStyle=sk.col;c.fillRect(x-r*.8,y-r,r*1.6,r*2);c.fillStyle=sk.c2;for(let i=0;i<3;i++)c.fillRect(x-r*.8,y-r*.6+i*r*.6,r*1.6,r*.14);c.fillStyle='rgba(255,255,255,.35)';c.fillRect(x-r*.6,y-r*.9,r*.25,r*1.7);c.fillStyle=sk.c2;c.beginPath();c.ellipse(x,y-r,r*.8,r*.25,0,0,7);c.fill()}
   else if(p==='phoenix'){const g=c.createLinearGradient(x,y-r*1.2,x,y+r);g.addColorStop(0,'#ffd23a');g.addColorStop(.5,sk.col);g.addColorStop(1,'#5a0e08');c.shadowColor='#ff6a1a';c.shadowBlur=on?r*2:r;c.fillStyle=g;c.beginPath();c.ellipse(x,y-r*.1,r*.85,r*1.15,0,0,7);c.fill();c.shadowBlur=0;
     c.strokeStyle='#ffe08a';c.lineWidth=Math.max(.4,r*.09);c.globalAlpha=.6+.4*Math.sin(T*4);c.beginPath();c.moveTo(x-r*.7,y-r*.2);c.lineTo(x-r*.3,y+r*.1);c.lineTo(x,y-r*.3);c.lineTo(x+r*.35,y+r*.05);c.lineTo(x+r*.75,y-r*.25);c.stroke();c.globalAlpha=1;
     for(const [col,s] of [['#ff5a1a',1],['#ffd23a',.6]]){const fl=Math.sin(T*9)*r*.12;c.fillStyle=col;c.beginPath();c.moveTo(x-r*.35*s,y-r*1.05);c.quadraticCurveTo(x-r*.4*s+fl,y-r*(1.5+.5*s),x+fl*1.5,y-r*(1.75+.55*s));c.quadraticCurveTo(x+r*.4*s+fl,y-r*(1.5+.5*s),x+r*.35*s,y-r*1.05);c.fill()}}
@@ -3923,9 +3945,9 @@ function sunFlare(x,y,bite,T,d){ctx.save();ctx.globalCompositeOperation='lighter
   if(bite){const f=.6+.4*Math.sin(T*22);glow(x,y,90,.45*f,'255,210,120');ctx.strokeStyle=`rgba(255,240,200,${.5*f})`;ctx.lineWidth=1.4;for(let k=0;k<8;k++){const a=k*Math.PI/4+T;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*8,y+Math.sin(a)*8);ctx.lineTo(x+Math.cos(a)*(26+f*14),y+Math.sin(a)*(26+f*14));ctx.stroke()}}ctx.restore()}
 function rodFx(x,y){const sk=rodEq();if(!sk||!sk.fx||RM)return;const c2=sk.c2,col=sk.col==='prism'?'#ff3a3a':sk.col;
   if(sk.fx==='splash')burst(x,y-6,[c2,'#ffffff',col],26);else if(sk.fx==='sparks')burst(x,y-6,['#ff7a2a','#ffd02a','#ff3a1a'],30);else if(sk.fx==='snow')burst(x,y-6,['#ffffff','#bfe6ff'],26);
-  else if(sk.fx==='stars')burst(x,y-10,['#ffffff','#c8b0ff','#7ac8ff'],40);else if(sk.fx==='coins')burst(x,y-10,['#ffd05a','#fff2b0','#e8b830'],50);else if(sk.fx==='starforge')burst(x,y-10,['#ffffff','#ffe8a8','#ffd870','#9ad8ff','#c8a0ff'],90);else if(sk.fx==='phoenix')burst(x,y-10,['#ff3a1a','#ff8a2a','#ffd23a','#fff2b0'],80);else if(sk.fx==='rainbow')burst(x,y-10,['#ff3a3a','#ffa02a','#ffe24a','#3ad06a','#3a8aff','#a05aff'],60);
+  else if(sk.fx==='stars')burst(x,y-10,['#ffffff','#c8b0ff','#7ac8ff'],40);else if(sk.fx==='coins')burst(x,y-10,['#ffd05a','#fff2b0','#e8b830'],50);else if(sk.fx==='feathers')burst(x,y-10,sk.id==='r_gobbler'?['#ffd05a','#ff9a3a','#fff2b0','#c8461f']:['#8a4a1a','#c8861a','#e8c890','#f4f0e6'],sk.id==='r_gobbler'?55:30);else if(sk.fx==='starforge')burst(x,y-10,['#ffffff','#ffe8a8','#ffd870','#9ad8ff','#c8a0ff'],90);else if(sk.fx==='phoenix')burst(x,y-10,['#ff3a1a','#ff8a2a','#ffd23a','#fff2b0'],80);else if(sk.fx==='rainbow')burst(x,y-10,['#ff3a3a','#ffa02a','#ffe24a','#3ad06a','#3a8aff','#a05aff'],60);
   RFX.push({k:sk.fx,x,y,t0:performance.now()/1000,c:c2,c1:col});if(RFX.length>6)RFX.shift()}
-function drawRodFx(){const now=performance.now()/1000;try{phxBirdDraw(now)}catch(e){}for(let i=RFX.length-1;i>=0;i--){const f=RFX[i];const q=now-f.t0;if(q>1.6){RFX.splice(i,1);continue}ctx.save();
+function drawRodFx(){const now=performance.now()/1000;try{phxBirdDraw(now)}catch(e){}try{gobStrutDraw(now)}catch(e){}for(let i=RFX.length-1;i>=0;i--){const f=RFX[i];const q=now-f.t0;if(q>1.6){RFX.splice(i,1);continue}ctx.save();
   if(f.k==='neon'){for(const [col,dl] of [[f.c1,0],[f.c,.15]]){const p=Math.max(0,q-dl);if(p>1)continue;ctx.strokeStyle=col;ctx.globalAlpha=1-p;ctx.lineWidth=2;ctx.shadowColor=col;ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(f.x,f.y,8+p*60,3+p*16,0,0,7);ctx.stroke()}}
   else if(f.k==='thunder'&&q<.45){ctx.globalAlpha=1-q/.45;ctx.strokeStyle='#fff8c0';ctx.lineWidth=2.4;ctx.shadowColor='#ffe24a';ctx.shadowBlur=12;ctx.beginPath();let bx=f.x+6,by=0;ctx.moveTo(bx,by);while(by<f.y-6){by+=18;bx+=(Math.random()-.5)*18;ctx.lineTo(bx,Math.min(by,f.y-6))}ctx.stroke();if(q<.12){ctx.fillStyle='rgba(255,250,210,.25)';ctx.fillRect(0,0,800,400)}}
   else if(f.k==='starforge'){for(let j=0;j<6;j++){const p=q*1.1-j*.06;if(p<0||p>1)continue;const a=-Math.PI/2+(j-2.5)*.38,dd=p*170,hx=f.x+Math.cos(a)*dd,hy=f.y+Math.sin(a)*dd;ctx.globalAlpha=1-p;ctx.strokeStyle='#ffe8a8';ctx.lineWidth=1.6;ctx.shadowColor='#ffd870';ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(hx,hy);ctx.lineTo(hx-Math.cos(a)*34,hy-Math.sin(a)*34);ctx.stroke();ctx.fillStyle='#fff';star4(ctx,hx,hy,3+2*(1-p))}}
@@ -3944,6 +3966,9 @@ function itemThumb(id,w,h){const it=ITEM_BY[id];if(!it)return '';if(it.kind==='p
 // ==PHOENIX== The Phoenix Collection: a Mythic boat, rod and bobber bought outright for $100M in all.
 // Wear all three for the set bonus: heat shimmer on the water and a firebird across the sky on a legendary.
 const PHX_ITEMS=[['phoenix','Phoenix Prow','A firebird of a boat: a carved head on the bow, wings that beat, a trailing tail and embers rising. It glows like a bonfire after dark.',5e7],['r_phoenix','Flame Feather','A rod like a burning tail feather, with sparks off the tip. Wings of flame open over every fish you land.',3e7],['b_phoenix','Phoenix Egg','A smoldering egg with a flame on top. It bursts into fire when a fish bites.',2e7]];
+function gobParts(c,x,y,L,b,d,T){const k=Math.max(.7,Math.min(1.5,L/95));c.save();const sx=x+4,sy=y-2;for(let i=0;i<9;i++){const a=-Math.PI*.92+i*Math.PI*.6/8+Math.sin(T*1.4)*.04,len=(22+Math.sin(i*1.7)*3)*k;c.fillStyle=['#ffd05a','#c8461f','#8a4a1a'][i%3];c.beginPath();c.ellipse(sx+Math.cos(a)*len*.5,sy+Math.sin(a)*len*.5,3*k,len*.5,a+Math.PI/2,0,7);c.fill();c.fillStyle='#fff2b0';c.beginPath();c.arc(sx+Math.cos(a)*len*.92,sy+Math.sin(a)*len*.92,1.2*k,0,7);c.fill()}
+  const hx=x+L-2,hy=y-6*k;c.fillStyle='#e8c890';c.fillRect(hx-2*k,hy-8*k,3*k,9*k);c.fillStyle='#d8c0a8';c.beginPath();c.arc(hx,hy-9*k,3.2*k,0,7);c.fill();c.fillStyle='#d8302a';c.beginPath();c.ellipse(hx+1.6*k,hy-5.5*k,1.2*k,2.8*k,.2,0,7);c.fill();c.fillStyle='#ffb030';c.beginPath();c.moveTo(hx+2.6*k,hy-10*k);c.lineTo(hx+5.6*k,hy-9.4*k);c.lineTo(hx+2.6*k,hy-8.4*k);c.fill();c.fillStyle='#111';c.fillRect(hx+.6*k,hy-10.4*k,1.2*k,1.2*k);
+  if(c===ctx&&d<.6){c.globalCompositeOperation='lighter';glow(x+L/2,y,L*.6,.25*(1-d),'255,200,90');c.globalCompositeOperation='source-over'}c.restore()}
 const phxSet=()=>{const p=PNT();return p.eq==='phoenix'&&p.eqR==='r_phoenix'&&p.eqB==='b_phoenix'};
 function phxParts(c,x,y,L,b,d,T){const k=Math.max(.7,Math.min(1.5,L/95)),bow=b>=3?6:0;c.save();c.lineCap='round';
   if(c===ctx){c.globalCompositeOperation='lighter';glow(x+L/2,y+6,L*.75+20,.02+.32*Math.pow(1-d,1.5),'255,110,40');c.globalCompositeOperation='source-over'}
@@ -5107,7 +5132,8 @@ function renderHelp(){
   ...(hvOn()?[['Harvest Festival 2026 (until November 30)',[
    ['Fall at the lake',`<p>The trees around every water have turned red, orange and gold, leaves drift across the lake, and geese fly over in a V now and then.</p>`],
    ['Festival decor',`<p>The Shop has a Harvest section: Corn Stalk Bundles, a Harvest Table, a Harvest Wreath, a Pie on the Windowsill and Potted Mums, plus the Scarecrow and Hay Bales. Anything you buy is yours to keep, but these leave the Shop when the festival ends.</p>`],
-   ['Festival fish',`<p>Four fish only bite until November 30: the Acorn Sunfish (Dock Pond, dawn and day), the Maple Trout (Reed Lake, dawn to dusk), the Cranberry Darter (Fork River, day and dusk) and the legendary Harvest Moon Carp (Deepwater Basin, night). They have their own section at the top of your Logbook and in the Harvest app.</p>`],
+   ['The Great Gobble',`<p>The Harvest app has four long goals until the end of November. The Thanksgiving Feast: once the Harvest Basket is full it keeps filling toward one huge lake-wide goal, with six rewards every helper shares. The Gobbler’s Ledger: twelve rewards for the points you give, up to 1.5 million, ending with the Mythic Golden Gobbler boat, rod and bobber (wear all three for a strutting golden turkey). The Prize Turkey Show: adopt a turkey poult, feed it and groom it once a day; on Thanksgiving the top three win trophies and prize money and every turkey is pardoned as a pet. Master Baker: 12 blue ribbons at the pie contest earn the baker’s apron.</p>`],
+   ['Festival fish',`<p>Five fish only bite until November 30: the Acorn Sunfish (Dock Pond, dawn and day), the Maple Trout (Reed Lake, dawn to dusk), the Cranberry Darter (Fork River, day and dusk) and the legendary Harvest Moon Carp (Deepwater Basin, night). Once the lake’s Thanksgiving Feast reaches 45%, the legendary Great Gobbler bites in Lantern Bay at any hour. They have their own section at the top of your Logbook and in the Harvest app.</p>`],
    ['The Harvest Basket',`<p>Open the <b>Harvest</b> app on your phone to give fish from your cooler to one basket for the whole lake. Commons are worth 1 point, uncommons 2, rares 4, legendaries 10 and mythics 25, and festival fish count double. When the lake fills a quarter of the basket, everyone who gave at least 10 points gets $25,000. Half full brings 3 Golden Scale Elixirs, three-quarters brings The Cornucopia for your yard, and a full basket brings $100,000 and a trophy. You need an angler name from the Friends app to join in.</p>`],
    ['Flannel & knit hat',`<p>Everyone gets a flannel shirt and knit hat for the festival. Change it or take it off under Costume in Settings.</p>`]]]]:[]),
   ['New in the Lake Life Update',[
@@ -6479,7 +6505,7 @@ function hvPieDone(){if(!PIE.on)return;PIE.on=false;const h=HV(),v=hvPieV(),f=FI
   const per=c.val/c.n;c.n-=1;c.val=Math.max(0,c.val-per);if(c.n<=0)delete S.cooler[PIE.fish];coolDirty=true;if(PIE.fruit==='store')S.coins-=500;else pantry()[PIE.fruit]=Math.max(0,(pantry()[PIE.fruit]|0)-1);
   const fishP={C:10,U:16,R:24,L:32,M:40}[f.r]||10,fruitP=PIE.fruit==='store'?5:PIE.fruit===jf?25:12,bake=Math.round(Math.max(0,35-Math.abs(v-.5)*140)),mood=Math.round(Math.random()*10-5),score=Math.max(1,Math.min(100,fishP+fruitP+bake+mood));
   const rib=score>=75?'b':score>=55?'r':'w',rate=Math.max(40,estRate()),cash=Math.round(rate*{b:30,r:15,w:5}[rib]/10)*10,fn=PIE.fruit==='store'?'apple':PIE.fruit,name=`${FRUITS[fn].one.toLowerCase()} and ${f.n.toLowerCase()} pie`;
-  S.coins+=cash;h.rib=h.rib||{b:0,r:0,w:0};h.rib[rib]++;h.pie={d:todayKey(),score,rib,n:name};
+  S.coins+=cash;h.rib=h.rib||{b:0,r:0,w:0};h.rib[rib]++;h.pie={d:todayKey(),score,rib,n:name};try{hvBakerCheck()}catch(e){}
   if(rib==='b'&&h.rib.b>=3&&!h.baker){h.baker=1;S.trophies.unshift({name:'Blue Ribbon Baker 2026',water:'pond',type:'species',score:'3 blue ribbons',day:S.day});setTimeout(()=>celebrate({lbl:'Trophy!',r:'L',name:'Blue Ribbon Baker 2026',sub:'Three blue ribbons at the Harvest Fair',icon:svgI('leaf','#4a8ae8')}),900)}
   renderCooler();save();sfx(rib==='b'?'fanfare':'coin');$('plotTitle').textContent='The judges’ verdict';
   const B=$('plotBody'),bakeTxt=bake>=30?'Perfectly golden.':v<.5?'A little pale.':'A touch dark around the edges.',col={b:'#4a8ae8',r:'#e0403a',w:'#e8e8e8'}[rib];
@@ -6861,6 +6887,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:165,n:'The Great Gobble',items:['The Harvest Festival goes big and goes turkey, all the way to November 30.','The Thanksgiving Feast: the Harvest Basket keeps filling past 100% toward one enormous lake-wide feast. Six feast rewards along the way for everyone who helps: Harvest Moon nights, the Turkey Bobber, the Great Gobbler (a festival Legendary in Lantern Bay), the Thanksgiving Table for your yard, $500,000 with a bag of potions, and $2,000,000 with a trophy.','The Gobbler’s Ledger: twelve rewards just for the points you give, up to 1.5 million. Cash, potions, a Cranberry Sauce bobber, a Pilgrim hat, the Wishbone rod, $1,000,000, a full Turkey suit, a Golden Turkey statue, and the Mythic Golden Gobbler boat, rod and bobber. Wear all three and a golden turkey struts across the lake every time you land a Rare or better. Finish the ledger to become the Gobbler Monarch.','The Prize Turkey Show: adopt a turkey poult in the Harvest app, then feed and groom it every day. Feeding streaks make it grow faster. On Thanksgiving (November 26) the heaviest, shiniest turkeys win trophies and up to $3,000,000, and every turkey shown is pardoned and stays on as your pet.','Master Baker: win 12 blue ribbons at the pie contest for the baker’s apron.','Bug fix: “Give all” in the Harvest app could forget your first tap if the app refreshed in between, so it needed extra taps. It now stays ready for a few seconds.']},
  {v:164,n:'Bug fix: greenhouse and farm prices',items:['Bug fix: Sunfruit, Moonflowers, Glowberries, Honey, Eggs and greenhouse bait were priced off your last minute or so of income with no limit, so a short burst could make one Sunfruit worth millions. They now follow your steady income and top out at $90,000 for Sunfruit, $50,000 for Moonflowers, $25,000 for Honey, $20,000 for Glowberries, $12,000 for bait and $8,000 for Eggs. The yard’s other income-based rewards follow your steady income too.']},
  {v:163,n:'Bug fix: slots right after a prestige',items:['Bug fix: right after a prestige, the slot machine still paid out based on your income from before you prestiged, so a few spins could win back tens of millions. Your income now starts fresh when you prestige, and slots, fruit and other income-based prizes follow your new lake.']},
  {v:162,n:'Bug fix: tall windows on iPhone',items:['Bug fix: on iPhone, the bottom of tall windows like the Crafting table sat behind Safari’s toolbar, so you couldn’t scroll down to the last rows (such as making Abyssal Iron). Windows now fit the part of the screen you can actually see.']},
@@ -7175,7 +7202,7 @@ function draw0(now){
   if(night>0)for(const s of STARS){ctx.fillStyle=`rgba(240,240,220,${night*(.5+.5*Math.sin(T*1.3+s[3]))})`;ctx.fillRect(s[0],s[1],s[2],s[2])}
   for(const s of AMB.shoot){const gr=ctx.createLinearGradient(s.x,s.y,s.x-s.vx*.15,s.y-s.vy*.15);gr.addColorStop(0,`rgba(255,255,240,${s.life})`);gr.addColorStop(1,'rgba(255,255,240,0)');ctx.strokeStyle=gr;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*.15,s.y-s.vy*.15);ctx.stroke()}
   if(h>=5.5&&h<=20.5){const p=(h-5.5)/15,x=60+p*680,y=210-Math.sin(Math.PI*p)*175;glow(x,y,34,.35,'255,214,140');ctx.fillStyle='#ffe2a0';ctx.beginPath();ctx.arc(x,y,17,0,7);ctx.fill()}
-  const mh=h>=19?h-19:h+5;if(mh<=12){const p=mh/12,x=60+p*680,y=210-Math.sin(Math.PI*p)*160;ctx.fillStyle='#e9ecdc';ctx.beginPath();ctx.arc(x,y,12,0,7);ctx.fill();ctx.fillStyle=rgb(mix(top,bot,.5));ctx.beginPath();ctx.arc(x+5,y-3,10,0,7);ctx.fill()}
+  const mh=h>=19?h-19:h+5;if(mh<=12){const p=mh/12,x=60+p*680,y=210-Math.sin(Math.PI*p)*160;if(hvOn()&&hvFeastHit(0)){glow(x,y,70,.4,'255,170,80');const g2=ctx.createRadialGradient(x-6,y-6,4,x,y,26);g2.addColorStop(0,'#ffe0a0');g2.addColorStop(1,'#f08a2a');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(x,y,26,0,7);ctx.fill();ctx.fillStyle='rgba(180,90,30,.35)';for(const [a,b,r] of [[-8,-4,5],[6,6,4],[4,-10,3],[-4,10,3]]){ctx.beginPath();ctx.arc(x+a,y+b,r,0,7);ctx.fill()}}else{ctx.fillStyle='#e9ecdc';ctx.beginPath();ctx.arc(x,y,12,0,7);ctx.fill();ctx.fillStyle=rgb(mix(top,bot,.5));ctx.beginPath();ctx.arc(x+5,y-3,10,0,7);ctx.fill()}}
   ctx.globalAlpha=1;
   const cc0=mix(mix([58,66,100],[250,250,252],d),bot,.22),cc=mix(cc0,mix([40,44,54],[150,156,166],d),AMB.cover*.75);for(const c of AMB.clouds)cloud(c,cc,Math.min(.95,.3+.55*d+AMB.cover*.4));
   if(AMB.cover>.05){ctx.fillStyle=rgb(mix([34,38,50],[150,156,168],d),Math.min(.9,AMB.cover*.85));for(let i=0;i<12;i++){const x=((i*90+T*AMB.wind*.25)%1080)-140,y=12+(i%3)*16;ctx.beginPath();ctx.ellipse(x,y,80,26,0,0,7);ctx.fill()}}
@@ -7454,7 +7481,8 @@ const PETS={
   duck:{n:'Duck',c:3000,d:'Waddles after you everywhere.',coats:[['Mallard','#5a8a4a'],['White','#f4f2ea'],['Golden','#e8c050']]},
   frog:{n:'Frog',c:2000,d:'Small, damp, very loyal.',coats:[['Green','#5aa84a'],['Blue','#4a8ad0'],['Golden','#e0b83a']]},
   otter:{n:'Otter',c:25000,d:'Floats on its back and holds your hand.',coats:[['Brown','#7a5234'],['Sandy','#b08a5a']]},
-  fox:{n:'Fox',c:60000,d:'Clever, a little sneaky, extremely fluffy.',coats:[['Red','#d8642a'],['Arctic','#eef0f2'],['Silver','#5a5e66']]}};
+  fox:{n:'Fox',c:60000,d:'Clever, a little sneaky, extremely fluffy.',coats:[['Red','#d8642a'],['Arctic','#eef0f2'],['Silver','#5a5e66']]},
+  turkey:{n:'Turkey',c:0,ev:1,d:'Your pardoned prize turkey from the 2026 show. Gobbles at everyone.',coats:[['Bronze','#7a4a2a'],['Golden','#e8b030']]}};
 const PACC=[['none','None',0],['collar','Collar',0],['bandana','Bandana',500],['bow','Bow',500],['hat','Tiny hat',1500]];
 let PET_DOCK=false;
 const PET_RT={x:60,y:320,tx:60,ty:320,face:1,st:'idle',t:0,heart:0,ctx:'',last:0};
@@ -7467,6 +7495,7 @@ const shdH=(h,a)=>rgb(a<0?mix(hex(h),[0,0,0],-a):mix(hex(h),[255,255,255],a));
 function petDraw(c,P,x,y,face,pose,T,s,d){if(!P)return;const K=PETS[P.k],col=K.coats[P.coat][1],dk=shdH(col,-.3),lt=shdH(col,.35),night=d==null?1:d*.75+.25;
   c.save();c.translate(x,y);c.scale(face*s,s);if(night<1){c.filter=`brightness(${Math.round(night*100)}%)`}
   const walk=pose==='walk',nap=pose==='nap',sit=pose==='sit',ph=T*9,lg=walk?Math.sin(ph)*2.2:0;
+  if(P.k==='turkey'){c.restore();drawTurkey(c,x,y,face,s*.85,T,d==null?1:d,{gold:P.coat===1,fan:pose==='sit'?1:.35,walk:pose==='walk'?1:0});return}
   c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(0,0,9,1.8,0,0,7);c.fill();
   if(P.k==='duck'){const bob=walk?Math.abs(Math.sin(ph))*1:0;c.fillStyle='#e88a2a';c.fillRect(-2+lg*.3,-3,1.6,3);c.fillRect(1-lg*.3,-3,1.6,3);
     c.fillStyle=col;c.beginPath();c.ellipse(0,-6-bob,6.5,4.2,0,0,7);c.fill();c.beginPath();c.moveTo(-6,-7-bob);c.lineTo(-9,-9-bob);c.lineTo(-5.5,-5-bob);c.fill();
@@ -7548,7 +7577,7 @@ function petTap(){const P=curPet();if(!P)return;PET_RT.heart=performance.now();p
   const g=petGift();if(g){sfx('chime','R');setTimeout(()=>showToast(`${P.name} brought you ${g}!`,'A gift'),ps.day!==day?1400:0);save()}
   if(ps.day!==day){ps.day=day;const before=S.stamina;S.stamina=Math.min(100,S.stamina+10);renderVitals();showToast(`You pet ${P.name} ♥`,before<100?'+10 stamina (once a day)':'Good pet!');save()}}
 // ---- pet fun: voices, daily gifts, a pet house and bed, fetch, excitement on a catch ----
-function petVoice(k){try{if(k==='dog'){tone(240,.09,{type:'square',vol:.05,to:180});tone(260,.1,{type:'square',vol:.05,to:190,delay:.16})}
+function petVoice(k){try{if(k==='turkey'){tone(520,.1,{type:'triangle',vol:.05,to:380});tone(560,.08,{type:'triangle',vol:.05,to:400,delay:.12});tone(500,.12,{type:'triangle',vol:.05,to:360,delay:.22});return}if(k==='dog'){tone(240,.09,{type:'square',vol:.05,to:180});tone(260,.1,{type:'square',vol:.05,to:190,delay:.16})}
   else if(k==='cat')tone(620,.32,{type:'triangle',vol:.05,to:820});else if(k==='duck'){noise(.09,{f:900,q:3,vol:.06});noise(.09,{f:900,q:3,vol:.06,delay:.14})}
   else if(k==='frog'){tone(140,.08,{type:'square',vol:.05});tone(190,.08,{type:'square',vol:.05,delay:.1})}else if(k==='otter')tone(1300,.12,{type:'sine',vol:.04,to:1700});else tone(900,.14,{type:'sawtooth',vol:.03,to:1300})}catch(e){}}
 const petGiftReady=()=>{const P=S.pets;return !!(P&&P.out&&P.own&&P.own[P.out])&&P.gift!==todayKey()};
@@ -7573,7 +7602,7 @@ function petFetch(){if(yardCtx()!=='home'||!curPet()||PET_RT.fetch)return;const 
 // ---- Lakeside Rescue (in the Shop) ----
 function petShopHTML(){const ps=petsS();let h='<div class="pj-wrap">';
   h+=`<div class="pj-card"><div class="pj-h"><b>🐾 Lakeside Rescue</b><span>${Object.keys(ps.own).length}/${Object.keys(PETS).length} adopted</span></div><p>Adopt a companion. One follows you at a time: it naps in your yard, rides in your boat and curls up in the cabin. Friends see it when they visit. Pet it once a day for +10 stamina.</p></div>`;
-  for(const [k,K] of Object.entries(PETS)){const o=ps.own[k],out=ps.out===k;
+  for(const [k,K] of Object.entries(PETS)){const o=ps.own[k],out=ps.out===k;if(K.ev&&!o)continue;
     h+=`<div class="pj-card pet-card${out?' out':''}"><div class="pet-row"><canvas class="pet-cv" width="120" height="80" data-pcv="${k}"></canvas><div style="min-width:0;flex:1"><div class="pj-h"><b>${o?esc(o.name):K.n}</b><span>${o?(out?'With you':'Adopted'):ym(K.c)}</span></div><p>${K.d}</p></div></div>`;
     if(!o)h+=`<div class="pet-adopt"><input class="pet-name" maxlength="16" placeholder="Name your ${K.n.toLowerCase()}" data-pn="${k}"><button class="sbtn" data-padopt="${k}" ${S.coins>=K.c?'':'disabled'}>Adopt · ${ym(K.c)}</button></div>`;
     else{h+=`<div class="pet-opts"><span class="pet-l">Coat</span>${K.coats.map(([n,cl],i)=>`<button class="pet-sw${(o.coat|0)===i?' on':''}" style="background:${cl}" title="${n}" aria-label="${n}" data-pcoat="${k}:${i}"></button>`).join('')}</div>
@@ -7604,7 +7633,7 @@ const YI={
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
-  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
+  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},feasttable:{ox:0,oy:0,w:90,h:30,def:[[30,300]]},goldturkey:{ox:0,oy:0,w:34,h:40,def:[[-30,330]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
   cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]},
   pumpkinpatch:{ox:61,oy:385,w:56,h:14,def:[[61,385]]},wheelbarrow:{ox:100,oy:347,w:44,h:33,def:[[100,347]]},ciderpress:{ox:44,oy:352,w:60,h:46,def:[[44,352]]},maple:{ox:14,oy:296,w:57,h:83,def:[[14,296]]},hayride:{ox:94,oy:396,w:89,h:62,def:[[94,396]]}};
 // v156 and earlier anchored these five at their top-left corner, so they couldn't come up to the house. Saves shift them once so they stay put.
@@ -7678,6 +7707,8 @@ function yDraw(id,d,T,night,ph){
   else if(id==='fence'){ctx.fillStyle=rgb(mix([60,62,66],[244,242,234],d));ctx.fillRect(0,385,128,2);ctx.fillRect(0,391,128,2);for(let x=2;x<126;x+=8){ctx.fillRect(x,383,4,14);ctx.beginPath();ctx.moveTo(x,383);ctx.lineTo(x+2,380);ctx.lineTo(x+4,383);ctx.fill()}}
   else if(id==='birch')birchOne(d,T,ph);
   else if(id==='hpsign')hpSignDraw(d);
+  else if(id==='feasttable')feastTableDraw(d);
+  else if(id==='goldturkey')goldTurkeyDraw(d,T);
   else if(id==='steeple'){const x=186,y=330,st=rgb(mix([40,42,44],[150,150,142],d)),gr=rgb(mix([22,36,32],[80,116,100],d));ctx.fillStyle=rgb(mix([30,28,24],[110,100,84],d));ctx.fillRect(x-17,y-8,34,8);ctx.fillStyle=st;ctx.fillRect(x-12,y-44,24,36);ctx.fillStyle=rgb(mix([10,12,14],[40,44,50],d));ctx.fillRect(x-7,y-38,14,16);
     const sw=Math.sin(T*1.1+ph)*.25*(night?1:.3);ctx.save();ctx.translate(x,y-36);ctx.rotate(sw);ctx.fillStyle=rgb(mix([60,52,30],[176,146,70],d));ctx.beginPath();ctx.moveTo(-5,8);ctx.quadraticCurveTo(-5,0,0,0);ctx.quadraticCurveTo(5,0,5,8);ctx.closePath();ctx.fill();ctx.restore();
     ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(x-15,y-44);ctx.lineTo(x,y-80);ctx.lineTo(x+15,y-44);ctx.fill();ctx.strokeStyle=rgb(mix([40,40,40],[120,110,90],d));ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,y-80);ctx.lineTo(x,y-90);ctx.moveTo(x-4,y-86);ctx.lineTo(x+4,y-86);ctx.stroke();
@@ -7698,7 +7729,7 @@ function yDraw(id,d,T,night,ph){
 // Pets, people and anything else that walks around get drawn in depth order with the yard items, so they pass behind and in front of them.
 let YACT=null;
 function yardActors(d,T){const A=YACT;if(!A)return;const c=yardCtx();if(c){const P=c==='friend'?(VT&&VT.ext&&VT.ext.pet):curPet();if(P&&!(c==='friend'&&houseHere()&&[...HOUSE.peers.values()].some(p=>p.host&&p.pet)))A.push({y:PET_RT.ctx===c&&PET_RT.y!=null?PET_RT.y:310,fn:()=>petYard(d,T)})}
-  const wc=walkCtx();if(wc)A.push({y:WALK.ctx===wc&&WALK.y!=null?WALK.y:246,fn:()=>{walkDraw(d,T,wc);WALK.drawnT=T}});houseActors(d,T);chickenActors(A,d,T)}
+  const wc=walkCtx();if(wc)A.push({y:WALK.ctx===wc&&WALK.y!=null?WALK.y:246,fn:()=>{walkDraw(d,T,wc);WALK.drawnT=T}});houseActors(d,T);chickenActors(A,d,T);try{tkActors(A,d,T)}catch(e){}}
 function drawYard(d,T,night,back){const L=yardList(),own=yardCtx()==='home';const idx=L.map((a,i)=>i).filter(i=>(L[i][2]<250)===back&&yHas(L[i][0])).sort((a,b)=>yKey(L[a])-yKey(L[b])||a-b);
   if(!back&&YACT&&YACT.length){const all=idx.map(i=>({y:yKey(L[i]),i})).concat(YACT.map(a=>({y:a.y+.01,fn:a.fn}))).sort((a,b)=>a.y-b.y);for(const e of all){if(e.fn)e.fn();else drawYardItem(L,e.i,d,T,night,own)}return}
   for(const i of idx)drawYardItem(L,i,d,T,night,own)}
@@ -11088,12 +11119,12 @@ const XKIND={
   yard:{name:it=>{const [c]=String(it).split('|');return `Best yard of the week: $${money(+c)}`},give:it=>{const [c]=String(it).split('|');S.coins+=+c||0;S.trophies.unshift({name:'Best Yard',water:'pond',type:'big',score:'Most liked',day:S.day});celebrate({lbl:'Best yard!',r:'L',name:'Your yard got the most likes',sub:`+$${money(+c)} and a trophy`,icon:cupSvg});return true}},
   chal:{name:it=>{const [k,c,o,f]=String(it).split('|');const fn=FI(f)?FI(f).n:f;return k==='win'?`Challenge won vs ${o} (${fn}): $${money(+c)}`:k==='tie'?`Challenge tie with ${o}: $${money(+c)} back`:`Challenge refund (${o}): $${money(+c)}`},give:it=>{const [k,c,o]=String(it).split('|');S.coins+=+c||0;if(k==='win')celebrate({lbl:'Challenge won!',r:'R',name:`You beat ${o}`,sub:`+$${money(+c)}`,icon:cupSvg});else showToast(`+$${money(+c)}`,k==='tie'?'Challenge tie':'Challenge refund');return true}}};
 XKIND.cos={name:it=>ITEM_BY[it]?`${ITEM_BY[it].n} (${KIND_LBL[kindOf(it)]||'cosmetic'})`:'a parcel',give:(it,n)=>{if(!ITEM_BY[it])return false;const P=PNT();P.own[it]=(P.own[it]||0)+1;storeDirty=true;celebrate({lbl:'A parcel for you!',r:ITEM_BY[it].t||'R',name:ITEM_BY[it].n,sub:`A ${KIND_LBL[kindOf(it)]||'cosmetic'} for your locker`,icon:svgI('crown','#ffd05a')});return true}};
-function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(hvOn()||(S.hv&&S.hv.pts)){body.hvq=1;if(m.hvb>0)body.hvb=Math.round(m.hvb)}if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
+function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(hvOn()||(S.hv&&S.hv.pts)){body.hvq=1;if(m.hvb>0)body.hvb=Math.round(m.hvb)}if(hvOn()||(S.hv&&S.hv.tk&&!S.hv.tkDone)){body.hvtq=1;if(m.hvtDirty&&TKY())body.hvt=tkScore(TKY())}if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
 // Supporters get the Mythic Lantern Keeper kit once. It stays theirs.
 const SUP_KIT=['leviathan','r_starforged','b_sun'];
 function supKit(){if(S.supKit)return;const P=PNT();for(const id of SUP_KIT)P.own[id]=Math.max(1,P.own[id]|0);const cb=CAB();try{cabSync()}catch(e){}cb.own.eternal=1;try{cabSync()}catch(e){}S.supKit=1;storeDirty=true;save();
   setTimeout(()=>celebrate({lbl:'Mythic! Thank you, supporter',r:'M',name:'The Lantern Keeper kit',sub:'Aurora Leviathan paint, Starforged rod, Pocket Sun bobber and the Eternal Lantern for your cabin. Find them in Crates → Locker and Decorate.',icon:svgI('crown','#ff8fb8')}),4500)}
-function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}if(S.sup)supKit()}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);if(body.hvb&&r.hvb)m.hvb=Math.max(0,(m.hvb||0)-body.hvb);if(r.hvb){const pv=MPV.hvb;MPV.hvb=r.hvb;if(pv&&pv.goal===r.hvb.goal)MPV.hvb.total=Math.max(r.hvb.total,pv.total|0);hvClaim();if(phView==='hv'&&!$('slotsModal').hidden)renderHV()};
+function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}if(S.sup)supKit()}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);if(body.hvb&&r.hvb)m.hvb=Math.max(0,(m.hvb||0)-body.hvb);if(r.hvb){const pv=MPV.hvb;MPV.hvb=r.hvb;if(pv&&pv.goal===r.hvb.goal)MPV.hvb.total=Math.max(r.hvb.total,pv.total|0);try{hvFeastClaim();hvLedgerClaim()}catch(e){}if(r.hvt){MPV.hvt=r.hvt;if(body.hvt)m.hvtDirty=0;try{tkSettle()}catch(e){}}hvClaim();if(phView==='hv'&&!$('slotsModal').hidden)renderHV()};
   if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;if(r.owner&&!S.wdOwn){S.wdOwn=1;save();setTimeout(()=>showToast('Your Game Warden boat is ready. Turn it on in the Owner tools.','Game Warden'),5000)}
   if(r.chal){const prev=MPV.chal||[];MPV.chal=r.chal;const newIn=r.chal.filter(c=>c.mine==='b'&&c.st==='pend'&&!(m.chSeen||[]).includes(c.id));if(newIn.length){m.chSeen=(m.chSeen||[]).concat(newIn.map(c=>c.id)).slice(-40);phNotify('friends','Challenge!',`${newIn[0].other} challenges you: biggest ${FI(newIn[0].fish)?FI(newIn[0].fish).n:newIn[0].fish} for $${money(newIn[0].stake)}`)}
     const live=new Set(r.chal.filter(c=>c.st==='live').map(c=>String(c.id)));if(m.chw)for(const k of Object.keys(m.chw))if(!live.has(k))delete m.chw[k]}
@@ -11240,14 +11271,109 @@ function hvReward(i){const ic=svgI('leaf','#e8823a');
   else if(i===2){hvGiveDecor('cornucopia');celebrate({lbl:'Harvest Basket: three-quarters full!',r:'L',name:'The Cornucopia',sub:'A drone is bringing it to your yard',icon:ic})}
   else{S.coins+=100000;S.trophies.unshift({name:'Harvest Basket 2026',water:'pond',type:'bag',score:'Filled it together',day:S.day});celebrate({lbl:'The Harvest Basket is full!',r:'L',name:'+$100,000 and a trophy',sub:'The whole lake did it together',icon:ic})}
   save()}
+// ==THE GREAT GOBBLE (v165)== The Harvest Festival goes long and goes turkey:
+//  · The Thanksgiving Feast: the Harvest Basket keeps filling past 100% toward a much bigger lake-wide goal (set by the server
+//    from how fast the lake filled the first basket), with six feast rewards everyone who helped shares.
+//  · The Gobbler's Ledger: twelve rewards for the points YOU give, up to 1.5 million, ending with the Mythic Golden Gobbler set.
+//  · The Prize Turkey Show: raise a turkey in your yard, feed and groom it every day, and enter it on Thanksgiving (Nov 26).
+//    The top three win trophies; every turkey shown is pardoned and stays on as a pet.
+//  · Master Baker: 12 blue ribbons at the pie contest earns the baker's apron.
+const HVF_T=[[.15,'Harvest Moon nights + $100,000','A giant orange moon rises over every lake at night until the festival ends'],[.3,'The Turkey Bobber','A plump little turkey bobber that fans its tail when a fish bites'],[.45,'The Great Gobbler','A festival Legendary starts biting in Lantern Bay for everyone'],[.6,'The Thanksgiving Table','A long feast table for your yard, set for the whole family'],[.8,'$500,000 and 10 potions','A bag of every kind of potion'],[1,'$2,000,000 and a trophy','The Thanksgiving Feast 2026 trophy for your case']];
+const HVL_T=[[1000,'$50,000'],[5000,'3 Golden Scale Elixirs'],[15000,'Cranberry Sauce bobber'],[30000,'Pilgrim hat costume'],[60000,'Wishbone rod'],[100000,'$1,000,000'],[175000,'Turkey suit costume'],[250000,'Golden Turkey statue'],[400000,'Golden Gobbler boat paint (Mythic)'],[600000,'Golden Gobbler rod (Mythic)'],[900000,'Golden Gobbler bobber (Mythic)'],[1500000,'Gobbler Monarch trophy + $5,000,000']];
+const HVT_END=Date.UTC(2026,10,27,5,0,0),HVT_MAX=150; // show day ends at midnight Eastern after Thanksgiving
+const hvGot=(id)=>{const p=PNT();p.own[id]=(p.own[id]|0)+1};
+function hvCos(k){const h=HV();h.cos=h.cos||{};h.cos[k]=1}
+const hvHasCos=k=>!!(S.hv&&S.hv.cos&&S.hv.cos[k]);
+function hvFeastHit(i){const h=HV();return !!(h.fh&&h.fh[i])}
+function hvFeastReward(i){const ic=svgI('leaf','#e8823a');
+  if(i===0){S.coins+=100000;celebrate({lbl:'Thanksgiving Feast: Harvest Moon!',r:'R',name:'Harvest Moon nights + $100,000',sub:'Look up tonight',icon:ic})}
+  else if(i===1){hvGot('b_turkey');celebrate({lbl:'Thanksgiving Feast!',r:'L',name:'The Turkey Bobber',sub:'Equip it from your gear',icon:ic})}
+  else if(i===2){celebrate({lbl:'Thanksgiving Feast!',r:'L',name:'The Great Gobbler is biting',sub:'A festival Legendary in Lantern Bay, any time of day',icon:ic})}
+  else if(i===3){hvGiveDecor('feasttable');celebrate({lbl:'Thanksgiving Feast!',r:'L',name:'The Thanksgiving Table',sub:'A drone is bringing it to your yard',icon:ic})}
+  else if(i===4){S.coins+=500000;for(const k of PKEYS)givePotion(k,Math.max(1,Math.round(10/PKEYS.length)));storeDirty=true;celebrate({lbl:'Thanksgiving Feast!',r:'L',name:'$500,000 and a bag of potions',sub:'One of every kind, and then some',icon:ic})}
+  else{S.coins+=2000000;S.trophies.unshift({name:'Thanksgiving Feast 2026',water:'bay',type:'bag',score:'Fed the whole lake',day:S.day});celebrate({lbl:'The Thanksgiving Feast is served!',r:'L',name:'+$2,000,000 and a trophy',sub:'The whole lake did it together',icon:ic})}
+  save()}
+function hvLedgerReward(i){const ic=svgI('leaf','#e8823a'),t=HVL_T[i];
+  if(i===0)S.coins+=50000;else if(i===1){givePotion('gold',3);storeDirty=true}else if(i===2)hvGot('b_cranberry');else if(i===3)hvCos('pilgrim');else if(i===4)hvGot('r_wishbone');else if(i===5)S.coins+=1000000;
+  else if(i===6)hvCos('turkeysuit');else if(i===7)hvGiveDecor('goldturkey');else if(i===8)hvGot('gobbler');else if(i===9)hvGot('r_gobbler');else if(i===10)hvGot('b_gobbler');
+  else{S.coins+=5000000;S.trophies.unshift({name:'Gobbler Monarch',water:'bay',type:'bag',score:'1,500,000 points given',day:S.day})}
+  celebrate({lbl:`The Gobbler’s Ledger · ${t[0].toLocaleString()} points`,r:i>=8?'M':i>=4?'L':'R',name:t[1],sub:i>=8&&i<=10?'Wear all three Golden Gobbler pieces for the set bonus':'Thanks for feeding the lake',icon:ic});save()}
+function hvLedgerClaim(){const h=HV();h.led=h.led||{};let any=false;HVL_T.forEach(([n],i)=>{if((h.pts||0)>=n&&!h.led[i]){h.led[i]=1;any=true;hvLedgerReward(i)}});if(any)try{renderAll()}catch(e){}}
+function hvFeastClaim(){const B=MPV.hvb,h=HV();if(!B||!B.goal2)return;h.fh=h.fh||{};h.feast=h.feast||{};let any=false;
+  HVF_T.forEach(([fr],i)=>{if(B.total>=Math.ceil(B.goal2*fr)){if(!h.fh[i]){h.fh[i]=1;any=true}if(!h.feast[i]&&(h.pts||0)>=HVB_MIN){h.feast[i]=1;hvFeastReward(i)}}});if(any)try{renderAll()}catch(e){}}
+// --- the Golden Gobbler set bonus: a golden turkey struts along the shore when you land something Rare or better
+const gobSet=()=>{const p=PNT();return p.eq==='gobbler'&&p.eqR==='r_gobbler'&&p.eqB==='b_gobbler'};
+const GOBS={t0:-99};function gobStrut(){GOBS.t0=performance.now()/1000;try{tone(520,.12,{type:'triangle',vol:.05,to:380});tone(560,.1,{type:'triangle',vol:.05,to:400,delay:.14});tone(500,.14,{type:'triangle',vol:.05,to:360,delay:.27})}catch(e){}}
+function gobStrutDraw(now){const q=(now-GOBS.t0)/4;if(q<0||q>1||RM)return;const x=-40+q*880,y=300+Math.abs(Math.sin(q*40))*-3;drawTurkey(ctx,x,y,1,1.6,now,1,{gold:1,walk:1});
+  if(q<.3){ctx.save();ctx.font='bold 13px sans-serif';ctx.fillStyle=`rgba(255,240,180,${1-q/.3})`;ctx.fillText('Gobble gobble!',x+10,y-48);ctx.restore()}}
+// --- one turkey drawing for everything: the prize turkey, the pet, the statue and the set bonus. (x,y) = feet.
+function drawTurkey(c,x,y,face,s,T,d,o){o=o||{};const sh=(rgbA)=>o.gold?`rgb(${Math.round(200+rgbA[0]*.2)},${Math.round(150+rgbA[1]*.25)},${Math.round(30+rgbA[2]*.1)})`:rgb(mix(rgbA.map(v=>v*.3),rgbA,(d==null?1:d)*.8+.2));
+  const fan=o.fan==null?1:o.fan,walk=o.walk?Math.sin(T*10):0;c.save();c.translate(x,y);c.scale(face*s,s);
+  if(o.gold){c.shadowColor='#ffd05a';c.shadowBlur=10+4*Math.sin(T*4)}
+  c.fillStyle='rgba(0,0,0,.18)';c.beginPath();c.ellipse(0,0,10,2,0,0,7);c.fill();
+  const FC=[[150,82,40],[200,140,60],[120,64,34],[226,186,110],[176,48,40]],n=9;for(let i=0;i<n;i++){const a=-Math.PI*.98+i*Math.PI*.96/(n-1),r=(7+fan*6)*(1-.05*Math.abs(i-4));c.fillStyle=sh(FC[i%FC.length]);c.beginPath();c.ellipse(-4+Math.cos(a)*r*.8,-12+Math.sin(a)*r*.8,2.2+fan,5.4+fan*1.8,a+Math.PI/2,0,7);c.fill()}
+  c.fillStyle=sh([255,240,200]);for(let i=0;i<n;i+=2){const a=-Math.PI*.98+i*Math.PI*.96/(n-1),r=(7+fan*6)*1.25;c.beginPath();c.arc(-4+Math.cos(a)*r*.8,-12+Math.sin(a)*r*.8,.9,0,7);c.fill()}
+  c.strokeStyle=sh([210,150,60]);c.lineWidth=1.1;c.beginPath();c.moveTo(-2,-3);c.lineTo(-2+walk,0);c.moveTo(2,-3);c.lineTo(2-walk,0);c.stroke();
+  c.fillStyle=sh([96,58,34]);c.beginPath();c.ellipse(0,-8,7,5.4,0,0,7);c.fill();c.fillStyle=sh([130,80,44]);c.beginPath();c.ellipse(-1,-8,4.4,3.2,0,0,7);c.fill();
+  c.fillStyle=sh([150,110,90]);c.fillRect(4,-17,2.6,7);c.fillStyle=sh([170,150,140]);c.beginPath();c.arc(5.4,-18,2.6,0,7);c.fill();
+  c.fillStyle=o.gold?'#ff9a3a':'#d8302a';c.beginPath();c.ellipse(6.6,-15.2,1.1,2.4,.15,0,7);c.fill();c.fillStyle='#e8a030';c.beginPath();c.moveTo(7.4,-18.6);c.lineTo(10,-18);c.lineTo(7.4,-17.2);c.fill();c.fillStyle='#111';c.fillRect(5.6,-19.2,1,1);
+  if(o.hat){c.fillStyle='#1a1a1a';c.fillRect(3,-23,5,1.2);c.fillRect(3.8,-27,3.4,4);c.fillStyle='#e8c050';c.fillRect(4.8,-24.6,1.4,1.2)}
+  c.restore()}
+// --- the Prize Turkey: one per player, lives in the yard from the day you claim it until it's pardoned
+const TKY=()=>{const h=HV();return h.tk&&typeof h.tk==='object'?h.tk:null};
+const tkScore=t=>t?Math.round((t.w+t.pl*.6)*10)/10:0;
+const showOpen=()=>Date.now()<HVT_END&&hvOn();
+function tkClaim(){const h=HV();if(h.tk||!showOpen())return;h.tk={w:8,pl:0,fed:'',gr:'',st:0,name:'Gobbles'};sfx('chime','R');showToast('A turkey poult is waddling around your yard. Feed and groom it every day!','Prize Turkey Show');save();renderHV()}
+const TK_FEED=[{k:'corn',n:'Cracked corn',d:'$2,500 from the feed store',lb:1.2},{k:'pantry',n:'Pantry feast',d:'5 fruit or crops from your pantry',lb:2},{k:'fish',n:'Festival fish',d:'1 festival fish from your cooler',lb:3}];
+function tkFeed(k){const t=TKY(),d=localDay();if(!t||!showOpen()||t.fed===d)return;const F=TK_FEED.find(x=>x.k===k);if(!F)return;
+  if(k==='corn'){if(S.coins<2500){showToast('You need $2,500 for the corn');return}S.coins-=2500}
+  else if(k==='pantry'){const P=pantry(),key=Object.keys(P).sort((a,b)=>(P[b]|0)-(P[a]|0))[0];if(!key||(P[key]|0)<5){showToast('You need 5 of one fruit or crop in your pantry');return}P[key]-=5;storeDirty=true}
+  else{const id=coolerIds().find(id=>{const f=FI(id);return f&&f.ev===HV_ID&&!S.locked[id]});if(!id){showToast('You need a festival fish in your cooler');return}const c=S.cooler[id],per=c.val/c.n;c.n--;c.val=Math.max(0,c.val-per);if(c.n<=0)delete S.cooler[id];coolDirty=true}
+  const y=new Date(Date.now()-864e5),yk=`${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,'0')}-${String(y.getDate()).padStart(2,'0')}`;t.st=t.last===yk?Math.min(10,(t.st|0)+1):1;t.last=d;t.fed=d;
+  const gain=+(F.lb*(1+.05*t.st)*(.85+Math.random()*.3)).toFixed(1);t.w=Math.min(HVT_MAX,+(t.w+gain).toFixed(1));sfx('pop');showToast(`${esc(t.name)} gained ${gain} lb`,`${t.st}-day feeding streak`);mpS().hvtDirty=1;save();renderHV()}
+function tkGroom(){const t=TKY(),d=localDay();if(!t||!showOpen()||t.gr===d)return;t.gr=d;t.pl=Math.min(30,(t.pl|0)+1);sfx('chime');showToast(`${esc(t.name)}’s feathers are shining`,`Plumage ${t.pl}/30`);mpS().hvtDirty=1;save();renderHV()}
+// After the show: trophies for the top three, and every shown turkey is pardoned and becomes a pet.
+function tkSettle(){const t=TKY(),h=HV(),R=MPV.hvt;if(!t||h.tkDone||Date.now()<HVT_END||!R||!R.ended)return;h.tkDone=1;const rk=R.me&&R.me.rank;
+  if(rk&&rk<=3){S.trophies.unshift({name:`Prize Turkey Show ${['','1st','2nd','3rd'][rk]} place`,water:'pond',type:'big',score:`${esc(t.name)}, ${t.w} lb`,day:S.day});S.coins+=[0,3000000,1500000,750000][rk]}
+  const ps=petsS();if(!ps.own.turkey)ps.own.turkey={coat:0,acc:'none',name:t.name||'Gobbles'};
+  celebrate({lbl:rk&&rk<=3?`Prize Turkey Show: ${['','1st','2nd','3rd'][rk]} place!`:'The Prize Turkey Show',r:rk===1?'M':rk&&rk<=3?'L':'R',name:`${t.name} is pardoned!`,sub:`${rk&&rk<=3?'A trophy and prize money, and ':''}${t.name} is staying on as your pet. Find them in the Lakeside Rescue.`,icon:svgI('leaf','#e8823a')});save();try{renderAll()}catch(e){}}
+function tkActors(A,d,T){const t=TKY();if(!t||HV().tkDone||yardCtx()!=='home')return;const R=TKR,now=performance.now()/1000,dt=Math.min(.1,now-(R.lt||now));R.lt=now;
+  if(R.x==null){R.x=40;R.y=330}if(R.tx==null){R.w=(R.w||0)-dt;if(R.w<=0){R.tx=Math.max(yardLeft()+30,Math.min(110,R.x+(Math.random()-.5)*90));R.ty=Math.max(270,Math.min(392,R.y+(Math.random()-.5)*50))}}
+  else{const dx=R.tx-R.x,dy=R.ty-R.y,dd=Math.hypot(dx,dy),sp=14*dt;if(dd<=sp){R.tx=null;R.w=2+Math.random()*5;R.fan=Math.random()<.4?1:0}else{R.x+=dx/dd*sp;R.y+=dy/dd*sp;R.f=dx>0?1:-1;R.fan=0}}
+  const k=.55+Math.min(1,(t.w-8)/90)*.75;A.push({y:R.y,fn:()=>{drawTurkey(ctx,R.x,R.y,R.f||1,k,T,d,{fan:R.fan?1:.35,walk:R.tx!=null?1:0})}})}
+const TKR={};
+function hvLedgerHTML(){const h=HV(),p=h.pts||0;h.led=h.led||{};const next=HVL_T.findIndex(([n])=>p<n);
+  return `<div class="hw-card"><b>The Gobbler’s Ledger</b><p>Your own rewards for the points you give, all the way to the Mythic Golden Gobbler set. You’ve given <b>${p.toLocaleString()}</b> points${next>=0?`, ${(HVL_T[next][0]-p).toLocaleString()} more to the next one`:'. Every reward is yours!'}.</p><ul class="hw-rw">${HVL_T.map(([n,t],i)=>`<li class="${h.led[i]?'got':''}"><span>${h.led[i]?'✓':n>=1e6?(n/1e6)+'M':n>=1000?(n/1000)+'k':n}</span><div><b>${t}</b></div></li>`).join('')}</ul></div>`}
+function hvFeastHTML(){const B=MPV.hvb,h=HV();if(!B||!B.goal2)return '';h.feast=h.feast||{};const tot=B.total,g=B.goal2,pc=Math.min(100,tot/g*100);
+  return `<div class="hw-card"><b>The Thanksgiving Feast</b><p>The basket is overflowing! Keep giving: the whole lake is setting one enormous feast table. Every helper shares each reward.</p><div class="hw-bar"><i style="width:${pc.toFixed(1)}%"></i>${HVF_T.slice(0,5).map(([fr])=>`<span class="hvb-mk" style="left:${fr*100}%"></span>`).join('')}</div><p><b>${tot.toLocaleString()}</b> of ${g.toLocaleString()} points</p><ul class="hw-rw">${HVF_T.map(([fr,t,d],i)=>{const hit=tot>=Math.ceil(g*fr);return `<li class="${hit?'got':''}"><span>${hit?'✓':Math.round(fr*100)+'%'}</span><div><b>${t}</b><small>${d}${h.feast[i]?' · yours':''}</small></div></li>`}).join('')}</ul></div>`}
+function hvTurkeyHTML(){const t=TKY(),h=HV(),R=MPV.hvt,d=localDay(),open=showOpen();let x=`<div class="hw-card"><b>The Prize Turkey Show</b>`;
+  if(h.tkDone)return x+`<p>The show is over. ${t?esc(t.name)+' was pardoned and lives with you now.':''}</p></div>`;
+  if(!t)return x+(open?`<p>Raise a turkey in your yard and enter it on Thanksgiving (November 26). Feed it and groom it once a day; a feeding streak makes it grow faster. The heaviest, shiniest turkeys win trophies and prize money, and every turkey shown is pardoned and stays on as your pet.</p><button class="hv-btn hv-main" id="tkGet">Adopt a turkey poult · free</button></div>`:'<p>The show is over for this year.</p></div>');
+  const days=Math.max(0,Math.ceil((HVT_END-Date.now())/864e5));
+  x+=`<div class="tk-row"><canvas id="tkCv" width="200" height="140" style="width:120px;height:84px"></canvas><div><b>${esc(t.name)}</b> <small style="color:var(--muted)">${t.w} lb · plumage ${t.pl}/30 · show score ${tkScore(t)}</small><br><small style="color:var(--muted)">${open?`${t.st|0}-day feeding streak · show day in ${days} day${days===1?'':'s'}`:'Judging is done. Results arrive shortly.'}</small></div></div>`;
+  if(open){x+=`<div class="xf-row" style="flex-wrap:wrap">${TK_FEED.map(F=>`<button class="hv-btn" data-tkf="${F.k}" ${t.fed===d?'disabled':''} title="${F.d}">${F.n} · +${F.lb} lb</button>`).join('')}<button class="hv-btn" id="tkGroom" ${t.gr===d?'disabled':''}>Groom · +1 plumage</button></div><p class="fr-muted">${t.fed===d?'Fed today. ':''}${t.gr===d?'Groomed today. ':''}Corn costs $2,500; a pantry feast takes 5 of one fruit or crop; a festival fish comes from your cooler.</p>`}
+  if(R&&R.top&&R.top.length)x+=`<ol class="hw-board">${R.top.map((y,i)=>`<li class="${y.me?'me':''}"><span>${i+1}</span><b>${esc(y.name)}</b><em>${y.w} pts</em></li>`).join('')}</ol>${R.me?`<p class="fr-muted">You’re #${R.me.rank}.</p>`:''}`;
+  return x+'</div>'}
+function hvBakerHTML(){const R=HV().rib||{b:0};const n=R.b|0,got=hvHasCos('apron');return `<div class="hw-card"><b>Master Baker</b><p>${got?'You earned the baker’s apron! Wear it from Settings.':`Win 12 blue ribbons at the Harvest Fair pie contest to earn the baker’s apron. You have ${n}/12.`}</p></div>`}
+function hvBakerCheck(){const R=HV().rib;if(R&&(R.b|0)>=12&&!hvHasCos('apron')){hvCos('apron');celebrate({lbl:'Master Baker!',r:'L',name:'The baker’s apron',sub:'12 blue ribbons. Wear it from Settings.',icon:svgI('leaf','#e8823a')});save()}}
+function hvGobbleBind(b){const g=$('tkGet');if(g)g.onclick=tkClaim;b.querySelectorAll('[data-tkf]').forEach(x=>x.onclick=()=>tkFeed(x.dataset.tkf));const gr=$('tkGroom');if(gr)gr.onclick=tkGroom;
+  const cv=$('tkCv'),t=TKY();if(cv&&t){const c=cv.getContext('2d');c.clearRect(0,0,200,140);drawTurkey(c,96,134,1,3.2+Math.min(1,(t.w-8)/90)*1.3,performance.now()/1000,1,{fan:1})}}
+// yard pieces
+function feastTableDraw(d){const wd=rgb(mix([40,26,16],[140,92,54],d)),cl=rgb(mix([60,50,40],[236,226,206],d));ctx.fillStyle=wd;ctx.fillRect(-40,-14,3,14);ctx.fillRect(37,-14,3,14);ctx.fillStyle=cl;ctx.fillRect(-44,-18,88,5);ctx.fillStyle=rgb(mix([40,10,10],[176,48,40],d));ctx.fillRect(-44,-14,88,3);
+  for(const x of [-30,30]){ctx.fillStyle=wd;ctx.fillRect(x-6,-10,12,2);ctx.fillRect(x-5,-8,2,8);ctx.fillRect(x+3,-8,2,8)}
+  drawTurkey(ctx,0,-18,1,.62,0,d,{fan:.2});ctx.fillStyle=rgb(mix([40,24,14],[200,150,82],d));for(const x of [-24,22]){ctx.beginPath();ctx.ellipse(x,-19.5,5,2,0,Math.PI,0);ctx.fill()}
+  ctx.fillStyle=rgb(mix([40,10,10],[180,30,50],d));ctx.beginPath();ctx.arc(-14,-19.6,2.2,0,7);ctx.fill();ctx.fillStyle=rgb(mix([40,30,10],[236,140,40],d));ctx.beginPath();ctx.arc(13,-19.6,2.4,0,7);ctx.fill();
+  if(lit(d))for(const x of [-36,36]){ctx.fillStyle='#fff2c0';ctx.fillRect(x-.6,-25,1.2,6);glow(x,-25,12,.5,'255,210,140')}}
+function goldTurkeyDraw(d,T){ctx.fillStyle=rgb(mix([40,40,44],[150,150,146],d));ctx.fillRect(-12,-8,24,8);ctx.fillRect(-14,-10,28,3);drawTurkey(ctx,0,-10,1,1.25,T,d,{gold:1,fan:1});if(lit(d)){ctx.globalCompositeOperation='lighter';glow(0,-26,30,.35,'255,210,90');ctx.globalCompositeOperation='source-over'}}
 function hvClaim(){const B=MPV.hvb,h=HV();if(!B||!B.goal||(h.pts||0)<HVB_MIN)return;h.tiers=h.tiers||{};let any=false;
   HVB_T.forEach(([fr],i)=>{if(B.total>=Math.ceil(B.goal*fr)&&!h.tiers[i]){h.tiers[i]=1;any=true;hvReward(i)}});if(any){try{renderAll()}catch(e){}}}
 function hvbGive(k,n){const c=S.cooler[k],f=FI(k),m=mpS();if(!c||!f||!m.id||!hvOn())return;n=Math.min(n,c.n);if(n<=0)return;
   const per=c.val/c.n;c.n-=n;c.val=Math.max(0,c.val-per*n);if(c.n<=0)delete S.cooler[k];const p=n*hvPts(f),h=HV();h.pts=(h.pts||0)+p;m.hvb=(m.hvb||0)+p;
-  if(MPV.hvb){MPV.hvb.total+=p;MPV.hvb.mine=(MPV.hvb.mine||0)+p}coolDirty=true;renderCooler();sfx('coin');showToast(`Gave ${n.toLocaleString()} ${f.n} to the Harvest Basket`,`+${p.toLocaleString()} point${p>1?'s':''}`);save();hvClaim();renderHV()}
+  if(MPV.hvb){MPV.hvb.total+=p;MPV.hvb.mine=(MPV.hvb.mine||0)+p}coolDirty=true;renderCooler();sfx('coin');showToast(`Gave ${n.toLocaleString()} ${f.n} to the Harvest Basket`,`+${p.toLocaleString()} point${p>1?'s':''}`);save();hvClaim();hvFeastClaim();hvLedgerClaim();renderHV()}
 function hvbGiveAll(){const ids=coolerIds().filter(k=>!S.locked[k]);if(!ids.length)return;let p=0,n=0;const m=mpS();if(!m.id||!hvOn())return;
   for(const k of ids){const c=S.cooler[k],f=FI(k);p+=c.n*hvPts(f);n+=c.n;delete S.cooler[k]}const h=HV();h.pts=(h.pts||0)+p;m.hvb=(m.hvb||0)+p;if(MPV.hvb){MPV.hvb.total+=p;MPV.hvb.mine=(MPV.hvb.mine||0)+p}
-  coolDirty=true;renderCooler();sfx('coin');showToast(`Gave ${n.toLocaleString()} fish to the Harvest Basket`,`+${p.toLocaleString()} points`);save();hvClaim();renderHV()}
+  coolDirty=true;renderCooler();sfx('coin');showToast(`Gave ${n.toLocaleString()} fish to the Harvest Basket`,`+${p.toLocaleString()} points`);save();hvClaim();hvFeastClaim();hvLedgerClaim();renderHV()}
+let HVARM=0; // "Give all" stays armed for a few seconds even if the panel refreshes between your two taps
 function renderHV(){const b=$('hvBody');if(!b)return;const h=HV(),m=mpS(),B=MPV.hvb,on=hvOn();h.tiers=h.tiers||{};
   let html=`<div class="hv-hero"><span>${svgI('leaf','#fff1d0')}</span><div><b>Harvest Festival</b><small>${on?`${hvDaysLeft()} day${hvDaysLeft()===1?'':'s'} left · ends November 30`:'The festival is over. Thanks for playing!'}</small></div></div>`;
   const tot=B?B.total:0,goal=B&&B.goal?B.goal:0,pc=goal?Math.min(100,tot/goal*100):0;
@@ -11255,6 +11381,10 @@ function renderHV(){const b=$('hvBody');if(!b)return;const h=HV(),m=mpS(),B=MPV.
     (!m.id?`<p class="fr-muted">Pick an angler name in the Friends app to join in.</p>`:!B?`<p class="fr-muted">Loading the basket…</p>`:
     `<div class="hw-bar"><i style="width:${pc.toFixed(1)}%"></i>${HVB_T.slice(0,3).map(([fr])=>`<span class="hvb-mk" style="left:${fr*100}%"></span>`).join('')}</div><p><b>${tot.toLocaleString()}</b> of ${goal.toLocaleString()} points · ${(B.n||0).toLocaleString()} angler${B.n===1?'':'s'} helping · you’ve given ${(h.pts||0).toLocaleString()}${(h.pts||0)<HVB_MIN?` (give ${HVB_MIN-(h.pts||0)} more to share the rewards)`:''}</p>`)+
     `<ul class="hw-rw">${HVB_T.map(([fr,t,d],i)=>{const hit=goal&&tot>=Math.ceil(goal*fr);return `<li class="${hit?'got':''}"><span>${hit?'✓':Math.round(fr*100)+'%'}</span><div><b>${t}</b><small>${d}${h.tiers[i]?' · yours':hit&&(h.pts||0)<HVB_MIN?' · give a little to claim it':''}</small></div></li>`}).join('')}</ul></div>`;
+  if(B&&B.goal2&&B.total>=B.goal)html+=hvFeastHTML();
+  if(m.id)html+=hvLedgerHTML();
+  if(on||TKY())html+=hvTurkeyHTML();
+  if(on||hvHasCos('apron'))html+=hvBakerHTML();
   if(on&&m.id){const ids=coolerIds().filter(k=>!S.locked[k]).sort((a,b)=>hvPts(FI(b))-hvPts(FI(a)));let allN=0,allP=0;for(const k of ids){allN+=S.cooler[k].n;allP+=S.cooler[k].n*hvPts(FI(k))}
     html+=`<div class="hw-card"><b>Give fish</b>${ids.length?`<p>Fish you give leave your cooler and don’t sell. Locked fish stay put.</p><button class="hv-btn hv-main" id="hvAll">Give all ${allN.toLocaleString()} fish · ${allP.toLocaleString()} points</button><ul class="hv-give">${ids.slice(0,30).map(k=>{const c=S.cooler[k],f=FI(k);return `<li>${fishSvg(f.col||RCOL[f.r])}<div><b class="rar-${f.r}">${f.n}</b><small>×${c.n.toLocaleString()} · ${hvPts(f)} pt${hvPts(f)>1?'s':''} each</small></div><button data-hvg="${k}" data-n="1">Give 1</button><button data-hvg="${k}" data-n="${c.n}">All ${c.n.toLocaleString()}</button></li>`}).join('')}</ul>`:'<p>Your cooler is empty. Go catch something!</p>'}</div>`}
   if(on)html+=`<div class="hw-card"><b>The Harvest Fair</b><p>Lantern Harbor’s main street is decked out for the festival. Visit the fair stall for apple bobbing and the daily pie contest.</p><button class="hv-btn" id="hvTown">Go to town</button></div>`;
@@ -11262,7 +11392,7 @@ function renderHV(){const b=$('hvBody');if(!b)return;const h=HV(),m=mpS(),B=MPV.
   html+=`<div class="hw-card"><b>Festival fish</b><p>${on?'Only biting until November 30.':'Gone until next fall.'}</p><ul class="hw-fish">${EVFISH.filter(f=>f.ev===HV_ID).map(f=>{const w=(h.fish&&h.fish[f.id])||(S.log[f.id]&&S.log[f.id].big);return `<li>${fishSvg(f.col)}<div><b class="rar-${f.r}">${w?f.n:'???'}</b><small>${W(f.at).n} · ${f.t.map(x=>PH[x]).join(', ')}${w?` · best ${(+w).toFixed(2)} lb`:''}</small></div></li>`}).join('')}</ul></div>`;
   html+=`<div class="hw-card"><b>Costume</b><div class="hw-cos">${[['','None'],['flannel','Flannel & knit hat']].map(([k,n])=>`<button data-hvw="${k}" aria-pressed="${(hwWear()||'')===k}" ${k&&!h.flannel?'disabled':''}>${n}</button>`).join('')}</div></div>`;
   b.innerHTML=html;
-  b.querySelectorAll('[data-hvg]').forEach(x=>x.onclick=()=>hvbGive(x.dataset.hvg,+x.dataset.n));const ga=$('hvAll');if(ga)ga.onclick=()=>{if(!ga.dataset.arm){ga.dataset.arm=1;ga.textContent='Tap again to give them all';return}hvbGiveAll()};
+  b.querySelectorAll('[data-hvg]').forEach(x=>x.onclick=()=>hvbGive(x.dataset.hvg,+x.dataset.n));try{hvGobbleBind(b)}catch(e){}const ga=$('hvAll');if(ga){if(Date.now()-HVARM<5000){ga.dataset.arm=1;ga.textContent='Tap again to give them all'}ga.onclick=()=>{if(!ga.dataset.arm){ga.dataset.arm=1;HVARM=Date.now();ga.textContent='Tap again to give them all';return}HVARM=0;hvbGiveAll()}};
   {const tb=$('hvTown');if(tb)tb.onclick=()=>{closePhone();openTown()}}
   b.querySelectorAll('[data-hvw]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.hvw||null;sfx('click');save();renderHV()})}
 function hwLogSection(p){const any=EVFISH.filter(f=>f.ev===HW_ID).some(f=>S.log[f.id]);if(!hwOn()&&!any)return;const ph=phaseOf(S.min);
