@@ -6861,6 +6861,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:164,n:'Bug fix: greenhouse and farm prices',items:['Bug fix: Sunfruit, Moonflowers, Glowberries, Honey, Eggs and greenhouse bait were priced off your last minute or so of income with no limit, so a short burst could make one Sunfruit worth millions. They now follow your steady income and top out at $90,000 for Sunfruit, $50,000 for Moonflowers, $25,000 for Honey, $20,000 for Glowberries, $12,000 for bait and $8,000 for Eggs. The yard’s other income-based rewards follow your steady income too.']},
  {v:163,n:'Bug fix: slots right after a prestige',items:['Bug fix: right after a prestige, the slot machine still paid out based on your income from before you prestiged, so a few spins could win back tens of millions. Your income now starts fresh when you prestige, and slots, fruit and other income-based prizes follow your new lake.']},
  {v:162,n:'Bug fix: tall windows on iPhone',items:['Bug fix: on iPhone, the bottom of tall windows like the Crafting table sat behind Safari’s toolbar, so you couldn’t scroll down to the last rows (such as making Abyssal Iron). Windows now fit the part of the screen you can actually see.']},
  {v:161,n:'Bug fix: time away in the realms',items:['Bug fix: since you started staying in the realms while away, the whole time away (up to 24 hours) paid at realm prices, far more than anywhere else. Now only the first hour away pays realm prices. After that your line is back on the water you came through the gate from, and you still wake up in the realm. Money already earned is yours to keep.']},
@@ -7553,7 +7554,7 @@ function petVoice(k){try{if(k==='dog'){tone(240,.09,{type:'square',vol:.05,to:18
 const petGiftReady=()=>{const P=S.pets;return !!(P&&P.out&&P.own&&P.own[P.out])&&P.gift!==todayKey()};
 function petGift(){const ps=petsS(),P=curPet();if(!P||ps.gift===todayKey())return null;ps.gift=todayKey();const r=Math.random();let what;
   if(r<.55){const pool=MATS.filter(m=>m.r==='C'),m=pool[Math.floor(Math.random()*pool.length)],n=1+Math.floor(Math.random()*3);S.mats[m.id]=(S.mats[m.id]||0)+n;what=`${n} ${m.n}`;storeDirty=true}
-  else if(r<.8){const c=Math.max(150,Math.round((S.rate||0)*1.5));S.coins+=c;what=`$${money(c)} they found in the reeds`}
+  else if(r<.8){const c=Math.max(150,Math.round(steadyRate()*1.5));S.coins+=c;what=`$${money(c)} they found in the reeds`}
   else if(r<.95){const f=FIDS[Math.floor(Math.random()*FIDS.length)];pantry()[f]=(pantry()[f]|0)+2;what=`2 ${FRUITS[f].n.toLowerCase()}`;storeDirty=true}
   else{const k=pick(PKEYS);givePotion(k,1);what=`a ${POT[k].n}`}
   return what}
@@ -7849,7 +7850,7 @@ function pantryAct(kind,k){const P=pantry(),n=P[k]|0;if(!n)return;const F=FRUITS
   else if(kind==='s'){const each=F?fruitPrice(k):C.sell,v=each*n;P[k]=0;S.coins+=v;sfx('coin');showToast(`Sold ${n} ${F?F.n:C.n}`,ym(v))}
   else if(kind==='p'&&F){const Y=S.yard;if(!yardOk(Y))return;const trees=FIDS.reduce((s,f)=>s+yInv('tree_'+f),0);if(trees>=TREE_CAP){showToast('Your orchard is full',`Up to ${TREE_CAP} trees`);return}
     P[k]=n-1;Y.inv['tree_'+k]=yInv('tree_'+k)+1;sfx('chime','R');showToast(`${F.one} sapling ready`,'Place it from Decorate yard');
-    if(!Y.got.orchard&&FIDS.every(f=>yInv('tree_'+f)>0)){Y.got.orchard=1;const r=Math.max(25000,Math.round((S.rate||0)*60));S.coins+=r;setTimeout(()=>showToast('Full orchard! All six fruit trees',`+${ym(r)}`),1600)}}
+    if(!Y.got.orchard&&FIDS.every(f=>yInv('tree_'+f)>0)){Y.got.orchard=1;const r=Math.max(25000,Math.round(steadyRate()*60));S.coins+=r;setTimeout(()=>showToast('Full orchard! All six fruit trees',`+${ym(r)}`),1600)}}
   if(!P[k])delete P[k];storeDirty=true;save()}
 // ==YARD GAMES== Decor you can play: cornhole, a basketball hoop and a tire swing. Tap one to walk over and play.
 const YGAMES={cornhole:{n:'Cornhole Set',c:3000,d:'Two boards. Hold to wind up, release to throw.'},hoop:{n:'Basketball Hoop',c:5000,d:'Stop the meter in the green to sink it.'},tireswing:{n:'Tire Swing',c:2000,d:'Sit back and swing.'}};
@@ -7860,12 +7861,16 @@ Object.assign(YUNIT,YGAMES);YIDS.push('cornhole','hoop','tireswing');
 const YFARM={greenhouse:{n:'Greenhouse',c:25000,d:'Grows rare plants and live bait the garden plot can’t.'},beehive:{n:'Beehive',c:8000,d:'Fills with honey. Faster with flowers nearby.'},coop:{n:'Chicken Coop',c:12000,d:'Three chickens that wander the yard and lay eggs.'},dryrack:{n:'Drying Rack',c:6000,d:'Hang fish from your cooler. Jerky sells for more.'}};
 Object.assign(YI,{greenhouse:{ox:0,oy:0,w:66,h:58,def:[],unit:1,farm:1},beehive:{ox:0,oy:0,w:20,h:30,def:[],unit:1,farm:1},coop:{ox:0,oy:0,w:50,h:38,def:[],unit:1,farm:1},dryrack:{ox:0,oy:0,w:40,h:34,def:[],unit:1,farm:1}});
 Object.assign(YUNIT,YFARM);YIDS.push('greenhouse','beehive','coop','dryrack');
-const rateSell=(base,m)=>Math.max(base,Math.round((S.rate||0)*m));
+// Bug fix (v164): yard produce priced off your income from the last minute or so, with no ceiling, so a burst of income
+// (potions, a lucky streak) made each Sunfruit worth millions. Prices now follow your steady income, up to a cap per item.
+const steadyRate=()=>{const r=S.rate||0;return Math.min(90000,S.rateL==null?r*.5:Math.min(r,S.rateL))};
+const rateSell=(base,m,cap)=>Math.max(base,Math.min(cap||Infinity,Math.round(steadyRate()*m)));
 // Greenhouse crops: rare produce, plus bait you can use for a 10-minute boost
 const GHC={glowberry:{n:'Glowberries',seed:800,min:120,yield:4,base:900,m:.9,eat:8,col:[110,230,200]},moonflower:{n:'Moonflowers',seed:1500,min:240,yield:3,base:2200,m:2.2,eat:0,col:[214,220,255]},
   sunfruit:{n:'Sunfruit',seed:3000,min:360,yield:3,base:4500,m:4,eat:25,col:[255,190,60]},glowworm:{n:'Glow Worms',seed:1200,min:90,yield:2,base:600,m:.5,eat:0,bait:'luck',col:[150,255,120]},grub:{n:'Fat Grubs',seed:1200,min:90,yield:2,base:600,m:.5,eat:0,bait:'giant',col:[230,200,150]}};
-for(const k in GHC)Object.defineProperty(GHC[k],'sell',{get(){return rateSell(this.base,this.m)}});
-const FARMF={honey:{n:'Honey',col:[240,180,40],eat:10,get sell(){return rateSell(400,1.2)}},egg:{n:'Eggs',col:[246,238,220],eat:8,get sell(){return rateSell(120,.35)}}};
+const GHC_CAP={glowberry:20000,moonflower:50000,sunfruit:90000,glowworm:12000,grub:12000};
+for(const k in GHC)Object.defineProperty(GHC[k],'sell',{get(){return rateSell(this.base,this.m,GHC_CAP[k])}});
+const FARMF={honey:{n:'Honey',col:[240,180,40],eat:10,get sell(){return rateSell(400,1.2,25000)}},egg:{n:'Eggs',col:[246,238,220],eat:8,get sell(){return rateSell(120,.35,8000)}}};
 const foodOf2=k=>CROPS[k]||GHC[k]||FARMF[k];
 const HONEY_MS=40*6e4,HONEY_CAP=6,EGG_MS=10*6e4,EGG_CAP=12,DRY_MS=2*36e5;
 const farmA=i=>S.yard&&S.yard.it&&S.yard.it[i];
@@ -7977,7 +7982,7 @@ function roastOpen(){Object.assign(ROAST,{on:true,heat:0,hold:false,done:null,fi
 function roastDone(){const h=ROAST.heat,y=YH(),today=localDay();if(y.md!==today){y.md=today;y.mm=0}let msg,good=false;
   if(h<.35)msg='Barely warm. Still tasty.';else if(h<.55)msg='Lightly toasted.';else if(h<.8){msg='Perfectly golden! 🔥';good=true}else if(h<1.15)msg='A little dark, but crunchy.';else msg='It caught fire! Charcoal marshmallow.';
   ROAST.done=msg;let extra='';if(h<1.15&&S.hunger<100){S.hunger=Math.min(100,S.hunger+(good?6:3));renderVitals&&renderVitals();extra=` +${good?6:3} hunger`}
-  if(good&&y.mm<5){y.mm++;const pay=Math.max(200,Math.round((S.rate||0)*2));S.coins+=pay;extra+=` · +${ym(pay)}`;sfx('coin')}else sfx(good?'chime':'pop');
+  if(good&&y.mm<5){y.mm++;const pay=Math.max(200,Math.round(steadyRate()*2));S.coins+=pay;extra+=` · +${ym(pay)}`;sfx('coin')}else sfx(good?'chime':'pop');
   $('rsMsg').textContent=msg+extra;$('rsHold').hidden=true;$('rsNew').hidden=false;try{if(HOUSE.st==='on')hsend({t:'emo',e:0})}catch(e){}save()}
 function roastDraw(T){const c=$('rsCv').getContext('2d'),W=320,H=220,h=ROAST.heat;c.clearRect(0,0,W,H);
   const g=c.createRadialGradient(160,200,4,160,200,120);g.addColorStop(0,'rgba(255,150,60,.45)');g.addColorStop(1,'rgba(255,150,60,0)');c.fillStyle=g;c.fillRect(0,0,W,H);
@@ -8006,12 +8011,12 @@ function scopeOpen(){const night=1-Math.min(1,daylight(S.min/60)*1.6),y=YH(),B=$
   cancelAnimationFrame(SCOPE.raf);let lt=performance.now();const loop=now=>{if($('plotModal').hidden||!$('scCv')){SCOPE.on=false;return}const dt=Math.min(.05,(now-lt)/1000);lt=now;scopeTick(dt,now/1000);scopeDraw(now/1000);SCOPE.raf=requestAnimationFrame(loop)};SCOPE.raf=requestAnimationFrame(loop)}
 function scopeLog(){const y=YH();return `<div class="pj-card" style="gap:4px"><b>Star log · ${Object.keys(y.stars).length}/${CONSTEL.length} constellations · ${y.shoot|0} shooting stars</b><small>${CONSTEL.map(c=>y.stars[c.n]?`✦ ${c.n}`:'· ???').join(' &nbsp; ')}</small></div>`}
 function scopeTick(dt,T){const cx=SCOPE.vx+160,cy=SCOPE.vy+120,y=YH();let near=-1;CON_POS.forEach(([x,y0],i)=>{if(Math.hypot(x-cx,y0-cy)<36)near=i});
-  if(near>=0&&!y.stars[CONSTEL[near].n]){if(SCOPE.lock!==near){SCOPE.lock=near;SCOPE.lockT=0}SCOPE.lockT+=dt;if(SCOPE.lockT>1.2){const c=CONSTEL[near];y.stars[c.n]=1;const pay=Math.max(2000,Math.round((S.rate||0)*15));S.coins+=pay;sfx('chime','R');$('scMsg').textContent=`You found ${c.n}! +${ym(pay)}`;{const e=$('scLog');if(e)e.innerHTML=scopeLog()}
+  if(near>=0&&!y.stars[CONSTEL[near].n]){if(SCOPE.lock!==near){SCOPE.lock=near;SCOPE.lockT=0}SCOPE.lockT+=dt;if(SCOPE.lockT>1.2){const c=CONSTEL[near];y.stars[c.n]=1;const pay=Math.max(2000,Math.round(steadyRate()*15));S.coins+=pay;sfx('chime','R');$('scMsg').textContent=`You found ${c.n}! +${ym(pay)}`;{const e=$('scLog');if(e)e.innerHTML=scopeLog()}
     if(Object.keys(y.stars).length===CONSTEL.length&&!y.all){y.all=1;S.trophies.unshift({name:'Stargazer',water:'pond',type:'big',score:'Every constellation found',day:S.day});celebrate({lbl:'Stargazer!',r:'L',name:'Every constellation found',sub:'A trophy for your cabin',icon:cupSvg})}save()}}
   else{SCOPE.lock=near;SCOPE.lockT=0}
   if(!SCOPE.shoot&&Math.random()<dt/6){const a=Math.PI*(.15+Math.random()*.2);SCOPE.shoot={x:SCOPE.vx+Math.random()*320,y:SCOPE.vy+Math.random()*100,vx:Math.cos(a)*220*(Math.random()<.5?-1:1),vy:Math.sin(a)*220,t:0}}
   const s=SCOPE.shoot;if(s){s.t+=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;if(s.t>1.1)SCOPE.shoot=null}}
-function scopeShoot(){const y=YH(),today=localDay();if(y.sd!==today){y.sd=today;y.sn=0}y.shoot=(y.shoot|0)+1;SCOPE.shoot=null;let extra='';if(y.sn<5){y.sn++;const pay=Math.max(500,Math.round((S.rate||0)*3));S.coins+=pay;extra=` +${ym(pay)}`}sfx('chime');$('scMsg').textContent=`You caught a shooting star! Make a wish.${extra}`;{const e=$('scLog');if(e)e.innerHTML=scopeLog()}save()}
+function scopeShoot(){const y=YH(),today=localDay();if(y.sd!==today){y.sd=today;y.sn=0}y.shoot=(y.shoot|0)+1;SCOPE.shoot=null;let extra='';if(y.sn<5){y.sn++;const pay=Math.max(500,Math.round(steadyRate()*3));S.coins+=pay;extra=` +${ym(pay)}`}sfx('chime');$('scMsg').textContent=`You caught a shooting star! Make a wish.${extra}`;{const e=$('scLog');if(e)e.innerHTML=scopeLog()}save()}
 function scopeDraw(T){const c=$('scCv').getContext('2d'),vx=SCOPE.vx,vy=SCOPE.vy,y=YH();c.fillStyle='#040612';c.fillRect(0,0,320,240);
   for(const [x,y0,r,tw] of SKYSTARS){const sx=x-vx,sy=y0-vy;if(sx<-2||sx>322||sy<-2||sy>242)continue;c.fillStyle=`rgba(255,255,255,${.4+.4*Math.abs(Math.sin(T*1.3+tw))})`;c.fillRect(sx,sy,r,r)}
   CONSTEL.forEach((cn,i)=>{const [ox,oy]=CON_POS[i],got=!!y.stars[cn.n],k=SCOPE.lock===i?Math.min(1,SCOPE.lockT/1.2):0;if(ox-vx<-80||ox-vx>400||oy-vy<-80||oy-vy>320)return;
@@ -8063,7 +8068,7 @@ Object.assign(YI,{statue:{ox:0,oy:0,w:40,h:62,def:[],unit:1,show:1},vane:{ox:0,o
 Object.assign(YUNIT,YSHOW);YIDS.push('statue','vane','leaves','snowman');
 const seasonOk=id=>{const s=YSHOW[id]&&YSHOW[id].season;return !s||s.includes(new Date().getMonth())};
 const Y3=()=>{if(!S.y3||typeof S.y3!=='object')S.y3={hs:0,hd:'',hn:0,pb:0,pd:'',pn:0};return S.y3};
-function y3Pay(kind,mult){const y=Y3(),d=localDay(),kd=kind+'d',kn=kind+'n';if(y[kd]!==d){y[kd]=d;y[kn]=0}if(y[kn]>=3)return 0;y[kn]++;const v=Math.max(300,Math.round((S.rate||0)*mult));S.coins+=v;return v}
+function y3Pay(kind,mult){const y=Y3(),d=localDay(),kd=kind+'d',kn=kind+'n';if(y[kd]!==d){y[kd]=d;y[kn]=0}if(y[kn]>=3)return 0;y[kn]++;const v=Math.max(300,Math.round(steadyRate()*mult));S.coins+=v;return v}
 // --- horseshoes: a power meter swings; tap to throw. Ringer = 3, close = 1.
 const SHOE={raf:0,on:false};
 function shoeOpen(){Object.assign(SHOE,{on:true,throws:[],fly:null,t:0,score:0});const B=$('plotBody');$('plotEye').textContent='Your yard';$('plotTitle').textContent='Horseshoes';

@@ -87,6 +87,7 @@ Run the whole suite before every push.
 - Big harvest yard pieces: they stand on their base so they can go right up to the house, and ones placed before the fix stay where they were
 - Pine Island part 2: fishing the Cove, digging once a day for relics and the town sign, the campfire story and stamina, and Nils’s key for Case 7
 - Time away in a realm: realm prices for the first hour only, then the water you came from, and you wake up still in the realm
+- Greenhouse and farm prices: they follow your steady income, a short spike doesn’t lift them, and each has a cap
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.
