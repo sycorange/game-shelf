@@ -401,7 +401,7 @@ await check('Harvest Basket: festival fish, giving fish, lake-wide total, tier r
   ok(await p.evaluate(()=>{let n=0;for(let i=0;i<4000;i++){const e=hwFishRoll('deep',23*60,null);if(e&&e.f.id==='mooncarp')n++}return n>0}),'Harvest Moon Carp never bites');
   await p.evaluate(()=>{openPhone();phShow('hv')});await p.waitForTimeout(300);ok(await p.isVisible('#hvBody [data-hvg="bluegill"]'),'give list');
   await p.click('#hvBody [data-hvg="bluegill"][data-n="1"]');ok(await p.evaluate(()=>S.cooler.bluegill.n===4&&HV().pts===1&&mpS().hvb===1),'give one');
-  await p.click('#hvAll');await p.click('#hvAll');ok(await p.evaluate(()=>!Object.keys(S.cooler).some(k=>S.cooler[k].n>0)&&HV().pts>=10),'give all');
+  await p.click('#hvAll');await p.click('#hvAll');ok(await p.evaluate(()=>!Object.keys(S.cooler).some(k=>S.cooler[k].n>0)&&HV().pts>=10),'give all '+await p.evaluate(()=>JSON.stringify([S.cooler,HV().pts,S.water])));
   await p.evaluate(()=>mpSync(true));await p.waitForTimeout(800);ok(await p.evaluate(()=>!mpS().hvb&&MPV.hvb&&MPV.hvb.mine>=40),'sent to the lake '+await p.evaluate(()=>JSON.stringify([mpS().hvb,MPV.hvb])));
   const c0=await p.evaluate(()=>S.coins);await p.evaluate(()=>{MPV.hvb={goal:100,total:60,n:1,mine:40,top:[]};hvClaim()});ok(await p.evaluate(c0=>S.coins===c0+25000&&(S.pots.gold|0)>=3&&HV().tiers[0]&&HV().tiers[1]&&!HV().tiers[2],c0),'tier rewards');
   await p.evaluate(()=>{MPV.hvb.total=100;hvClaim()});ok(await p.evaluate(()=>S.boxes.some(b=>b.id==='cornucopia')&&S.trophies.some(t=>t.name==='Harvest Basket 2026')),'top tiers');ok(!errs.length,errs.join('; '));await c.close()});
@@ -556,6 +556,9 @@ await check('big harvest pieces sit on their base and reach the house; old place
   const r=await p.evaluate(()=>{const L=yardList(),m=L.find(a=>a[0]==='maple'),h=L.find(a=>a[0]==='hayride'),bm=yBoxM(m);return {m:[m[1],m[2]],h:[h[1],h[2]],foot:bm[1]+bm[3]-m[2],up:yardClamp('maple',60,250)[1],flag:S.yard.re157}});
   ok(r.m[0]===14&&r.m[1]===296&&r.h[0]>=2&&r.h[0]<=8&&r.h[1]===396&&r.flag,'migrated '+JSON.stringify(r));ok(Math.abs(r.foot)<=2,'maple base at its anchor '+r.foot);ok(r.up===250,'maple can come up to the house');
   ok(!p.errs.length,p.errs.join('; '))});
+await check('time away in a realm: realm prices for the first hour only, then the home water; you stay in the realm',async()=>{const p=await page(VPS[0][1],save({boat:7,rod:9,lure:9,shack:6,water:'sky',realmFrom:'pond'}));
+  const r=await p.evaluate(()=>{RS().gates={sky:1};S.water='sky';S.realmFrom='pond';S.log={};S.cooler={};offline(3*3600);const ids=Object.keys(S.log),fi=id=>FI(id);return {w:S.water,sky:ids.filter(id=>fi(id)&&fi(id).at==='sky').length,pond:ids.filter(id=>fi(id)&&fi(id).at==='pond').length,txt:document.querySelector('.aw-sub')?document.querySelector('.aw-sub').textContent:''}});
+  ok(r.w==='sky','still in the realm');ok(r.sky>0&&r.pond>0,'realm fish then home fish '+JSON.stringify(r));ok(/first hour/.test(r.txt),'away note');ok(!p.errs.length,p.errs.join('; '))});
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
