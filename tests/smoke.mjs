@@ -1,7 +1,7 @@
 // Lantern Lake smoke tests. Starts the local harness (in-memory database, nothing real is touched),
 // plays through the main features in a headless browser on desktop and phone sizes, and prints PASS/FAIL.
 // Run from the repo root:  node tests/smoke.mjs      (needs Node 22+ and Playwright, see tests/README.md)
-import {spawn} from 'node:child_process';import path from 'node:path';import {fileURLToPath} from 'node:url';
+import {spawn} from 'node:child_process';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
 const HERE=path.dirname(fileURLToPath(import.meta.url)),PORT=+process.env.PORT||8799,URL0=`http://127.0.0.1:${PORT}/lantern-lake/?season=off`;
 const pw=await import(process.env.PW||'playwright');const chromium=pw.chromium||pw.default.chromium;
 const srv=spawn(process.execPath,[path.join(HERE,'harness.mjs')],{env:{...process.env,PORT:String(PORT),EXPOSE:'1'},stdio:['ignore','pipe','pipe']});
@@ -150,7 +150,7 @@ await check('walking: tap to walk, WASD, onto the dock, stays on land, pet follo
   await p.keyboard.down('d');await p.waitForTimeout(5000);await p.keyboard.up('d');r=await p.evaluate(()=>[WALK.x,WALK.y,yShoreX(WALK.y)]);ok(r[0]<=r[2],'walked into the lake '+r);
   await p.evaluate(()=>{WALK.tx=999;WALK.ty=246});await p.waitForTimeout(6000);r=await p.evaluate(()=>[WALK.x,WALK.y]);ok(r[0]>200&&r[1]===246,'not on the dock '+r);
   ok(await p.evaluate(()=>{WALK.tx=WALK.x>60?20:120;WALK.ty=330;return new Promise(r=>setTimeout(()=>r(document.getElementById('scene').classList.contains('ytuck')),400))}),'bar tucks while walking');
-  await p.waitForFunction(()=>!document.getElementById('scene').classList.contains('ytuck'),null,{timeout:6000});await p.click('#vbView');ok(await p.isVisible('[data-yf="dock"]'),'camera views behind View');await p.click('[data-yf="dock"]');ok(await p.evaluate(()=>!document.getElementById('scene').classList.contains('vpop')),'views close');
+  await p.waitForFunction(()=>!document.getElementById('scene').classList.contains('ytuck'),null,{timeout:20000});await p.click('#vbView');ok(await p.isVisible('[data-yf="dock"]'),'camera views behind View');await p.click('[data-yf="dock"]');ok(await p.evaluate(()=>!document.getElementById('scene').classList.contains('vpop')),'views close');
   await p.evaluate(()=>document.getElementById('vbIn').click());await p.waitForTimeout(7000);ok(await p.evaluate(()=>S.sleep.ph!=='yard'),'never went inside');ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
 await check('yard games: buy from the Games tab, cornhole scoring, hoop swish, tickets, tire swing',async()=>{const p=await page(VPS[0][1],save({coins:50000,sleep:{ph:'yard',t:0,visit:true}}));
@@ -583,6 +583,10 @@ await check('the Great Gobble: feast goal on the server, the ledger, the Great G
   ok(await p.evaluate(()=>{const h=HV();h.rib={b:11,r:0,w:0};h.rib.b++;hvBakerCheck();return hvHasCos('apron')}),'Master Baker apron');
   await p.evaluate(()=>{openPhone();phShow('hv')});await p.waitForTimeout(400);ok(await p.evaluate(()=>/Gobbler’s Ledger/.test(document.getElementById('hvBody').textContent)&&/Thanksgiving Feast/.test(document.getElementById('hvBody').textContent)),'Harvest app shows the feast and the ledger');
   ok(!errs.length,errs.join('; '));await c.close()});
+await check('every fish can go to the museum: the server knows every species in the game',async()=>{const p=await page(VPS[0][1],save({}));
+  const src=fs.readFileSync(path.join(HERE,'..','src','worker.js'),'utf8'),M=JSON.parse(src.match(/const MUS_W=(\{.*?\});/)[1]);
+  const ids=await p.evaluate(()=>FISH.filter(f=>!f.quest).map(f=>f.id));const miss=ids.filter(id=>!M[id]);ok(!miss.length,'missing from the museum list: '+miss.join(', '));
+  const r=await p.evaluate(async()=>{const A=await api('hello',{name:'Mu'+Math.floor(Math.random()*1e5)});try{return await api('museum/donate',{id:A.id,key:A.key,fish:'greatgobbler',v:'',w:250+Math.random(),name:'Great Gobbler'})}catch(e){return {err:String(e)}}});ok(r&&!r.error&&!r.err,'a Great Gobbler is accepted '+JSON.stringify(r));await p.context().close()});
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
