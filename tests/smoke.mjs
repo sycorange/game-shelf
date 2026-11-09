@@ -494,6 +494,15 @@ await check('home comfort: furniture, bed, house and yard add comfort; sleeping 
   ok(JSON.stringify(b)==='[0,1,3,3,3,0]','coffee pot '+JSON.stringify(b));
   await p.evaluate(()=>{S.day+=1;goRoom('basement')});await p.waitForTimeout(800);const c1=await p.evaluate(()=>S.pots.coffee);await p.evaluate(()=>bAct('coffee'));await p.waitForTimeout(4900);
   ok(await p.evaluate(c1=>S.pots.coffee===c1+1&&!BS.act&&brewReady()===0,c1),'brewing in the basement fills a thermos');ok(!p.errs.length,p.errs.join('; '))});
+await check('gates in one tap: the dock ring and the map pin open a picker, one gate goes straight through, the map row works from any water, and from home you head out first',async()=>{
+  const p=await page(VPS[1][1],save({boat:7,water:'lake',realm:{gates:{moon:5,hell:9},gear:{}}}));
+  await p.click('#mnav [data-mt="map"]');await p.waitForTimeout(300);ok(await p.evaluate(()=>!!document.querySelector('.lm-pin.gate')&&document.querySelectorAll('.gq').length===2),'map pin and gate row');
+  await p.click('.lm-pin.gate');await p.waitForTimeout(200);ok(await p.evaluate(()=>document.querySelectorAll('.gpick [data-gp]').length===2),'picker from the map pin');
+  await p.click('.gpick [data-gp="hell"]');await p.waitForTimeout(300);ok(await p.evaluate(()=>S.water==='hell'&&!document.querySelector('.gpick')),'through the Hellmouth Gate from Reed Lake');
+  await p.evaluate(()=>{RS().gates={moon:5}});ok(await p.evaluate(()=>{S.water='lake';gatePick(document.body,100,300);return S.water==='moon'&&!document.querySelector('.gpick')}),'one gate goes straight through');
+  ok(await p.evaluate(()=>{S.boat=4;return /Needs a/.test(gateBlock(REALMS_BY.hell))}),'blocked without the right boat');
+  await p.evaluate(()=>{S.boat=7;S.water='pond';RS().gates={moon:5,hell:9};S.sleep={ph:'awake',t:0};gateGo('hell')});let there=false;for(let i=0;i<60&&!there;i++){await p.waitForTimeout(500);there=await p.evaluate(()=>S.water==='hell'&&!S.sleep)}
+  ok(there,'from home you head out and sail through');ok(!p.errs.length,p.errs.join('; '))});
 await check('phone controls: thumbstick walks, action button enters places, Go to walks you there, off in Settings',async()=>{const c=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({sleep:{ph:'yard',t:0,visit:true}}));const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.goto(URL0);await p.waitForTimeout(800);await p.evaluate(()=>{if(!document.getElementById('titleScreen').hidden)document.getElementById('tGo').click()});await p.waitForTimeout(900);await p.evaluate(()=>document.querySelectorAll('.away').forEach(m=>m.hidden=true));await p.waitForTimeout(400);

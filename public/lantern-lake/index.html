@@ -1581,6 +1581,23 @@ body:not([data-mt="catch"]) .main .tabs{display:none}
 @keyframes flrIn{from{opacity:0;transform:translateY(6px)}}
 @media (prefers-reduced-motion:reduce){.flr-row{animation:none}}
 
+/* ==GATES IN ONE TAP== */
+#pane-waters{position:relative}
+.gpick{position:absolute;z-index:60;transform:translate(-50%,calc(-100% - 12px));background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;display:grid;gap:6px;min-width:210px;box-shadow:0 14px 34px rgba(0,0,0,.5);animation:gpIn .18s both}
+.gpick>b{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 2px}
+.gpick button{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:center;text-align:left;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--fg);font:inherit;font-weight:700;cursor:pointer}
+.gpick button:not(:disabled):hover{border-color:var(--gc)}.gpick button:disabled{opacity:.55;cursor:default}
+.gpick button small{display:block;font-weight:400;font-size:.74rem;color:var(--muted)}
+.gpick i,.gq i{width:18px;height:18px;border-radius:50%;border:3px solid var(--gc);box-shadow:0 0 8px var(--gc);box-sizing:border-box;display:inline-block}
+@keyframes gpIn{from{opacity:0;transform:translate(-50%,calc(-100% - 4px))}}
+.gpick.below{transform:translate(-50%,14px);animation:gpInB .18s both}@keyframes gpInB{from{opacity:0;transform:translate(-50%,6px)}}
+.lm-pin.gate i{background:#1a1030;border:2.5px solid #c8a0ff;box-shadow:0 0 0 3px rgba(200,160,255,.35),0 0 10px #c8a0ff}
+.gate-row{grid-column:1/-1;display:grid;gap:6px;margin-top:-4px}
+.gate-row>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gq{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 7px;color:var(--fg);font:inherit;font-weight:700;font-size:.86rem;cursor:pointer}
+.gq:not(:disabled):hover{border-color:var(--gc)}.gq:disabled{opacity:.6;cursor:default}.gq small{color:var(--gold);font-weight:700}
+.gq-more{background:none;border:0;color:var(--muted);font:inherit;font-size:.82rem;cursor:pointer;padding:4px 6px}.gq-more:hover{color:var(--fg)}
+
 /* ==LAKE FIRST== one layout pass: the lake gets the room, controls stay slim, menus sit beside the lake on wide screens */
 :root{--r-sm:8px;--r-md:12px;--r-lg:16px;--gap:14px;--fs-xs:.72rem;--fs-sm:.84rem;--fs-md:.95rem;--fs-lg:1.2rem;--shadow-pop:0 18px 44px rgba(0,0,0,.5)}
 .playcol,.menucol{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--gap);min-width:0;align-content:start}
@@ -3452,6 +3469,7 @@ function refreshBuy(){
 function renderWaters(){
   const p=$('pane-waters');p.innerHTML='';const ph=phaseOf(S.min);
   p.insertAdjacentHTML('afterbegin',lakeMapHTML());
+  {const G=gatesOpen();if(G.length)p.insertAdjacentHTML('beforeend',`<div class="gate-row"><span class="eyebrow">Beyond the Lake</span><div>${G.map(r=>{const why=gateBlock(r);return `<button class="gq" data-gq="${r.id}" style="--gc:rgb(${r.rgb})"${why?` disabled title="${esc(why)}"`:''}><i></i>${r.n}${S.water===r.id?' <small>here</small>':''}</button>`}).join('')}<button class="gq-more" onclick="document.querySelector('.realm-h').scrollIntoView({behavior:'smooth',block:'start'})">Gates &amp; gear ›</button></div></div>`)}
   {const bb=$('bedBtn'),sl=S.sleep,home=!!sl&&(sl.ph==='awake'||sl.ph==='yard')&&sl.at!=='friend';const c=document.createElement('div');c.className='card water'+(home?' active':'');
     c.innerHTML=`<span class="eyebrow">Your cabin</span><h3>🏠 Home</h3><p>${home?'You’re home. Rest up, then head back out.':'Head home to rest. Click your bed to sleep until you’re rested.'}</p>`;
     const b=document.createElement('button');b.className='go';b.id='go-home';b.textContent=home?'You’re home':bb.textContent;b.disabled=home||bb.disabled;b.title=bb.title;b.onclick=()=>{bedBtnClick();if(!sheetMode())$('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})};c.append(b);p.append(c)}
@@ -5473,8 +5491,10 @@ function lakeMapHTML(){const pin=(x,y,k,lbl,cls,dis,tip,lb)=>`<button class="lm-
   {const bb=$('bedBtn'),sl=S.sleep,home=!!sl&&(sl.ph==='awake'||sl.ph==='yard')&&sl.at!=='friend';h+=pin(57,262,'home','Home','cabin'+(home?' here':''),home||!bb||bb.disabled,home?'You’re home':bb?bb.textContent:'Return home')}
   if(tpDone('ferry')){const on=TOWN.on&&TOWN.z==='isle';h+=pin(372,128,'isle','Pine Island','town'+(on?' here':''),on||TRV.on||!!VT||isRealm(S.water),on?'You’re on the island':'Take the ferry from Lantern Harbor')}
   h+=pin(470,212,'town','Lantern Harbor','town'+(TOWN.on?' here':''),TOWN.on||TRV.on||!!VT||isRealm(S.water),TOWN.on?'You’re in town':'Visit the town','below');
+  {const G=gatesOpen();if(G.length){const inR=isRealm(S.water);h+=pin(146,262,'gate',G.length>1?'Gates':G[0].gate,'gate'+(inR?' here':''),TRV.on,inR?`You’re in ${W(S.water).n}`:G.length>1?'Step through a portal gate':`Step through to ${G[0].n}`,'below')}}
   return `<div class="lmap">${LMAP_SVG}<b class="lm-t" aria-hidden="true">Lantern Lake</b>${h}</div>`}
-$('pane-waters').addEventListener('click',e=>{const b=e.target.closest('.lm-pin');if(!b||b.disabled)return;const k=b.dataset.lm;
+$('pane-waters').addEventListener('click',e=>{const gq=e.target.closest('[data-gq]');if(gq){gateGo(gq.dataset.gq);return}const b=e.target.closest('.lm-pin');if(!b||b.disabled)return;const k=b.dataset.lm;
+  if(k==='gate'){const B=b.getBoundingClientRect();gatePick(document.body,B.left+B.width/2,B.top);return}
   if(k==='home'){bedBtnClick();if(!sheetMode())$('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'});return}if(k==='town')openTown();else if(k==='isle'){openTown();setTimeout(()=>{if(TOWN.on&&!TOWN.z)townTo(150,TW_Y0+16,()=>ferryUI())},500)}else travelTo(k);if(!sheetMode())$('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){$('updModal').hidden=true;$('cardModal').hidden=true;closePhone();$('itemModal').hidden=true;$('decoModal').hidden=true;$('gamesModal').hidden=true;$('troModal').hidden=true;$('collModal').hidden=true;$('hotModal').hidden=true;$('loginModal').hidden=true;$('lpinModal').hidden=true;$('tripModal').hidden=true;$('saveModal').hidden=true;$('gbModal').hidden=true;$('bugModal').hidden=true;$('ownModal').hidden=true;if(!$('tvModal').hidden)closeTV()}
@@ -5515,7 +5535,7 @@ function tipHTML(h){let html='';
   else if(h.kind==='deco'&&h.data==='bed')html=`<b>Bed</b><small>${S.sleep.ph!=='awake'?'Zzz…':S.stamina>=99?'You’re fully rested. Change its style with Decorate.':`Tap to sleep until you’re rested (stamina ${Math.round(S.stamina)}%). Change its style with Decorate.`}<br>Comfort ${comfortOf()} · Well Rested lasts ${restMins()} min</small>`;
   else if(h.kind==='deco'){const nm={bed:'Bed',rug:'Rug',curt:'Curtains',lamp:'Lamp',wall:'Wall decor',extra:'Fern'}[h.data]||'Decor';html=`<b>${nm}</b><small>${S.sleep.ph==='awake'?'Tap to decorate: colors and styles':'Decorate once you’re up and about'}</small>`}
   if(h.kind[0]==='y'&&!html)html=yardTip(h);
-  if(h.kind==='gate')html=`<b>Portal ring</b><small>${REALMS.filter(r=>gateOwned(r.id)).map(r=>r.gate).join(' · ')} · tap to travel</small>`;if(h.kind==='updraft')html='<b>Updraft!</b><small>Tap to scoop up the whole school</small>';
+  if(h.kind==='gate')html=`<b>Portal ring</b><small>${REALMS.filter(r=>gateOwned(r.id)).map(r=>r.gate).join(' · ')} · tap to step through</small>`;if(h.kind==='updraft')html='<b>Updraft!</b><small>Tap to scoop up the whole school</small>';
   if(h.kind==='peer')html=h.data&&h.data.q4?'<b>…you?</b><small>Tap them</small>':peerTip(h.data);if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
   if(h.kind==='door'&&TOT.inside)html='<b>Trick or treat!</b><small>Tap the door to hand out candy</small>';
   if(TOWN.on)html=townTip(h)||'';
@@ -5535,7 +5555,7 @@ $('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,
   else if(h.kind==='pet'){hideTip();petTap()}
   else if(h.kind==='deco'&&h.data==='bed'){if(S.sleep.ph==='awake'&&ROOM==='cabin')sleepInBed();else showTip(h,e)}
   else if(h.kind==='deco'){if(S.sleep.ph==='awake')openDeco(h.data);else showTip(h,e)}else showTip(h,e);return}
-  if(CAM.moved){CAM.moved=false;YED.skip=false;return}if(h&&h.kind==='fpet'){petTap();return}if(h&&h.kind==='gate'){hideTip();openTab('waters');setTimeout(()=>{const x=document.querySelector('.realm-h');if(x)x.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})},50);return}if(h&&h.kind==='updraft'){hideTip();updraftScoop();return}if(h&&h.kind==='peer'){hideTip();peerOpen(h.data);return}if(h&&h.kind==='hwpk'){hideTip();hwCollect(h.data);return}if(h&&h.kind==='tot'){hideTip();totGive(h.data);return}if(h&&h.kind==='box'){openBox(h.data);return}
+  if(CAM.moved){CAM.moved=false;YED.skip=false;return}if(h&&h.kind==='fpet'){petTap();return}if(h&&h.kind==='gate'){hideTip();gatePick(document.body,e.clientX,e.clientY);return}if(h&&h.kind==='updraft'){hideTip();updraftScoop();return}if(h&&h.kind==='peer'){hideTip();peerOpen(h.data);return}if(h&&h.kind==='hwpk'){hideTip();hwCollect(h.data);return}if(h&&h.kind==='tot'){hideTip();totGive(h.data);return}if(h&&h.kind==='box'){openBox(h.data);return}
   if(CAMT.z>1.3&&yardCtx()==='home'&&YED.on){if(YED.skip){YED.skip=false;return}if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(YED.tab==='paths'||YED.tab==='house')return;YED.sel=yardPick(x,y);renderYed();return}
   if(CAMT.z>1.3&&yardCtx()){if(h&&h.kind==='yland'){hideTip();openLand(h.data);return}if(h&&h.kind==='ytree'){hideTip();treeTap(h.data);return}if(h&&h.kind==='ygame'){hideTip();ygStart(h.data.i);return}if(h&&h.kind==='ypeer'){hideTip();peerMenu(h.data);return}if(h&&h.kind==='ypet'){hideTip();if(yardCtx()==='home')petTap();else{PET_RT.heart=performance.now();sfx('pop')}return}if(h&&h.kind==='yplot'&&yardCtx()==='home'){hideTip();openPlot(h.data.i);return}if(h&&h.kind==='yfarm'&&yardCtx()==='home'){hideTip();farmTap(h.data.i);return}if(h&&h.kind==='ychick'){hideTip();chickTap(h);return}if(h&&h.kind==='yhang'){hideTip();hangTap(h.data.i);return}if(h&&h.kind==='yshow'){hideTip();showTap(h.data.i);return}if(h&&h.kind==='ydoor'){hideTip();walkThen(()=>{if(S.sleep.at==='friend')enterFriend();else yardIn()});return}if(h&&h.kind[0]==='y')showTip(h,e);else{hideTip();if(dockFishing())jig();else if(walkCtx()&&!YG.on)walkTo(x,y)}return}jig()};
 $('scene').onmousemove=e=>{if(CAM.drag&&CAM.moved)return;const [x,y]=scenePt(e),h0=hitAt(x,y),h=VISIT&&h0&&!['trophy','coll','tank','door','stairs','up','btank'].includes(h0.kind)?null:h0;if(VISIT&&h){const real=S;S=VISIT.S;$('scene').style.cursor='pointer';try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}return}if(VISIT){$('scene').style.cursor='default';hideTip();return}if(!indoor()&&!h){$('scene').style.cursor='';hideTip();return}$('scene').style.cursor=h?'pointer':'default';if(h)showTip(h,e);else hideTip()};
@@ -7106,6 +7126,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:173,n:'One-Tap Gates',items:['Portal gates are one tap now. Tap the ring by your dock to step straight through, or pick a realm if you have more than one gate.','The lake map has a portal pin by your dock, and your gates sit right under the map, so you can head through from any water, or from home (you’ll head out first).']},
  {v:172,n:'Critter Club',items:['Series 3 is here: the Critter Club case in Crate Expectations. 31 animal boat paints, rod finishes and bobbers. Paint your boat as a Swan Boat (with a neck that sways) or a Kitty Boat (ears, whiskers and a swishing tail), or go Shark Mouth, Frog, Orca, Peacock or a Chameleon that keeps changing color. Rare and better rods let critters loose when you land a fish: Firefly, Monarch butterflies and the Songbird. Bobbers include a Goldfish Bowl with a fish inside, a Sleepy Cat that snoozes at night, a hopping Chick and the Baby Lake Beast.','A cleaner layout: the lake gets more of the screen on phones, the controls are slimmer, and on wide screens the menus sit beside the lake so nothing is below the fold.','Pop-ups now show at the top of the lake, one at a time. Tap one to dismiss it.','Home sweet home: everything in your home now adds comfort. Sleep in your own bed to wake up Well Rested (casts 15% faster) for 10 minutes plus 1 per comfort point, up to an hour. Tap the bed to see your comfort.','A coffee maker on the basement counter brews a free Thermos of Coffee every day while you’re out. The pot holds three.','Voyage reports: when a Fleet ship comes home, see the whole haul species by species, what was new, what was in the hold and your logbook progress, then send her straight back out. Reopen the last report from port any time.']},
  {v:171,n:'Two new case files',items:['Case 8, The Marigold: once you own a ship, a crew hauls up the log of a schooner lost in fog in 1911. Plot her last course on a sea chart, send a ship to the wreck, hear Old Pete’s story in town, then follow her lantern through the fog on Misty Bay. Rewards: the ghostly Marigold boat paint, her bell for your yard, her figurehead for your dock, a trophy and $750,000.','Case 9, The Weigh-In Scandal: opens after The Lake Beast. Somebody rigged the Fishing Derby. Weigh the winning fish, interview the town, pull the records, photograph the right boat on a dawn stakeout and name the culprit, who changes every time you play. Rewards: a detective’s coat, the Gold Sinker bobber, a brass weigh scale for your yard, the Fair Catch plaque and $600,000.']},
  {v:170,n:'The Farm Update',items:['Crop care and quality: water your plots (rain does it for you), add compost, and shoo the crows. Care decides each harvest’s quality: Normal, Silver, Gold or Prize. Better quality sells for up to 5× and fills you up more. A scarecrow keeps crows away, and a cat helps.','Cross-breeding: harvest a crop next to a different one and you may get a hybrid seed. Six hybrids to discover, from Ember Peppers and Golden Corn to a Giant Pumpkin, plus three exotic seeds your fleet brings home: Dragonfruit, Snowberries and Lotus Root.','The Kitchen: cook crops, eggs, honey and fish into dishes like Lakeside Chowder, Fish Tacos, Golden Cornbread and the Harvest Feast Platter. Eat them for potion effects and hunger, or sell them. Make bait like Corn Dough Balls, and turn junk or spare fish into compost.','The Farmers’ Market: three orders a day from townsfolk. Filling them pays well and builds farm reputation, which unlocks a silver watering can, a compost tumbler, a seed shop, and finally the Blue Ribbon Farmer prizes: a straw hat and overalls, a red tractor and a trophy.','The Seed Catalog tracks every crop you’ve grown, with rewards at 5, 10 and all 14. Find the Farm, the Kitchen and the Seed Catalog in Storage.','Bug fix: harvesting a garden plot used to reset its layer (To front / To back). It keeps it now.']},
@@ -12275,6 +12296,23 @@ function drawVortex(T){const r=REALMS_BY[TRV.to]||REALMS_BY[TRV.from],c=r?r.rgb:
   let g=ctx.createRadialGradient(400,200,10,400,200,520);g.addColorStop(0,`rgba(${c},1)`);g.addColorStop(.25,`rgba(${c},.55)`);g.addColorStop(1,'rgba(8,6,20,1)');ctx.fillStyle=g;ctx.fillRect(0,0,800,400);
   ctx.save();ctx.translate(400,200);for(let i=0;i<14;i++){const rr=30+i*28+((t*90)%28),a=t*1.6+i*.5;ctx.strokeStyle=`rgba(255,255,255,${.5-i*.03})`;ctx.lineWidth=3-i*.15;ctx.beginPath();ctx.ellipse(0,0,rr*1.6,rr,a*.2,a,a+Math.PI*1.3);ctx.stroke()}
   for(let i=0;i<60;i++){const a=i*2.399+t*.8,d=((i*37+t*260)%420);ctx.fillStyle=`rgba(255,255,255,${Math.min(1,d/200)})`;ctx.fillRect(Math.cos(a)*d*1.5,Math.sin(a)*d,2,2)}ctx.restore()}
+// ==GATES IN ONE TAP== the ring by your dock and the portal pin on the lake map both step straight through (or show a picker
+// when you have more than one gate). From home, you head out first and then sail through.
+const gatesOpen=()=>REALMS.filter(r=>gateOwned(r.id));
+function gateBlock(r){if(S.water===r.id)return 'You’re fishing here';if(S.boat<r.boat)return `Needs a ${GEAR.boat.items[r.boat].n}`;if(TRV.on||MFX.ph)return 'Wait until the boat stops';if(VT||VISIT)return 'You’re out visiting';if(TOWN.on)return 'Leave town first';return ''}
+let gateWait=0;
+function gateGo(id){const r=REALMS_BY[id];if(!r||!gateOwned(id))return;gpClose();const why=gateBlock(r);if(why){showToast(why,r.gate);return}
+  const show=()=>{if(sheetMode())sheetSet(false);else $('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})};
+  if(S.sleep){const ph=S.sleep.ph;if(S.sleep.at!=='friend'&&(ph==='awake'||ph==='yard')){bedBtnClick();showToast(`Heading out to the ${r.gate}`,r.n);clearInterval(gateWait);let n=0;
+      gateWait=setInterval(()=>{if(++n>160){clearInterval(gateWait);return}if(!S.sleep&&!TRV.on&&!MFX.ph){clearInterval(gateWait);if(!gateBlock(r))travelTo(id)}},250);show();return}
+    showToast(S.sleep.at==='friend'?'Head home first':'Wait until you’re up and about',r.gate);return}
+  travelTo(id);show()}
+function gatePick(host,x,y){gpClose();const L=gatesOpen();if(!L.length)return;if(L.length===1){gateGo(L[0].id);return}
+  const d=document.createElement('div');d.className='gpick';const fx=host===document.body,W=fx?innerWidth:host.clientWidth;if(fx)d.style.position='fixed';d.style.left=Math.max(115,Math.min(W-115,x))+'px';d.style.top=y+'px';
+  d.innerHTML=`<b>Step through a gate</b>${L.map(r=>{const why=gateBlock(r);return `<button data-gp="${r.id}" style="--gc:rgb(${r.rgb})"${why&&why!=='You’re fishing here'?'':''}${why?' disabled':''}><i></i><span>${r.n}<small>${why||r.gate}</small></span></button>`}).join('')}`;
+  host.append(d);if(y-d.offsetHeight-14<(fx?6:host===$('pane-waters')?host.scrollTop:0))d.classList.add('below');d.querySelectorAll('[data-gp]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();gateGo(b.dataset.gp)});setTimeout(()=>document.addEventListener('pointerdown',gpOut,true),0)}
+function gpOut(e){if(!e.target.closest('.gpick'))gpClose()}
+function gpClose(){document.querySelectorAll('.gpick').forEach(x=>x.remove());document.removeEventListener('pointerdown',gpOut,true)}
 // The portal ring beside your dock
 function drawGateRing(d,T){const owned=REALMS.filter(r=>gateOwned(r.id));if(!owned.length)return;const r=owned[Math.floor(T/6)%owned.length],x=344,y=224+Math.sin(T*1.1)*2;
   ctx.fillStyle=`rgba(${r.rgb},${.18+.08*Math.sin(T*3)})`;ctx.beginPath();ctx.ellipse(x,y+26,30,5,0,0,7);ctx.fill();
