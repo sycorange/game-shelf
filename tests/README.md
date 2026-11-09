@@ -91,6 +91,10 @@ Run the whole suite before every push.
 - The Great Gobble: the server sets the Thanksgiving Feast goal and keeps each turkey’s best show score, the Gobbler’s Ledger pays out by points given, feast rewards unlock the Great Gobbler, feeding and grooming once a day, show-day trophies and the pardoned turkey pet, the baker’s apron, and the Golden Gobbler set bonus
 - Museum list: every species in the game is on the server’s museum list, so none get turned away
 - The Fleet and Species Mastery: one ship of each type, voyages limited by ship and by real time, unloading a haul into the cooler and logbook, upgrades, the fleet surviving a prestige, mastery stars raising sale value, the first mastery reward, and the server’s mastery board
+- Chickens: they keep the same destination while walking instead of picking a new one every frame (the shaking bug)
+- The Farm Update: care makes Gold or Prize harvests, crows eat crops left alone, neighbouring crops give hybrid seeds, harvesting keeps a plot’s layer, cooking and eating a dish, compost from junk, filling a market order once, the Blue Ribbon Farmer prizes, and Prize crops selling for 5×
+- Case 8, The Marigold: opens with a ship; the log, the sea chart, the wreck voyage, Old Pete, the night lantern and the fog game (lose and win)
+- Case 9, The Weigh-In Scandal: Marge, weighing the fish, the five interviews and what they say, the records, the dawn stakeout (wrong boat and right boat), a wrong accusation costing a day, the rewards and a replay
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.
