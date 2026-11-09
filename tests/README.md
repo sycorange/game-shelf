@@ -90,6 +90,7 @@ Run the whole suite before every push.
 - Greenhouse and farm prices: they follow your steady income, a short spike doesn’t lift them, and each has a cap
 - The Great Gobble: the server sets the Thanksgiving Feast goal and keeps each turkey’s best show score, the Gobbler’s Ledger pays out by points given, feast rewards unlock the Great Gobbler, feeding and grooming once a day, show-day trophies and the pardoned turkey pet, the baker’s apron, and the Golden Gobbler set bonus
 - Museum list: every species in the game is on the server’s museum list, so none get turned away
+- The Fleet and Species Mastery: one ship of each type, voyages limited by ship and by real time, unloading a haul into the cooler and logbook, upgrades, the fleet surviving a prestige, mastery stars raising sale value, the first mastery reward, and the server’s mastery board
 - App install (manifest, icons, service worker) and alerts: they arrive encrypted, never while you play, and respect each alert type's on/off switch
 
 Everything in this folder is for testing only. It isn’t part of the website and isn’t deployed.

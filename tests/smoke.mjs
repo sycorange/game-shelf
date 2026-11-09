@@ -587,10 +587,26 @@ await check('every fish can go to the museum: the server knows every species in 
   const src=fs.readFileSync(path.join(HERE,'..','src','worker.js'),'utf8'),M=JSON.parse(src.match(/const MUS_W=(\{.*?\});/)[1]);
   const ids=await p.evaluate(()=>FISH.filter(f=>!f.quest).map(f=>f.id));const miss=ids.filter(id=>!M[id]);ok(!miss.length,'missing from the museum list: '+miss.join(', '));
   const r=await p.evaluate(async()=>{const A=await api('hello',{name:'Mu'+Math.floor(Math.random()*1e5)});try{return await api('museum/donate',{id:A.id,key:A.key,fish:'greatgobbler',v:'',w:250+Math.random(),name:'Great Gobbler'})}catch(e){return {err:String(e)}}});ok(r&&!r.error&&!r.err,'a Great Gobbler is accepted '+JSON.stringify(r));await p.context().close()});
+await check('the Fleet and Species Mastery: buying ships, voyages by real time, unloading the haul, upgrades, survives prestige, mastery stars and rewards, the server board',async()=>{
+  const cx=await b.newContext(),p0=await cx.newPage();await p0.goto(URL0);const A=await p0.evaluate(async()=>api('hello',{name:'Fl'+Math.floor(Math.random()*1e5)}));
+  const r1=await p0.evaluate(async A=>api('sync',{id:A.id,key:A.key,stats:{},msq:1,ms:37}),A);ok(r1.mst&&r1.mst.me&&r1.mst.me.w===37&&r1.mst.me.rank>=1,'mastery board '+JSON.stringify(r1.mst));await cx.close();
+  const p=await page(VPS[0][1],save({coins:2e8,boat:4,ret:1,log:{bluegill:{n:499,big:1}}}));await p.waitForTimeout(1000);
+  ok(await p.evaluate(()=>fleetOpen()&&!!document.querySelector('[data-app="fleet"],#app-fleet')),'Fleet app is there');
+  const s1=await p.evaluate(()=>{fleetBuy('trawler');fleetBuy('trawler');fleetBuy('schooner');fleetBuy('research');const F=FLEET();return [F.ships.map(s=>s.t).join(),S.coins]});ok(s1[0]==='trawler,schooner'&&s1[1]===2e8-5e6-5e7,'buy ships, one of each, if you can afford it '+JSON.stringify(s1));
+  ok(await p.evaluate(()=>{fleetSail(0,'coral');const a=FLEET().ships[0].v;fleetSail(0,'kelp');return !a&&!!FLEET().ships[0].v&&FLEET().ships[0].v.d==='kelp'}),'a Trawler can’t reach the Coral Atoll');
+  ok(await p.evaluate(()=>{const n=Object.keys(S.cooler).length;fleetUnload(0);return Object.keys(S.cooler).length===n&&!!FLEET().ships[0].v}),'can’t unload before she’s home');
+  const u=await p.evaluate(()=>{const s=FLEET().ships[0];s.v.end=Date.now()-1;const c0=Object.values(S.cooler).reduce((a,e)=>a+e.val,0);fleetUnload(0);const c1=Object.values(S.cooler).reduce((a,e)=>a+e.val,0);return [c1-c0,FARW[0].cnt,FISH.filter(f=>f.at==='kelp').some(f=>S.log[f.id]),!s.v,s.xp,FLEET().trips]});
+  ok(u[0]>200000&&u[0]<400000&&u[2]&&u[3]&&u[4]===2&&u[5]===1,'unload: fish worth about $300k in the cooler, logged, captain xp '+JSON.stringify(u));
+  ok(await p.evaluate(()=>{const c=S.coins;fleetUp(1);const s=FLEET().ships[1];return s.lv===2&&S.coins===c-25e6}),'upgrade a ship');
+  ok(await p.evaluate(()=>{S.coins=5e8;const st=S.mst;prestigeNow();return S.ret===2&&FLEET().ships.length===2&&FLEET().ships[1].lv===2}),'the fleet survives a prestige');
+  const m=await p.evaluate(()=>{const f=FI('bluegill');const a=mstStars(f),v0=saleValue(f,1000);S.log.bluegill.n=500;const b=mstStars(f),v1=saleValue(f,1000);S.log.perch={n:600,big:1};S.log.walleye={n:300,big:1};S.log.koi={n:30,big:1};S.log.carp={n:2000,big:1};S.log.lmb={n:300,big:1};mstClaim();return [a,b,v1/v0,mstTotal(),S.coins>=250000&&!!(S.mst&&S.mst.got[0])]});
+  ok(m[0]===1&&m[1]===2&&Math.abs(m[2]-1.08/1.04)<.02&&m[3]>=10&&m[4],'mastery stars, sale bonus and the first reward '+JSON.stringify(m));
+  await p.evaluate(()=>{openPhone();phShow('fleet')});await p.waitForTimeout(400);ok(await p.evaluate(()=>/Your fleet/.test(document.getElementById('flBody').textContent)),'Fleet app renders');
+  ok(!p.errs.length,p.errs.join('; '))});
 await check('after Halloween: keepsakes only for owners, costumes in Settings',async()=>{for(const own of [true,false]){const p=await page(VPS[0][1],save({decor:own?{jacks:1}:{},hw:own?{pk:20,candy:0,wear:'vamp',gg:0,fish:{}}:undefined}));
     await p.evaluate(()=>{openPhone();phShow('shop')});await p.waitForTimeout(300);const t=await p.evaluate(()=>[...document.querySelectorAll('.shop-h h3')].map(h=>h.textContent).join('|'));
     ok(own?t.includes('Halloween keepsakes'):!t.includes('Halloween'),'shop: '+t);
-    await p.evaluate(()=>phShow('settings'));const cos=await p.evaluate(()=>document.querySelectorAll('[data-cos]').length);ok(own?cos===3:cos===0,'costume buttons '+cos);await p.context().close()}});
+    await p.evaluate(()=>phShow('settings'));const cos=await p.evaluate(()=>document.querySelectorAll('#cosSel option').length);ok(own?cos===3:cos===0,'costume choices '+cos);if(own){await p.selectOption('#cosSel','witch');ok(await p.evaluate(()=>HW().wear==='witch'),'choose a costume from the list')}await p.context().close()}});
 
 await check('visiting: broken friend data is ignored, cabin and yard draw',async()=>{const p=await page(VPS[0][1],save({}));
   await p.evaluate(()=>{const cab={col:{walls:4},own:{armchair:1,wheel:1},wall:[null,null,null],ex:{},wd:[['wheel',500,150],['bogus',1,1]],fp:[['armchair',300,470,1],['evil',1,1]],pat:{w:'fish',f:'zzz'}};

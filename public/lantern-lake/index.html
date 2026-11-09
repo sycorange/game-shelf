@@ -175,7 +175,8 @@ button:focus-visible{outline:2px solid var(--buoy);outline-offset:2px}
 .gd-x{background:none;border:0;color:var(--muted);font:inherit;font-size:.78rem;cursor:pointer;text-decoration:underline}
 @media (max-width:560px){.guide{grid-template-columns:auto minmax(0,1fr) auto}.gd-x{grid-column:1/-1;justify-self:end;padding:0}}
 .ph-screen.v-hw{background:linear-gradient(180deg,#1a1024,#2a1438 60%,#160c1e)}.ph-screen.v-hw .ph-bar{color:#fff}
-.ph-screen.v-hv{background:linear-gradient(180deg,#2a1608,#3a1e0e 60%,#1e1006)}.ph-screen.v-hv .ph-bar{color:#fff}
+.ph-screen.v-hv{background:linear-gradient(180deg,#2a1608,#3a1e0e 60%,#1e1006)}
+.ph-screen.v-fl{background:linear-gradient(180deg,#0c1a2e,#12284a 60%,#081424)}.ph-screen.v-fl .ph-bar{color:#fff}#flBody{display:grid;gap:10px;padding:0 2px 14px}.ph-screen.v-hv .ph-bar{color:#fff}
 #hvBody{display:grid;gap:10px;padding:0 2px 14px}#hvBody .hw-card{color:#f8ecdc}#hvBody .hw-card p{color:#e8d2b8}#hvBody .hw-rw small,#hvBody .hw-fish small{color:#d8b898}
 .hv-hero{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:linear-gradient(135deg,#e8823a,#8a2e14);color:#fff}.hv-hero svg{width:44px;height:44px}.hv-hero b{font-size:1.1rem;display:block}.hv-hero small{opacity:.9}
 #hvBody .hw-bar{position:relative}#hvBody .hw-bar i{background:linear-gradient(90deg,#e8823a,#ffd05a)}#hvBody .hw-rw li.got>span{background:#e8823a}
@@ -951,6 +952,9 @@ details summary{cursor:pointer;color:var(--muted);font-size:.85rem;font-weight:7
 .yedbar{min-width:0;max-width:100%;box-sizing:border-box;margin:8px 0 0;background:rgba(10,22,28,.88);border:1px solid var(--line);border-radius:14px;padding:8px 10px;color:#edf2ea;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;flex-direction:column;gap:6px}
 .yed-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.yed-top i{font-style:normal;color:#ffd05a;font-weight:700}
 .yed-top .ghost,.yed-top .jig{padding:4px 10px;font-size:.8rem}
+.cos-sel{font:inherit;font-size:14px;padding:7px 10px;border-radius:10px;max-width:180px;background:rgba(255,255,255,.08);color:inherit;border:1px solid rgba(255,255,255,.18)}.cos-sel option{color:#111}
+.mst{font-size:12px;color:#ffd05a;letter-spacing:1px}.mst i{font-style:normal;color:rgba(255,255,255,.18)}.mst small{color:var(--muted);letter-spacing:0;font-size:11px}
+.fl-dest{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin:6px 0}.fl-dest button{display:grid;text-align:left;gap:2px}.fl-dest small{font-weight:400;opacity:.8}.fl-buy{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}.fl-buy small{display:block;color:var(--muted)}
 .tk-row{display:flex;gap:12px;align-items:center;margin:4px 0 8px}.tk-row canvas{flex:none;border-radius:10px;background:rgba(255,255,255,.06)}
 .yed-tray{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.yed-dock{display:flex;gap:6px;flex:none;margin-left:4px;padding-left:10px;border-left:1px solid var(--line)}.yed-it{flex:none;background:rgba(255,255,255,.08);border:1px solid var(--line);color:#edf2ea;border-radius:10px;padding:5px 10px;font:inherit;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap}.yed-it:hover{background:rgba(255,255,255,.16)}.yed-it small{opacity:.7}
 .yed-none{font-size:.8rem;opacity:.75}
@@ -1767,6 +1771,10 @@ body:not([data-mt="catch"]) .main .tabs{display:none}
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Spooky</b><i></i></div>
         <div id="hwBody"></div>
       </section>
+      <section class="ph-view" id="app-fleet" hidden>
+        <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Your Fleet</b><i></i></div>
+        <div id="flBody"></div>
+      </section>
       <section class="ph-view" id="app-hv" hidden>
         <div class="ph-bar"><button class="ph-back" data-home>‹ Home</button><b>Harvest Festival</b><i></i></div>
         <div id="hvBody"></div>
@@ -2285,7 +2293,7 @@ function rollCatch(water,minute,lure,rod,mods){
   let w=f.w[0]+(f.w[1]-f.w[0])*Math.pow(Math.random(),k);if(X.wtX)w=Math.min(f.w[1],w*X.wtX);w=+w.toFixed(2);
   return {f,w};
 }
-const saleValue=(f,w)=>Math.max(1,Math.round(w*f.v*SHACK_MULT[S.shack]*sellBonus()));
+const saleValue=(f,w)=>Math.max(1,Math.round(w*f.v*SHACK_MULT[S.shack]*sellBonus()*mstMult(f)));
 // ==/ECON==
 
 const DECOR = [
@@ -2300,6 +2308,7 @@ const DECOR = [
   {id:'fence',cat:'land',n:'Picket Fence',c:160000,d:'Fresh white pickets along the front of the yard.'},
   {id:'hammock',cat:'land',n:'Hammock',c:300000,d:'Strung between two cedar posts.'},
   {id:'hottub',cat:'land',n:'Cedar Hot Tub',c:700000,d:'Steams on cold mornings.'},
+  {id:'lodgesign',cat:'land',cs:1,n:'Master’s Lodge sign',c:0,d:'For anglers with 275 mastery stars.'},
   {id:'feasttable',cat:'land',cs:1,n:'The Thanksgiving Table',c:0,d:'A long feast table set for the whole family. From the 2026 Thanksgiving Feast.'},
   {id:'goldturkey',cat:'land',cs:1,n:'Golden Turkey',c:0,d:'A gleaming gold turkey on a stone plinth. From the Gobbler’s Ledger.'},
   {id:'hpsign',cat:'land',cs:1,n:'Hollow Pines Town Sign',c:0,d:'The old sign from the road into Hollow Pines. Wren’s thank-you for finding all four relics on Pine Island.'},
@@ -2451,6 +2460,14 @@ const pumpkinSvg=svgI('pumpkin','#ff8a2a');
 {const A='dawn day dusk night';FISH.push(F('pineperch','Pine Perch',.3,2.5,16,'C','dawn day dusk','isle'),F('covechub','Cove Chub',.5,4,12,'C','day dusk night','isle'),
   F('steeplebass','Steeple Bass',1,10,18,'U','dawn dusk','isle'),F('isleshiner','Island Shiner',.1,1,60,'U','dusk night','isle'),
   F('mayorpike','Mayor’s Pike',3,28,14,'R','day','isle'),F('hollowchar','Hollow Pines Char',2,16,30,'R','night dawn','isle'))}
+// Far-water fish: brought home only by your fleet (see ==THE FLEET==).
+{const A='dawn day dusk night',X=(id,n,a,b,r,at)=>Object.assign(F(id,n,a,b,{C:8,U:14,R:24,L:40}[r],r,A,at),{fleet:1});FISH.push(
+  X('kelpbass','Kelp Bass',1,14,'C','kelp'),X('garibaldi','Garibaldi',.5,2,'C','kelp'),X('opaleye','Opaleye',1,6,'U','kelp'),X('sheephead','California Sheephead',3,36,'U','kelp'),X('giantseabass','Giant Sea Bass',60,560,'R','kelp'),X('kelpwyrm','Kelp Wyrm',80,400,'L','kelp'),
+  X('snook','Snook',3,44,'C','mangrove'),X('mangsnap','Mangrove Snapper',1,17,'C','mangrove'),X('silvertarpon','Silver King Tarpon',20,280,'U','mangrove'),X('archerfish','Archerfish',.2,1.5,'U','mangrove'),X('sawfish','Smalltooth Sawfish',100,700,'R','mangrove'),X('saltjaw','Old Saltjaw',150,900,'L','mangrove'),
+  X('parrotfish','Parrotfish',2,20,'C','coral'),X('triggerfish','Clown Triggerfish',1,4,'C','coral'),X('napoleon','Napoleon Wrasse',20,400,'U','coral'),X('trevally','Giant Trevally',15,170,'U','coral'),X('manta','Manta Ray',300,3000,'R','coral'),X('reefqueen','The Reef Queen',200,1200,'L','coral'),
+  X('stormmack','Storm Mackerel',1,8,'C','storm'),X('bonito','Atlantic Bonito',2,18,'C','storm'),X('stormsword','Storm Broadbill',60,1100,'U','storm'),X('wahoo','Wahoo',15,180,'U','storm'),X('bluemarlin','Blue Marlin',200,1800,'R','storm'),X('thunderhead','Thunderhead Shark',500,3000,'L','storm'),
+  X('arcticcod','Arctic Cod',.5,3,'C','frozen'),X('capelin','Capelin',.05,.2,'C','frozen'),X('halibut','Greenland Halibut',5,60,'U','frozen'),X('wolffish','Atlantic Wolffish',3,40,'U','frozen'),X('greenshark','Greenland Shark',300,2200,'R','frozen'),X('auroraeel','The Aurora Eel',40,260,'L','frozen'),
+  X('ruintang','Ruin Tang',.5,3,'C','sunken'),X('pillargoby','Pillar Goby',.1,.5,'C','sunken'),X('statuegrouper','Statue Grouper',40,600,'U','sunken'),X('mosaicray','Mosaic Ray',20,300,'U','sunken'),X('crownpike','Sunken Crown Pike',30,180,'R','sunken'),X('drownedking','The Drowned King',600,4000,'L','sunken'))}
 const EVFISH=[
   Object.assign(F('jacksun','Jack-o’-Lantern Sunfish',.3,2.4,45,'U','day dusk','pond'),{ev:HW_ID,col:'#ff8a2a'}),
   Object.assign(F('ghostgar','Ghost Gar',4,40,32,'R','dusk night','lake'),{ev:HW_ID,col:'#cfe8ff'}),
@@ -2532,7 +2549,7 @@ function hvHouse(G,wins,d,T){
   if(has('sillpie')&&wins&&wins.length){const [wx,wy]=wins[0],by=wy+(wy===212?12:10),px=wx+7;ctx.fillStyle=rgb(mix([46,32,20],[206,150,82],d));ctx.beginPath();ctx.ellipse(px,by-1.4,5.4,2,0,Math.PI,0);ctx.fill();ctx.fillRect(px-5.6,by-1.6,11.2,1.6);
     ctx.fillStyle=rgb(mix([36,24,14],[160,102,50],d));ctx.fillRect(px-3,by-2.6,6,.7);for(let i=0;i<3;i++){const q=(T*.35+i/3)%1;ctx.fillStyle=`rgba(236,236,240,${.4*(1-q)})`;ctx.beginPath();ctx.arc(px-2+i*2+Math.sin(q*6+i)*1.5,by-4-q*12,1+q*1.6,0,7);ctx.fill()}}}
 // Costumes from holiday events. Earned ones stay wearable after the event; pick None in Settings to take it off.
-const COSTUMES=[{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')},{k:'flannel',n:'Flannel & knit hat',ev:'Harvest',own:()=>!!(S.hv&&S.hv.flannel)},{k:'pilgrim',n:'Pilgrim hat',ev:'Harvest',own:()=>hvHasCos('pilgrim')},{k:'turkeysuit',n:'Turkey suit',ev:'Harvest',own:()=>hvHasCos('turkeysuit')},{k:'apron',n:'Baker’s apron',ev:'Harvest',own:()=>hvHasCos('apron')},{k:'pcap',n:'Captain’s cap',ev:'Prestige I',own:()=>prLv()>=1},{k:'psweat',n:'Fisherman’s sweater',ev:'Prestige III',own:()=>prLv()>=3},{k:'pkeep',n:'Lighthouse keeper’s coat',ev:'Prestige VI',own:()=>prLv()>=6},{k:'pgold',n:'Golden captain’s hat',ev:'Prestige X',own:()=>prLv()>=10}];
+const COSTUMES=[{k:'vest',n:'Angler’s vest',ev:'Mastery',own:()=>!!(S.mst&&S.mst.vest)},{k:'robe',n:'Grandmaster’s robe',ev:'Mastery',own:()=>!!(S.mst&&S.mst.robe)},{k:'witch',n:'Witch hat',ev:'Halloween',own:()=>hwHas('witch')},{k:'vamp',n:'Vampire cape',ev:'Halloween',own:()=>hwHas('vamp')},{k:'flannel',n:'Flannel & knit hat',ev:'Harvest',own:()=>!!(S.hv&&S.hv.flannel)},{k:'pilgrim',n:'Pilgrim hat',ev:'Harvest',own:()=>hvHasCos('pilgrim')},{k:'turkeysuit',n:'Turkey suit',ev:'Harvest',own:()=>hvHasCos('turkeysuit')},{k:'apron',n:'Baker’s apron',ev:'Harvest',own:()=>hvHasCos('apron')},{k:'pcap',n:'Captain’s cap',ev:'Prestige I',own:()=>prLv()>=1},{k:'psweat',n:'Fisherman’s sweater',ev:'Prestige III',own:()=>prLv()>=3},{k:'pkeep',n:'Lighthouse keeper’s coat',ev:'Prestige VI',own:()=>prLv()>=6},{k:'pgold',n:'Golden captain’s hat',ev:'Prestige X',own:()=>prLv()>=10}];
 const hwWear=()=>{const w=S.hw&&S.hw.wear,c=w&&COSTUMES.find(x=>x.k===w);return c&&c.own()?w:null};
 function drawCostume(ax,ay,d,T,k){const sh=c=>rgb(mix(c.map(v=>v*.3),c,d*.8+.2));
   const twinkle=(x,y,ph)=>{const a=Math.max(0,Math.sin(T*2.4+ph));if(a<.2)return;ctx.save();ctx.globalAlpha=a;ctx.fillStyle='#fff8d0';ctx.beginPath();for(let i=0;i<8;i++){const an=i*Math.PI/4,r=i%2?.6:2.6*a;ctx.lineTo(x+Math.cos(an)*r,y+Math.sin(an)*r)}ctx.fill();ctx.restore()};
@@ -2544,6 +2561,9 @@ function drawCostume(ax,ay,d,T,k){const sh=c=>rgb(mix(c.map(v=>v*.3),c,d*.8+.2))
   if(k==='pkeep'){ctx.fillStyle=sh([244,200,40]);ctx.fillRect(ax-7,ay-22,14,22);ctx.fillStyle=sh([200,160,20]);ctx.fillRect(ax-.7,ay-22,1.4,22);for(let i=0;i<3;i++)ctx.fillRect(ax-2.5,ay-18+i*5,1.6,1.6);
     ctx.fillStyle=sh([244,200,40]);ctx.beginPath();ctx.arc(ax,ay-32,6.4,Math.PI,0);ctx.fill();ctx.beginPath();ctx.ellipse(ax-1,ay-31,10,2.4,-.08,0,7);ctx.fill();
     const lx=ax-11,ly=ay-12+Math.sin(T*2)*.8;ctx.fillStyle='#2a2a30';ctx.fillRect(lx-2.2,ly-4,4.4,1.2);ctx.fillStyle='#ffe8a8';ctx.fillRect(lx-2,ly-3,4,5);glow(lx,ly-1,16,.55+.15*Math.sin(T*5),'255,220,140');return}
+  if(k==='vest'){ctx.fillStyle=sh([110,120,70]);ctx.fillRect(ax-6,ay-21,12,15);ctx.fillStyle=sh([80,90,50]);for(const dx of [-4.5,1.5])for(const dy of [-17,-11]){ctx.fillRect(ax+dx,ay+dy,3,3.4)}ctx.fillStyle=sh([60,60,40]);ctx.fillRect(ax-.6,ay-21,1.2,15);ctx.fillStyle=sh([220,80,50]);ctx.fillRect(ax+2,ay-20,1.6,2.4);return}
+  if(k==='robe'){ctx.fillStyle=sh([60,40,120]);ctx.beginPath();ctx.moveTo(ax-7,ay-22);ctx.lineTo(ax+7,ay-22);ctx.lineTo(ax+9,ay);ctx.lineTo(ax-9,ay);ctx.fill();ctx.fillStyle=sh([232,196,80]);ctx.fillRect(ax-7,ay-22,14,1.6);ctx.fillRect(ax-1,ay-21,2,20);for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(ax-5+i*3.4,ay-2,.9,0,7);ctx.fill()}
+    ctx.fillStyle=sh([60,40,120]);ctx.beginPath();ctx.moveTo(ax-8,ay-33);ctx.lineTo(ax,ay-48);ctx.lineTo(ax+8,ay-33);ctx.fill();ctx.fillStyle=sh([232,196,80]);ctx.beginPath();ctx.arc(ax,ay-48,1.6,0,7);ctx.fill();ctx.fillRect(ax-8,ay-34,16,1.6);return}
   if(k==='pilgrim'){ctx.fillStyle=sh([240,236,226]);ctx.beginPath();ctx.moveTo(ax-7,ay-22);ctx.lineTo(ax+7,ay-22);ctx.lineTo(ax+4,ay-17);ctx.lineTo(ax,ay-19);ctx.lineTo(ax-4,ay-17);ctx.fill();
     ctx.fillStyle=sh([22,20,24]);ctx.beginPath();ctx.ellipse(ax,ay-33,10,2.4,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(ax-5.6,ay-33);ctx.lineTo(ax-4.6,ay-45);ctx.lineTo(ax+4.6,ay-45);ctx.lineTo(ax+5.6,ay-33);ctx.fill();ctx.fillStyle=sh([60,56,50]);ctx.fillRect(ax-5.4,ay-37,10.8,2.2);ctx.fillStyle=sh([232,196,80]);ctx.fillRect(ax-1.8,ay-37.6,3.6,3.4);ctx.fillStyle=sh([60,56,50]);ctx.fillRect(ax-.8,ay-36.8,1.6,1.8);return}
   if(k==='turkeysuit'){const FC=[[150,82,40],[200,140,60],[120,64,34],[226,186,110],[176,48,40]];for(let i=0;i<9;i++){const a=-Math.PI*.95+i*Math.PI*.9/8+Math.sin(T*1.5)*.03;ctx.fillStyle=sh(FC[i%5]);ctx.beginPath();ctx.ellipse(ax+Math.cos(a)*13,ay-18+Math.sin(a)*13,3.4,8,a+Math.PI/2,0,7);ctx.fill()}
@@ -2827,7 +2847,7 @@ const SLOT_CAP_MIN=120;function slotDay(){const d=localDay();if(!S.slotDay||S.sl
 const fmtClock=m=>{let h=Math.floor(m/60),mm=Math.floor(m%60);if(S&&S.set&&S.set.h24)return `${String(h%24).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;const ap=h<12?'AM':'PM';h=h%12||12;return `${h}:${String(mm).padStart(2,'0')} ${ap}`};
 const money=n=>Math.floor(n).toLocaleString('en-US');
 const ISLE_WATER={id:'isle',n:'Pine Island Cove',boat:0,d:'Still water behind the point on Pine Island. Take the ferry from Lantern Harbor.'};
-const W=id=>WATERS.find(w=>w.id===id)||REALMS_BY[id]||(id==='isle'?ISLE_WATER:undefined);
+const W=id=>WATERS.find(w=>w.id===id)||REALMS_BY[id]||(id==='isle'?ISLE_WATER:undefined)||(typeof FARW_BY!=='undefined'?FARW_BY[id]:undefined);
 const FI=id=>FISH.find(f=>f.id===id)||EVFISH.find(f=>f.id===id);
 const owned=id=>!!S.decor[id];
 const has=id=>!!S.decor[id]&&!S.off[id];
@@ -2947,7 +2967,7 @@ function doCatch(){
   const mKept=musKeep(f,w,vr,val,true);if(!mKept)addCooler(f,w,val); S.total++; earnAcc+=val; catchAcc++; S.st.earn+=val; if(f.r==='R'||f.r==='L')S.stamina=Math.max(0,S.stamina-bigCost());if(f.r==='L'&&rodPerk().wind)S.stamina=Math.min(100,S.stamina+10);
   const t=S.tour; if(t&&t.phase==='live'&&S.water===t.water) t.me=scoreAdd(t,t.me,f,w);
   rollDay();S.today.n++;if(!S.today.best||w>S.today.best.w)S.today.best={id:f.id,w};if(S.today.n>S.st.best.n)S.st.best={n:S.today.n,day:S.day};
-  pushRecent({id:f.id,w,val,v:vr,mus:mKept||undefined});if(f.r==='L'&&phxSet())phxBird();if((f.r==='R'||f.r==='L')&&gobSet())gobStrut();
+  pushRecent({id:f.id,w,val,v:vr,mus:mKept||undefined});if(f.r==='L'&&phxSet())phxBird();if(L.n<6||[5,20,50,100,250,400,500,1000,2000,2500,5000,10000,25000,50000].includes(L.n))try{mstClaim()}catch(e){}if((f.r==='R'||f.r==='L')&&gobSet())gobStrut();
   if(vr){celebrate({lbl:`${VAR[vr].n} ${f.n}!`,r:vr==='golden'?'L':'R',name:newVar?`New ${VAR[vr].n.toLowerCase()} variant for your logbook`:`${VAR[vr].n} variant`,sub:`${w} lb · worth $${money(val)}`,icon:fishSvg(vr==='giant'?RCOL[f.r]:VAR[vr].col)});burst(BOB.x,BOB.y-10,[VAR[vr].col,'#ffffff'],60)}
   else if(f.r==='R'||f.r==='L'){celebrate({lbl:`${RAR[f.r]} catch!`,r:f.r,name:f.n,sub:`${w} lb · worth $${money(val)}${isNew?' · New species':isRec?' · New record':''}`,icon:fishSvg(RCOL[f.r])});burst(BOB.x,BOB.y-10,[RCOL[f.r],'#ffffff','#ff7a3d'],f.r==='L'?70:35)}
   else sfx('splash'),showToast(`${w} lb ${f.n} · $${money(val)} to the cooler`,isNew?'New species!':isRec?'New record!':'');
@@ -3382,7 +3402,7 @@ const cupSvg=`<svg viewBox="0 0 26 30" aria-hidden="true"><path d="M6 3h14v7a7 7
 const RCOL={C:'#9db4ae',U:'#7cc7dc',R:'#c9a0f2',L:'#ffd05a',M:'#ff8fb8'};
 let logF='all';
 const bitingNow=f=>!f.quest&&f.at===S.water&&f.t.includes(phaseOf(S.min))&&(!f.wx||f.wx.includes(S.wx.id)||S.buffs.charm>0);
-const LOGF={all:['All fish',()=>true],now:['Biting here now',bitingNow],new:['Not caught yet',f=>!S.log[f.id]],vars:['Missing variants',f=>!f.quest&&!!S.log[f.id]&&['golden','albino','giant'].some(k=>!(S.log[f.id].v&&S.log[f.id].v[k]))]};
+const LOGF={all:['All fish',()=>true],now:['Biting here now',bitingNow],new:['Not caught yet',f=>!S.log[f.id]],vars:['Missing variants',f=>!f.quest&&!f.fleet&&!!S.log[f.id]&&['golden','albino','giant'].some(k=>!(S.log[f.id].v&&S.log[f.id].v[k]))]};
 const varN=()=>FISH.reduce((a,f)=>a+(S.log[f.id]&&S.log[f.id].v?Object.keys(S.log[f.id].v).filter(k=>VAR[k]).length:0),0);
 function progBars(){
   const fishN=FISH.filter(f=>S.log[f.id]).length,vt=FISH.filter(f=>!f.quest).length*3,cn=COLL.filter(c=>S.coll[c.id]&&S.coll[c.id].n).length,tk=Object.keys(TAPES),tn=tk.filter(k=>S.tapes[k]).length;
@@ -3411,23 +3431,24 @@ function renderLog(){
   const lg=document.createElement('div');lg.className='legend';
   lg.innerHTML=`<span>Color variants:</span>${['golden','albino','giant'].map(k=>`<span class="vchip on" style="--vc:${VAR[k].col}"><i></i>${VAR[k].n} ×${VAR[k].mult}</span>`).join('')}<span>Rare versions of each fish that sell for more. A chip lights up with a ✓ once you've caught that version.</span>`;
   p.append(lg);
+  p.insertAdjacentHTML('beforeend',mstCardHTML());
   hvLogSection(p);hwLogSection(p);
   const fn=LOGF[logF][1];let shown=0;
   if(logF==='now'){const w=W(S.water);p.insertAdjacentHTML('beforeend',`<p class="empty" style="margin:0 0 8px">Fish that can bite at ${w.n} right now (${PH[ph].toLowerCase()}, ${WX[S.wx.id].n.toLowerCase()}). Changes with the time, weather and water.</p>`)}
-  for(const w of [...WATERS,ISLE_WATER]){
-    const sp=FISH.filter(f=>f.at===w.id&&fn(f));if(!sp.length)continue;shown+=sp.length;
+  for(const w of [...WATERS,ISLE_WATER,...FARW]){
+    const sp=FISH.filter(f=>f.at===w.id&&fn(f));if(!sp.length)continue;if(w.far&&!sp.some(f=>S.log[f.id])&&!FLEET().ships.length)continue;shown+=sp.length;
     const all=FISH.filter(f=>f.at===w.id);
     const h=document.createElement('div');h.className='sec-h';
     h.innerHTML=`<h3>${w.n}</h3><small>${all.filter(f=>S.log[f.id]).length}/${all.length} · ${setHdr(w.id)}</small>`;p.append(h);
     const g=document.createElement('div');g.className='grid';if(w.id==='lake'&&q4LieOn('log'))g.innerHTML=q4LogLieHTML();
     for(const f of sp){
       const L=S.log[f.id],c=document.createElement('div');c.className='card fish'+(L?'':' unk');
-      const times=f.quest?'<span class="chip wx">Mystery quest</span>':f.t.filter(x=>PH[x]).map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('');
+      const times=f.quest?'<span class="chip wx">Mystery quest</span>':f.fleet?'<span class="chip wx">Brought home by your fleet</span>':f.t.filter(x=>PH[x]).map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('');
       const lureNote=f.r==='L'&&!LEGM[S.lure]&&!f.quest?'<span class="chip" style="background:#4a2a1a;color:#ffb08a">Needs a Crankbait</span>':'';
       c.innerHTML=`${fishSvg(RCOL[f.r])}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]}</span>`+
-        (L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+
+        (L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1]} lb</span>`)+mstStarsHTML(f)+
         `<div class="chips">${times}${f.wx?f.wx.map(x=>`<span class="chip wx${x===S.wx.id?' now':''}">${WX[x].n}</span>`).join(''):''}${lureNote}</div>`+
-        logBtns(f,L)+(f.quest?'':`<div class="vstamps">${['golden','albino','giant'].map(k=>{const n=L&&L.v&&L.v[k];return `<span class="vchip${n?' on':''}" style="--vc:${VAR[k].col}" title="${VAR[k].n} ${f.n} · ${n?'caught ×'+n:'not caught yet'}"><i></i>${n?'✓ ':''}${VAR[k].n}</span>`}).join('')}</div>`)+`</div>`;
+        logBtns(f,L)+(f.quest||f.fleet?'':`<div class="vstamps">${['golden','albino','giant'].map(k=>{const n=L&&L.v&&L.v[k];return `<span class="vchip${n?' on':''}" style="--vc:${VAR[k].col}" title="${VAR[k].n} ${f.n} · ${n?'caught ×'+n:'not caught yet'}"><i></i>${n?'✓ ':''}${VAR[k].n}</span>`}).join('')}</div>`)+`</div>`;
       g.append(c);
     }
     p.append(g);
@@ -3621,16 +3642,17 @@ const APPS=[
   {id:'weather',n:'Lake 7 Weather',s:'Weather',bg:'linear-gradient(145deg,#3a8aff,#0c2a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="12" r="5.5" fill="#ffd05a"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21M5.6 5.6l1.7 1.7M16.7 16.7l1.7 1.7M18.4 5.6l-1.7 1.7" stroke="#ffd05a" stroke-width="1.8" stroke-linecap="round"/><path d="M11 25.5a4.5 4.5 0 0 1 .6-9 6 6 0 0 1 11.3 1.6 3.8 3.8 0 0 1 .4 7.4z" fill="#fff"/><rect x="19" y="20" width="11" height="9" rx="2" fill="#d8312a"/><path d="M22 22.4h5l-2.6 4.8" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
   {id:'crate',n:'Crate Expectations',s:'Crates',bg:'linear-gradient(145deg,#ff5ad8,#3a1a6a)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 11l12-6 12 6v12l-12 6-12-6z" fill="#b07a3a"/><path d="M4 11l12 6 12-6M16 17v12" stroke="#5a3814" stroke-width="1.6" fill="none"/><path d="M14 18l4-2v5l-4 2z" fill="#ffc23a"/><path d="M24 3l1 2.4 2.4 1-2.4 1L24 10l-1-2.6-2.4-1 2.4-1z" fill="#fff"/></svg>`},
   {id:'hw',n:'Spooky',bg:'linear-gradient(145deg,#ff8a2a,#5a1a6a)',ic:()=>pumpkinSvg,when:()=>hwOn()},
+  {id:'fleet',n:'Fleet',bg:'linear-gradient(145deg,#2a5a8a,#0e2440)',ic:()=>svgI('anchor','#ffe8a8'),when:()=>fleetOpen()},
   {id:'hv',n:'Harvest',bg:'linear-gradient(145deg,#e8823a,#7a2e14)',ic:()=>svgI('leaf','#fff1d0'),when:()=>hvOn()||!!(S.hv&&S.hv.pts)},
   {id:'settings',n:'Settings',bg:'linear-gradient(145deg,#a8aeb8,#5e6470)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 4l2.2 3.1 3.7-.9.9 3.7 3.1 2.2-1.7 3.4 1.7 3.4-3.1 2.2-.9 3.7-3.7-.9L16 28l-2.2-3.1-3.7.9-.9-3.7-3.1-2.2 1.7-3.4-1.7-3.4 3.1-2.2.9-3.7 3.7.9z" fill="#fff"/><circle cx="16" cy="16" r="4.5" fill="#6e7480"/></svg>`},
   {id:'help',n:'Help',bg:'linear-gradient(145deg,#5aa8ff,#2a5ad0)',ic:()=>`<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12" fill="#fff"/><path d="M12.4 12.6a3.6 3.6 0 1 1 5.2 3.2c-1 .5-1.6 1.2-1.6 2.3v1" stroke="#2a5ad0" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="16" cy="23.2" r="1.7" fill="#2a5ad0"/></svg>`},
 ];
-const APP_ORDER=['texts','discord','friends','bounty','shop','case','news','weather','radio','crate','sports','slots','hw','hv','settings','help'];
+const APP_ORDER=['texts','discord','friends','bounty','shop','fleet','case','news','weather','radio','crate','sports','slots','hw','hv','settings','help'];
 const newsUnread=()=>S.newsDay!==S.day;
 function phShow(v){sfx(v==='home'&&phView==='lock'&&!$('slotsModal').hidden?'unlock':'click');
   phView=v;$('phLock').hidden=v!=='lock';$('phApps').hidden=v!=='home';for(const a of APPS)$('app-'+a.id).hidden=v!==a.id;
-  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='hv'?'v-hv':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='discord'?'v-dc':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
-  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case'){CASEV=0;renderCase()}if(v==='hw')renderHW();if(v==='hv')renderHV();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='fishdle')renderFishdle();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin){CR.tab='home';CR.last=null}renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
+  $('phScreen').className='ph-screen '+(v==='lock'||v==='home'?'v-wall':v==='slots'?'':v==='sports'?'v-book':v==='hw'?'v-hw':v==='hv'?'v-hv':v==='fleet'?'v-fl':v==='weather'?'v-wx':v==='radio'?'v-radio':v==='discord'?'v-dc':v==='crate'?'v-crate':(v==='news'||v==='case')?'v-paper':'v-light')+(phDark()?' dark':'');
+  if(v==='home')renderHome();if(v==='shop')renderDecor();if(v==='news')renderNews();if(v==='help')renderHelp();if(v==='bounty')renderBounties();if(v==='case'){CASEV=0;renderCase()}if(v==='hw')renderHW();if(v==='hv')renderHV();if(v==='fleet')renderFleet();if(v==='friends'){MPV.contact=null;renderFriends();mpSync(true)}if(v==='settings')renderSettings();if(v==='weather')renderWeatherApp();if(v==='radio')renderRadio();if(v==='fishdle')renderFishdle();if(v==='discord')renderDiscord();if(v==='crate'){if(!CR.spin){CR.tab='home';CR.last=null}renderCrate()}if(v==='sports'){SBV.sel=null;renderSports()}if(v==='texts'){TX.view='inbox';TX.with=null;TX.threads=null;txAlertClose();renderTexts();txPoll(true)}if(v==='slots'){renderPaytable();updateSlots()}
   const sec=v==='lock'?$('phLock'):v==='home'?$('phApps'):$('app-'+v);if(sec)sec.scrollTop=0;
 }
 
@@ -3733,6 +3755,7 @@ const QSKINS=[{...SK('reflection','Reflection','L','#c8d6e2','mirror','#ffffff',
 // The Lantern Keeper kit (Mythic): a thank-you for Lantern Lake supporters. Looks only, never in crates, can't be mailed.
 QSKINS.push({...SK('leviathan','Aurora Leviathan','M','#081430','leviathan','#5affc8','#b07aff','glow'),quest:true,sup:true});
 // The Phoenix Collection (Mythic): bought outright in Crate Expectations, never in crates, can't be mailed.
+QSKINS.push({...SK('admiral','Admiral’s Flagship','M','#14224a','admiral','#ffd05a','#f0ece2','glow'),quest:true});
 QSKINS.push({...SK('gobbler','Golden Gobbler','M','#6a3a14','gobbler','#ffd05a','#c8461f','glow'),quest:true,gob:1});
 QSKINS.push({...SK('phoenix','Phoenix Prow','M','#5a0e08','phoenix','#ff5a1a','#ffd23a','glow'),quest:true,phx:1});
 // Series 2: Deep Sea Expedition (a mixed case: paints, rod finishes and bobbers)
@@ -3809,6 +3832,7 @@ function drawPaint(c,x,y,L,b,d,T,sk){if(sk.p==='mirror'&&c===ctx)mirrorGhost(c,x
   else if(p==='stained'){const cols=['#d83a3a','#3a8ad8','#f4c02a','#3ab06a','#a05ad8','#ff8a2a'];for(let i=0;i*9<L+8;i++)for(let j=0;j*6<H+4;j++){c.fillStyle=cols[Math.floor(R()*6)];c.globalAlpha=.85;c.fillRect(x-4+i*9,top-2+j*6,9,6)}c.globalAlpha=1;c.strokeStyle='#141414';c.lineWidth=1;for(let i=0;i*9<L+8;i++){c.beginPath();c.moveTo(x-4+i*9,top-2);c.lineTo(x-4+i*9,y+16);c.stroke()}for(let j=0;j*6<H+4;j++){c.beginPath();c.moveTo(x-4,top-2+j*6);c.lineTo(x+L+4,top-2+j*6);c.stroke()}}
   else if(p==='kraken'){for(let i=0;i<4;i++){const bx=x+L*(.15+i*.22),w=Math.sin(T*1.6+i*1.4)*3;c.strokeStyle=sk.c2;c.lineWidth=2.6;c.lineCap='round';c.beginPath();c.moveTo(bx,y+16);c.bezierCurveTo(bx+4+w,y+6,bx-6-w,top+4,bx+3+w,top-1);c.stroke();c.fillStyle=sk.c3;for(let k=0;k<4;k++){const q=.2+k*.2;c.beginPath();c.arc(bx+(w*q)-1+k*.3,y+14-(y+15-top)*q,.7,0,7);c.fill()}}c.lineCap='butt'}
   else if(p==='chrome'){const g=c.createLinearGradient(0,top,0,y+14);g.addColorStop(0,'#f4f8ff');g.addColorStop(.3,'#9ab0c8');g.addColorStop(.5,'#e8eef6');g.addColorStop(.62,'#6a7a8a');g.addColorStop(1,'#d8e0ea');c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4)}
+  else if(p==='admiral'){c.fillStyle='#14224a';c.fillRect(x-4,top-2,L+8,H+4);c.fillStyle='#ffd05a';c.fillRect(x-4,top-1,L+8,2);c.fillRect(x-4,top+H*.62,L+8,1.6);c.fillStyle='#f0ece2';for(let i=0;i<Math.floor(L/14);i++){c.beginPath();c.arc(x+8+i*14,top+H*.36,2.2,0,7);c.fill()}c.strokeStyle='#ffd05a';c.lineWidth=.8;for(let i=0;i<Math.floor(L/14);i++){c.beginPath();c.arc(x+8+i*14,top+H*.36,2.6,0,7);c.stroke()}}
   else if(p==='gobbler'){const g=c.createLinearGradient(x,0,x+L,0);g.addColorStop(0,'#4a240c');g.addColorStop(.5,'#8a4a1a');g.addColorStop(1,'#e8a83a');c.fillStyle=g;c.fillRect(x-4,top-2,L+8,H+4);
     for(let i=0;i<L/10;i++){const fx=x+4+i*10;c.fillStyle=i%3===0?'#ffd05a':i%3===1?'#c8461f':'#5a2a10';c.beginPath();c.moveTo(fx,top+H*.2);c.quadraticCurveTo(fx+5,top+H*.5,fx,top+H*.95);c.quadraticCurveTo(fx-3,top+H*.55,fx,top+H*.2);c.fill()}
     c.fillStyle='rgba(255,240,180,.5)';c.fillRect(x-4,top-1,L+8,1.5)}
@@ -3855,12 +3879,14 @@ const DS_RODS=[RSK('bamboo','Bamboo','C','#c8b060'),RSK('cork','Classic Cork','C
   RSK('kraken','Kraken Rod','L','#3a1a5a','#c87aff','bubbles','#b05aff'),RSK('chrome','Chrome Rod','L','#c8d0d8','#ffffff','stars','#ffffff')].map(x=>({...x,ds:1}));
 const Q_BOBS=[{...BSK('antenna','Antenna Bobber','L','antenna','#2a2a30','#d8dde6'),quest:true}];
 Q_BOBS.push({...BSK('sun','Pocket Sun','M','sun','#ffd84a','#ff8a2a'),quest:true,sup:true});
+Q_BOBS.push({...BSK('admiral','Ship’s Wheel','M','wheel','#8a5a2a','#ffd05a'),quest:true},{...BSK('gmaster','Grandmaster','M','two','#ffd05a','#8a5ae8'),quest:true});
 Q_BOBS.push({...BSK('turkey','Turkey Bobber','L','turkey','#7a4a2a','#d8302a'),quest:true},{...BSK('cranberry','Cranberry Sauce','R','cran','#a8102a','#e85a70'),quest:true},{...BSK('gobbler','Golden Gobbler','M','turkey','#e8b030','#ff9a3a'),quest:true,gob:1});
 Q_BOBS.push({...BSK('dbell','Drowned Bell','L','dbell','#b08a3a','#5ab8a0'),quest:true});
 Q_BOBS.push({...BSK('tin','Cannery Tin','L','tin','#c8ccd2','#c83a2a'),quest:true});
 Q_BOBS.push({...BSK('phoenix','Phoenix Egg','M','phoenix','#d8301a','#ffc23a'),quest:true,phx:1});
 const Q_RODS=[{...RSK('starforged','Starforged','M','#1a1440','#ffe8a8','starforge','#ffd870'),quest:true,sup:true},
   {...RSK('legacy','Legacy','L','#5a3a22','#e8b030','legacy','#e8b030'),quest:true,pr:1},{...RSK('legacylit','Lit Legacy','M','#3a2418','#7affe0','legacy','#7affe0'),quest:true,pr:5},{...RSK('legacygold','Golden Legacy','M','#ffd05a','#ffffff','legacy','#fff2a0'),quest:true,pr:10}];
+Q_RODS.push({...RSK('admiral','Admiral’s Spyglass','M','#14224a','#ffd05a','coins','#ffd05a'),quest:true},{...RSK('mbronze','Bronze Master','R','#a8642a','#e0904a','none',''),quest:true},{...RSK('msilver','Silver Master','L','#c8d0dc','#f4f8ff','none','#dfe8f4'),quest:true},{...RSK('mgold','Gold Master','L','#c8961a','#ffe08a','coins','#ffd05a'),quest:true},{...RSK('mprism','Prismatic Master','M','#8a5ae8','#5ae8d8','stars','#c8a8ff'),quest:true});
 Q_RODS.push({...RSK('wishbone','Wishbone','L','#f0e2c0','#c8a070','feathers','#ffe8b0'),quest:true},{...RSK('gobbler','Golden Gobbler','M','#c8861a','#ffe8a0','feathers','#ffd05a'),quest:true,gob:1});
 Q_RODS.push({...RSK('phoenix','Flame Feather','M','phoenix','#ffd23a','phoenix','#ff7a2a'),quest:true,phx:1});
 // Town-only bobbers from Marge's Counter (shown in the locker once owned)
@@ -3930,6 +3956,7 @@ function drawBobber(c,x,y,sk,d,T,r){r=r||4.5;const on=lit(d);c.save();
   else if(p==='krakenb'){c.fillStyle=sk.col;c.lineWidth=r*.28;c.strokeStyle=sk.col;c.lineCap='round';for(let k=0;k<5;k++){const ax=x-r*.8+k*r*.4,w=Math.sin(T*3+k)*r*.35;c.beginPath();c.moveTo(ax,y+r*.2);c.quadraticCurveTo(ax+w,y+r*.9,ax-w*.5,y+r*1.5);c.stroke()}c.beginPath();c.ellipse(x,y-r*.1,r*.9,r*1.05,0,0,7);c.fill();c.fillStyle='#fff';for(const dx of [-.32,.32]){c.beginPath();c.arc(x+dx*r,y-r*.15,r*.22,0,7);c.fill()}c.fillStyle='#1a0a2a';for(const dx of [-.3,.34]){c.beginPath();c.arc(x+dx*r,y-r*.12,r*.1,0,7);c.fill()}c.fillStyle=sk.c2;c.beginPath();c.arc(x,y+r*.25,r*.12,0,Math.PI);c.fill()}
   else if(p==='dbell'){const sw=Math.sin(T*2.2)*.18;c.save();c.translate(x,y-r*.9);c.rotate(sw);const g=c.createLinearGradient(-r,0,r,0);g.addColorStop(0,'#6a5020');g.addColorStop(.45,'#e0c070');g.addColorStop(1,'#6a5020');c.fillStyle=g;c.beginPath();c.moveTo(-r*1.05,r*1.7);c.quadraticCurveTo(-r*.9,0,0,0);c.quadraticCurveTo(r*.9,0,r*1.05,r*1.7);c.closePath();c.fill();c.fillStyle=sk.c2;c.globalAlpha=.6;c.fillRect(-r*.8,r*.9,r*.5,r*.4);c.fillRect(r*.2,r*.5,r*.4,r*.3);c.globalAlpha=1;c.fillStyle='#4a3a18';c.beginPath();c.arc(0,r*1.75,r*.25,0,7);c.fill();c.fillRect(-r*.15,-r*.35,r*.3,r*.4);c.restore()}
   else if(p==='tin'){const g=c.createLinearGradient(x-r,0,x+r,0);g.addColorStop(0,'#8a9098');g.addColorStop(.45,'#f0f2f4');g.addColorStop(1,'#7a8088');c.fillStyle=g;c.fillRect(x-r*.85,y-r*.9,r*1.7,r*1.8);c.fillStyle=sk.c2;c.fillRect(x-r*.85,y-r*.35,r*1.7,r*.7);c.fillStyle='#fff6e0';c.font=`bold ${Math.max(3,r*.42)}px Georgia,serif`;c.textAlign='center';c.fillText('1961',x,y+r*.14);c.textAlign='left';c.fillStyle='#d8dce2';c.beginPath();c.ellipse(x,y-r*.9,r*.85,r*.28,0,0,7);c.fill();c.strokeStyle='#9aa0a8';c.lineWidth=Math.max(.4,r*.08);c.stroke()}
+  else if(p==='wheel'){c.save();c.translate(x,y);c.rotate(T*.6);c.strokeStyle=sk.col;c.lineWidth=r*.28;c.beginPath();c.arc(0,0,r*.8,0,7);c.stroke();for(let i=0;i<8;i++){const a=i*Math.PI/4;c.beginPath();c.moveTo(0,0);c.lineTo(Math.cos(a)*r*1.25,Math.sin(a)*r*1.25);c.stroke()}c.fillStyle=sk.c2;c.beginPath();c.arc(0,0,r*.3,0,7);c.fill();for(let i=0;i<8;i++){const a=i*Math.PI/4;c.beginPath();c.arc(Math.cos(a)*r*1.3,Math.sin(a)*r*1.3,r*.16,0,7);c.fill()}c.restore()}
   else if(p==='turkey'){const gold=sk.id==='b_gobbler',fn=Math.min(1,.4+(on?0:0)+.6*Math.abs(Math.sin(T*1.5)));if(gold){c.shadowColor='#ffd05a';c.shadowBlur=8+3*Math.sin(T*4)}
     const FC=gold?['#ffd05a','#ff9a3a','#fff2b0']:['#8a4a1a','#c8861a','#e8c890'];for(let i=0;i<7;i++){const a=-Math.PI*.95+i*Math.PI*.9/6;c.fillStyle=FC[i%3];c.beginPath();c.ellipse(x-r*.3+Math.cos(a)*r*1.2,y-r*.3+Math.sin(a)*r*1.2*fn,r*.32,r*.75,a+Math.PI/2,0,7);c.fill()}
     c.fillStyle=sk.col;c.beginPath();c.arc(x,y,r,0,7);c.fill();c.fillStyle='#f4f0e6';c.beginPath();c.arc(x,y,r,0,Math.PI);c.fill();c.fillStyle=gold?'#fff2b0':'#b89a80';c.beginPath();c.arc(x+r*.7,y-r*.7,r*.42,0,7);c.fill();c.fillStyle=sk.c2;c.beginPath();c.ellipse(x+r*.95,y-r*.35,r*.14,r*.3,0,0,7);c.fill();c.shadowBlur=0}
@@ -4650,7 +4677,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
     ${row('Hide the phone','Tucks it off the screen. New messages still show a red badge',sw('phHide',!!st.phHide,'Hide the phone'))}
     ${row('Next goals card','Suggestions for what to do next, under the scene',sw('goals',st.goals!==false,'Next goals card'))}
     ${row('Dark mode',st.dark==='auto'?'Auto: follows your device':'Dark backgrounds for the phone’s apps',seg('dark',[['off','Off'],['on','On'],['auto','Auto']]))}
-    ${(()=>{const own=COSTUMES.filter(c=>c.own());if(!own.length)return row('Costume','Earn costumes in holiday events','<small class="fr-muted">None yet</small>');const cur=hwWear()||'';return row('Costume','From holiday events. Pick None to take it off',`<span class="seg" role="group">${[['','None'],...own.map(c=>[c.k,c.n])].map(([k,n])=>`<button data-cos="${k}" aria-pressed="${cur===k}">${n}</button>`).join('')}</span>`)})()}
+    ${(()=>{const own=COSTUMES.filter(c=>c.own());if(!own.length)return row('Costume','Earn costumes in holiday events','<small class="fr-muted">None yet</small>');const cur=hwWear()||'';return row('Costume','From events, prestige and mastery. Pick None to take it off',`<select id="cosSel" class="cos-sel" aria-label="Costume">${[['','None'],...own.map(c=>[c.k,c.n])].map(([k,n])=>`<option value="${k}"${cur===k?' selected':''}>${esc(n)}</option>`).join('')}</select>`)})()}
   </div></div>
   <div><h4>Motion</h4><div class="grp">
     ${row('Travel cut scenes',st.cut==='auto'?(RM?'Auto: off, because your device asks for reduced motion':'Auto: on. Follows your device’s reduced motion setting'):st.cut==='always'?'Always show the boat rides':'Skip straight to where you’re going',seg('cut',[['auto','Auto'],['always','Always'],['off','Off']]))}
@@ -4689,7 +4716,7 @@ function renderSettings(){const st=SETS(),s=S.snd,b=$('setBody');
   <div><h4>Support Lantern Lake</h4><div class="grp"><div class="row col"><span><small style="line-height:1.45">${donateNote()}</small></span><a class="set-donate" href="${DONATE_URL}" target="_blank" rel="noopener">♥ Donate with PayPal</a></div></div></div>
   <p class="set-foot">Lantern Lake · version ${ver}</p>`;
   appSettingsBind(b);{const sb=$('setBlocks');if(sb)sb.onclick=blocksUI}
-  b.querySelectorAll('[data-cos]').forEach(x=>x.onclick=()=>{HW().wear=x.dataset.cos||null;sfx('click');save();renderSettings()});
+  {const cs=$('cosSel');if(cs)cs.onchange=()=>{HW().wear=cs.value||null;sfx('click');save();renderSettings()}}
   b.querySelectorAll('[data-sk]').forEach(x=>x.onclick=()=>{let v=x.dataset.sv;if(v==='true')v=true;else if(v==='false')v=false;st[x.dataset.sk]=v;sfx('click');applyDock();applyPhTheme();applyTextSize();save();renderSettings();renderLock();renderVitals&&renderVitals()});
   b.querySelectorAll('[data-sw]').forEach(x=>x.onchange=()=>{st[x.dataset.sw]=x.checked;save();if(x.dataset.sw==='cloud'&&x.checked){CSYNC.lastUp=0;cloudCheck()}if(x.dataset.sw==='live'&&!x.checked)liveClose();if(x.dataset.sw==='phHide')applyPhHide();});
   {const pn=$('setPin');if(pn)pn.onclick=()=>{closePhone();openPin(false)};const mv=$('setMove');if(mv)mv.onclick=()=>{closePhone();openSaveModal()};const ow=$('setOwner');if(ow)ow.onclick=()=>{closePhone();openOwner()}}
@@ -5132,6 +5159,8 @@ function renderHelp(){
   ...(hvOn()?[['Harvest Festival 2026 (until November 30)',[
    ['Fall at the lake',`<p>The trees around every water have turned red, orange and gold, leaves drift across the lake, and geese fly over in a V now and then.</p>`],
    ['Festival decor',`<p>The Shop has a Harvest section: Corn Stalk Bundles, a Harvest Table, a Harvest Wreath, a Pie on the Windowsill and Potted Mums, plus the Scarecrow and Hay Bales. Anything you buy is yours to keep, but these leave the Shop when the festival ends.</p>`],
+   ['Your Fleet',`<p>Once you reach Misty Bay (or prestige once), open the Fleet app on your phone. Buy up to four ships: a Trawler ($5M), a Schooner ($50M), an Icebreaker ($250M) and a Research Vessel ($1B). Send them on real-time voyages to six far waters, from 2 hours (the Kelp Forest) to 24 hours (the Sunken Isles). Bigger ships reach farther waters. When a ship is home, unload her: exotic fish go into your cooler and logbook, with materials and sometimes a captain’s chest. Upgrade ships for bigger hauls and shorter trips, and captains level up the more they sail. Your fleet is never reset by a prestige. Log every far-water fish to earn the Mythic Admiral set.</p>`],
+   ['Species Mastery',`<p>Every species earns up to 5 stars from how many you’ve caught, ever. Each star adds 4% to what that fish sells for. Stars are never lost to a prestige. Your total stars are your Mastery Level; the reward track and the lake leaderboard are at the top of your Logbook.</p>`],
    ['The Great Gobble',`<p>The Harvest app has four long goals until the end of November. The Thanksgiving Feast: once the Harvest Basket is full it keeps filling toward one huge lake-wide goal, with six rewards every helper shares. The Gobbler’s Ledger: twelve rewards for the points you give, up to 1.5 million, ending with the Mythic Golden Gobbler boat, rod and bobber (wear all three for a strutting golden turkey). The Prize Turkey Show: adopt a turkey poult, feed it and groom it once a day; on Thanksgiving the top three win trophies and prize money and every turkey is pardoned as a pet. Master Baker: 12 blue ribbons at the pie contest earn the baker’s apron.</p>`],
    ['Festival fish',`<p>Five fish only bite until November 30: the Acorn Sunfish (Dock Pond, dawn and day), the Maple Trout (Reed Lake, dawn to dusk), the Cranberry Darter (Fork River, day and dusk) and the legendary Harvest Moon Carp (Deepwater Basin, night). Once the lake’s Thanksgiving Feast reaches 45%, the legendary Great Gobbler bites in Lantern Bay at any hour. They have their own section at the top of your Logbook and in the Harvest app.</p>`],
    ['The Harvest Basket',`<p>Open the <b>Harvest</b> app on your phone to give fish from your cooler to one basket for the whole lake. Commons are worth 1 point, uncommons 2, rares 4, legendaries 10 and mythics 25, and festival fish count double. When the lake fills a quarter of the basket, everyone who gave at least 10 points gets $25,000. Half full brings 3 Golden Scale Elixirs, three-quarters brings The Cornucopia for your yard, and a full basket brings $100,000 and a trophy. You need an angler name from the Friends app to join in.</p>`],
@@ -6887,6 +6916,8 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:168,n:'Bug fix: the costume setting',items:['Bug fix: with lots of costumes, the Costume setting squeezed its label into a single tall column of letters on phones. It’s now a dropdown that fits any number of costumes.']},
+ {v:167,n:'The Fleet & Species Mastery',items:['Your Fleet: once you reach Misty Bay (or prestige once), the Lantern Harbor shipyard opens in the new Fleet app. Buy up to four ships (a Trawler, a Schooner, an Icebreaker and a Research Vessel), each with a captain who levels up the more they sail.','Send ships on real-time voyages of 2 to 24 hours to six far waters: the Kelp Forest, the Mangrove Delta, the Coral Atoll, Storm Cape, the Frozen North and the Sunken Isles. They bring home exotic fish (36 new species with their own logbook sections and set rewards), materials including Starglass, Ember Core and Abyssal Iron, and sometimes a captain’s chest.','Upgrade ships up to level 10 for bigger hauls and faster voyages. Your fleet is never reset by a prestige.','Log every fish from far waters to earn the Mythic Admiral set (Flagship boat paint, Spyglass rod, Ship’s Wheel bobber). Wear all three for +10% on every voyage.','Species Mastery: every species earns up to 5 stars from how many you’ve caught, ever. Each star adds 4% to what that fish sells for, and stars are never lost to a prestige. Your total stars are your Mastery Level, with a reward track in the Logbook: cash, four Master rods, an Angler’s vest, the Master’s Lodge sign, a Grandmaster’s robe and bobber, and the Grandmaster trophy. There’s a lake leaderboard for mastery too.']},
  {v:166,n:'Bug fix: Great Gobblers and Cove fish at the Museum',items:['Bug fix: the Museum turned away the Great Gobbler and the six Pine Island Cove fish because they weren’t on its list. You can donate them now.']},
  {v:165,n:'The Great Gobble',items:['The Harvest Festival goes big and goes turkey, all the way to November 30.','The Thanksgiving Feast: the Harvest Basket keeps filling past 100% toward one enormous lake-wide feast. Six feast rewards along the way for everyone who helps: Harvest Moon nights, the Turkey Bobber, the Great Gobbler (a festival Legendary in Lantern Bay), the Thanksgiving Table for your yard, $500,000 with a bag of potions, and $2,000,000 with a trophy.','The Gobbler’s Ledger: twelve rewards just for the points you give, up to 1.5 million. Cash, potions, a Cranberry Sauce bobber, a Pilgrim hat, the Wishbone rod, $1,000,000, a full Turkey suit, a Golden Turkey statue, and the Mythic Golden Gobbler boat, rod and bobber. Wear all three and a golden turkey struts across the lake every time you land a Rare or better. Finish the ledger to become the Gobbler Monarch.','The Prize Turkey Show: adopt a turkey poult in the Harvest app, then feed and groom it every day. Feeding streaks make it grow faster. On Thanksgiving (November 26) the heaviest, shiniest turkeys win trophies and up to $3,000,000, and every turkey shown is pardoned and stays on as your pet.','Master Baker: win 12 blue ribbons at the pie contest for the baker’s apron.','Bug fix: “Give all” in the Harvest app could forget your first tap if the app refreshed in between, so it needed extra taps. It now stays ready for a few seconds.']},
  {v:164,n:'Bug fix: greenhouse and farm prices',items:['Bug fix: Sunfruit, Moonflowers, Glowberries, Honey, Eggs and greenhouse bait were priced off your last minute or so of income with no limit, so a short burst could make one Sunfruit worth millions. They now follow your steady income and top out at $90,000 for Sunfruit, $50,000 for Moonflowers, $25,000 for Honey, $20,000 for Glowberries, $12,000 for bait and $8,000 for Eggs. The yard’s other income-based rewards follow your steady income too.']},
@@ -7634,7 +7665,7 @@ const YI={
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
-  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},feasttable:{ox:0,oy:0,w:90,h:30,def:[[30,300]]},goldturkey:{ox:0,oy:0,w:34,h:40,def:[[-30,330]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
+  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},feasttable:{ox:0,oy:0,w:90,h:30,def:[[30,300]]},lodgesign:{ox:0,oy:0,w:48,h:44,def:[[150,268]]},goldturkey:{ox:0,oy:0,w:34,h:40,def:[[-30,330]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
   cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]},
   pumpkinpatch:{ox:61,oy:385,w:56,h:14,def:[[61,385]]},wheelbarrow:{ox:100,oy:347,w:44,h:33,def:[[100,347]]},ciderpress:{ox:44,oy:352,w:60,h:46,def:[[44,352]]},maple:{ox:14,oy:296,w:57,h:83,def:[[14,296]]},hayride:{ox:94,oy:396,w:89,h:62,def:[[94,396]]}};
 // v156 and earlier anchored these five at their top-left corner, so they couldn't come up to the house. Saves shift them once so they stay put.
@@ -7709,6 +7740,7 @@ function yDraw(id,d,T,night,ph){
   else if(id==='birch')birchOne(d,T,ph);
   else if(id==='hpsign')hpSignDraw(d);
   else if(id==='feasttable')feastTableDraw(d);
+  else if(id==='lodgesign')lodgeSignDraw(d);
   else if(id==='goldturkey')goldTurkeyDraw(d,T);
   else if(id==='steeple'){const x=186,y=330,st=rgb(mix([40,42,44],[150,150,142],d)),gr=rgb(mix([22,36,32],[80,116,100],d));ctx.fillStyle=rgb(mix([30,28,24],[110,100,84],d));ctx.fillRect(x-17,y-8,34,8);ctx.fillStyle=st;ctx.fillRect(x-12,y-44,24,36);ctx.fillStyle=rgb(mix([10,12,14],[40,44,50],d));ctx.fillRect(x-7,y-38,14,16);
     const sw=Math.sin(T*1.1+ph)*.25*(night?1:.3);ctx.save();ctx.translate(x,y-36);ctx.rotate(sw);ctx.fillStyle=rgb(mix([60,52,30],[176,146,70],d));ctx.beginPath();ctx.moveTo(-5,8);ctx.quadraticCurveTo(-5,0,0,0);ctx.quadraticCurveTo(5,0,5,8);ctx.closePath();ctx.fill();ctx.restore();
@@ -10156,6 +10188,91 @@ function projCan(p){const st=PJ(p.id),nx=p.stages[st.s];if(!nx||st.b!=null)retur
 function projFund(id){const p=PROJ.find(x=>x.id===id);if(!p||!projCan(p))return;const st=PJ(id),nx=p.stages[st.s];S.coins-=nx.c;for(const [k,n] of Object.entries(nx.m))S.mats[k]-=n;st.b=S.day;storeDirty=true;sfx('craft');
   showToast(`${p.n}: stage ${st.s+1} is under construction. Ready tomorrow.`,'Lake projects');save();renderDecor()}
 function projTick(){if(!S.proj)return;for(const p of PROJ){const st=S.proj[p.id];if(st&&st.b!=null&&S.day>st.b){st.s++;st.b=null;celebrate({lbl:'Project finished!',r:'L',name:`${p.n} · stage ${st.s} of ${p.stages.length}`,sub:p.bonus(st.s),icon:svgI('crown','#ffd05a')});save();if(phView==='shop')renderDecor()}}}
+// ==THE FLEET (v167)== Ships you own, crewed by captains who level up, sailing real-time voyages to six far waters you never
+// fish yourself. Each voyage brings home exotic fish (their own logbook sections), materials and sometimes a captain's chest.
+// The fleet is never reset by a prestige, so it's the long project that every prestige run benefits from.
+const FARW=[{id:'kelp',n:'The Kelp Forest',h:2,tier:0,val:300000,cnt:8,d:'Towering kelp off the western shelf.',col:'#3a8a4a',mats:[['rope',.8,2,4],['fabric',.5,1,3]]},
+  {id:'mangrove',n:'The Mangrove Delta',h:4,tier:0,val:700000,cnt:10,d:'Warm brown channels under tangled roots.',col:'#6a7a3a',mats:[['drift',.8,2,5],['paint',.4,1,2]]},
+  {id:'coral',n:'The Coral Atoll',h:6,tier:1,val:1500000,cnt:12,d:'A ring of reef around a turquoise lagoon.',col:'#e0605a',mats:[['amber',.25,1,1],['paint',.6,1,3]]},
+  {id:'storm',n:'Storm Cape',h:8,tier:1,val:3000000,cnt:14,d:'Where two oceans meet and the sky never settles.',col:'#5a6a8a',mats:[['thunderstone',.6,1,2],['scrap',.7,2,4]]},
+  {id:'frozen',n:'The Frozen North',h:12,tier:2,val:8000000,cnt:16,d:'Pack ice, northern lights and black water.',col:'#8ac8e8',mats:[['starglass',.6,1,2],['moon',.5,1,2]]},
+  {id:'sunken',n:'The Sunken Isles',h:24,tier:3,val:25000000,cnt:20,d:'A drowned archipelago of temples and statues.',col:'#3aa8a0',mats:[['starglass',.7,1,3],['embercore',.6,1,2],['abyss',.4,1,1],['amber',.3,1,1]]}];
+const FARW_BY=Object.fromEntries(FARW.map(w=>[w.id,Object.assign(w,{boat:99,far:1})]));
+const FLEET_T=[{k:'trawler',n:'Trawler',c:5e6,tier:0,d:'Sturdy and slow. Kelp and mangroves.'},{k:'schooner',n:'Schooner',c:5e7,tier:1,d:'Fast under sail. Reaches the Coral Atoll and Storm Cape.'},{k:'icebreaker',n:'Icebreaker',c:2.5e8,tier:2,d:'A steel hull for the Frozen North.'},{k:'research',n:'Research Vessel',c:1e9,tier:3,d:'Sonar, a dive bell and a crane. Reaches the Sunken Isles.'}];
+const FT=k=>FLEET_T.find(t=>t.k===k);
+const CAPTS=['Old Pete’s cousin Nell','Ruth Ashby','Big Sal','Abel Ogden','Mae Harrow','Tobias Finch','June Calloway','Hank Brody'];
+const FLEET=()=>{if(!S.fleet||typeof S.fleet!=='object')S.fleet={ships:[],trips:0};if(!Array.isArray(S.fleet.ships))S.fleet.ships=[];return S.fleet};
+const fleetOpen=()=>S.boat>=4||prLv()>=1||FLEET().ships.length>0;
+const shipUpCost=s=>Math.round(FT(s.t).c*.5*Math.pow(1.55,s.lv-1)/1000)*1000;
+const capLv=s=>Math.min(20,1+Math.floor(Math.sqrt((s.xp||0)/3)));
+const admiralSet=()=>{const p=PNT();return p.eq==='admiral'&&p.eqR==='r_admiral'&&p.eqB==='b_admiral'};
+const tripHours=(s,w)=>w.h*(1-.04*(s.lv-1));
+const tripValue=(s,w)=>w.val*(1+.15*(s.lv-1))*(1+.02*(capLv(s)-1))*(admiralSet()?1.1:1);
+function fleetBuy(k){const T=FT(k),F=FLEET();if(!T||!fleetOpen()||F.ships.some(s=>s.t===k)||S.coins<T.c)return;S.coins-=T.c;
+  F.ships.push({t:k,lv:1,xp:0,cap:CAPTS[F.ships.length*2+Math.floor(Math.random()*2)%CAPTS.length]||'Abel Ogden',v:null});sfx('craft');celebrate({lbl:'A new ship for your fleet!',r:'L',name:T.n,sub:'Send her out from the Fleet app',icon:svgI('anchor','#ffd05a')});save();renderFleet()}
+function fleetUp(i){const s=FLEET().ships[i];if(!s||s.lv>=10||s.v)return;const c=shipUpCost(s);if(S.coins<c)return;S.coins-=c;s.lv++;sfx('craft');showToast(`${FT(s.t).n} upgraded to level ${s.lv}`,'+15% haul, faster voyages');save();renderFleet()}
+function fleetSail(i,wid){const s=FLEET().ships[i],w=FARW_BY[wid];if(!s||s.v||!w||FT(s.t).tier<w.tier)return;const now=Date.now();s.v={d:wid,st:now,end:now+tripHours(s,w)*36e5};sfx('splash');showToast(`${FT(s.t).n} is bound for ${w.n}`,`Back in ${fmtHrs(tripHours(s,w))}`);save();renderFleet()}
+const fmtHrs=h=>{const m=Math.max(1,Math.round(h*60));return m>=60?`${Math.floor(m/60)}h ${m%60}m`:`${m}m`};
+function fleetUnload(i){const F=FLEET(),s=F.ships[i];if(!s||!s.v||Date.now()<s.v.end)return;const w=FARW_BY[s.v.d],cl0=capLv(s);s.xp=(s.xp||0)+w.h;
+  const tot=tripValue(s,w)*(.85+Math.random()*.3),sp=FISH.filter(f=>f.at===w.id),rb=.003*(capLv(s)-1),pick=[];
+  for(let k=0;k<w.cnt;k++){const r=Math.random();const ra=r<.03+rb?'L':r<.15+rb*2?'R':r<.45?'U':'C';const opts=sp.filter(f=>f.r===ra);pick.push(opts[Math.floor(Math.random()*opts.length)])}
+  const RW={C:1,U:2,R:5,L:20},sw=pick.reduce((a,f)=>a+RW[f.r],0);let newSp=0,got=0;
+  for(const f of pick){const wt=+(f.w[0]+(f.w[1]-f.w[0])*Math.pow(Math.random(),1.6)).toFixed(2),val=Math.round(tot*RW[f.r]/sw),L=S.log[f.id]||(S.log[f.id]={n:0,big:0});if(L.n===0)newSp++;L.n++;if(wt>L.big)L.big=wt;addCooler(f,wt,val);got+=val}
+  const mats=[];for(const [id,ch,a,b] of w.mats)if(Math.random()<ch){const n=a+Math.floor(Math.random()*(b-a+1));S.mats[id]=(S.mats[id]||0)+n;const m=MATS.find(x=>x.id===id);mats.push(`${n} ${m?m.n:id}`)}
+  let chest=0;if(Math.random()<(w.id==='sunken'?.25:.1)){chest=Math.round(tot*.5);S.coins+=chest}
+  F.trips=(F.trips|0)+1;s.v=null;S.total+=pick.length;coolDirty=true;storeDirty=true;renderLogSoon();
+  const cl1=capLv(s);celebrate({lbl:`${FT(s.t).n} is home from ${w.n}`,r:chest?'L':'R',name:`${pick.length} fish worth $${money(got)} in your cooler`,sub:[newSp?`${newSp} new species`:'',mats.join(', '),chest?`Captain’s chest: $${money(chest)}`:'',cl1>cl0?`${s.cap} reached captain level ${cl1}`:''].filter(Boolean).join(' · '),icon:svgI('anchor','#ffd05a')});
+  fleetAdmiralCheck();save();renderFleet()}
+function fleetAdmiralCheck(){const done=FARW.filter(w=>FISH.filter(f=>f.at===w.id).every(f=>S.log[f.id])).length,P=PNT(),A=[[2,'admiral','Admiral’s Flagship boat paint'],[4,'r_admiral','Admiral’s Spyglass rod'],[6,'b_admiral','Ship’s Wheel bobber']];
+  for(const [n,id,nm] of A)if(done>=n&&!(P.own[id]|0)){P.own[id]=1;celebrate({lbl:`${n} far waters complete!`,r:'M',name:nm,sub:'Mythic. Wear the whole Admiral set for +10% on every voyage',icon:svgI('anchor','#ffd05a')})}}
+let fleetNoted={};
+function fleetTick(){const F=S.fleet;if(!F||!F.ships)return;const now=Date.now();F.ships.forEach((s,i)=>{if(s.v&&now>=s.v.end&&!fleetNoted[i+':'+s.v.end]){fleetNoted[i+':'+s.v.end]=1;showToast(`${FT(s.t).n} is back from ${FARW_BY[s.v.d].n}. Unload her in the Fleet app.`,'Your fleet');if(phView==='fleet')renderFleet()}})}
+function drawShip(c,x,y,k,s,T,sea){c.save();c.translate(x,y+(sea?Math.sin(T*1.6+x)*1.5:0));c.scale(s,s);c.rotate(sea?Math.sin(T*1.2+x)*.03:0);
+  const hull={trawler:'#a83a2a',schooner:'#2a3a5a',icebreaker:'#c84a2a',research:'#f0f0ea'}[k],L={trawler:46,schooner:60,icebreaker:58,research:66}[k];
+  c.fillStyle=hull;c.beginPath();c.moveTo(-L/2,-8);c.lineTo(L/2+6,-10);c.lineTo(L/2-4,2);c.lineTo(-L/2+4,2);c.closePath();c.fill();c.fillStyle='rgba(255,255,255,.7)';c.fillRect(-L/2+2,-8,L-2,1.4);
+  if(k==='trawler'){c.fillStyle='#f0ece2';c.fillRect(-6,-20,16,12);c.fillStyle='#2a3a4a';c.fillRect(-3,-17,4,3);c.fillRect(3,-17,4,3);c.strokeStyle='#4a4a4a';c.lineWidth=1.4;c.beginPath();c.moveTo(-14,-8);c.lineTo(-18,-30);c.lineTo(-30,-12);c.stroke()}
+  if(k==='schooner'){c.strokeStyle='#5a3a1a';c.lineWidth=1.6;c.beginPath();c.moveTo(-8,-8);c.lineTo(-8,-46);c.moveTo(12,-8);c.lineTo(12,-40);c.stroke();c.fillStyle='#f4f0e2';c.beginPath();c.moveTo(-7,-44);c.quadraticCurveTo(6,-30,-7,-10);c.fill();c.beginPath();c.moveTo(13,-38);c.quadraticCurveTo(26,-26,13,-10);c.fill();c.beginPath();c.moveTo(14,-40);c.lineTo(34,-10);c.lineTo(14,-10);c.globalAlpha=.85;c.fill();c.globalAlpha=1}
+  if(k==='icebreaker'){c.fillStyle='#f0ece2';c.fillRect(-18,-22,26,14);c.fillStyle='#2a3a4a';for(let i=0;i<4;i++)c.fillRect(-15+i*6,-18,3.6,3);c.fillStyle='#d8302a';c.fillRect(-4,-32,6,10);c.fillStyle='#222';c.fillRect(-4,-32,6,2)}
+  if(k==='research'){c.fillStyle='#2a5a8a';c.fillRect(-L/2+4,-4,L-6,3);c.fillStyle='#f0f0ea';c.fillRect(-22,-22,24,14);c.fillStyle='#2a3a4a';for(let i=0;i<3;i++)c.fillRect(-19+i*7,-18,4,3);c.strokeStyle='#e8a030';c.lineWidth=1.6;c.beginPath();c.moveTo(14,-8);c.lineTo(20,-34);c.lineTo(32,-24);c.stroke();c.strokeStyle='#ccc';c.beginPath();c.moveTo(-10,-22);c.lineTo(-10,-36);c.stroke();c.fillStyle='#fff';c.beginPath();c.arc(-10,-38,3,0,7);c.fill()}
+  c.restore()}
+function renderFleet(){const b=$('flBody');if(!b)return;const F=FLEET(),now=Date.now();
+  if(!fleetOpen()){b.innerHTML=`<div class="hw-card"><b>The Shipyard</b><p>Reach Misty Bay (or prestige once) and the Lantern Harbor shipyard opens. Build a fleet, hire captains and send ships to six far waters.</p></div>`;return}
+  let h=`<canvas id="flCv" width="640" height="220" style="width:100%;border-radius:12px;display:block"></canvas>`;
+  h+=`<div class="hw-card"><b>Your fleet</b><p>${F.ships.length?`${F.ships.length} of 4 ships · ${F.trips|0} voyage${(F.trips|0)===1?'':'s'} sailed. The fleet stays with you through every prestige.`:'Buy your first ship below. Ships sail on their own while you play or while you’re away.'}${admiralSet()?' The Admiral set adds +10% to every voyage.':''}</p></div>`;
+  F.ships.forEach((s,i)=>{const T=FT(s.t),cl=capLv(s);h+=`<div class="hw-card fl-ship"><b>${T.n}</b> <small style="color:var(--muted)">level ${s.lv}/10 · Captain ${esc(s.cap)}, level ${cl}/20</small>`;
+    if(s.v){const w=FARW_BY[s.v.d],left=(s.v.end-now)/36e5;h+=left>0?`<p>At sea, bound for ${w.n}. Home in ${fmtHrs(left)}.</p><div class="hw-bar"><i style="width:${Math.min(100,(now-s.v.st)/(s.v.end-s.v.st)*100).toFixed(1)}%"></i></div>`:`<p><b>Home from ${w.n}!</b></p><button class="hv-btn hv-main" data-flu="${i}">Unload the catch</button>`}
+    else{h+=`<p>In port. Choose a voyage:</p><div class="fl-dest">${FARW.map(w=>{const ok=T.tier>=w.tier;return `<button class="hv-btn" data-fls="${i}:${w.id}" ${ok?'':'disabled'} title="${w.d}"><b>${w.n}</b><small>${ok?`${fmtHrs(tripHours(s,w))} · about $${money(Math.round(tripValue(s,w)))}`:`Needs a ${FLEET_T.find(t=>t.tier===w.tier).n}`}</small></button>`}).join('')}</div>`;
+      h+=s.lv<10?`<button class="hv-btn" data-flup="${i}" ${S.coins>=shipUpCost(s)?'':'disabled'}>Upgrade to level ${s.lv+1} · $${money(shipUpCost(s))}</button>`:'<p class="fr-muted">Fully upgraded.</p>'}
+    h+='</div>'});
+  const buy=FLEET_T.filter(t=>!F.ships.some(s=>s.t===t.k));if(buy.length)h+=`<div class="hw-card"><b>The Shipyard</b>${buy.map(t=>`<div class="fl-buy"><div><b>${t.n}</b><small>${t.d}</small></div><button class="hv-btn" data-flb="${t.k}" ${S.coins>=t.c?'':'disabled'}>$${money(t.c)}</button></div>`).join('')}</div>`;
+  const done=FARW.filter(w=>FISH.filter(f=>f.at===w.id).every(f=>S.log[f.id])).length;h+=`<div class="hw-card"><b>The Admiral set</b><p>Log every fish from far waters to earn a Mythic set: complete 2 for the Flagship boat paint, 4 for the Spyglass rod and all 6 for the Ship’s Wheel bobber. ${done}/6 far waters complete.</p></div>`;
+  b.innerHTML=h;b.querySelectorAll('[data-flb]').forEach(x=>x.onclick=()=>fleetBuy(x.dataset.flb));b.querySelectorAll('[data-flup]').forEach(x=>x.onclick=()=>fleetUp(+x.dataset.flup));
+  b.querySelectorAll('[data-fls]').forEach(x=>x.onclick=()=>{const [i,w]=x.dataset.fls.split(':');fleetSail(+i,w)});b.querySelectorAll('[data-flu]').forEach(x=>x.onclick=()=>fleetUnload(+x.dataset.flu));
+  fleetDrawHarbor()}
+function fleetDrawHarbor(){const cv=$('flCv');if(!cv||!cv.isConnected||phView!=='fleet')return;const c=cv.getContext('2d'),T=performance.now()/1000,d=daylight(S.min/60);c.setTransform(2,0,0,2,0,0);
+  const g=c.createLinearGradient(0,0,0,110);g.addColorStop(0,rgb(mix([14,20,40],[150,190,220],d)));g.addColorStop(1,rgb(mix([20,30,50],[220,220,200],d)));c.fillStyle=g;c.fillRect(0,0,320,110);
+  c.fillStyle=rgb(mix([10,22,36],[50,110,140],d));c.fillRect(0,70,320,40);c.fillStyle=rgb(mix([40,30,22],[120,90,60],d));c.fillRect(0,96,320,14);for(let i=0;i<4;i++){c.fillRect(20+i*78,78,4,22)}
+  c.fillStyle='rgba(255,255,255,.12)';for(let i=0;i<10;i++){const x=(i*37+T*6)%340-10;c.fillRect(x,80+(i*7)%14,14,1)}
+  const F=FLEET();for(let i=0;i<4;i++){const s=F.ships[i],x=58+i*78;if(!s){c.fillStyle='rgba(255,255,255,.25)';c.font='9px sans-serif';c.textAlign='center';c.fillText('empty berth',x,92);continue}
+    if(s.v&&Date.now()<s.v.end){const q=(Date.now()-s.v.st)/(s.v.end-s.v.st);c.globalAlpha=.55;drawShip(c,x+40+q*60,74-q*6,s.t,.45-q*.2,T,1);c.globalAlpha=1;c.fillStyle='rgba(255,255,255,.6)';c.font='8px sans-serif';c.textAlign='center';c.fillText('at sea',x,92)}
+    else drawShip(c,x,86,s.t,.8,T,1)}
+  c.textAlign='left';requestAnimationFrame(fleetDrawHarbor)}
+// ==SPECIES MASTERY (v167)== Every species earns up to five stars from how many you've caught, ever (the logbook is never reset
+// by prestige). Each star adds 4% to what that species sells for. Your total stars are your Mastery Level, with a reward track.
+const MST_T={C:[100,500,2000,10000,50000],U:[50,250,1000,5000,25000],R:[20,100,400,2000,10000],L:[5,25,100,500,2500],M:[1,3,10,30,100]};
+const mstStars=f=>{const L=S.log[f.id],t=MST_T[f.r]||MST_T.C;if(!L||f.quest)return 0;let n=0;for(const x of t)if(L.n>=x)n++;return n};
+const mstMult=f=>1+.04*mstStars(f);
+const mstTotal=()=>FISH.reduce((a,f)=>a+mstStars(f),0),mstMax=()=>FISH.filter(f=>!f.quest).length*5;
+const MST_RW=[[10,'$250,000'],[25,'Bronze Master rod'],[50,'$2,000,000'],[75,'Angler’s vest costume'],[100,'Silver Master rod'],[150,'$10,000,000'],[200,'Gold Master rod'],[275,'Master’s Lodge sign for your yard'],[350,'Prismatic Master rod'],[450,'Grandmaster’s robe costume'],[550,'Grandmaster bobber'],[650,'The Grandmaster trophy']];
+function mstClaim(){const m=S.mst||(S.mst={got:{}});const n=mstTotal();let any=false;MST_RW.forEach(([k,t],i)=>{if(n>=k&&!m.got[i]){m.got[i]=1;any=true;const P=PNT();
+  if(i===0)S.coins+=250000;else if(i===1)P.own.r_mbronze=1;else if(i===2)S.coins+=2e6;else if(i===3)m.vest=1;else if(i===4)P.own.r_msilver=1;else if(i===5)S.coins+=1e7;else if(i===6)P.own.r_mgold=1;else if(i===7)hvGiveDecor('lodgesign');else if(i===8)P.own.r_mprism=1;else if(i===9)m.robe=1;else if(i===10)P.own.b_gmaster=1;else S.trophies.unshift({name:'The Grandmaster',water:'deep',type:'big',score:`${n} mastery stars`,day:S.day});
+  celebrate({lbl:`Mastery Level ${k}!`,r:i>=8?'M':i>=4?'L':'R',name:t,sub:'From your Mastery track in the Logbook',icon:svgI('crown','#ffd05a')})}});if(any){storeDirty=true;save()}}
+const mstStarsHTML=f=>{const n=mstStars(f),t=MST_T[f.r]||MST_T.C,L=S.log[f.id];return f.quest?'':`<span class="mst" title="Mastery: ${n}/5 stars${n<5?` · next at ${t[n].toLocaleString()} caught`:''}">${'★'.repeat(n)}<i>${'★'.repeat(5-n)}</i>${n<5&&L?` <small>${L.n.toLocaleString()}/${t[n].toLocaleString()}</small>`:''}${n?` <small>+${n*4}%</small>`:''}</span>`};
+function mstCardHTML(){const n=mstTotal(),mx=mstMax(),m=S.mst||{got:{}},nx=MST_RW.find(([k])=>n<k),R=MPV.mst;
+  return `<div class="hw-card mst-card"><b>Mastery Level ${n}</b><p>Every species earns up to 5 stars from how many you’ve caught, ever. Each star adds 4% to what that fish sells for, and stars are never lost to a prestige. ${n}/${mx} stars.${nx?` Next reward at ${nx[0]}: ${nx[1]}.`:''}</p><div class="hw-bar"><i style="width:${(n/mx*100).toFixed(1)}%"></i></div>
+    <ul class="hw-rw">${MST_RW.map(([k,t],i)=>`<li class="${m.got&&m.got[i]?'got':''}"><span>${m.got&&m.got[i]?'✓':k}</span><div><b>${t}</b></div></li>`).join('')}</ul>${R&&R.top&&R.top.length?`<ol class="hw-board">${R.top.map((y,i)=>`<li class="${y.me?'me':''}"><span>${i+1}</span><b>${esc(y.name)}</b><em>${y.w} ★</em></li>`).join('')}</ol>${R.me?`<p class="fr-muted">You’re #${R.me.rank} on the lake.</p>`:''}`:''}</div>`}
+function lodgeSignDraw(d){const wd=rgb(mix([40,28,18],[120,80,44],d));ctx.fillStyle=wd;ctx.fillRect(-20,-34,3,34);ctx.fillRect(17,-34,3,34);ctx.fillRect(-24,-36,48,4);ctx.fillStyle=rgb(mix([30,22,14],[90,58,30],d));ctx.fillRect(-20,-30,40,16);
+  ctx.fillStyle=rgb(mix([60,50,20],[232,196,90],d));ctx.font='bold 5px Georgia,serif';ctx.textAlign='center';ctx.fillText('MASTER’S',0,-24);ctx.fillText('LODGE',0,-17.5);ctx.textAlign='left';ctx.fillStyle=rgb(mix([60,50,20],[232,196,90],d));ctx.beginPath();ctx.moveTo(-6,-38);ctx.lineTo(-3,-44);ctx.lineTo(0,-39);ctx.lineTo(3,-44);ctx.lineTo(6,-38);ctx.fill()}
 // ==PRESTIGE== replaces Retire. Ten levels; each costs twice the last, starting at $10M. Gear, money and your catch reset;
 // your house, yard, pets, decor, logbook, collection, trophies and cosmetics stay. Every level shows: a star, a boat flag, rods and costumes.
 const PR_MAX=10,PR_ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
@@ -10208,7 +10325,7 @@ function drawMarina(d,T){const s=projLv('marina');if(!s)return;const wood=rgb(mi
   if(s>=4){ctx.fillStyle='#ffd05a';ctx.fillRect(748,212,48,10);ctx.fillStyle='#2a1206';ctx.font='bold 8px sans-serif';ctx.fillText('MARINA',753,220);if(lit(d))for(let i=0;i<6;i++){ctx.fillStyle=['#ff6b6b','#ffd05a','#7cc7dc'][i%3];ctx.beginPath();ctx.arc(672+i*22,246,1.4,0,7);ctx.fill()}}}
 
 // ==LOGBOOK SETS==
-const SET_RW={pond:5000,lake:25000,river:75000,deep:200000,bay:500000,isle:100000,moon:750000,hell:1500000,sky:3000000};
+const SET_RW={pond:5000,lake:25000,river:75000,deep:200000,bay:500000,isle:100000,kelp:1e6,mangrove:2e6,coral:4e6,storm:8e6,frozen:15e6,sunken:3e7,moon:750000,hell:1500000,sky:3000000};
 function setDone(w){const all=FISH.filter(f=>f.at===w&&!f.quest);return all.length&&all.every(f=>S.log[f.id])}
 function setClaim(w){S.sets=S.sets||{};if(S.sets[w]||!setDone(w))return;S.sets[w]=S.day;const rw=SET_RW[w]||0;S.coins+=rw;S.trophies.unshift({name:`${W(w).n} Master`,water:w,type:'big',score:'Every species',day:S.day});
   sfx('fanfare');celebrate({lbl:'Logbook set complete!',r:'L',name:`${W(w).n} Master`,sub:`+$${money(rw)} and a trophy`,icon:cupSvg});save();renderLog();renderTrophies&&renderTrophies()}
@@ -11120,12 +11237,12 @@ const XKIND={
   yard:{name:it=>{const [c]=String(it).split('|');return `Best yard of the week: $${money(+c)}`},give:it=>{const [c]=String(it).split('|');S.coins+=+c||0;S.trophies.unshift({name:'Best Yard',water:'pond',type:'big',score:'Most liked',day:S.day});celebrate({lbl:'Best yard!',r:'L',name:'Your yard got the most likes',sub:`+$${money(+c)} and a trophy`,icon:cupSvg});return true}},
   chal:{name:it=>{const [k,c,o,f]=String(it).split('|');const fn=FI(f)?FI(f).n:f;return k==='win'?`Challenge won vs ${o} (${fn}): $${money(+c)}`:k==='tie'?`Challenge tie with ${o}: $${money(+c)} back`:`Challenge refund (${o}): $${money(+c)}`},give:it=>{const [k,c,o]=String(it).split('|');S.coins+=+c||0;if(k==='win')celebrate({lbl:'Challenge won!',r:'R',name:`You beat ${o}`,sub:`+$${money(+c)}`,icon:cupSvg});else showToast(`+$${money(+c)}`,k==='tie'?'Challenge tie':'Challenge refund');return true}}};
 XKIND.cos={name:it=>ITEM_BY[it]?`${ITEM_BY[it].n} (${KIND_LBL[kindOf(it)]||'cosmetic'})`:'a parcel',give:(it,n)=>{if(!ITEM_BY[it])return false;const P=PNT();P.own[it]=(P.own[it]||0)+1;storeDirty=true;celebrate({lbl:'A parcel for you!',r:ITEM_BY[it].t||'R',name:ITEM_BY[it].n,sub:`A ${KIND_LBL[kindOf(it)]||'cosmetic'} for your locker`,icon:svgI('crown','#ffd05a')});return true}};
-function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(hvOn()||(S.hv&&S.hv.pts)){body.hvq=1;if(m.hvb>0)body.hvb=Math.round(m.hvb)}if(hvOn()||(S.hv&&S.hv.tk&&!S.hv.tkDone)){body.hvtq=1;if(m.hvtDirty&&TKY())body.hvt=tkScore(TKY())}if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
+function mpSyncExtras(body){const m=mpS(),h=S.hw;if(SETS().push){try{const al=alertsDue(),sig=al.map(a=>a.k+Math.round(a.due/6e4)).join(',');if(sig!==m.alSig){m.alSig=sig;body.alerts=al}}catch(e){}}if(h&&h.gg>(h.ggSent||0))body.ev={id:HW_ID,w:h.gg};if(m.mdmg>0)body.mdmg=Math.round(m.mdmg);if(hvOn()||(S.hv&&S.hv.pts)){body.hvq=1;if(m.hvb>0)body.hvb=Math.round(m.hvb)}{const ms=mstTotal(),nw=Date.now();if(ms>0&&(ms!==m.msSent||nw-(m.msQ||0)>9e5)){body.msq=1;m.msQ=nw;if(ms!==m.msSent){body.ms=ms;m.msSent=ms}}}if(hvOn()||(S.hv&&S.hv.tk&&!S.hv.tkDone)){body.hvtq=1;if(m.hvtDirty&&TKY())body.hvt=tkScore(TKY())}if(m.chw&&Object.keys(m.chw).length)body.chw=m.chw;body.gbSeen=m.gbSeen||0}
 // Supporters get the Mythic Lantern Keeper kit once. It stays theirs.
 const SUP_KIT=['leviathan','r_starforged','b_sun'];
 function supKit(){if(S.supKit)return;const P=PNT();for(const id of SUP_KIT)P.own[id]=Math.max(1,P.own[id]|0);const cb=CAB();try{cabSync()}catch(e){}cb.own.eternal=1;try{cabSync()}catch(e){}S.supKit=1;storeDirty=true;save();
   setTimeout(()=>celebrate({lbl:'Mythic! Thank you, supporter',r:'M',name:'The Lantern Keeper kit',sub:'Aurora Leviathan paint, Starforged rod, Pocket Sun bobber and the Eternal Lantern for your cabin. Find them in Crates → Locker and Decorate.',icon:svgI('crown','#ff8fb8')}),4500)}
-function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}if(S.sup)supKit()}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);if(body.hvb&&r.hvb)m.hvb=Math.max(0,(m.hvb||0)-body.hvb);if(r.hvb){const pv=MPV.hvb;MPV.hvb=r.hvb;if(pv&&pv.goal===r.hvb.goal)MPV.hvb.total=Math.max(r.hvb.total,pv.total|0);try{hvFeastClaim();hvLedgerClaim()}catch(e){}if(r.hvt){MPV.hvt=r.hvt;if(body.hvt)m.hvtDirty=0;try{tkSettle()}catch(e){}}hvClaim();if(phView==='hv'&&!$('slotsModal').hidden)renderHV()};
+function mpSyncDone(body,r){const m=mpS();try{if(r.inv)showInvites(r.inv);blocksLoad()}catch(e){}try{if(r.beta)betaGrant()}catch(e){}try{if(r.sup!==undefined){const was=!!S.sup;S.sup=r.sup?1:0;if(S.sup&&!was&&!S.supThanked){S.supThanked=1;setTimeout(()=>showToast('Thank you for supporting Lantern Lake! A ♥ Supporter badge now shows on your contact card.','Supporter'),3000)}if(S.sup)supKit()}}catch(e){}try{if(!MUS.map||(r.musv&&r.musv!==MUS.ver))musFetch(true);for(const n of (r.mnotes||[])){phNotify('friends','Museum',n.body);showToast(n.body,'Museum');S.musBeat=(S.musBeat||[]).concat([n.body]).slice(-3)}}catch(e){}if(body.ev&&S.hw)S.hw.ggSent=body.ev.w;if(body.mdmg)m.mdmg=Math.max(0,(m.mdmg||0)-body.mdmg);if(body.hvb&&r.hvb)m.hvb=Math.max(0,(m.hvb||0)-body.hvb);if(r.hvb){const pv=MPV.hvb;MPV.hvb=r.hvb;if(pv&&pv.goal===r.hvb.goal)MPV.hvb.total=Math.max(r.hvb.total,pv.total|0);try{hvFeastClaim();hvLedgerClaim()}catch(e){}if(r.mst)MPV.mst=r.mst;if(r.hvt){MPV.hvt=r.hvt;if(body.hvt)m.hvtDirty=0;try{tkSettle()}catch(e){}}hvClaim();if(phView==='hv'&&!$('slotsModal').hidden)renderHV()};
   if(r.ev!==undefined){MPV.ev=r.ev;if(phView==='hw'&&!$('slotsModal').hidden)renderHW()}if(r.mon)MPV.mon=r.mon;MPV.owner=!!r.owner;if(r.owner&&!S.wdOwn){S.wdOwn=1;save();setTimeout(()=>showToast('Your Game Warden boat is ready. Turn it on in the Owner tools.','Game Warden'),5000)}
   if(r.chal){const prev=MPV.chal||[];MPV.chal=r.chal;const newIn=r.chal.filter(c=>c.mine==='b'&&c.st==='pend'&&!(m.chSeen||[]).includes(c.id));if(newIn.length){m.chSeen=(m.chSeen||[]).concat(newIn.map(c=>c.id)).slice(-40);phNotify('friends','Challenge!',`${newIn[0].other} challenges you: biggest ${FI(newIn[0].fish)?FI(newIn[0].fish).n:newIn[0].fish} for $${money(newIn[0].stake)}`)}
     const live=new Set(r.chal.filter(c=>c.st==='live').map(c=>String(c.id)));if(m.chw)for(const k of Object.keys(m.chw))if(!live.has(k))delete m.chw[k]}
@@ -11686,7 +11803,7 @@ function bindRealmWaters(p){p.querySelectorAll('[data-gate]').forEach(b=>b.oncli
 function realmLogSections(p,fn){const ph=phaseOf(S.min);for(const r of REALMS){const all=FISH.filter(f=>f.at===r.id);if(!gateOwned(r.id)&&!all.some(f=>S.log[f.id]))continue;const sp=all.filter(fn);if(!sp.length)continue;
   const h=document.createElement('div');h.className='sec-h';h.innerHTML=`<h3>${r.n}</h3><small>${all.filter(f=>S.log[f.id]).length}/${all.length} · ${setHdr(r.id)}</small>`;p.append(h);const g=document.createElement('div');g.className='grid';
   for(const f of sp){const L=S.log[f.id],c=document.createElement('div');c.className='card fish'+(L?'':' unk');
-    c.innerHTML=`${fishSvg(RCOL[f.r])}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1].toLocaleString()} lb</span>`)+logBtns(f,L)+`</div>`;g.append(c)}
+    c.innerHTML=`${fishSvg(RCOL[f.r])}<div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?f.n:'Not yet caught'}</span><span class="eyebrow rar-${f.r}">${RAR[f.r]}</span>`+(L?`<span class="rec">Biggest <b>${L.big.toFixed(2)} lb</b> · ${L.n.toLocaleString()} caught</span>`:`<span class="rec">Grows up to ${f.w[1].toLocaleString()} lb</span>`)+mstStarsHTML(f)+logBtns(f,L)+`</div>`;g.append(c)}
   p.append(g)}}
 
 // ---------- Loop ----------
@@ -11719,7 +11836,7 @@ function tick(now){if(SESS.paused)return;
     $('castLabel').textContent=TRV.on?'On the move…':S.sleep?dockFishing()?(cast.el/cast.dur>.85?'Something’s biting…':'Fishing off the dock'):(S.sleep.at?(VT&&VT.arcade?'At the arcade…':VT&&VT.museum?'At the museum…':'Visiting a friend…'):S.sleep.ph==='sleep'?'Asleep in your cabin…':'At home…'):cast.el/cast.dur>.85?'Something’s biting…':'Line in the water';
     refreshBuy();tourUI();renderWx();renderPin();statT+=.25;if(statT>=5){statT=0;const sb=$('statsBox');if(sb&&!$('pane-log').hidden)sb.innerHTML=statCells()}renderBuffs();$('cc').textContent=S.cc.toLocaleString();mnTick();hvTick();
     if(!$('slotsModal').hidden){if(!spinning)updateSlots();if(phView==='lock')renderLock()}else{$('phClock').textContent=fmtClock(S.min).replace(/ [AP]M/,'');$('phBat').style.width=Math.max(4,S.stamina)+'%'}
-    ensureBounties();checkStreak();qStart();renderGuide();renderGoals();houseTick();guideCheck();projTick();renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
+    ensureBounties();checkStreak();qStart();renderGuide();renderGoals();houseTick();guideCheck();projTick();try{fleetTick()}catch(e){}renderLiveUI();renderRealmHud();if(S.mp&&S.mp.id){mpSync();cloudPush()}
     {const bc=mpBadge()+TX.unread+(newsUnread()?1:0)+readyBounties()+(S.streak.claimed?0:1)+(S.q.step>0&&S.q.step<7&&S.q.seen!==S.q.step?1:0)+(S.q2&&S.q2.step>0&&S.q2.step<7&&S.q2.seen!==S.q2.step?1:0)+(S.q3&&S.q3.step>0&&S.q3.step<7&&S.q3.seen!==S.q3.step?1:0);$('phoneBadge').hidden=!bc;$('phoneBadge').textContent=bc}
     if(storeDirty){renderStorage();renderHot()}
     if(collDirty)renderColl();
@@ -11742,7 +11859,7 @@ function start(data){
   if(isRealm(S.water)){const r=REALMS_BY[S.water],stay=gateOwned(S.water)&&S.boat>=r.boat&&(S.water!=='moon'||!isFinite(o2Max())||(+S.o2||0)>0);
     if(!stay){if(S.realmWx)S.wx=S.realmWx;delete S.realmWx;S.water=S.realmFrom&&!isRealm(S.realmFrom)?S.realmFrom:'deep'}}
   if(S.sleep&&(S.sleep.at||['door','pick','inside'].includes(S.sleep.ph)))S.sleep=null;
-  SETS();applyDock();applyPhHide();try{prGrant()}catch(e){}applyPhTheme();applyTextSize();if(!S.guide&&S.total===0&&S.day<=1&&!(S.mp&&S.mp.id))S.guide={step:0,apps:{}};if(S.q&&S.q.step===7)S.q.everSolved=true;if(S.tour&&S.tour.ghost&&S.q2)S.q2.ghost={t0:0};else if(S.q2)S.q2.ghost=null;try{sbInit()}catch(e){}
+  SETS();applyDock();applyPhHide();try{prGrant()}catch(e){}setTimeout(()=>{try{mstClaim();fleetAdmiralCheck()}catch(e){}},2500);applyPhTheme();applyTextSize();if(!S.guide&&S.total===0&&S.day<=1&&!(S.mp&&S.mp.id))S.guide={step:0,apps:{}};if(S.q&&S.q.step===7)S.q.everSolved=true;if(S.tour&&S.tour.ghost&&S.q2)S.q2.ghost={t0:0};else if(S.q2)S.q2.ghost=null;try{sbInit()}catch(e){}
   if(!Array.isArray(S.hot))S.hot=[];while(S.hot.length<5)S.hot.push(null);
   if(S.snd&&!S.snd.v){if(S.snd.amb===.6)S.snd.amb=.4;if(S.snd.music===.35)S.snd.music=.5;S.snd.v=2}
   if(S.tvInput==='console')S.tvInput='vhs';delete S.cart;delete S.games;
