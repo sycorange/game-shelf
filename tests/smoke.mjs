@@ -229,7 +229,7 @@ await check('owner gift: only the owner can send, it arrives in the mailbox and 
 
 await check('Crates: landing page, locker, and the Deep Sea crate opens Series 2 items of every kind, equips them, and they survive a reload',async()=>{const p=await page(VPS[1][1],save({coins:5e6}));
   await p.evaluate(()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);openPhone();phShow('crate')});
-  ok(await p.evaluate(()=>document.querySelectorAll('.cr-box').length===4&&document.querySelectorAll('.cr-look').length===3),'landing page with four crates and your look');
+  ok(await p.evaluate(()=>document.querySelectorAll('.cr-box').length===5&&document.querySelectorAll('.cr-look').length===3),'landing page with five crates and your look');
   await p.click('[data-crt="locker"]');ok(await p.evaluate(()=>CR.tab==='locker'&&!!document.querySelector('.cr-grid')),'locker from the landing page');await p.click('[data-crt="home"]');
   await p.click('[data-crgo-open="deep"]');ok(await p.evaluate(()=>CR.tab==='open'&&CR.kind==='deep'&&!!document.getElementById('crBuy')),'a crate opens its page');
   const kinds=await p.evaluate(()=>{const seen=new Set();for(let i=0;i<300;i++){const it=itemRoll('deep');if(!it.ds)return 'old item '+it.id;seen.add(kindOf(it.id))}return [...seen].sort().join(',')});ok(kinds==='bob,paint,rod','kinds '+kinds);
@@ -463,6 +463,37 @@ await check('ferry and Pine Island: the third town project, boarding for the far
   ok(await p.evaluate(()=>{const n=S.trophies.length,a=isleKey(),b=isleKey();return a&&!b&&S.trophies.length===n+1&&S.trophies[0].name==='Key to Hollow Pines'}),'Nils’s key, once');await p.waitForTimeout(300);await p.evaluate(()=>document.querySelectorAll('.away,#celebrate').forEach(m=>m.hidden=true));
   const c1=await p.evaluate(()=>S.coins);await p.evaluate(()=>ferryCross('town'));await p.waitForFunction(()=>TOWN.z===''&&!TOWN.cross,null,{timeout:20000}).catch(()=>{});ok(await p.evaluate(c1=>TOWN.on&&TOWN.z===''&&S.coins===c1,c1),'free ride home '+await p.evaluate(()=>JSON.stringify({on:TOWN.on,z:TOWN.z,c:S.coins,cr:TOWN.cross})));ok(!p.errs.length,p.errs.join('; '));await p.context().close()});
 
+await check('fleet voyage report: unloading opens the report, lists the haul, sends her back, and the last report reopens from port',async()=>{const p=await page(VPS[1][1],save({coins:2e8,boat:4}));
+  await p.evaluate(()=>{fleetBuy('trawler');fleetSail(0,'kelp');FLEET().ships[0].v.end=Date.now()-1;openPhone();phShow('fleet')});await p.waitForTimeout(400);await p.click('[data-flu="0"]');await p.waitForTimeout(500);
+  const r=await p.evaluate(()=>{const L=FLEET().ships[0].last,rows=[...document.querySelectorAll('.flr-row')].length,sum=Object.values(L.sp).reduce((a,t)=>a+t.n,0);return {rows,sp:Object.keys(L.sp).length,sum,n:L.n,got:L.got,again:!!document.getElementById('flAgain')}});
+  ok(r.rows===r.sp&&r.sum===r.n&&r.n===await p.evaluate(()=>FARW[0].cnt)&&r.got>0&&r.again,'report '+JSON.stringify(r));
+  await p.click('#flAgain');ok(await p.evaluate(()=>FLEET().ships[0].v&&FLEET().ships[0].v.d==='kelp'&&!document.querySelector('.fl-rep')),'send her back');
+  await p.evaluate(()=>{FLEET().ships[0].v=null;renderFleet()});await p.click('[data-fll="0"]');ok(await p.evaluate(()=>!!document.querySelector('.fl-rep.old')&&!document.getElementById('flAgain')),'last report reopens without a resend button');
+  await p.click('#flBack');ok(await p.evaluate(()=>!document.querySelector('.fl-rep')&&!!document.querySelector('[data-fls]')),'back to port');ok(!p.errs.length,p.errs.join('; '))});
+await check('Critter Club (Series 3): the case is first on the shelf, opens, rolls only its own items, every item draws, rods fire their critter effects',async()=>{const p=await page(VPS[1][1],save({coins:5e6}));
+  await p.evaluate(()=>{openPhone();phShow('crate');CR.tab='home';renderCrate()});await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>{const f=document.querySelector('.cr-shelf [data-crgo-open]');return f&&f.dataset.crgoOpen==='critter'}),'Critter Club is the first crate');
+  await p.click('[data-crgo-open="critter"]');ok(await p.evaluate(()=>CR.kind==='critter'&&/Critter Club crate/.test(document.getElementById('crBuy').textContent)),'open page');
+  const r=await p.evaluate(()=>{const ids=new Set(CRATES.critter.items.map(s=>s.id));let bad=0;for(let i=0;i<300;i++)if(!ids.has(itemRoll('critter').id))bad++;
+    const tiers=new Set(CRATES.critter.items.map(s=>s.t));let thumbs=0;for(const s of CRATES.critter.items){if(itemThumb(s.id,96,44).startsWith('data:image'))thumbs++}
+    const inLists=['paint','rod','bob'].every(k=>crItems(k).some(s=>s.cc));return {n:ids.size,bad,tiers:[...tiers].sort().join(''),thumbs,inLists}});
+  ok(r.n===31&&r.bad===0&&r.tiers==='CELRU'&&r.thumbs===31&&r.inLists,'rolls and thumbnails '+JSON.stringify(r));
+  await p.evaluate(()=>crateOpen(false));await p.waitForTimeout(6600);ok(await p.evaluate(()=>!!CR.last&&!!CR.last.win.cc&&!!document.getElementById('crPrev')),'a crate lands on a Critter Club item');
+  await p.evaluate(()=>{const P=PNT();for(const id of ['swan','r_songbird','b_beast'])P.own[id]=1;P.eq='swan';P.eqR='r_songbird';P.eqB='b_beast';closePhone()});await p.waitForTimeout(600);
+  for(const id of ['r_firefly','r_monarch','r_songbird']){await p.evaluate(id=>{const P=PNT();P.own[id]=1;P.eqR=id;rodFx(500,260)},id);await p.waitForTimeout(500)}
+  await p.evaluate(()=>{for(const id of ['kitty','frog','bee','swan']){PNT().eq=id}});await p.waitForTimeout(500);ok(!p.errs.length,p.errs.join('; '))});
+await check('home comfort: furniture, bed, house and yard add comfort; sleeping in your own bed gives Well Rested (faster casts, longer when cozier); visiting a friend does not; the coffee maker brews one a day and holds three',async()=>{
+  const st=save({shack:3,sleep:{ph:'awake',t:0},stamina:40,cab:{col:{},own:{quilt:1,braided:1,lakemap:1,armchair:1,stove:1},bed:'quilt',rug:'braided',lamp:null,wall:['lakemap',null,null],ex:{}},decor:{flowers:1,campfire:1}});
+  const p=await page(VPS[0][1],st);
+  const cp=await p.evaluate(()=>comfortParts());ok(cp.house===6&&cp.bed===2&&cp.furn===5&&cp.yard===3&&cp.total===16,'comfort parts '+JSON.stringify(cp));
+  ok(await p.evaluate(()=>restMins()===26&&!PALL.includes('rested')&&!PKEYS.includes('rested')),'rest minutes and rested is not a potion');
+  const c0=await p.evaluate(()=>castDur());await p.evaluate(()=>sleepInBed());let ok2=false;for(let i=0;i<40&&!ok2;i++){await p.waitForTimeout(500);ok2=await p.evaluate(()=>S.sleep&&S.sleep.ph==='awake')}
+  const r=await p.evaluate(()=>({b:S.buffs.rested||0,cd:castDur(),chip:document.getElementById('buffs').textContent}));ok(r.b>25*60&&r.b<=26*60&&Math.abs(r.cd/c0-.85)<.01&&/Rested 26m/.test(r.chip),'Well Rested after your own bed '+JSON.stringify(r));
+  ok(await p.evaluate(()=>{const cb=CAB();for(const z of COS)cb.own[z.id]=1;cb.bed='canopy';S.shack=6;for(const id of ['flowers','mailbox','gnome','woodpile','campfire','birch','torches','garden','fence','hammock','hottub'])S.decor[id]=1;const P=comfortParts();return P.yard===12&&P.total>55&&restMins()===60}),'yard capped, and Well Rested capped at an hour');
+  const b=await p.evaluate(()=>{S.brew={d:S.day};const a=brewReady();S.day+=1;const b1=brewReady();S.day+=9;const b2=brewReady();const c=S.pots.coffee||0;const got=brewCollect();return [a,b1,b2,got,(S.pots.coffee||0)-c,brewReady()]});
+  ok(JSON.stringify(b)==='[0,1,3,3,3,0]','coffee pot '+JSON.stringify(b));
+  await p.evaluate(()=>{S.day+=1;goRoom('basement')});await p.waitForTimeout(800);const c1=await p.evaluate(()=>S.pots.coffee);await p.evaluate(()=>bAct('coffee'));await p.waitForTimeout(4900);
+  ok(await p.evaluate(c1=>S.pots.coffee===c1+1&&!BS.act&&brewReady()===0,c1),'brewing in the basement fills a thermos');ok(!p.errs.length,p.errs.join('; '))});
 await check('phone controls: thumbstick walks, action button enters places, Go to walks you there, off in Settings',async()=>{const c=await b.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},save({sleep:{ph:'yard',t:0,visit:true}}));const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.goto(URL0);await p.waitForTimeout(800);await p.evaluate(()=>{if(!document.getElementById('titleScreen').hidden)document.getElementById('tGo').click()});await p.waitForTimeout(900);await p.evaluate(()=>document.querySelectorAll('.away').forEach(m=>m.hidden=true));await p.waitForTimeout(400);
