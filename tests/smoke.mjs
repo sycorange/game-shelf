@@ -1,6 +1,7 @@
 // Lantern Lake smoke tests. Starts the local harness (in-memory database, nothing real is touched),
 // plays through the main features in a headless browser on desktop and phone sizes, and prints PASS/FAIL.
 // Run from the repo root:  node tests/smoke.mjs      (needs Node 22+ and Playwright, see tests/README.md)
+import {AsyncLocalStorage} from 'node:async_hooks';
 import {spawn} from 'node:child_process';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
 const HERE=path.dirname(fileURLToPath(import.meta.url)),PORT=+process.env.PORT||8799,URL0=`http://127.0.0.1:${PORT}/lantern-lake/?season=off`;
 const pw=await import(process.env.PW||'playwright');const chromium=pw.chromium||pw.default.chromium;
@@ -12,10 +13,14 @@ const results=[];let fails=0;
 // (__pushes, __cron, __seen) run one at a time after the rest. Pass words to run only matching checks:
 //   node tests/smoke.mjs harvest save      (any check whose name contains "harvest" or "save")
 // Checks that play real-time minigames or walk characters around get flaky when the CPU is shared, so they run alone too.
-const SOLO=['horseshoes','yard games','open house','case 5','hangouts','pet','mirror match','town','harvest basket','harvest fair','phone controls'];
+const SOLO=['horseshoes','yard games','open house','case 5','hangouts','pet','mirror match','town','harvest basket','harvest fair','phone controls','big hatch','live headwaters'];
 const ONLY=process.argv.slice(2).map(s=>s.toLowerCase()),CONC=Math.max(1,+process.env.CONC||2),JOBS=[];
 function check(name,fn){if(ONLY.length&&!ONLY.some(w=>name.toLowerCase().includes(w)))return Promise.resolve();JOBS.push({name,fn,solo:/__pushes|__cron|__seen/.test(fn.toString())||SOLO.some(w=>name.toLowerCase().includes(w))});return Promise.resolve()}
-async function runCheck({name,fn}){const t0=Date.now();try{const r=await Promise.race([fn(),new Promise((_,bad)=>setTimeout(()=>bad(new Error('timed out after 150s')),150000))]);if(r===false)throw new Error('returned false');results.push(['PASS',name]);console.log('✔ PASS  '+name+` (${((Date.now()-t0)/1000).toFixed(1)}s)`)}catch(e){fails++;const m=name+' — '+String(e.message||e).split('\n').slice(0,3).join(' | ');results.push(['FAIL',m]);console.log('✘ FAIL  '+m)}}
+// Every browser context a check opens is closed when the check ends, pass or fail. A page left open keeps running the game
+// at full frame rate for the rest of the run, and enough of them starve the checks that follow.
+const ALS=new AsyncLocalStorage();
+async function runCheck(job){const bag=[];try{await ALS.run(bag,()=>runCheck0(job))}finally{await Promise.all(bag.map(c=>c.close().catch(()=>{})))}}
+async function runCheck0({name,fn}){const t0=Date.now();try{const r=await Promise.race([fn(),new Promise((_,bad)=>setTimeout(()=>bad(new Error('timed out after 150s')),150000))]);if(r===false)throw new Error('returned false');results.push(['PASS',name]);console.log('✔ PASS  '+name+` (${((Date.now()-t0)/1000).toFixed(1)}s)`)}catch(e){fails++;const m=name+' — '+String(e.message||e).split('\n').slice(0,3).join(' | ');results.push(['FAIL',m]);console.log('✘ FAIL  '+m)}}
 async function runAll(){const par=JOBS.filter(j=>!j.solo),solo=JOBS.filter(j=>j.solo);let k=0;
   await Promise.all(Array.from({length:Math.min(CONC,par.length)},async()=>{while(k<par.length)await runCheck(par[k++])}));
   for(const j of solo)await runCheck(j)}
@@ -23,6 +28,7 @@ const ok=(c,msg)=>{if(!c)throw new Error(msg)};
 const today=new Date().toLocaleDateString('en-CA');
 const save=(o)=>Object.assign({coins:500000,shack:3,boat:2,water:'lake',min:720,day:30,total:900,log:{},recent:[],q:{step:7},streak:{last:today,count:1,claimed:true},last:Date.now(),set:{cut:'off'}},o);
 const b=await chromium.launch();
+{const nc=b.newContext.bind(b);b.newContext=async o=>{const c=await nc(o);const bag=ALS.getStore();if(bag)bag.push(c);return c}}
 async function page(vp,state,keepAway,pre){const c=await b.newContext({viewport:vp,acceptDownloads:true});if(pre)await pre(c);await c.addInitScript(s=>{if(!localStorage.getItem('lantern-lake-v1'))localStorage.setItem('lantern-lake-v1',JSON.stringify(s))},state);
   const p=await c.newPage();p.errs=[];p.on('pageerror',e=>p.errs.push(e.message));await p.goto(URL0);await p.waitForTimeout(700);await p.click('#tGo');await p.waitForTimeout(700);
   if(!keepAway)await p.evaluate(()=>document.querySelectorAll('.away').forEach(m=>m.hidden=true));return p}
@@ -648,20 +654,20 @@ await check('live Headwaters: two anglers on the same mountain water see each ot
   await B.evaluate(()=>{S.water='tarn'});await A.waitForFunction(()=>[...LIVE.peers.values()].every(p=>p.out!=null)||LIVE.peers.size===0,null,{timeout:12000});await B.waitForFunction(()=>LIVE.st==='on'&&LIVE.room.endsWith(':tarn')&&LIVE.peers.size===0,null,{timeout:12000});ok(true,'moving to Mirror Tarn leaves the falls room');
   for(const p of [A,B]){ok(!p.errs.length,'no script errors: '+p.errs.join(' | '));await p.context().close()}});
 await check('The Big Hatch: two anglers on a mountain water fill one fish count together, the matching fly counts double, the Hatch King pays everyone who helped, and a thin hatch pays nothing',async()=>{const ps=[];const flies={mayfly:1,caddis:1,stone:1,hopper:1,midge:1,moth:1};
-  for(const [i,vp] of [VPS[0][1],VPS[1][1]].entries()){const p=await page(vp,save({water:'tarn',min:700,coins:1000,boat:5,rod:9,lure:9,proj:{road:{s:3,b:null}},hd:{canoe:1,waders:1,mill:1,lake:{done:1},arrived:1,flies:i===0?flies:{},hatchW:i===0?2:0}}));await p.evaluate(async()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);const r=await api('hello',{name:'Bh'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});MPV.online=true});ps.push(p)}
+  for(const [i,vp] of [VPS[0][1],VPS[1][1]].entries()){const p=await page(vp,save({water:'steam',min:700,coins:1000,boat:5,rod:9,lure:9,proj:{road:{s:3,b:null}},hd:{canoe:1,waders:1,mill:1,lake:{done:1},arrived:1,flies:i===0?flies:{},hatchW:i===0?2:0}}));await p.evaluate(async()=>{document.querySelectorAll('.away').forEach(m=>m.hidden=true);const r=await api('hello',{name:'Bh'+Math.floor(Math.random()*1e5)});mpS();Object.assign(S.mp,{id:r.id,key:r.key,name:r.name,pinAsked:true});MPV.online=true});ps.push(p)}
   const [A,B]=ps;for(const p of ps)await p.waitForFunction(()=>LIVE.st==='on'&&LIVE.peers.size===1,null,{timeout:12000});
-  for(const p of ps)await p.evaluate(()=>{window.__lc=liveOnCatch;cast.el=0;cast.dur=1e9});/* the game fishes by itself: hold its line still so only the test's catches count */const room=await A.evaluate(()=>LIVE.room),org=URL0.split('/lantern-lake')[0];await fetch(org+'/__alarm?room='+encodeURIComponent(room));
+  for(const p of ps)await p.evaluate(()=>{window.__lc=liveOnCatch;setInterval(()=>{cast.el=0;cast.dur=1e9},50)});/* the game fishes by itself: hold its line still so only the test's catches count */const room=await A.evaluate(()=>LIVE.room),org=URL0.split('/lantern-lake')[0];await fetch(org+'/__alarm?room='+encodeURIComponent(room));
   for(const p of ps)await p.waitForFunction(()=>!!LIVE.raid,null,{timeout:6000});
   const r0=await B.evaluate(()=>({k:LIVE.raid.k,max:LIVE.raid.max,hp:LIVE.raid.hp,name:LIVE.raid.name}));ok(r0.k==='hatch'&&r0.max===80&&r0.hp===80&&r0.name==='The Big Hatch','two anglers need 80 fish: '+JSON.stringify(r0));
   await A.waitForTimeout(700);ok(await A.evaluate(()=>!$('raidBar').hidden&&$('rbHelp').hidden&&/0 \/ 80 fish/.test($('rbIn').textContent)&&/count double/.test($('rbIn').textContent)),'the bar counts fish and there is no call for help');
-  const cA=await A.evaluate(()=>S.coins),cB=await B.evaluate(()=>S.coins),f='FISH.find(f=>f.at===\'tarn\')';
-  await A.evaluate(async()=>{for(let i=0;i<3;i++){__lc(FISH.find(f=>f.at==='tarn'),2,'');await new Promise(r=>setTimeout(r,120))}});await B.waitForFunction(()=>LIVE.raid&&LIVE.raid.hp===74,null,{timeout:6000});ok(true,'three fish on the matching fly count as six');
-  await B.evaluate(async()=>{for(let i=0;i<4;i++){__lc(FISH.find(f=>f.at==='tarn'),2,'');await new Promise(r=>setTimeout(r,120))}});await A.waitForFunction(()=>LIVE.raid&&LIVE.raid.hp===70,null,{timeout:6000});ok(true,'four without the fly count as four');
-  await A.evaluate(async()=>{for(let i=0;i<35;i++){__lc(FISH.find(f=>f.at==='tarn'),2,'');await new Promise(r=>setTimeout(r,40))}});for(const p of ps)await p.waitForFunction(()=>!LIVE.raid,null,{timeout:6000});await A.waitForTimeout(300);
+  const cA=await A.evaluate(()=>S.coins),cB=await B.evaluate(()=>S.coins),f='FISH.find(f=>f.at===\'steam\')';
+  await A.evaluate(async()=>{for(let i=0;i<3;i++){__lc(FISH.find(f=>f.at==='steam'),2,'');await new Promise(r=>setTimeout(r,120))}});await B.waitForFunction(()=>LIVE.raid&&LIVE.raid.hp===74,null,{timeout:6000});ok(true,'three fish on the matching fly count as six');
+  await B.evaluate(async()=>{for(let i=0;i<4;i++){__lc(FISH.find(f=>f.at==='steam'),2,'');await new Promise(r=>setTimeout(r,120))}});await A.waitForFunction(()=>LIVE.raid&&LIVE.raid.hp===70,null,{timeout:6000});ok(true,'four without the fly count as four');
+  await A.evaluate(async()=>{for(let i=0;i<35;i++){__lc(FISH.find(f=>f.at==='steam'),2,'');await new Promise(r=>setTimeout(r,40))}});for(const p of ps)await p.waitForFunction(()=>!LIVE.raid,null,{timeout:6000});await A.waitForTimeout(300);
   const a=await A.evaluate(()=>({coins:S.coins,bait:S.pots.mill|0,w:S.hd.hatchW,bob:PNT().own.b_hatchking|0})),b=await B.evaluate(()=>({coins:S.coins,bait:S.pots.mill|0,w:S.hd.hatchW,bob:PNT().own.b_hatchking|0}));
-  ok(a.coins===cA+60000&&b.coins===cB+60000&&a.bait===1&&b.bait===1,'both get the Mirror Tarn bounty for two anglers and a Mill Bait: '+JSON.stringify([a,b]));ok(a.w===3&&a.bob===1&&b.w===1&&b.bob===0,'the third win earns the Hatch King bobber');
+  ok(a.coins===cA+40000&&b.coins===cB+40000&&a.bait===1&&b.bait===1,'both get the Steam Hollow bounty for two anglers and a Mill Bait: '+JSON.stringify([a,b]));ok(a.w===3&&a.bob===1&&b.w===1&&b.bob===0,'the third win earns the Hatch King bobber');
   await A.evaluate(()=>document.querySelectorAll('.away,.celeb').forEach(x=>x.hidden=true));await fetch(org+'/__alarm?room='+encodeURIComponent(room));for(const p of ps)await p.waitForFunction(()=>!!LIVE.raid&&LIVE.raid.hp===80,null,{timeout:6000});
-  await B.evaluate(()=>__lc(FISH.find(f=>f.at==='tarn'),2,''));await A.waitForFunction(()=>LIVE.raid&&LIVE.raid.hp===79,null,{timeout:6000});await fetch(org+'/__raidend?room='+encodeURIComponent(room));for(const p of ps)await p.waitForFunction(()=>!LIVE.raid,null,{timeout:6000});
+  await B.evaluate(()=>__lc(FISH.find(f=>f.at==='steam'),2,''));await A.waitForFunction(()=>LIVE.raid&&LIVE.raid.hp===79,null,{timeout:6000});await fetch(org+'/__raidend?room='+encodeURIComponent(room));for(const p of ps)await p.waitForFunction(()=>!LIVE.raid,null,{timeout:6000});
   ok(await B.evaluate(c=>S.coins===c,b.coins)&&await B.evaluate(()=>S.hd.hatchW===1),'a hatch that runs out pays nothing');
   for(const p of ps){await p.waitForTimeout(400);ok(!p.errs.length,'no script errors: '+p.errs.join(' | '));await p.context().close()}});
 await check('bird feeder up close: tap the feeder on the dock, birds you know drop by without using seed, the real visitor shows as new, the Guide button, and back to the water',async()=>{
