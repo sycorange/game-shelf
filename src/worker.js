@@ -436,7 +436,7 @@ async function bugRoute(db,b,now){const n=await db.prepare('SELECT COUNT(*) AS c
 // Webhook links are secret, so they live in the cfg table (set from Owner tools), never in the code.
 const DC_RE=/^https:\/\/(?:(?:ptb|canary)\.)?discord(?:app)?\.com\/api\/webhooks\/\d{5,25}\/[\w-]{20,100}$/;
 const DC_FISH={"pickerel": "Chain Pickerel", "grasscarp": "Grass Carp", "eel": "American Eel", "koi": "Ghost Koi", "tench": "Golden Tench", "bowfin": "Bowfin", "whitefish": "Lake Whitefish", "spotgar": "Spotted Gar", "tiger": "Tiger Muskie", "bluepike": "Blue Pike", "flathead": "Flathead Catfish", "shovelnose": "Shovelnose Sturgeon", "steelhead": "Steelhead", "golden": "Golden Trout", "alligar": "Alligator Gar", "muskie": "Muskellunge", "paddle": "Paddlefish", "atlsalmon": "Atlantic Salmon", "sturgeon": "Lake Sturgeon", "aurora": "Aurora Trout", "cobia": "Cobia", "tarpon": "Tarpon", "blackdrum": "Black Drum", "tuna": "Atlantic Bluefin Tuna", "swordfish": "Swordfish", "orfe": "Golden Orfe", "stormkoi": "Storm Koi", "lamprey": "Silver Lamprey", "thundermusk": "Thunderhead Muskie", "grayling": "Arctic Grayling", "boltsturg": "Thunderbolt Sturgeon", "sculpin": "Deepwater Sculpin", "frostchar": "Frost Char", "cod": "Atlantic Cod", "marlin": "Blue Marlin", "lakebeast": "The Lake Beast", "cometrout": "Comet Trout", "eclipseray": "Eclipse Ray", "lunarlev": "Lunar Leviathan", "soulcarp": "Soul Carp", "obsidiangar": "Obsidian Gar", "cerberus": "Cerberus Catfish", "prismtrout": "Prism Trout", "thundereel": "Thunder Eel", "skywhale": "Sky Whale", "ghostgar": "Ghost Gar", "witcheel": "Witch’s Eel", "bonepike": "Skeleton Pike"};
-const WATER_N={pond:'Dock Pond',lake:'Reed Lake',river:'Fork River',deep:'Deepwater Basin',bay:'Misty Bay'};
+const WATER_N={pond:'Dock Pond',lake:'Reed Lake',river:'Fork River',deep:'Deepwater Basin',bay:'Misty Bay',mill:'Miller’s Run',meadow:'Beaver Meadow',falls:'Silver Falls',steam:'Steam Hollow',tarn:'Mirror Tarn'};
 let DCC=null,DCT=0;
 async function dcCfg(db){if(DCC&&Date.now()-DCT<60000)return DCC;try{const r=await db.prepare("SELECT k,v FROM cfg WHERE k LIKE 'dc:%'").all();DCC={};for(const x of r.results)DCC[x.k.slice(3)]=x.v}catch(e){DCC={}}DCT=Date.now();return DCC}
 async function dcPost(db,ch,body,wait){const c=await dcCfg(db),u=c[ch];if(!u||!DC_RE.test(u))return null;
@@ -452,10 +452,13 @@ const MUS_V=['','golden','albino','giant'],VAR_N={golden:'Golden',albino:'Albino
 async function musVer(db){try{const r=await db.prepare("SELECT v FROM kvc WHERE k='mus:v'").first();return r?+r.v:0}catch(e){return 0}}
 // ==LIVE LAKE== one Durable Object room per lake scope and water. Players connect with a WebSocket while they fish;
 // the room relays boats, catches and emotes, and now and then a raid monster surfaces for everyone in the room.
-const LIVE_WATERS=['pond','lake','river','deep','bay'];
+// The Headwaters have live rooms too (v178). Lake monster raids and calls for help stay on the five lake waters.
+const LIVE_BASE=['pond','lake','river','deep','bay'],LIVE_HD=['mill','meadow','falls','steam','tarn'],LIVE_WATERS=[...LIVE_BASE,...LIVE_HD];
 const RAID_PER={pond:60,lake:150,river:250,deep:500,bay:900};
 const RAID_NAMES=['The Lake Leviathan','Old Ironjaw','Mother Muskie','The Bottom Dweller','Captain Whiskers','The Thing in the Reeds'];
 const RAID_MS=180000,RAID_GAP=25*60000;
+// The Big Hatch (v178): the Headwaters' own raid. No monster: a shared count of fish landed, where a fish on the matching fly counts double.
+const HATCH_PER=40,HATCH_PAY={mill:8000,meadow:10000,falls:16000,steam:20000,tarn:30000};
 async function liveRoute(req,env,url,db){
   if((req.headers.get('Upgrade')||'').toLowerCase()!=='websocket')return json({error:'expected-websocket'},426);
   if(!env.LAKE)return json({error:'no-live'},503);
@@ -485,39 +488,40 @@ export class LakeRoom{
     let o;try{o=JSON.parse(msg)}catch(e){return}let a;try{a=ws.deserializeAttachment()}catch(e){}if(!a)return;
     if(o.t==='st'){a.boat=Math.max(0,Math.min(7,o.boat|0));a.wd=String(a.name||'').toLowerCase()===OWNER_NAME?Math.max(0,Math.min(2,o.wd|0)):0;a.wear=String(o.wear||'').slice(0,8);if(o.g)a.g=o.g==='f'?'f':'m';a.pt=String(o.pt||'').replace(/[^a-z0-9]/g,'').slice(0,12);a.rd=String(o.rd||'').replace(/[^a-z0-9_]/g,'').slice(0,14);a.bb=String(o.bb||'').replace(/[^a-z0-9_]/g,'').slice(0,14);ws.serializeAttachment(a);this.bcast({t:'st',pid:a.pid,cid:a.cid,wd:a.wd,boat:a.boat,wear:a.wear,g:a.g||'m',pt:a.pt,rd:a.rd,bb:a.bb},ws)}
     else if(o.t==='catch'){const w=+o.w;if(!(w>0&&w<5000)||typeof o.f!=='string')return;const c={t:'catch',pid:a.pid,cid:a.cid,f:o.f.slice(0,24),w:+w.toFixed(2),v:String(o.v||'').slice(0,8),r:String(o.r||'').slice(0,1)};
-      const R=await this.ctx.storage.get('raid');if(R&&!R.done&&Date.now()<R.ends){R.hp=Math.max(0,R.hp-w);R.hits[a.pid]=(R.hits[a.pid]||0)+w;R.names[a.pid]=a.name;c.raid={hp:Math.round(R.hp),max:R.max};
+      const R=await this.ctx.storage.get('raid');if(R&&!R.done&&Date.now()<R.ends){const dmg=R.k==='hatch'?(o.m?2:1):w;R.hp=Math.max(0,R.hp-dmg);R.hits[a.pid]=(R.hits[a.pid]||0)+dmg;R.names[a.pid]=a.name;c.raid={hp:Math.round(R.hp),max:R.max};
         if(R.hp<=0){R.done=true;await this.ctx.storage.put('raid',R);this.bcast(c);await this.raidEnd(true);return}await this.ctx.storage.put('raid',R)}
       this.bcast(c)}
     else if(o.t==='help'){await this.callHelp(ws,a)}
     else if(o.t==='emo'){const e=o.e|0;if(e>=0&&e<12)this.bcast({t:'emo',pid:a.pid,cid:a.cid,e},ws)}}
   // One call per player per raid, and at most one every 20 seconds per room, sent to the other spots on this lake.
-  async callHelp(ws,a){const R=await this.ctx.storage.get('raid'),now=Date.now();if(!R||R.done||now>=R.ends||a.help===R.ends)return;
+  async callHelp(ws,a){const R=await this.ctx.storage.get('raid'),now=Date.now();if(!R||R.done||R.k==='hatch'||now>=R.ends||a.help===R.ends)return;
     const last=(await this.ctx.storage.get('helpAt'))||0;if(now-last<20000){try{ws.send(JSON.stringify({t:'helpsent',n:-1}))}catch(e){}return}
     a.help=R.ends;ws.serializeAttachment(a);await this.ctx.storage.put('helpAt',now);
     const room=(await this.ctx.storage.get('room'))||'',water=(await this.ctx.storage.get('water'))||'lake',scope=room.slice(0,room.lastIndexOf(':'));if(!scope)return;
     const msg={from:a.name,pid:a.pid,water,name:R.name,hp:Math.round(R.hp),max:R.max,ends:R.ends};let n=0;
-    await Promise.all(LIVE_WATERS.filter(w=>w!==water).map(async w=>{try{const st=this.env.LAKE.get(this.env.LAKE.idFromName(`${scope}:${w}`));const r=await st.fetch(new Request('https://lake/help',{method:'POST',body:JSON.stringify(msg)}));const j=await r.json();n+=j.n|0}catch(e){}}));
+    await Promise.all(LIVE_BASE.filter(w=>w!==water).map(async w=>{try{const st=this.env.LAKE.get(this.env.LAKE.idFromName(`${scope}:${w}`));const r=await st.fetch(new Request('https://lake/help',{method:'POST',body:JSON.stringify(msg)}));const j=await r.json();n+=j.n|0}catch(e){}}));
     try{ws.send(JSON.stringify({t:'helpsent',n}))}catch(e){}this.bcast({t:'helpcalled',from:a.name},ws)}
   async webSocketClose(ws){this.left(ws)}
   async webSocketError(ws){this.left(ws)}
   left(ws){let a=null;try{a=ws.deserializeAttachment()}catch(e){}try{ws.close(1000,'bye')}catch(e){}if(a)this.bcast({t:'leave',pid:a.pid,cid:a.cid},ws)}
-  async raidView(){const R=await this.ctx.storage.get('raid');if(!R||R.done||Date.now()>=R.ends)return null;return {name:R.name,hp:Math.round(R.hp),max:R.max,ends:R.ends}}
+  async raidView(){const R=await this.ctx.storage.get('raid');if(!R||R.done||Date.now()>=R.ends)return null;return {name:R.name,hp:Math.round(R.hp),max:R.max,ends:R.ends,k:R.k||''}}
   async maybeRaid(){const n=this.peers().length,now=Date.now();if(n<2)return;const R=await this.ctx.storage.get('raid');if(R&&!R.done&&now<R.ends)return;
     const next=(await this.ctx.storage.get('raidNext'))||0,al=await this.ctx.storage.getAlarm();if(al)return;
     await this.ctx.storage.setAlarm(Math.max(now,next)+(3+Math.random()*5)*60000)}
   async alarm(){const now=Date.now(),R=await this.ctx.storage.get('raid');
     if(R&&!R.done){if(now>=R.ends-500){R.done=true;await this.ctx.storage.put('raid',R);await this.raidEnd(false)}else await this.ctx.storage.setAlarm(R.ends);return}
     const ps=this.peers();if(ps.length<2)return;const water=(await this.ctx.storage.get('water'))||'lake';
-    const max=Math.round((RAID_PER[water]||150)*ps.length);const raid={name:RAID_NAMES[Math.floor(Math.random()*RAID_NAMES.length)],hp:max,max,ends:now+RAID_MS,hits:{},names:{},done:false};
-    await this.ctx.storage.put('raid',raid);this.bcast({t:'raid',raid:{name:raid.name,hp:max,max,ends:raid.ends}});await this.ctx.storage.setAlarm(raid.ends);
+    const hatch=LIVE_HD.includes(water),max=hatch?HATCH_PER*ps.length:Math.round((RAID_PER[water]||150)*ps.length);const raid={name:hatch?'The Big Hatch':RAID_NAMES[Math.floor(Math.random()*RAID_NAMES.length)],hp:max,max,ends:now+RAID_MS,hits:{},names:{},done:false};if(hatch)raid.k='hatch';
+    await this.ctx.storage.put('raid',raid);this.bcast({t:'raid',raid:{name:raid.name,hp:max,max,ends:raid.ends,k:raid.k||''}});await this.ctx.storage.setAlarm(raid.ends);
     try{const room=(await this.ctx.storage.get('room'))||'';if(room.startsWith('all:')&&this.env.DB){const c=await dcCfg(this.env.DB),role=/^\d{5,25}$/.test(c.role||'')?c.role:'';
-      const id=await dcPost(this.env.DB,'raids',{content:role?`<@&${role}>`:undefined,allowed_mentions:{roles:role?[role]:[]},embeds:[{color:0xff7a3d,title:`🛟 Raid! ${raid.name} on ${WATER_N[water]||water}`,description:`${ps.length} anglers are fighting it right now. You have 3 minutes to jump in and help.${dcLink(c)}`}]},true);
+      const id=await dcPost(this.env.DB,'raids',{content:role?`<@&${role}>`:undefined,allowed_mentions:{roles:role?[role]:[]},embeds:[hatch?{color:0xd8c86a,title:`🪰 The Big Hatch at ${WATER_N[water]||water}`,description:`${ps.length} anglers are fishing it right now in the Headwaters. Land ${max} fish together in 3 minutes and the Hatch King rises.${dcLink(c)}`}:{color:0xff7a3d,title:`🛟 Raid! ${raid.name} on ${WATER_N[water]||water}`,description:`${ps.length} anglers are fighting it right now. You have 3 minutes to jump in and help.${dcLink(c)}`}]},true);
       if(id){raid.dc=id;await this.ctx.storage.put('raid',raid)}}}catch(e){}}
   async raidEnd(win){const R=await this.ctx.storage.get('raid');await this.ctx.storage.put('raidNext',Date.now()+RAID_GAP);try{await this.ctx.storage.deleteAlarm()}catch(e){}
     const top=Object.entries(R.hits).sort((x,y)=>y[1]-x[1]).slice(0,5).map(([pid,w])=>({name:R.names[pid]||'?',w:Math.round(w)}));
-    this.bcast({t:'raidend',win,name:R.name,hits:Object.keys(R.hits),top,reward:win?Math.round(R.max*20):0});
-    if(R.dc&&this.env.DB){const water=(await this.ctx.storage.get('water'))||'lake';
-      try{await dcEdit(this.env.DB,'raids',R.dc,{content:'',embeds:[{color:win?0x3fb950:0x8b949e,title:`${win?'🏆 Won':'🌊 Got away'}: ${R.name} on ${WATER_N[water]||water}`,description:win?`${Object.keys(R.hits).length} anglers landed it.${top.length?' Top haulers: '+top.slice(0,3).map(x=>`**${x.name}** (${x.w} lb)`).join(', ')+'.':''}`:`It escaped this time. The next raid could start any minute.`}]})}catch(e){}}
+    const water=(await this.ctx.storage.get('water'))||'lake',hatch=R.k==='hatch';
+    this.bcast({t:'raidend',win,name:R.name,k:R.k||'',hits:Object.keys(R.hits),top,reward:!win?0:hatch?(HATCH_PAY[water]||8000)*Math.max(1,Math.min(4,Object.keys(R.hits).length)):Math.round(R.max*20)});
+    if(R.dc&&this.env.DB){
+      try{await dcEdit(this.env.DB,'raids',R.dc,{content:'',embeds:[{color:win?0x3fb950:0x8b949e,title:hatch?`${win?'🏆 The Hatch King rose':'🌫️ The hatch thinned out'} at ${WATER_N[water]||water}`:`${win?'🏆 Won':'🌊 Got away'}: ${R.name} on ${WATER_N[water]||water}`,description:hatch?(win?`${Object.keys(R.hits).length} anglers fished it to the end.${top.length?' Most fish: '+top.slice(0,3).map(x=>`**${x.name}** (${x.w})`).join(', ')+'.':''}`:'Not enough fish this time. Another hatch could come off any minute.'):win?`${Object.keys(R.hits).length} anglers landed it.${top.length?' Top haulers: '+top.slice(0,3).map(x=>`**${x.name}** (${x.w} lb)`).join(', ')+'.':''}`:`It escaped this time. The next raid could start any minute.`}]})}catch(e){}}
     await this.maybeRaid()}
 }
 
