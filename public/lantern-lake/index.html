@@ -2297,7 +2297,9 @@ const isRealm=id=>!!REALMS_BY[id];
 // the hw prefix, so everything here is hd.)
 const HDW=[
   {id:'mill',n:'Miller’s Run',boat:0,hd:1,d:'A slow mill pond, a covered bridge and the race below the old wheel.',tint:[[64,108,86],[18,44,40]]},
-  {id:'meadow',n:'Beaver Meadow',boat:0,hd:1,d:'A wide, flooded meadow behind a beaver dam. Some fish like high water, some like low.',tint:[[92,116,92],[28,46,40]]}];
+  {id:'meadow',n:'Beaver Meadow',boat:0,hd:1,d:'A wide, flooded meadow behind a beaver dam. Some fish like high water, some like low.',tint:[[92,116,92],[28,46,40]]},
+  {id:'falls',n:'Silver Falls',boat:0,hd:2,d:'A tall waterfall and the deep pool under it. Salmon run the falls at dawn and dusk.',tint:[[72,116,126],[16,40,52]]},
+  {id:'steam',n:'Steam Hollow',boat:0,hd:2,d:'A geyser steams on the bank and its runoff keeps the water warm. Weather never slows the bite here, and the fish are oddballs somebody let go long ago.',tint:[[92,150,146],[24,56,60]]}];
 const HDW_BY=Object.fromEntries(HDW.map(w=>[w.id,w])),isHD=id=>!!HDW_BY[id];
 const HD=()=>{if(!S.hd||typeof S.hd!=='object')S.hd={};return S.hd};
 const hdRoad=()=>(S.proj&&S.proj.road?S.proj.road.s|0:0),hdOpen=()=>hdRoad()>=1;
@@ -2305,9 +2307,11 @@ const hdHash=n=>{let x=Math.imul((n|0)+977,2654435761)>>>0;x^=x>>>15;x=Math.imul
 // Beaver Meadow: each game day the dam is either holding (high water) or broken (low water)
 const hdHigh=day=>hdHash(day==null?S.day:day)%100<55,hdBroke=()=>!hdHigh(S.day)&&hdHigh(S.day-1);
 // The hatch: one insect comes off the water each game day. If its fly is in your box you fish it automatically, in the Headwaters only.
-const HATCH=[{id:'mayfly',n:'Mayfly',fly:'Mayfly Dun',pl:'Mayflies',rgb:[236,224,164]},{id:'caddis',n:'Caddis',fly:'Elk Hair Caddis',pl:'Caddis',rgb:[196,160,110]},{id:'stone',n:'Stonefly',fly:'Stonefly Nymph',pl:'Stoneflies',rgb:[168,150,118]}],HATCH_BY=Object.fromEntries(HATCH.map(h=>[h.id,h]));
-const FLY_COST={mayfly:{c:5000,m:{feather:4}},caddis:{c:10000,m:{feather:6,bark:2}},stone:{c:20000,m:{feather:6,bark:4}}};
-const hatchOf=day=>HATCH[hdHash((day==null?S.day:day)*3+11)%HATCH.length],hatchOn=()=>{const f=HD().flies;return !!(f&&f[hatchOf().id])},hatchX=water=>isHD(water)&&hatchOn();
+const HATCH=[{id:'mayfly',n:'Mayfly',fly:'Mayfly Dun',pl:'Mayflies',rgb:[236,224,164]},{id:'caddis',n:'Caddis',fly:'Elk Hair Caddis',pl:'Caddis',rgb:[196,160,110]},{id:'stone',n:'Stonefly',fly:'Stonefly Nymph',pl:'Stoneflies',rgb:[168,150,118]},
+  {id:'hopper',n:'Grasshopper',fly:'Foam Hopper',pl:'Grasshoppers',rgb:[156,196,96],hd:2},{id:'midge',n:'Midge',fly:'Zebra Midge',pl:'Midges',rgb:[204,210,220],hd:2},{id:'moth',n:'Moth',fly:'Night Moth',pl:'Moths',rgb:[234,226,204],hd:2}],HATCH_BY=Object.fromEntries(HATCH.map(h=>[h.id,h]));
+const FLY_COST={mayfly:{c:5000,m:{feather:4}},caddis:{c:10000,m:{feather:6,bark:2}},stone:{c:20000,m:{feather:6,bark:4}},hopper:{c:40000,m:{feather:8,antler:4}},midge:{c:80000,m:{feather:10,quartz:4}},moth:{c:150000,m:{feather:12,quartz:6,moon:2}}};
+// The falls bridge brings three more insects into the hatch. Anglers without it keep the first three, so their flies cover every day.
+const hatchPool=()=>HATCH.filter(h=>(h.hd||1)<=Math.max(1,hdRoad())),hatchOf=day=>{const P=hatchPool();return P[hdHash((day==null?S.day:day)*3+11)%P.length]},hatchOn=()=>{const f=HD().flies;return !!(f&&f[hatchOf().id])},hatchX=water=>isHD(water)&&hatchOn();
 const HD_COST={canoe:{n:'Canoe',c:60000,m:{drift:15,rope:10,fabric:6}},waders:{n:'Waders',c:25000,m:{fabric:10,brass:4}},mill:{n:'The old mill',c:120000,m:{stone:20,drift:15}}};
 const hdRiverN=()=>FISH.filter(f=>f.at==='river'&&!f.quest&&S.log[f.id]).length,hdReq=()=>S.boat>=2&&hdRiverN()>=10;
 
@@ -2492,6 +2496,8 @@ const DECOR = [
   {id:'wscale',cat:'land',cs:1,n:'Brass Weigh Scale',c:0,d:'An honest scale, for honest fish. From The Weigh-In Scandal case.'},
   {id:'figurehead',cat:'dock',cs:1,n:'Marigold Figurehead',c:0,d:'A woman in gold holding up a lantern. It glows a little at night. From The Marigold case.'},
   {id:'lodgesign',cat:'land',cs:1,n:'Master’s Lodge sign',c:0,d:'For anglers with 275 mastery stars.'},
+  {id:'lodgerocker',cat:'land',cs:1,n:'Lodge Rocking Chair',c:0,d:'A bentwood rocker off the Lodge porch. Hattie gives one to anglers who finish two weeks of her jobs.'},
+  {id:'antlerrack',cat:'land',cs:1,n:'Antler Coat Rack',c:0,d:'Shed antlers on a birch post, with a creel hung on it. For five weeks of jobs at the Lodge.'},
   {id:'feasttable',cat:'land',cs:1,n:'The Thanksgiving Table',c:0,d:'A long feast table set for the whole family. From the 2026 Thanksgiving Feast.'},
   {id:'goldturkey',cat:'land',cs:1,n:'Golden Turkey',c:0,d:'A gleaming gold turkey on a stone plinth. From the Gobbler’s Ledger.'},
   {id:'hpsign',cat:'land',cs:1,n:'Hollow Pines Town Sign',c:0,d:'The old sign from the road into Hollow Pines. Wren’s thank-you for finding all four relics on Pine Island.'},
@@ -2619,6 +2625,7 @@ const WXI={
 };
 const wxSvg=id=>`<svg viewBox="0 0 32 32" aria-hidden="true">${WXI[id]}</svg>`;
 const svgI=(k,c)=>`<svg viewBox="0 0 32 32" aria-hidden="true">${I[k](c)}</svg>`;
+I.antler=c=>`<path d="M9 27c2-8 4-12 9-15M18 12c1-4 4-7 8-8M18 12c-3-2-5-5-5-9M14 19c-3-1-6-3-7-7M22 9c2 1 4 1 6 0" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`;
 I.bark=c=>`<path d="M7 6q9-3 18 0v20q-9 3-18 0z" fill="${c}"/><path d="M10 10h5M19 13h4M9 17h6M18 21h5M11 24h3" stroke="#3a3430" stroke-width="1.6" stroke-linecap="round"/><path d="M7 6q9 4 18 0" fill="none" stroke="#c8bca4" stroke-width="1.4"/>`;
 I.mug=c=>`<rect x="10" y="6" width="12" height="22" rx="3" fill="${c}"/><rect x="10" y="6" width="12" height="5" rx="2" fill="#c8ccd2"/><rect x="12" y="15" width="8" height="6" rx="1" fill="#f4e8d4"/><path d="M14 4q1-2 0-3M18 4q1-2 0-3" stroke="#d8d8d8" stroke-width="1.4" fill="none" stroke-linecap="round"/>`;
 // ==SEASON== Halloween 2026 runs Oct 20 through Nov 1 (local time). Everything that checks hwOn() switches itself off after that.
@@ -2655,7 +2662,13 @@ const pumpkinSvg=svgI('pumpkin','#ff8a2a');
   C(F('pearldace','Pearl Dace',.1,.4,440,'U','dawn','meadow'),lo,'Low water'),C(F('redbelly','Northern Redbelly Dace',.05,.25,870,'U','day','meadow'),hi,'High water'),
   C(F('lnsucker','Longnose Sucker',1,7,45,'U','night','meadow'),hi,'High water'),C(F('madtom','Tadpole Madtom',.05,.3,2850,'R','night','meadow'),lo,'Low water'),
   C(F('cutthroat','Cutthroat Trout',1,12,108,'R','dawn dusk','meadow'),hi,'High water'),
-  C(F('dambreaker','Dambreaker',15,60,120,'L','dawn day dusk night','meadow'),()=>hdBroke(),'The day the dam breaks'))}
+  C(F('dambreaker','Dambreaker',15,60,120,'L','dawn day dusk night','meadow'),()=>hdBroke(),'The day the dam breaks'),
+  F('longdace','Longnose Dace',.05,.3,430,'C','day','falls'),F('mtwhitefish','Mountain Whitefish',.5,4,67,'C','dawn day','falls'),F('slimysculpin','Slimy Sculpin',.05,.3,1430,'U','night','falls'),
+  C(F('kokanee','Kokanee',.5,4,237,'U','dawn dusk','falls'),null,'Salmon run'),C(F('pinksalmon','Pink Salmon',2,8,127,'U','dawn dusk','falls'),null,'Salmon run'),C(F('sockeye','Sockeye Salmon',3,12,245,'R','dawn dusk','falls'),null,'Salmon run'),
+  F('bulltrout','Bull Trout',3,20,203,'R','night','falls'),F('mistbow','Mistbow Trout',6,24,722,'L','day','falls','clear'),
+  F('mosquitofish','Mosquitofish',.02,.1,1110,'C','dawn day dusk night','steam'),F('sailfin','Sailfin Molly',.05,.3,667,'C','day','steam'),F('bluetilapia','Blue Tilapia',1,6,114,'U','day dusk','steam'),
+  F('pupfish','Desert Pupfish',.02,.1,7200,'U','day','steam'),F('jewelcichlid','Jewel Cichlid',.1,.6,1430,'U','dusk','steam'),F('convict','Convict Cichlid',.1,.8,3330,'R','night','steam'),
+  F('feralgold','Feral Goldfish',1,8,444,'R','dawn','steam'),F('oldsulphur','Old Sulphur',10,40,533,'L','night','steam','snow'))}
 // Far-water fish: brought home only by your fleet (see ==THE FLEET==).
 {const A='dawn day dusk night',X=(id,n,a,b,r,at)=>Object.assign(F(id,n,a,b,{C:8,U:14,R:24,L:40}[r],r,A,at),{fleet:1});FISH.push(
   X('kelpbass','Kelp Bass',1,14,'C','kelp'),X('garibaldi','Garibaldi',.5,2,'C','kelp'),X('opaleye','Opaleye',1,6,'U','kelp'),X('sheephead','California Sheephead',3,36,'U','kelp'),X('giantseabass','Giant Sea Bass',60,560,'R','kelp'),X('kelpwyrm','Kelp Wyrm',80,400,'L','kelp'),
@@ -2987,6 +3000,8 @@ const MT=(id,n,r,at,night,ic,col,d)=>({id,n,r,at,night,ic,col,d});
 const MATS=[
   MT('drift','Driftwood','C','any',0,'branch','#a07a4a','Bleached and sturdy. Good for hulls and walls.'),
   MT('bark','Birch Bark','C','mill meadow',0,'bark','#ece4d2','Papery white bark from the mountain birches. Only in the Headwaters.'),
+  MT('quartz','River Quartz','U','steam',0,'shard','#f0e6f4','Clear crystal from the warm pools, cloudy at one end. Only in the upper Headwaters.'),
+  MT('antler','Shed Antler','U','falls',0,'antler','#e0d2ac','Dropped by a buck in spring and washed down to the falls. Only in the upper Headwaters.'),
   MT('scrap','Scrap Metal','C','any',0,'nut','#9aa4ac','Bolts, brackets and bent bits.'),
   MT('rope','Old Rope','C','any',0,'tangle','#c8a868','Still holds a knot.'),
   MT('feather','Lure Feathers','U','pond lake',0,'feather','#e86a8a','Bright feathers from the reed beds.'),
@@ -3040,7 +3055,7 @@ function save(){if(SESS.paused)return;S.last=Date.now();try{localStorage.setItem
 
 const vitalX=()=>(S.hunger<=0?1.4:S.hunger<25?1.1:1)*(S.stamina<=0?1.5:S.stamina<20?1.1:1);
 const vitalMiss=()=>(S.hunger<=0?.1:0)+(S.stamina<=0?.12:0);
-const castDur=()=>castDurFor(S.water)*(S.buffs.haste>0?.5:1)*(S.buffs.rested>0?.85:1)*(S.buffs.mill>0?.9:1)*(WX[S.wx.id].castX||1)*vitalX();
+const castDur=()=>castDurFor(S.water)*(S.buffs.haste>0?.5:1)*(S.buffs.rested>0?.85:1)*(S.buffs.mill>0?.9:1)*(S.water==='steam'?Math.min(1,WX[S.wx.id].castX||1):(WX[S.wx.id].castX||1))*vitalX();
 const mods=()=>{const o={wx:S.wx.id,missAdd:vitalMiss()};for(const k in S.buffs)if(S.buffs[k]>0)o[k]=true;return o};
 const junkTotal=()=>Object.values(S.junk).reduce((a,b)=>a+b,0);
 const estRate=()=>S.rate||(RATE_EST[WATERS.findIndex(w=>w.id===S.water)]||RATE_EST[4])*.6;
@@ -3681,14 +3696,14 @@ async function ownRoadLoad(body){const m=mpS(),box=$('ownRoad');if(!box)return;l
 // ==HEADWATERS: THE LODGE== the hub at the end of the Mountain Road. It opens as a sheet from the Headwaters map, so your line stays in.
 const LODGE_KEEPER='Hattie',LODGE_WHY=['for the breakfast pan','for the smoker','for the guests in Room 2','for the tank in the lobby','for Saturday’s fish fry'];
 const flyCan=id=>{const c=FLY_COST[id];return !!c&&S.coins>=c.c&&Object.entries(c.m).every(([m,n])=>(S.mats[m]||0)>=n)};
-function flyTie(id){const c=FLY_COST[id],H=HD();if(!c||!hdOpen())return;H.flies=H.flies||{};if(H.flies[id]||!flyCan(id))return;
+function flyTie(id){const c=FLY_COST[id],H=HD();if(!c||!hdOpen()||!hatchPool().some(h=>h.id===id))return;H.flies=H.flies||{};if(H.flies[id]||!flyCan(id))return;
   S.coins-=c.c;for(const [m,n] of Object.entries(c.m))S.mats[m]-=n;H.flies[id]=1;storeDirty=true;gearDirty=true;sfx('craft');
-  const all=HATCH.every(h=>H.flies[h.id]),x=HATCH_BY[id];
+  const all=hatchPool().every(h=>H.flies[h.id]),x=HATCH_BY[id];
   celebrate({lbl:all?'Fly box full':'New fly tied',r:all?'R':'U',name:x.fly,sub:all?'You match every hatch on the mountain':`You fish it on ${x.n} hatch days without lifting a finger`,icon:svgI('feather','#e86a8a')});
   {const fr=cast.dur?cast.el/cast.dur:0;cast.dur=castDur();cast.el=fr*cast.dur}save();renderAll();lodgeRe()}
 // Three jobs a real week, the same three for everyone on the lake. Kept in the save so a job never changes under you.
 function lodgeJobs(){const H=HD(),wk=weekKey();if(H.jobs&&H.jobs.wk===wk&&Array.isArray(H.jobs.j))return H.jobs;
-  const sd=[...wk].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7),pk=(a,i)=>a[hdHash(sd+i*101)%a.length],hf=r=>FISH.filter(f=>isHD(f.at)&&f.r===r);
+  const sd=[...wk].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7),pk=(a,i)=>a[hdHash(sd+i*101)%a.length],hf=r=>FISH.filter(f=>isHD(f.at)&&HDW_BY[f.at].hd===1&&f.r===r);
   const c=pk(hf('C'),1),u=pk(hf('U'),2),r=pk(hf('R'),3);
   const third=[{t:'fish',k:r.id,n:1,c:40000,m:{bark:4},p:'luck'},{t:'count',n:60,c:20000,m:{bark:4,feather:2}},{t:'mat',k:'bark',n:8,c:25000,m:{feather:3},p:'giant'}][hdHash(sd+404)%3];
   H.jobs={wk,c:0,done:[0,0,0],j:[{t:'fish',k:c.id,n:3+hdHash(sd+11)%3,c:6000,m:{bark:3}},{t:'fish',k:u.id,n:2,c:14000,m:{bark:2,feather:2}},third]};return H.jobs}
@@ -3704,7 +3719,7 @@ function lodgeGive(i){const J=lodgeJobs(),j=J.j[i];if(!j||J.done[i]||!hdOpen()||
   if(j.t==='fish'){const e=S.cooler[j.k],pv=e.val/e.n,pl=e.lbs/e.n;e.n-=j.n;e.val=Math.max(0,e.val-pv*j.n);e.lbs=Math.max(0,e.lbs-pl*j.n);if(e.n<=0)delete S.cooler[j.k];coolDirty=true}
   else if(j.t==='mat')S.mats[j.k]-=j.n;
   J.done[i]=1;S.coins+=pay;for(const [m,n] of Object.entries(j.m||{}))S.mats[m]=(S.mats[m]||0)+n;if(j.p)givePotion(j.p,1);storeDirty=true;gearDirty=true;sfx('coin');
-  if(J.done.every(Boolean)){const H=HD();H.stamps=(H.stamps|0)+1;givePotion('mill',2);celebrate({lbl:'All three jobs done',r:'R',name:'A week’s work at the Lodge',sub:`${LODGE_KEEPER} packed you 2 Mill Bait for the road`,icon:svgI('crown','#ffd05a')})}
+  if(J.done.every(Boolean)){const H=HD();H.stamps=(H.stamps|0)+1;givePotion('mill',2);try{if(H.stamps>=2)hvGiveDecor('lodgerocker');if(H.stamps>=5)hvGiveDecor('antlerrack')}catch(e){}celebrate({lbl:'All three jobs done',r:'R',name:'A week’s work at the Lodge',sub:`${LODGE_KEEPER} packed you 2 Mill Bait for the road`,icon:svgI('crown','#ffd05a')})}
   else showToast('Job done',`+$${money(pay)}`);
   save();renderAll();lodgeRe()}
 function lodgeCatch(d){if(!d||!isHD(d.water)||!hdOpen())return;const J=lodgeJobs();J.c=(J.c|0)+1}
@@ -3731,7 +3746,7 @@ const lodgeNapWhy=()=>{const H=HD();return H.rest===S.day?'You’ve had today’
 // what each tag says, and whether something there is ready for you
 function lodgeTag(k){const H=HD(),J=lodgeJobs(),fl=H.flies||{};
   if(k==='jobs')return [`Jobs ${J.done.filter(Boolean).length}/3`,J.j.some((j,i)=>!J.done[i]&&lodgeHave(j,J)>=j.n)];
-  if(k==='bench')return [`Fly bench ${HATCH.filter(h=>fl[h.id]).length}/${HATCH.length}`,HATCH.some(h=>!fl[h.id]&&flyCan(h.id))];
+  if(k==='bench')return [`Fly bench ${hatchPool().filter(h=>fl[h.id]).length}/${hatchPool().length}`,hatchPool().some(h=>!fl[h.id]&&flyCan(h.id))];
   if(k==='room')return ['Guest room',!lodgeNapWhy()&&S.stamina<99];
   return [k==='wall'?'Trophies':k==='guest'?'Guest book':'Today',false]}
 function lodgeDraw(now,d,T,top,bot){HITS=[];baseRoom();ctx.setTransform(BASE.s,0,0,BASE.s,BASE.ox,BASE.oy);
@@ -3748,7 +3763,7 @@ function lodgeDraw(now,d,T,top,bot){HITS=[];baseRoom();ctx.setTransform(BASE.s,0
   ctx.fillStyle='#1c120c';ctx.beginPath();ctx.moveTo(86,300);ctx.lineTo(86,236);ctx.quadraticCurveTo(130,196,174,236);ctx.lineTo(174,300);ctx.fill();
   {const g=ctx.createRadialGradient(130,286,4,130,286,70);g.addColorStop(0,`rgba(255,170,70,${.75*fk})`);g.addColorStop(1,'rgba(255,140,50,0)');ctx.fillStyle=g;ctx.fillRect(60,210,140,96)}
   R(100,286,60,7,'#3a2414');R(108,279,44,7,'#4a2e18');for(const [fx,fs] of [[116,2.6],[130,3.4],[144,2.4]])flame(fx,281,fs,RM?0:T);
-  for(const [i,w] of HDW.entries()){const px=96+i*68,py=92,got=!!(S.sets&&S.sets[w.id]);E(px,py,29,21,'#40280f');E(px,py,25,17,got?'#a8733f':'#6a4a2c');
+  for(const [i,w] of HDW.entries()){const last=i===HDW.length-1&&HDW.length%2===1,px=last?130:96+(i%2)*68,py=HDW.length>2?62+Math.floor(i/2)*46:92,got=!!(S.sets&&S.sets[w.id]);E(px,py,29,21,'#40280f');E(px,py,25,17,got?'#a8733f':'#6a4a2c');
     if(got){ctx.fillStyle=i?'#c8743a':'#cfd8de';ctx.beginPath();ctx.moveTo(px-17,py);ctx.quadraticCurveTo(px-4,py-11,px+9,py-2);ctx.lineTo(px+17,py-8);ctx.lineTo(px+17,py+8);ctx.lineTo(px+9,py+2);ctx.quadraticCurveTo(px-4,py+11,px-17,py);ctx.fill();E(px-10,py-2,1.6,1.6,'#16100a');R(px-9,py+19,18,5,'#e8c060')}
     else{ctx.strokeStyle='rgba(255,236,200,.35)';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.ellipse(px,py,15,9,0,0,7);ctx.stroke();ctx.setLineDash([])}}
   // the lodge dog, asleep by the fire
@@ -3764,7 +3779,7 @@ function lodgeDraw(now,d,T,top,bot){HITS=[];baseRoom();ctx.setTransform(BASE.s,0
   R(232,236,176,10,'#40280f');R(240,246,8,54,'#38230f');R(392,246,8,54,'#38230f');R(240,270,160,5,'#38230f');
   R(262,216,6,20,'#8e949a');R(254,212,22,6,'#aab0b6');E(279,214,5,2.4,`rgb(${hx.rgb})`);                                  // vise, with today's fly in it
   for(const [i,c] of ['#e86a8a','#e8c060','#7ab0d8'].entries()){const jx=296+i*17;R(jx,220,12,16,'rgba(200,225,235,.5)');R(jx-1,218,14,3,'#8e949a');ctx.strokeStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(jx+6,222);ctx.quadraticCurveTo(jx+2,208,jx+9,200);ctx.stroke()}
-  R(352,224,46,12,'#2e3e2c');R(354,226,42,8,'#e9dfc6');for(const [i,h] of HATCH.entries()){const sx=361+i*14;if(fl[h.id]){E(sx,230,4,2.6,`rgb(${h.rgb})`);ctx.strokeStyle='#3a2414';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(sx-4,230);ctx.lineTo(sx+5,231);ctx.stroke()}else{ctx.strokeStyle='rgba(60,40,20,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx,230,3,0,7);ctx.stroke()}}
+  R(352,224,46,12,'#2e3e2c');R(354,226,42,8,'#e9dfc6');for(const [i,h] of hatchPool().entries()){const big=hatchPool().length>3,sx=big?358.5+i*7:361+i*14;if(fl[h.id]){E(sx,230,big?2.8:4,2.6,`rgb(${h.rgb})`);ctx.strokeStyle='#3a2414';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(sx-4,230);ctx.lineTo(sx+5,231);ctx.stroke()}else{ctx.strokeStyle='rgba(60,40,20,.35)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(sx,230,big?2.2:3,0,7);ctx.stroke()}}
   R(246,198,4,38,'#38230f');ctx.fillStyle='#4f8a5a';ctx.beginPath();ctx.moveTo(236,198);ctx.lineTo(260,198);ctx.lineTo(254,186);ctx.lineTo(242,186);ctx.fill();if(dark){const g=ctx.createRadialGradient(248,204,2,248,204,54);g.addColorStop(0,'rgba(255,224,150,.5)');g.addColorStop(1,'rgba(255,224,150,0)');ctx.fillStyle=g;ctx.fillRect(194,186,110,60)}
   R(300,276,44,7,'#6a4426');R(318,283,6,17,'#38230f');                                                                    // stool
   // --- the job board, the chalkboard, Hattie and the front desk
@@ -3800,8 +3815,8 @@ function lodgeUI(sec){if(!hdOpen())return;sec=LDG_T[sec]?sec:LDG.sec||'jobs';LDG
   $('plotEye').textContent='Headwaters Lodge';$('plotTitle').textContent=LDG_T[sec];let h='';
   if(sec==='jobs')h=`<p class="ldg-kp">${LODGE_KEEPER} keeps the Lodge. “${dn===3?'That’s my whole list. Come back Monday.':'Three things on the board this week. Bring me what you can.'}”</p>${J.j.map((j,i)=>{const have=Math.min(j.n,lodgeHave(j,J)),ok=have>=j.n;
       return `<div class="hd-row${J.done[i]?' done':''}"><div><b>${esc(lodgeJobText(j,i))}</b><span class="hd-cost"><span class="${ok||J.done[i]?'ok':''}">${J.done[i]?'Done':`${have}/${j.n}`}</span><span>${esc(lodgeRwText(j))}</span></span></div><button class="sbtn" data-ldg="job${i}"${ok&&!J.done[i]?'':' disabled'}>${J.done[i]?'✓':j.t==='count'?'Collect':'Give'}</button></div>`}).join('')}
-    <p class="ldg-fine">${dn}/3 this week. A new list goes up on Monday. Finish all three for 2 Mill Bait. Fish come out of your cooler.</p>`;
-  else if(sec==='bench')h=HATCH.map(f=>{const c=FLY_COST[f.id],got=!!fl[f.id];
+    <p class="ldg-fine">${dn}/3 this week. A new list goes up on Monday. Finish all three for 2 Mill Bait. Fish come out of your cooler.</p><p class="ldg-fine">Full weeks finished: ${HD().stamps|0}. Hattie gives regulars a rocking chair off the porch after 2, and an antler coat rack after 5.</p>`;
+  else if(sec==='bench')h=hatchPool().map(f=>{const c=FLY_COST[f.id],got=!!fl[f.id];
       return `<div class="hd-row${got?' done':''}"><div><b>${f.fly}${f.id===x.id?' · hatching today':''}</b>${got?'<span class="hd-cost"><span class="ok">In your fly box</span></span>':`<span class="hd-cost"><span class="${S.coins>=c.c?'ok':''}">$${money(c.c)}</span>${Object.entries(c.m).map(([m,n])=>`<span class="${(S.mats[m]||0)>=n?'ok':''}">${n} ${MI(m).n} (${S.mats[m]||0})</span>`).join('')}</span>`}</div>${got?'':`<button class="sbtn" data-ldg="fly-${f.id}"${flyCan(f.id)?'':' disabled'}>Tie</button>`}</div>`}).join('')+
     '<p class="ldg-fine">A fly is tied once and kept for good. On its hatch days you fish it automatically: Headwaters fish bite 25% faster and rare fish turn up 1.5 times as often.</p>';
   else if(sec==='today')h=`<div class="ldg-sec"><p class="ldg-kp">“${on?`${x.pl} are coming off the water and you’ve got the fly for it. Go fish.`:`${x.pl} are hatching today. The bench is under the window if you want to tie one.`}”</p><p><b>${x.n} hatch.</b> ${on?'Your fly matches: bites come 25% faster and rare fish turn up 1.5 times as often in the Headwaters.':`You haven’t tied the ${x.fly} yet.`} Tomorrow: ${tom.n}.</p><p>Beaver Meadow is at <b>${hdHigh()?'high':'low'} water</b>${hdBroke()?', and the dam broke overnight':''}. Tomorrow: ${hdHigh(S.day+1)?'high':'low'}.</p></div>`;
@@ -3814,27 +3829,28 @@ $('plotBody').addEventListener('click',e=>{const b=e.target.closest('[data-ldg]'
 
 // ==HEADWATERS: MAP PANEL== sits under the lake map on the Map tab. Before the road is built it shows what is needed;
 // after, it is the region's own map with a pin and a card for each water.
-const HD_MAP_SVG=`<svg viewBox="0 0 520 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="520" height="220" fill="#9db2c4"/><path d="M0 72 40 34l40 30 50-42 50 38 50-30 50 34 50-38 50 32 50-26 50 28 40-20V120H0z" fill="#8395aa"/><path d="M130 22l13 11-7-2-6 8-6-8-8 4zM330 26l13 11-7-2-6 8-6-8-8 4zM40 34l11 10-6-2-5 7-5-7-7 3zM230 30l11 10-6-2-5 7-5-7-7 3zM430 32l11 10-6-2-5 7-5-7-7 3z" fill="#f3f6f9"/><ellipse cx="268" cy="58" rx="13" ry="4.5" fill="#5aa0c0" stroke="#eef2f6" stroke-width="1.2"/><path d="M0 104 50 74l60 24 60-28 70 30 60-26 60 28 60-24 60 24 40-14V130H0z" fill="#56755f"/><rect y="112" width="520" height="108" fill="#3f6a48"/><ellipse cx="146" cy="150" rx="92" ry="30" fill="#4d7b4e"/><path d="M0 108 10 100 20 97 33 93 44 90 52 96 56 129H0z" fill="#78838d"/><path d="M10 100 20 97 33 93 44 90 52 96 45 100 34 98 21 103z" fill="#9aa5ae"/><path d="M6 112h11M37 108h12M4 121h9M40 118h11" stroke="#626d76" stroke-width="1.3" fill="none"/><path d="M18 110c0-10 18-10 18 0v2H18z" fill="#262d33"/><path d="M18 110c0-10 18-10 18 0" fill="none" stroke="#5a656e" stroke-width="1.4"/><path d="M20.5 110.4h13v1.8h-13z" fill="#a9cfe0"/><path d="M23.5 111.2h7V127h-7z" fill="#eaf4f9"/><path d="M25.5 113.5v11.5M28.8 114.5v10.5" stroke="#bcd9e6" stroke-width="1" fill="none"/><path d="M30 131C46 150 84 150 140 146 190 142 214 122 262 126 312 130 322 158 360 156 404 154 432 136 468 146 496 154 510 172 528 184" fill="none" stroke="#3f86a0" stroke-width="12" stroke-linecap="round"/><ellipse cx="27" cy="130" rx="17" ry="6.5" fill="#3f86a0"/><ellipse cx="27" cy="128" rx="9" ry="3.2" fill="#eaf4f9" opacity=".92"/><circle cx="19" cy="124" r="3" fill="#eaf4f9" opacity=".45"/><circle cx="35" cy="124" r="3.4" fill="#eaf4f9" opacity=".45"/><ellipse cx="6" cy="130" rx="6" ry="3.4" fill="#6b767f"/><ellipse cx="50" cy="131" rx="6.5" ry="3.6" fill="#6b767f"/><ellipse cx="140" cy="146" rx="40" ry="15" fill="#4a8a92"/><ellipse cx="360" cy="156" rx="32" ry="13" fill="#3f86a0"/><path d="M184 132l10 24" stroke="#7a5632" stroke-width="5" stroke-linecap="round"/><path d="M386 132h16v12h-16z" fill="#8a8580"/><path d="M384 132l10-8 10 8z" fill="#6a3a2a"/><circle cx="384" cy="146" r="5" fill="none" stroke="#7a5632" stroke-width="2"/><g fill="#2f5236"><path d="M96 112l6 -15 6 15z"/><path d="M112 116l5 -12 5 12z"/><path d="M206 110l6 -15 6 15z"/><path d="M222 114l5 -12 5 12z"/><path d="M300 112l6 -15 6 15z"/><path d="M316 116l5 -12 5 12z"/><path d="M404 108l6 -15 6 15z"/><path d="M492 112l6 -14 6 14z"/><path d="M36 196l7 -17 7 17z"/><path d="M58 204l6 -14 6 14z"/><path d="M236 200l7 -17 7 17z"/><path d="M258 206l6 -14 6 14z"/><path d="M300 196l6 -15 6 15z"/><path d="M420 96l5 -12 5 12z"/><path d="M500 128l5 -12 5 12z"/><path d="M74 112l5 -12 5 12z"/></g><path d="M524 208C500 198 484 160 470 124" fill="none" stroke="#c9ab78" stroke-width="3" stroke-dasharray="5 4"/><path d="M447 120h30v-12l-15-11-15 11z" fill="#8a5a34" stroke="#3a2414" stroke-width="1.5"/><path d="M458 120v-9h8v9z" fill="#ffcf7a"/><text x="440" y="210" text-anchor="end" font-size="9" font-weight="700" font-family="system-ui,sans-serif" fill="#e9f0ea" opacity=".8">down to Fork River ↘</text></svg>`;
-const HD_PIN={mill:[360,156],meadow:[140,146]};
+const HD_MAP_SVG=`<svg viewBox="0 0 520 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="520" height="220" fill="#9db2c4"/><path d="M0 72 40 34l40 30 50-42 50 38 50-30 50 34 50-38 50 32 50-26 50 28 40-20V120H0z" fill="#8395aa"/><path d="M130 22l13 11-7-2-6 8-6-8-8 4zM330 26l13 11-7-2-6 8-6-8-8 4zM40 34l11 10-6-2-5 7-5-7-7 3zM230 30l11 10-6-2-5 7-5-7-7 3zM430 32l11 10-6-2-5 7-5-7-7 3z" fill="#f3f6f9"/><ellipse cx="268" cy="58" rx="13" ry="4.5" fill="#5aa0c0" stroke="#eef2f6" stroke-width="1.2"/><path d="M0 104 50 74l60 24 60-28 70 30 60-26 60 28 60-24 60 24 40-14V130H0z" fill="#56755f"/><rect y="112" width="520" height="108" fill="#3f6a48"/><ellipse cx="146" cy="150" rx="92" ry="30" fill="#4d7b4e"/><path d="M0 108 10 100 20 97 33 93 44 90 52 96 56 129H0z" fill="#78838d"/><path d="M10 100 20 97 33 93 44 90 52 96 45 100 34 98 21 103z" fill="#9aa5ae"/><path d="M6 112h11M37 108h12M4 121h9M40 118h11" stroke="#626d76" stroke-width="1.3" fill="none"/><path d="M18 110c0-10 18-10 18 0v2H18z" fill="#262d33"/><path d="M18 110c0-10 18-10 18 0" fill="none" stroke="#5a656e" stroke-width="1.4"/><path d="M20.5 110.4h13v1.8h-13z" fill="#a9cfe0"/><path d="M23.5 111.2h7V127h-7z" fill="#eaf4f9"/><path d="M25.5 113.5v11.5M28.8 114.5v10.5" stroke="#bcd9e6" stroke-width="1" fill="none"/><path d="M30 131C46 150 84 150 140 146 190 142 214 122 262 126 312 130 322 158 360 156 404 154 432 136 468 146 496 154 510 172 528 184" fill="none" stroke="#3f86a0" stroke-width="12" stroke-linecap="round"/><ellipse cx="27" cy="130" rx="17" ry="6.5" fill="#3f86a0"/><ellipse cx="27" cy="128" rx="9" ry="3.2" fill="#eaf4f9" opacity=".92"/><circle cx="19" cy="124" r="3" fill="#eaf4f9" opacity=".45"/><circle cx="35" cy="124" r="3.4" fill="#eaf4f9" opacity=".45"/><ellipse cx="6" cy="130" rx="6" ry="3.4" fill="#6b767f"/><ellipse cx="50" cy="131" rx="6.5" ry="3.6" fill="#6b767f"/><path d="M330 78C322 96 306 112 296 127" fill="none" stroke="#4f97b2" stroke-width="3" stroke-linecap="round"/><ellipse cx="330" cy="74" rx="16" ry="6" fill="#62b8b4" stroke="#8a949c" stroke-width="2"/><circle cx="323" cy="66" r="4" fill="#eef4f6" opacity=".6"/><circle cx="332" cy="61" r="5" fill="#eef4f6" opacity=".5"/><circle cx="339" cy="67" r="3.5" fill="#eef4f6" opacity=".55"/><ellipse cx="140" cy="146" rx="40" ry="15" fill="#4a8a92"/><ellipse cx="360" cy="156" rx="32" ry="13" fill="#3f86a0"/><path d="M184 132l10 24" stroke="#7a5632" stroke-width="5" stroke-linecap="round"/><path d="M386 132h16v12h-16z" fill="#8a8580"/><path d="M384 132l10-8 10 8z" fill="#6a3a2a"/><circle cx="384" cy="146" r="5" fill="none" stroke="#7a5632" stroke-width="2"/><g fill="#2f5236"><path d="M96 112l6 -15 6 15z"/><path d="M112 116l5 -12 5 12z"/><path d="M206 110l6 -15 6 15z"/><path d="M222 114l5 -12 5 12z"/><path d="M300 112l6 -15 6 15z"/><path d="M316 116l5 -12 5 12z"/><path d="M404 108l6 -15 6 15z"/><path d="M492 112l6 -14 6 14z"/><path d="M36 196l7 -17 7 17z"/><path d="M58 204l6 -14 6 14z"/><path d="M236 200l7 -17 7 17z"/><path d="M258 206l6 -14 6 14z"/><path d="M300 196l6 -15 6 15z"/><path d="M420 96l5 -12 5 12z"/><path d="M500 128l5 -12 5 12z"/><path d="M74 112l5 -12 5 12z"/></g><path d="M524 208C500 198 484 160 470 124" fill="none" stroke="#c9ab78" stroke-width="3" stroke-dasharray="5 4"/><path d="M447 120h30v-12l-15-11-15 11z" fill="#8a5a34" stroke="#3a2414" stroke-width="1.5"/><path d="M458 120v-9h8v9z" fill="#ffcf7a"/><text x="440" y="210" text-anchor="end" font-size="9" font-weight="700" font-family="system-ui,sans-serif" fill="#e9f0ea" opacity=".8">down to Fork River ↘</text></svg>`;
+const HD_PIN={mill:[360,156],meadow:[140,146],falls:[32,112],steam:[330,72]};const HD_PIN_L={steam:'left'};
 function hdCostHTML(k){const c=HD_COST[k];return `<span class="hd-cost"><span class="${S.coins>=c.c?'ok':''}">$${money(c.c)}</span>${Object.entries(c.m).map(([m,n])=>`<span class="${(S.mats[m]||0)>=n?'ok':''}">${n} ${MI(m).n} (${S.mats[m]||0})</span>`).join('')}</span>`}
 const hdCan=k=>{const c=HD_COST[k];return S.coins>=c.c&&Object.entries(c.m).every(([m,n])=>(S.mats[m]||0)>=n)};
-function hdBuy(k){if(k==='lake'){hdRoadPanel();hdRoadFresh();return}if(k==='proj'){shopFilter='proj';openPhone();phShow('shop');return}const c=HD_COST[k],H=HD();if(!c||H[k]||!hdOpen()||!hdCan(k))return;
+function hdSoak(){const H=HD();if(S.water!=='steam'){showToast('Head up to Steam Hollow first');return}if(H.soak===S.day){showToast('You’ve had today’s soak');return}H.soak=S.day;const fr=cast.dur?cast.el/cast.dur:0;S.buffs.rested=Math.max(S.buffs.rested||0,1200);cast.dur=castDur();cast.el=fr*cast.dur;sfx('pop');showToast('A long soak in the warm pool','Well Rested for 20 minutes');try{renderBuffs()}catch(e){}save();try{renderWaters()}catch(e){}}
+function hdBuy(k){if(k==='soak'){hdSoak();return}if(k==='lake'){hdRoadPanel();hdRoadFresh();return}if(k==='proj'){shopFilter='proj';openPhone();phShow('shop');return}const c=HD_COST[k],H=HD();if(!c||H[k]||!hdOpen()||!hdCan(k))return;
   S.coins-=c.c;for(const [m,n] of Object.entries(c.m))S.mats[m]-=n;H[k]=1;storeDirty=true;sfx('craft');
   if(k==='mill')celebrate({lbl:'The mill turns again',r:'R',name:'Miller’s Run',sub:'Something pale moves under the wheel on foggy nights',icon:svgI('crown','#ffd05a')});
   else showToast(`${c.n} ready`,H.canoe&&H.waders?'You can head up to the Headwaters':'The Headwaters');save();renderAll()}
 function hdPanelHTML(){const live=hdLakeLive();if(!hdOpen()&&live)return hdLakeTeaserHTML();if(S.boat<2&&!hdOpen())return '';const st=PJ('road'),ph=phaseOf(S.min);
   if(!hdOpen()&&!hdLakeDone())return `<div class="hd-panel"><span class="eyebrow">Up Fork River</span><h3>⛰️ The Headwaters</h3><p class="hd-note">Checking on the road crew…</p></div>`;
   if(!hdOpen()){const n=hdRiverN();return `<div class="hd-panel"><span class="eyebrow">Up Fork River</span><h3>⛰️ The Headwaters</h3><p>An old logging road climbs into the mountains past Fork River. Rebuild it to reach a lodge, new waters and fish nobody on the lake has logged.</p>${st.b!=null?'<p class="hd-note">The road crew is at work. The Mountain Road opens tomorrow.</p>':hdReq()?'<p class="hd-note">The Mountain Road is ready to fund.</p><button class="go" data-hdb="proj">Open Lake projects</button>':`<p class="hd-note">Log 10 Fork River species to ${HD().crew&&hdLakeReal()?'take your free road':'start the Mountain Road'}. You have ${n} of 10.</p>`}</div>`}
-  const H=HD(),pin=(k)=>{const w=HDW_BY[k],[x,y]=HD_PIN[k],act=S.water===k,why=hdBlock(k);return `<button class="lm-pin ${act?'here':why?'locked':''}" data-lm="${k}" style="left:${(x/5.2).toFixed(2)}%;top:${(y/2.2).toFixed(2)}%"${act||why||TRV.on?' disabled':''} title="${esc(act?'You’re fishing here':why||'Head out')}"><i></i><span>${esc(w.n)}</span></button>`};
+  const H=HD(),pin=(k)=>{const w=HDW_BY[k],[x,y]=HD_PIN[k],act=S.water===k,why=hdBlock(k);return `<button class="lm-pin ${act?'here':why?'locked':''}" data-lm="${k}" style="left:${(x/5.2).toFixed(2)}%;top:${(y/2.2).toFixed(2)}%"${act||why||TRV.on?' disabled':''} title="${esc(act?'You’re fishing here':why||'Head out')}"><i></i><span${HD_PIN_L[k]?` class="${HD_PIN_L[k]}"`:''}>${esc(w.n)}</span></button>`};
   let h=`<div class="hd-panel"><span class="eyebrow">Up Fork River</span><h3>⛰️ The Headwaters</h3><div class="lmap hd-map">${HD_MAP_SVG}<b class="lm-t" aria-hidden="true">The Headwaters</b>${HDW.map(w=>pin(w.id)).join('')}<button class="lm-pin lodge" data-lm="lodge" style="left:${(462/5.2).toFixed(2)}%;top:${(106/2.2).toFixed(2)}%" title="Step inside"><i></i><span class="left">Lodge</span></button></div>`;
   const need=['canoe','waders'].filter(k=>!H[k]);
   if(need.length)h+=`<div class="hd-kit"><b>Before you go</b>${need.map(k=>`<div class="hd-row"><div><b>${HD_COST[k].n}</b>${hdCostHTML(k)}</div><button class="sbtn" data-hdb="${k}"${hdCan(k)?'':' disabled'}>${k==='canoe'?'Build':'Sew'}</button></div>`).join('')}</div>`;
   {const x=hatchOf(),J=lodgeJobs(),dn=J.done.filter(Boolean).length;h+=`<p class="hd-note">Hatch today: <b>${x.n}</b> · ${hatchOn()?'your fly matches':`no ${x.fly} in your box`}. Tomorrow: ${hatchOf(S.day+1).n}.</p><p class="hd-note">Beaver Meadow today: <b>${hdHigh()?'high water':'low water'}</b>${hdBroke()?' · the dam broke overnight':''}. Tomorrow: ${hdHigh(S.day+1)?'high':'low'}.</p></div>`;
-    h+=`<div class="card water"><span class="eyebrow">${dn}/3 jobs this week · ${HATCH.filter(f=>HD().flies&&HD().flies[f.id]).length}/${HATCH.length} flies tied</span><h3>Headwaters Lodge</h3><p>A log lodge at the end of the road. ${LODGE_KEEPER} posts three jobs a week, there’s a fly-tying bench under the window, and a guest room if you need a nap. Your line stays in while you’re inside.</p><button class="go" data-hdlodge="1">Step inside</button></div>`}
+    h+=`<div class="card water"><span class="eyebrow">${dn}/3 jobs this week · ${hatchPool().filter(f=>HD().flies&&HD().flies[f.id]).length}/${hatchPool().length} flies tied</span><h3>Headwaters Lodge</h3><p>A log lodge at the end of the road. ${LODGE_KEEPER} posts three jobs a week, there’s a fly-tying bench under the window, and a guest room if you need a nap. Your line stays in while you’re inside.</p><button class="go" data-hdlodge="1">Step inside</button></div>`}
   for(const w of HDW){const act=S.water===w.id,why=hdBlock(w.id),sp=FISH.filter(f=>f.at===w.id),got=sp.filter(f=>S.log[f.id]).length;
     const biting=sp.filter(f=>f.t.includes(ph)&&(!f.wx||f.wx.includes(S.wx.id)||S.buffs.charm>0)&&(!f.cond||f.cond())).length;
     h+=`<div class="card water${act?' active':''}"><span class="eyebrow">${got}/${sp.length} species logged</span><h3>${w.n}</h3><p>${w.d}</p><p>${biting} species active at ${PH[ph].toLowerCase()} in ${WX[S.wx.id].n.toLowerCase()} weather</p>`+
-      (w.id==='mill'&&!H.mill?`<div class="hd-row"><div><b>Restore the mill</b>${hdCostHTML('mill')}</div><button class="sbtn" data-hdb="mill"${hdCan('mill')?'':' disabled'}>Restore</button></div>`:'')+(w.id==='mill'&&H.mill?millRowHTML():'')+
+      (w.id==='mill'&&!H.mill?`<div class="hd-row"><div><b>Restore the mill</b>${hdCostHTML('mill')}</div><button class="sbtn" data-hdb="mill"${hdCan('mill')?'':' disabled'}>Restore</button></div>`:'')+(w.id==='mill'&&H.mill?millRowHTML():'')+(w.id==='steam'&&!why?`<div class="hd-row"><div><b>Soak in the warm pool</b><span class="hd-cost">Well Rested for 20 minutes, once a day, while you’re fishing here.${H.soak===S.day?' You’ve had today’s soak.':''}</span></div><button class="sbtn" data-hdb="soak"${act&&H.soak!==S.day?'':' disabled'}>Soak</button></div>`:'')+
       `<button class="go" id="go-${w.id}" data-hdgo="${w.id}"${act||why||TRV.on?' disabled':''}>${act?'Fishing here':why?(why.startsWith('You need')?why:'Not open yet'):'Head out'}</button></div>`}
   return h}
 const fishSvg=c=>`<svg viewBox="0 0 44 22" aria-hidden="true"><path d="M4 11c6-8 18-9 27-3l7-5v16l-7-5c-9 6-21 5-27-3z" fill="${c}"/><circle cx="10" cy="9.5" r="1.6" fill="#0f2026"/></svg>`;
@@ -5849,9 +5865,20 @@ const ANIMALS=[
   AN('hare','Snowshoe Hare','C','meadow','dawn day dusk',{L:18,H:10,leg:7,col:'#a89a84',c2:'#f0ece4',ear:'long',tail:'puff',hop:1,lure:'salt'}),
   AN('moose','Moose','R','meadow','dawn dusk',{L:50,H:22,leg:30,col:'#4a3424',c2:'#6a4e36',ear:'p',tail:0,neck:1,ex:'palm',hump:1,big:1,lure:'salt'}),
   AN('bobcat','Bobcat','R','meadow','night',{L:26,H:11,leg:11,col:'#b89468',c2:'#e8dcc8',ear:'tuft',tail:'stub',ex:'spots',lure:'fish'}),
-  AN('albino','The Albino Moose','L','meadow','dawn',{L:50,H:22,leg:30,col:'#f0ece4',c2:'#ffffff',ear:'p',tail:0,neck:1,ex:'palm',hump:1,big:1,glow:1,lure:'salt',hint:'Dawn at Meadow Edge'})];
+  AN('albino','The Albino Moose','L','meadow','dawn',{L:50,H:22,leg:30,col:'#f0ece4',c2:'#ffffff',ear:'p',tail:0,neck:1,ex:'palm',hump:1,big:1,glow:1,lure:'salt',hint:'Dawn at Meadow Edge'}),
+  AN('chipmunk','Least Chipmunk','C','falls steam','dawn day',{L:11,H:6,leg:3,col:'#a8763e',c2:'#f0e4cc',ear:'r',tail:'thin',ex:'stripe',hop:1,lure:'berry'}),
+  AN('marmot','Yellow-bellied Marmot','C','falls','day',{L:22,H:12,leg:4,col:'#8a6a44',c2:'#d8b060',ear:'r',tail:'bush',lure:'salt'}),
+  AN('marten','Pine Marten','U','falls','dusk night',{L:22,H:8,leg:6,col:'#6a4424',c2:'#e8c078',ear:'r',tail:'bush',lure:'fish'}),
+  AN('mtgoat','Mountain Goat','R','falls','dawn day',{L:32,H:16,leg:14,col:'#f0ece4',c2:'#ffffff',ear:'p',tail:'stub',neck:1,lure:'salt'}),
+  AN('blackbear','Black Bear','R','falls','dawn dusk',{L:42,H:22,leg:13,col:'#1c1a1c',c2:'#3a3030',ear:'r',tail:0,snoutc:'#8a6a4a',big:1,lure:'fish berry'}),
+  AN('greyghost','The Grey Ghost','L','falls','night',{L:44,H:13,leg:14,col:'#b8b0a4',c2:'#ece6dc',ear:'r',tail:'thick',glow:1,lure:'fish',hint:'Nights at Falls Overlook'}),
+  AN('pika','Pika','C','steam','day dusk',{L:10,H:7,leg:3,col:'#9a8468',c2:'#d8c8ac',ear:'r',tail:0,hop:1,lure:'salt'}),
+  AN('weasel','Long-tailed Weasel','C','steam','dusk night',{L:18,H:5,leg:4,col:'#8a5a30',c2:'#f4ecd8',ear:'r',tail:'thin',lure:'fish'}),
+  AN('mink','Mink','U','steam','night',{L:20,H:6,leg:4,col:'#3a2a20',c2:'#5a4636',ear:0,tail:'thick',lure:'fish'}),
+  AN('elk','Elk','R','steam','dawn dusk',{L:46,H:19,leg:26,col:'#9a7448',c2:'#5a3e26',ear:'p',tail:'white',neck:1,ex:'antler',big:1,lure:'salt'}),
+  AN('steamelk','The Hollow King','L','steam','dawn',{L:48,H:20,leg:27,col:'#f0ece4',c2:'#ffffff',ear:'p',tail:'white',neck:1,ex:'antler',big:1,glow:1,wx:['snow'],lure:'salt',hint:'Snowy dawns on Hollow Path'})];
 const AN_BY=Object.fromEntries(ANIMALS.map(a=>[a.id,a]));
-const TRAILS=[{id:'yard',n:'Your back yard',ok:()=>true},{id:'mill',n:'Mill Lane',ok:()=>hdOpen(),lock:'Opens with the Headwaters'},{id:'meadow',n:'Meadow Edge',ok:()=>hdOpen(),lock:'Opens with the Headwaters'}];
+const TRAILS=[{id:'yard',n:'Your back yard',ok:()=>true},{id:'mill',n:'Mill Lane',ok:()=>hdOpen(),lock:'Opens with the Headwaters'},{id:'meadow',n:'Meadow Edge',ok:()=>hdOpen(),lock:'Opens with the Headwaters'},{id:'falls',n:'Falls Overlook',ok:()=>hdRoad()>=2,lock:'Opens with the falls bridge'},{id:'steam',n:'Hollow Path',ok:()=>hdRoad()>=2,lock:'Opens with the falls bridge'}];
 const LURES={salt:{n:'Salt lick',c:500,d:'Deer, moose, hares'},berry:{n:'Berries',c:300,d:'Bears, raccoons, foxes'},fish:{n:'Fish scraps',c:400,d:'Otters, coyotes, bobcats'}},LURE_N=12,ROLL_N=24;
 const CAM_COST={c:40000,m:{scrap:6,brass:4}},PHOTO_PAY={C:40,U:150,R:800,L:6000},FG_W={C:70,U:22,R:6,L:1};
 const FGS={bird:null,bt:25,ct:0,next:null,walk:null,flash:0,dev:null};  // runtime only, never saved
@@ -6172,7 +6199,7 @@ function tipHTML(h){let html='';
   else if(h.kind==='deco'){const nm={bed:'Bed',rug:'Rug',curt:'Curtains',lamp:'Lamp',wall:'Wall decor',extra:'Fern'}[h.data]||'Decor';html=`<b>${nm}</b><small>${S.sleep.ph==='awake'?'Tap to decorate: colors and styles':'Decorate once you’re up and about'}</small>`}
   if(h.kind[0]==='y'&&!html)html=yardTip(h);
   if(h.kind==='gate')html=`<b>Portal ring</b><small>${REALMS.filter(r=>gateOwned(r.id)).map(r=>r.gate).join(' · ')} · tap to step through</small>`;if(h.kind==='updraft')html='<b>Updraft!</b><small>Tap to scoop up the whole school</small>';
-  if(h.kind==='peer')html=h.data&&h.data.q4?'<b>…you?</b><small>Tap them</small>':peerTip(h.data);if(h.kind==='feeder')html='<b>Bird feeder</b><small>Tap to watch it up close</small>';if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
+  if(h.kind==='peer')html=h.data&&h.data.q4?'<b>…you?</b><small>Tap them</small>':peerTip(h.data);if(h.kind==='soak')html=`<b>The warm pool</b><small>${HD().soak===S.day?'You’ve had today’s soak':'Tap for a soak: Well Rested for 20 minutes'}</small>`;if(h.kind==='feeder')html='<b>Bird feeder</b><small>Tap to watch it up close</small>';if(h.kind==='hwpk')html='<b>A glowing pumpkin!</b><small>Tap to collect it before it vanishes</small>';if(h.kind==='tot')html='<b>Trick-or-treaters</b><small>Tap to hand out candy</small>';
   if(h.kind==='door'&&TOT.inside)html='<b>Trick or treat!</b><small>Tap the door to hand out candy</small>';
   if(TOWN.on)html=townTip(h)||'';
   if(h.kind==='wlight')html=`<b>Light bar</b><small>Tap to turn the reds and blues ${WDB().lit?'off':'on'}</small>`;
@@ -6183,7 +6210,7 @@ function showTip(h,e){const tip=$('stip'),html=tipHTML(h);if(!html){tip.hidden=t
   const w=tip.offsetWidth,hh=tip.offsetHeight;if(x+w>r.width-8)x=Math.max(8,e.clientX-r.left-w-14);if(y+hh>r.height-8)y=Math.max(8,r.height-hh-8);if(h.kind[0]==='y'&&r.width<560){x=Math.max(6,(r.width-w)/2);y=6}
   tip.style.left=x+'px';tip.style.top=y+'px';
 }
-$('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(LDG.on){if(h&&h.kind==='ldg'&&!e.target.closest('button'))lodgeUI(h.data);return}if(h&&h.kind==='feeder'&&!TOWN.on&&!VISIT&&!e.target.closest('button')){hideTip();feederWatch(true);return}if(h&&h.kind==='wlight'&&!TOWN.on){wardenLights();return}if(TOWN.on){if(!e.target.closest('button,.leave,.hchat,.stip'))townClick(x,y,e);return}if(h&&h.kind==='peer'&&h.data&&h.data.q4){q4TapReflect();return}if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&h.kind==='stairs'&&VISIT.S.sleep.ph==='awake'){goRoom('basement');return}if(h&&h.kind==='up'){goRoom('cabin');return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
+$('scene').onclick=e=>{$('emoPop').hidden=true;const [x,y]=scenePt(e),h=hitAt(x,y);if(LDG.on){if(h&&h.kind==='ldg'&&!e.target.closest('button'))lodgeUI(h.data);return}if(h&&h.kind==='soak'&&!TOWN.on&&!VISIT&&!e.target.closest('button')){hideTip();hdSoak();return}if(h&&h.kind==='feeder'&&!TOWN.on&&!VISIT&&!e.target.closest('button')){hideTip();feederWatch(true);return}if(h&&h.kind==='wlight'&&!TOWN.on){wardenLights();return}if(TOWN.on){if(!e.target.closest('button,.leave,.hchat,.stip'))townClick(x,y,e);return}if(h&&h.kind==='peer'&&h.data&&h.data.q4){q4TapReflect();return}if(VISIT){if(h&&h.kind==='door'){exitFriend();return}if(h&&h.kind==='stairs'&&VISIT.S.sleep.ph==='awake'){goRoom('basement');return}if(h&&h.kind==='up'){goRoom('cabin');return}if(h&&['trophy','coll','tank'].includes(h.kind)){const real=S;S=VISIT.S;try{showTip(h.kind==='coll'?{kind:'collv',data:h.data}:h,e)}finally{S=real}}else hideTip();return}
   if(indoor()&&CED.on){if(CED.skip){CED.skip=false;return}const [rx,ry]=[x/RK,y/RK];CED.sel=cedPick(rx,ry);renderCed();return}
   if(indoor()){if(!h){hideTip();return}
   if(h.kind==='tv')openTV();else if(h.kind==='drawer'){hideTip();openTapes()}else if(h.kind==='trodrawer'){openTroDrawer()}else if(h.kind==='colldrawer'){openCollDrawer()}else if(h.kind==='craft'){openCraft()}else if(h.kind==='coll'){hideTip();openItem(h.data)}
@@ -6415,7 +6442,7 @@ const TRV={on:false,t0:0,from:'pond',to:'pond',dx:0,dir:1,moving:false,dur:5.2};
 const ISLE=id=>id==='pond'||id==='friend';
 function trvDirs(from,to){const ord=waterIdx(to)>waterIdx(from)?1:-1;return {dir:ord,dOut:ISLE(from)?1:ord,dIn:ISLE(to)?-1:ord}}
 const waterIdx=id=>{const i=WATERS.findIndex(w=>w.id===id);return id==='pond'?-1:id==='friend'?99:isRealm(id)?50:isHD(id)?40+HDW.indexOf(HDW_BY[id]):i};
-function hdBlock(id){return !hdOpen()?'Build the Mountain Road first (Shop, Projects)':!HD().canoe?'You need a canoe':!HD().waders?'You need waders':''}
+function hdBlock(id){return !hdOpen()?'Build the Mountain Road first (Shop, Projects)':hdRoad()<(HDW_BY[id].hd||1)?'Rebuild the falls bridge first (Shop, Projects, Mountain Road stage 2)':!HD().canoe?'You need a canoe':!HD().waders?'You need waders':''}
 function travelTo(id,opt){if(id===S.water||TRV.on||(MFX.ph==='lift'&&!(opt&&opt.instant)))return;if(LDG.on)lodgeLeave();
   if(isHD(id)){const why=hdBlock(id);if(why){showToast(why,W(id).n);return}}
   if(isHD(id)&&!HD().arrived){HD().arrived=1;if(cutOn()&&!S.sleep&&!(opt&&opt.instant)){hdArrive();opt={instant:true}}}
@@ -6438,7 +6465,79 @@ function hdBack(loc,d,T){
   ctx.fillStyle=C2([190,198,214],[244,246,250],d,.85);for(const [x,y] of pk){if(y>100)continue;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+14,y+16);ctx.lineTo(x+5,y+12);ctx.lineTo(x-2,y+19);ctx.lineTo(x-9,y+12);ctx.lineTo(x-15,y+16);ctx.closePath();ctx.fill()}
   ctx.fillStyle=C2([10,20,22],[42,78,56],d);ctx.beginPath();ctx.moveTo(0,216);for(let x=0;x<=800;x+=8)ctx.lineTo(x,186-((x*13)%17)*.7-Math.sin(x/70)*8);ctx.lineTo(800,216);ctx.fill();
   for(let x=8;x<800;x+=24)pine(x,198+Math.sin(x)*4,22+((x*7)%14),C2([8,16,16],[30,62,42],d))}
+// Silver Falls: a cliff, the fall and its pool. At dawn and dusk the salmon run it, and a bear comes down to fish the top.
+function hdFalls(d,T,wc){const ph=phaseOf(S.min),run=ph==='dawn'||ph==='dusk',rock=C2([24,26,32],[118,122,128],d),rock2=C2([16,18,24],[90,94,102],d);
+  const bank=()=>{ctx.beginPath();ctx.moveTo(0,210);ctx.lineTo(800,210);ctx.lineTo(800,232);for(let x=800;x>=0;x-=20)ctx.lineTo(x,232+Math.sin(x/47)*3);ctx.closePath()};
+  ctx.fillStyle=C2([16,26,18],[78,108,62],d);bank();ctx.fill();snowCap(bank,d);
+  // the cliff
+  ctx.fillStyle=rock;ctx.beginPath();ctx.moveTo(388,236);ctx.lineTo(404,150);ctx.lineTo(430,96);ctx.lineTo(470,70);ctx.lineTo(530,58);ctx.lineTo(640,56);ctx.lineTo(700,72);ctx.lineTo(742,110);ctx.lineTo(764,170);ctx.lineTo(778,236);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=rock2;ctx.lineWidth=2;for(const [x1,y1,x2,y2] of [[420,150,470,144],[436,112,500,104],[650,96,726,104],[664,150,752,158],[410,196,480,190],[672,200,766,206],[700,128,744,132]]){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+  for(const [x,h] of [[446,26],[476,34],[668,30],[702,22]])pine(x,y0(x),h,C2([8,16,16],[30,62,42],d));function y0(x){return x<530?96-(x-430)*.38:x<640?57:56+(x-640)*.3}
+  if(AMB.snowAcc>0){ctx.fillStyle=`rgba(236,242,250,${.8*AMB.snowAcc})`;ctx.beginPath();ctx.moveTo(430,96);ctx.lineTo(470,70);ctx.lineTo(530,58);ctx.lineTo(640,56);ctx.lineTo(700,72);ctx.lineTo(742,110);ctx.lineTo(730,108);ctx.lineTo(696,78);ctx.lineTo(640,63);ctx.lineTo(530,65);ctx.lineTo(474,77);ctx.lineTo(440,98);ctx.fill()}
+  // the cave in the cliff face: the river comes out of the dark and spills over its bottom lip, like on the Headwaters map
+  const cy=132;ctx.fillStyle=C2([4,6,10],[26,30,38],d);ctx.beginPath();ctx.moveTo(524,cy);ctx.quadraticCurveTo(526,cy-62,574,cy-66);ctx.quadraticCurveTo(622,cy-62,624,cy);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=C2([40,44,52],[150,154,160],d);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(524,cy);ctx.quadraticCurveTo(526,cy-62,574,cy-66);ctx.quadraticCurveTo(622,cy-62,624,cy);ctx.stroke();
+  ctx.fillStyle=C2([10,14,22],[52,62,76],d);ctx.beginPath();ctx.ellipse(574,cy-20,34,26,0,Math.PI,0);ctx.fill();
+  ctx.fillStyle=rock2;ctx.fillRect(458,cy,184,7);ctx.fillStyle=C2([34,38,46],[142,146,152],d);ctx.fillRect(458,cy,184,2.5);
+  const wf=C2([120,136,156],[232,242,248],d);ctx.fillStyle=C2([70,96,120],[150,196,214],d);ctx.fillRect(540,cy-5,68,5);
+  ctx.fillStyle=wf;ctx.fillRect(546,cy-2,56,240-cy);
+  ctx.strokeStyle=C2([70,86,110],[176,206,222],d);ctx.lineWidth=2;for(let i=0;i<7;i++){const x=551+i*8,o=RM?0:(T*90+i*37)%44;ctx.setLineDash([16,28]);ctx.lineDashOffset=-o;ctx.beginPath();ctx.moveTo(x,cy);ctx.lineTo(x,236);ctx.stroke()}ctx.setLineDash([]);
+  // mist and foam at the foot
+  for(let i=0;i<7;i++){const q=RM?.4:((T*.22)+i/7)%1,mx=530+i*15+Math.sin(i*2+T*.5)*6;ctx.fillStyle=`rgba(236,244,250,${(.34*(1-q))*(.4+.6*d)})`;ctx.beginPath();ctx.arc(mx,236-q*34,10+q*16,0,7);ctx.fill()}
+  ctx.fillStyle=C2([150,164,184],[240,246,250],d,.9);ctx.beginPath();ctx.ellipse(574,240,52,7,0,0,7);ctx.fill();
+  // the salmon run
+  if(run&&!RM)for(let i=0;i<3;i++){const q=((T*.5)+i*.37)%1;if(q>.62)continue;const k=q/.62,sx=520+i*34+k*26,sy=238-Math.sin(k*Math.PI)*(46+i*8),a=Math.atan2(-Math.cos(k*Math.PI)*(46+i*8),26)-.2;ctx.save();ctx.translate(sx,sy);ctx.rotate(a);ctx.fillStyle=C2([120,60,60],[214,96,86],d);ctx.beginPath();ctx.ellipse(0,0,9,3.2,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(-14,-4);ctx.lineTo(-14,4);ctx.fill();ctx.fillStyle=C2([60,90,70],[120,160,120],d);ctx.beginPath();ctx.ellipse(6,0,3.4,2.6,0,0,7);ctx.fill();ctx.restore()}
+  // the bear on the ledge beside the cave mouth during the run
+  if(run){const bx=492,by=132,b=RM?0:Math.sin(T*1.1)*1.2,c=C2([26,18,12],[104,70,44],d);ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(bx,by-13,20,11,0,0,7);ctx.fill();ctx.fillRect(bx-15,by-8,6,9);ctx.fillRect(bx-4,by-8,6,9);ctx.fillRect(bx+8,by-8,6,9);ctx.beginPath();ctx.ellipse(bx+20,by-12+b,9,7.5,.3,0,7);ctx.fill();ctx.beginPath();ctx.arc(bx+17,by-20+b,3,0,7);ctx.arc(bx+24,by-19+b,3,0,7);ctx.fill();ctx.fillStyle=C2([40,30,22],[150,112,78],d);ctx.beginPath();ctx.ellipse(bx+27,by-10+b,4,3,.3,0,7);ctx.fill()}
+  // an osprey over the pool by day
+  else if(ph==='day'&&!RM){const q=(T*.05)%1,ox=120+q*620,oy=96+Math.sin(q*9)*18,f=Math.sin(T*5)*5;ctx.strokeStyle=C2([40,40,46],[60,56,52],d);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(ox-12,oy-f);ctx.quadraticCurveTo(ox-5,oy-3,ox,oy);ctx.quadraticCurveTo(ox+5,oy-3,ox+12,oy-f);ctx.stroke()}
+  // boulders in the pool
+  ctx.fillStyle=rock2;for(const [x,y,rx,ry] of [[468,240,22,9],[690,242,26,10],[726,236,14,7],[150,238,18,6],[90,236,12,5]]){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,Math.PI,0);ctx.fill()}}
+// Steam Hollow: a geyser on the bank. A low mound of pale mineral crust with a vent that steams all the time and throws up a spout
+// every so often. Its runoff trickles down the crust, gathers in one small warm pool at the foot, and runs on into the water you fish.
+function hdSteam(d,T,wc){const ph=phaseOf(S.min),rock=C2([24,26,32],[118,122,128],d),rock2=C2([16,18,24],[90,94,102],d),crust=C2([46,46,46],[214,204,180],d),crust2=C2([34,34,36],[178,168,146],d),moss=C2([14,32,20],[76,124,72],d),pool=C2([20,54,60],[104,198,192],d),wf=C2([116,150,160],[228,244,244],d);
+  const bank=()=>{ctx.beginPath();ctx.moveTo(0,210);ctx.lineTo(800,210);ctx.lineTo(800,232);for(let x=800;x>=0;x-=20)ctx.lineTo(x,232+Math.sin(x/47)*3);ctx.closePath()};
+  ctx.fillStyle=C2([14,26,18],[70,104,62],d);bank();ctx.fill();snowCap(bank,d);
+  // rocks and pines behind the mound
+  ctx.fillStyle=rock;ctx.beginPath();ctx.moveTo(640,214);ctx.lineTo(662,176);ctx.lineTo(700,160);ctx.lineTo(752,166);ctx.lineTo(790,190);ctx.lineTo(800,214);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=rock2;ctx.lineWidth=2;for(const [x1,y1,x2,y2] of [[672,188,720,184],[716,200,784,204]]){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+  for(const [x,y,h] of [[692,164,34],[730,164,26],[772,180,30],[420,212,30],[388,212,22]])pine(x,y,h,C2([8,16,16],[30,62,42],d));
+  // the mound: wide and low, in layers of crust, with the vent at the top
+  const vx=560,vy=150;
+  ctx.fillStyle=crust2;ctx.beginPath();ctx.moveTo(448,216);ctx.quadraticCurveTo(500,206,524,180);ctx.quadraticCurveTo(540,156,vx-12,vy);ctx.lineTo(vx+12,vy);ctx.quadraticCurveTo(582,158,600,182);ctx.quadraticCurveTo(626,208,676,216);ctx.closePath();ctx.fill();
+  ctx.fillStyle=crust;ctx.beginPath();ctx.moveTo(470,216);ctx.quadraticCurveTo(512,204,532,182);ctx.quadraticCurveTo(546,160,vx-10,vy+2);ctx.lineTo(vx+6,vy+2);ctx.quadraticCurveTo(566,170,574,190);ctx.quadraticCurveTo(584,208,610,216);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=crust2;ctx.lineWidth=1.6;for(const [x1,y1,x2,y2] of [[500,206,548,202],[520,192,560,190],[536,176,566,175],[590,200,640,204],[484,212,520,211]]){ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo((x1+x2)/2,y1+3,x2,y2);ctx.stroke()}
+  ctx.fillStyle=C2([8,10,12],[52,50,48],d);ctx.beginPath();ctx.ellipse(vx,vy+1,11,3.4,0,0,7);ctx.fill();
+  // the cycle: every 16 seconds or so the spout builds, holds and falls back. flow is how much water is running off the mound:
+  // it starts with the spout and drains away over a few seconds after.
+  const cyc=RM?.86:(T%16)/16,k=cyc<.72?0:cyc<.78?(cyc-.72)/.06:cyc<.92?1:1-(cyc-.92)/.08,flow=cyc<.2?1-cyc/.2:cyc>=.74?Math.min(1,(cyc-.74)/.05):0,h=k*96;
+  ctx.fillStyle=rock2;for(const [x,y,rx,ry] of [[462,222,12,6],[540,226,13,6],[478,214,9,5],[528,216,9,5]]){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,7);ctx.fill()}
+  ctx.fillStyle=crust;ctx.beginPath();ctx.ellipse(500,221,38,7.5,0,0,7);ctx.fill();ctx.fillStyle=pool;ctx.beginPath();ctx.ellipse(500,221,33,5.5,0,0,7);ctx.fill();ctx.fillStyle=C2([60,112,114],[216,246,240],d,.45);ctx.beginPath();ctx.ellipse(492,220,14,2,0,0,7);ctx.fill();
+  // the water goes over the lip of the vent and down the crust like the falls: a white sheet with streaks running down it
+  if(flow>.02){const run=()=>{ctx.beginPath();ctx.moveTo(vx-8,vy+1);ctx.quadraticCurveTo(vx-17,vy+3,vx-19,vy+15);ctx.quadraticCurveTo(540,182,524,200);ctx.lineTo(511,216)},st=C2([70,112,122],[168,214,218],d),o=RM?0:(T*80)%26;
+    ctx.save();ctx.globalAlpha=Math.min(1,flow*1.4);ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle=wf;ctx.lineWidth=4+9*flow;run();ctx.stroke();ctx.lineCap='butt';
+    ctx.strokeStyle=st;ctx.lineWidth=1.3;ctx.setLineDash([9,17]);for(const [dx,ph] of [[-3,0],[0,9],[3,17]]){ctx.lineDashOffset=-(o+ph);ctx.save();ctx.translate(dx*flow,dx*.5*flow);run();ctx.stroke();ctx.restore()}ctx.setLineDash([]);
+    ctx.fillStyle=C2([150,176,184],[240,248,248],d,.92);ctx.beginPath();ctx.ellipse(510,217,11*flow+3,3,0,0,7);ctx.fill();
+    // and the pool spills over into the water you fish while it runs
+    ctx.fillStyle=wf;ctx.fillRect(470,224,8,26);ctx.strokeStyle=st;ctx.lineWidth=1.2;ctx.setLineDash([7,11]);ctx.lineDashOffset=-o;ctx.beginPath();ctx.moveTo(472.5,224);ctx.lineTo(472.5,250);ctx.moveTo(475.5,224);ctx.lineTo(475.5,250);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=C2([150,176,184],[240,248,248],d,.9);ctx.beginPath();ctx.ellipse(474,250,11,3,0,0,7);ctx.fill();
+    if(!RM)for(let i=0;i<3;i++){const q=((T*.5)+i/3)%1;ctx.fillStyle=`rgba(238,246,246,${.3*(1-q)*(.45+.55*d)})`;ctx.beginPath();ctx.arc(466+i*8,250-q*12,4+q*6,0,7);ctx.fill()}ctx.restore()}
+  // the spout itself
+  if(h>2){const g=ctx.createLinearGradient(0,vy-h,0,vy);g.addColorStop(0,C2([150,170,180],[250,252,252],d,0));g.addColorStop(.25,C2([150,170,180],[250,252,252],d,.9));g.addColorStop(1,wf);ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(vx-5,vy);ctx.quadraticCurveTo(vx-9,vy-h*.6,vx-14-k*4,vy-h);ctx.lineTo(vx+14+k*4,vy-h);ctx.quadraticCurveTo(vx+9,vy-h*.6,vx+5,vy);ctx.closePath();ctx.fill();
+    if(!RM)for(let i=0;i<9;i++){const q=((T*1.1)+i/9)%1,dx=(i-4)*5+Math.sin(i*3)*4;ctx.fillStyle=C2([170,190,200],[250,252,252],d,.8*(1-q));ctx.beginPath();ctx.arc(vx+dx*(1+q),vy-h+q*q*h*.9-8,2.4,0,7);ctx.fill()}}
+  for(let i=0;i<11;i++){const q=RM?.4:((T*.13)+i*.21)%1,big=i<7,sx=(big?vx:500)+Math.sin(i*2.3+T*.4)*(8+q*22),sy=(big?vy:218)-q*(big?90+k*70:40);ctx.fillStyle=`rgba(238,246,246,${(big?.34:.26)*(1-q)*(.45+.55*d)})`;ctx.beginPath();ctx.arc(sx,sy,(big?8:5)+q*(big?22:10),0,7);ctx.fill()}
+  if(!RM)for(let i=0;i<4;i++){const q=((T*.1)+i*.27)%1;ctx.fillStyle=`rgba(238,246,246,${.2*(1-q)*(.45+.55*d)})`;ctx.beginPath();ctx.arc(180+i*150,246-q*46,10+q*18,0,7);ctx.fill()}
+  // ferns and moss where the ground stays warm
+  ctx.fillStyle=moss;for(const [x,y,rx,ry] of [[640,214,22,4],[436,216,16,3.5],[596,212,14,3]]){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,7);ctx.fill()}
+  ctx.strokeStyle=C2([16,40,22],[70,140,74],d);ctx.lineWidth=1.6;ctx.lineCap='round';for(const [x,y] of [[632,212],[440,214],[606,210],[556,222]])for(let j=-2;j<=2;j++){ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+j*4,y-9,x+j*8,y-11+Math.abs(j)*3);ctx.stroke()}ctx.lineCap='butt';
+  // a deer comes to the edge at dawn and dusk
+  if(ph==='dawn'||ph==='dusk'){const x=350,y=214,c=C2([30,22,16],[150,106,70],d),hd=RM?0:Math.sin(T*.5)>.3?6:0;ctx.fillStyle=c;ctx.beginPath();ctx.ellipse(x,y-17,15,7,0,0,7);ctx.fill();for(const dx of [-10,-5,7,11])ctx.fillRect(x+dx,y-13,2.2,13);ctx.save();ctx.translate(x+13,y-20);ctx.rotate(hd?.6:-.5);ctx.fillRect(-2,-13,4,14);ctx.beginPath();ctx.ellipse(1,-15,5.5,3.4,-.3,0,7);ctx.fill();ctx.restore();ctx.fillStyle=C2([190,180,170],[244,238,228],d);ctx.beginPath();ctx.ellipse(x-15,y-18,2.6,3.4,0,0,7);ctx.fill()}
+  // frogs that sing all winter
+  ctx.fillStyle=C2([20,50,24],[90,160,70],d);for(const [x,y] of [[536,222],[620,214]]){const j=RM?0:Math.max(0,Math.sin(T*1.3+x))*1.5;ctx.beginPath();ctx.ellipse(x,y-j,4,2.6,0,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+3,y-2-j,1.6,0,7);ctx.fill()}
+  if(!VISIT&&!S.sleep)HITS.push({x:456,y:204,w:90,h:30,kind:'soak',data:0})}
 function hdFore(loc,d,T){const night=d<.6,wc=C2([8,16,24],W(loc).tint[0],d*.85+.1);
+  if(loc==='falls'){hdFalls(d,T,wc);return}
+  if(loc==='steam'){hdSteam(d,T,wc);return}
   if(loc==='mill'){
     const bank=()=>{ctx.beginPath();ctx.moveTo(0,210);ctx.lineTo(800,210);ctx.lineTo(800,232);for(let x=800;x>=0;x-=20)ctx.lineTo(x,232+Math.sin(x/47)*3);ctx.closePath()};
     ctx.fillStyle=C2([16,26,18],[84,112,62],d);bank();ctx.fill();snowCap(bank,d);
@@ -7839,6 +7938,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:175,hd:1,n:'Silver Falls & Steam Hollow',items:['The Headwaters, part 2. Rebuild the falls bridge (Mountain Road stage 2, under Lake projects: $1,500,000, 20 Brass Fittings, 30 River Stone, 10 Birch Bark) and two more waters open, with 16 new fish.','Silver Falls. The river pours out of a cave in the cliff. Kokanee, Pink Salmon and Sockeye run the falls at dawn and dusk only, and a bear comes down to the ledge to fish while they do. Shed Antler turns up here.','Steam Hollow. A geyser on the bank goes off every so often, and its runoff keeps the water warm. Weather never slows the bite here, the fish are oddballs somebody let go long ago, and one legend only shows on snowy nights. Soak in the warm pool once a day for 20 minutes of Well Rested. River Quartz turns up here.','Three more insects join the hatch once your bridge is built: Grasshoppers, Midges and Moths. Tie the Foam Hopper, Zebra Midge and Night Moth at the Lodge bench. If you have not built the bridge, your hatch stays as it was.','Two more trail camera spots, Falls Overlook and Hollow Path, with 11 new animals between them.','Hattie now rewards regulars: a Lodge Rocking Chair after two full weeks of her jobs and an Antler Coat Rack after five, both for your yard. Her jobs only ever ask for fish from Miller’s Run and Beaver Meadow.']},
  {v:174,hd:1,n:'The Headwaters',items:['The first big expansion. An old logging road climbs past Fork River to a lodge, two new waters and 16 new fish, and the whole lake is clearing it together. Chip in from the Map tab: give 25 points or more and your own road is free the day it opens, with a Mountain Road Crew trophy. After it opens, anyone who has reached Fork River and logged 10 of its species can fund their own stretch under Lake projects.','Miller’s Run and Beaver Meadow. You fish them from a canoe, so any boat can go once you build a canoe and sew waders. Restore the old mill and something pale starts biting on foggy nights. The beaver dam holds or breaks each day, and some fish only bite at high or low water.','Headwaters Lodge. Step inside and tap around the main room: Hattie’s job board (three jobs a week), the fly bench under the window, the guest book on the desk, the stairs to a guest room for a nap, and the trophy wall over the fireplace. Your line stays in while you’re inside. One insect hatches each day. Tie its fly once and, on its days, Headwaters fish bite 25% faster and rare fish turn up 1.5 times as often.','Mill Bait. The restored mill grinds 3 of a Farm crop into bait that makes fish bite 10% sooner for 30 minutes, on any water.','For everyone, road or no road: a Bird Feeder for your dock (Shop, Dock). Fill it with one of five seeds and birds come by on their own. 31 to spot, each with its own taste in seed. Tap the feeder to watch it up close.','Also for everyone: a Trail Camera. Set it in your yard and it photographs whatever walks past while you fish. Develop the roll, sell the prints to the Lantern Ledger, or sit and watch the trail to catch a Witnessed shot. Two more trails open in the Headwaters.','A new Field Guide tab under Catch for your birds and animals, mountain music up the road, and a new title screen.']},
  {v:173,n:'One-Tap Gates',items:['Portal gates are one tap now. Tap the ring by your dock to step straight through, or pick a realm if you have more than one gate.','The lake map has a portal pin by your dock, and your gates sit right under the map, so you can head through from any water, or from home (you’ll head out first).']},
  {v:172,n:'Critter Club',items:['Series 3 is here: the Critter Club case in Crate Expectations. 31 animal boat paints, rod finishes and bobbers. Paint your boat as a Swan Boat (with a neck that sways) or a Kitty Boat (ears, whiskers and a swishing tail), or go Shark Mouth, Frog, Orca, Peacock or a Chameleon that keeps changing color. Rare and better rods let critters loose when you land a fish: Firefly, Monarch butterflies and the Songbird. Bobbers include a Goldfish Bowl with a fish inside, a Sleepy Cat that snoozes at night, a hopping Chick and the Baby Lake Beast.','A cleaner layout: the lake gets more of the screen on phones, the controls are slimmer, and on wide screens the menus sit beside the lake so nothing is below the fold.','Pop-ups now show at the top of the lake, one at a time. Tap one to dismiss it.','Home sweet home: everything in your home now adds comfort. Sleep in your own bed to wake up Well Rested (casts 15% faster) for 10 minutes plus 1 per comfort point, up to an hour. Tap the bed to see your comfort.','A coffee maker on the basement counter brews a free Thermos of Coffee every day while you’re out. The pot holds three.','Voyage reports: when a Fleet ship comes home, see the whole haul species by species, what was new, what was in the hold and your logbook progress, then send her straight back out. Reopen the last report from port any time.']},
@@ -8607,7 +8707,7 @@ const YI={
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
-  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},feasttable:{ox:0,oy:0,w:90,h:30,def:[[30,300]]},lodgesign:{ox:0,oy:0,w:48,h:44,def:[[150,268]]},mgbell:{ox:0,oy:0,w:34,h:46,def:[[120,292]]},wscale:{ox:0,oy:0,w:40,h:52,def:[[178,300]]},tractor:{ox:0,oy:0,w:40,h:30,def:[[100,360]]},goldturkey:{ox:0,oy:0,w:34,h:40,def:[[-30,330]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
+  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},feasttable:{ox:0,oy:0,w:90,h:30,def:[[30,300]]},lodgesign:{ox:0,oy:0,w:48,h:44,def:[[150,268]]},lodgerocker:{ox:0,oy:0,w:34,h:42,def:[[132,312]]},antlerrack:{ox:0,oy:0,w:30,h:54,def:[[160,300]]},mgbell:{ox:0,oy:0,w:34,h:46,def:[[120,292]]},wscale:{ox:0,oy:0,w:40,h:52,def:[[178,300]]},tractor:{ox:0,oy:0,w:40,h:30,def:[[100,360]]},goldturkey:{ox:0,oy:0,w:34,h:40,def:[[-30,330]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
   cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]},
   pumpkinpatch:{ox:61,oy:385,w:56,h:14,def:[[61,385]]},wheelbarrow:{ox:100,oy:347,w:44,h:33,def:[[100,347]]},ciderpress:{ox:44,oy:352,w:60,h:46,def:[[44,352]]},maple:{ox:14,oy:296,w:57,h:83,def:[[14,296]]},hayride:{ox:94,oy:396,w:89,h:62,def:[[94,396]]}};
 // v156 and earlier anchored these five at their top-left corner, so they couldn't come up to the house. Saves shift them once so they stay put.
@@ -8685,6 +8785,8 @@ function yDraw(id,d,T,night,ph){
   else if(id==='lodgesign')lodgeSignDraw(d);
   else if(id==='mgbell')mgBellDraw(d,T,night);
   else if(id==='wscale')wScaleDraw(d,T);
+  else if(id==='lodgerocker')lodgeRockerDraw(d,T);
+  else if(id==='antlerrack')antlerRackDraw(d);
   else if(id==='tractor')tractorDraw(d);
   else if(id==='goldturkey')goldTurkeyDraw(d,T);
   else if(id==='steeple'){const x=186,y=330,st=rgb(mix([40,42,44],[150,150,142],d)),gr=rgb(mix([22,36,32],[80,116,100],d));ctx.fillStyle=rgb(mix([30,28,24],[110,100,84],d));ctx.fillRect(x-17,y-8,34,8);ctx.fillStyle=st;ctx.fillRect(x-12,y-44,24,36);ctx.fillStyle=rgb(mix([10,12,14],[40,44,50],d));ctx.fillRect(x-7,y-38,14,16);
@@ -11266,7 +11368,7 @@ const PROJ=[
   {id:'marina',n:'Marina',d:'Slips, a fuel dock and a bait counter out on the water past your dock.',bonus:s=>`Fish sell for ${s*5}% more`,stages:[{c:250000,m:{drift:30,rope:20}},{c:600000,m:{brass:15,stone:25}},{c:1500000,m:{titan:6,glass:12}},{c:4000000,m:{abyss:2,carbon:10}}]},
   {id:'hatch',n:'Fish Hatchery',d:'Raise fingerlings and stock the lake with bigger, rarer fish.',bonus:s=>`Rare and Legendary fish bite ${s*8}% more often`,stages:[{c:400000,m:{stone:30,scrap:30}},{c:1200000,m:{glass:15,brass:20}},{c:3500000,m:{amber:1,titan:8}}]},
   {id:'barn',n:'Salvage Barn',d:'A big red barn for sorting everything the lake coughs up.',bonus:s=>`Materials turn up ${s*10}% more often`,stages:[{c:200000,m:{drift:40,fabric:20}},{c:700000,m:{paint:20,scrap:40}},{c:2000000,m:{carbon:8,moon:4}}]}];
-PROJ.push({id:'road',n:'Mountain Road',d:'Rebuild the old logging road past Fork River and open the Headwaters: a lodge, new waters and new fish.',bonus:s=>'Opens the Headwaters',stages:[{c:300000,m:{drift:40,stone:25}}],req:()=>hdReq()&&hdLakeDone(),reqT:()=>!hdLakeDone()?'The whole lake is clearing this road together. Help from the Map tab.':`Reach Fork River and log 10 of its species first (${hdRiverN()}/10).`});
+PROJ.push({id:'road',n:'Mountain Road',d:'Rebuild the old logging road past Fork River and open the Headwaters: a lodge, new waters and new fish.',bonus:s=>s>=2?'The falls bridge is rebuilt: Silver Falls is open':'Opens the Headwaters',stages:[{c:300000,m:{drift:40,stone:25}},{c:1500000,m:{brass:20,stone:30,bark:10}}],req:()=>hdReq()&&hdLakeDone(),reqT:()=>!hdLakeDone()?'The whole lake is clearing this road together. Help from the Map tab.':`Reach Fork River and log 10 of its species first (${hdRiverN()}/10).`});
 const PJ=id=>{S.proj=S.proj||{};return S.proj[id]||(S.proj[id]={s:0,b:null})};
 const projLv=id=>S.proj&&S.proj[id]?S.proj[id].s:0;
 const sellBonus=()=>(1+.05*projLv('marina'))*(1+.1*prLv());
@@ -11428,7 +11530,7 @@ function drawMarina(d,T){const s=projLv('marina');if(!s)return;const wood=rgb(mi
   if(s>=4){ctx.fillStyle='#ffd05a';ctx.fillRect(748,212,48,10);ctx.fillStyle='#2a1206';ctx.font='bold 8px sans-serif';ctx.fillText('MARINA',753,220);if(lit(d))for(let i=0;i<6;i++){ctx.fillStyle=['#ff6b6b','#ffd05a','#7cc7dc'][i%3];ctx.beginPath();ctx.arc(672+i*22,246,1.4,0,7);ctx.fill()}}}
 
 // ==LOGBOOK SETS==
-const SET_RW={mill:150000,meadow:200000,pond:5000,lake:25000,river:75000,deep:200000,bay:500000,isle:100000,kelp:1e6,mangrove:2e6,coral:4e6,storm:8e6,frozen:15e6,sunken:3e7,moon:750000,hell:1500000,sky:3000000};
+const SET_RW={mill:150000,meadow:200000,falls:400000,steam:600000,pond:5000,lake:25000,river:75000,deep:200000,bay:500000,isle:100000,kelp:1e6,mangrove:2e6,coral:4e6,storm:8e6,frozen:15e6,sunken:3e7,moon:750000,hell:1500000,sky:3000000};
 function setDone(w){const all=FISH.filter(f=>f.at===w&&!f.quest);return all.length&&all.every(f=>S.log[f.id])}
 function setClaim(w){S.sets=S.sets||{};if(S.sets[w]||!setDone(w))return;S.sets[w]=S.day;const rw=SET_RW[w]||0;S.coins+=rw;S.trophies.unshift({name:`${W(w).n} Master`,water:w,type:'big',score:'Every species',day:S.day});
   sfx('fanfare');celebrate({lbl:'Logbook set complete!',r:'L',name:`${W(w).n} Master`,sub:`+$${money(rw)} and a trophy`,icon:cupSvg});save();renderLog();renderTrophies&&renderTrophies()}
@@ -12154,6 +12256,15 @@ function figureheadDraw(d,T){ctx.save();ctx.translate(252,248);ctx.scale(.55,.55
   ctx.fillStyle=skin;ctx.beginPath();ctx.arc(1,-15,3.2,0,7);ctx.fill();ctx.fillStyle=rgb(mix([30,18,10],[120,60,30],d));ctx.beginPath();ctx.arc(.4,-16,3.4,Math.PI*.9,Math.PI*2.1);ctx.fill();ctx.fillRect(-3,-16,2,8);
   ctx.strokeStyle=skin;ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(3,-9);ctx.lineTo(9,-17);ctx.stroke();ctx.fillStyle='#2a2216';ctx.fillRect(7.5,-22,4,1);ctx.fillStyle=d<.5?`rgba(255,226,150,${.8+.2*Math.sin(T*7)})`:'#f4e0a0';ctx.fillRect(8,-21,3,4);ctx.restore();
   if(d<.5)glow(px+10,py-43,14,.5*(1-d*2),'255,220,140');ctx.restore()}
+function lodgeRockerDraw(d,T){const w=rgb(mix([34,22,14],[150,100,58],d)),w2=rgb(mix([24,16,10],[112,72,40],d)),a=RM?0:Math.sin(T*1.1)*.06;ctx.save();ctx.rotate(a);
+  ctx.strokeStyle=w2;ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-15,-1);ctx.quadraticCurveTo(0,5,16,-3);ctx.stroke();ctx.lineCap='butt';
+  ctx.fillStyle=w;ctx.fillRect(-10,-20,3,19);ctx.fillRect(8,-18,3,17);ctx.fillRect(-12,-21,24,4);ctx.fillRect(-12,-42,3,24);ctx.fillRect(-12,-42,12,3);ctx.fillRect(-3,-42,3,22);
+  ctx.fillStyle=w2;for(const y of [-36,-30,-25])ctx.fillRect(-11,y,10,1.6);ctx.fillRect(-12,-28,22,3);ctx.fillRect(8,-28,3,9);
+  ctx.fillStyle=rgb(mix([60,20,18],[178,60,48],d));ctx.fillRect(-9,-23,18,3);ctx.restore()}
+function antlerRackDraw(d){const post=rgb(mix([120,116,108],[236,230,216],d)),an=rgb(mix([110,100,80],[224,210,172],d));ctx.fillStyle=post;ctx.fillRect(-2.5,-48,5,48);ctx.fillStyle=rgb(mix([30,26,22],[70,60,50],d));for(const y of [-40,-28,-14])ctx.fillRect(-2.5,y,3,1.5);
+  ctx.fillStyle=rgb(mix([30,22,14],[110,74,40],d));ctx.fillRect(-9,-2,18,3);
+  ctx.strokeStyle=an;ctx.lineWidth=2.4;ctx.lineCap='round';for(const s of [-1,1]){ctx.beginPath();ctx.moveTo(s*2,-44);ctx.quadraticCurveTo(s*10,-46,s*13,-56);ctx.moveTo(s*7,-47);ctx.lineTo(s*8,-55);ctx.moveTo(s*2,-32);ctx.quadraticCurveTo(s*8,-33,s*10,-40);ctx.stroke()}ctx.lineCap='butt';
+  ctx.fillStyle=rgb(mix([60,44,24],[176,136,78],d));ctx.fillRect(5,-34,9,10);ctx.strokeStyle=rgb(mix([40,30,18],[120,90,50],d));ctx.lineWidth=1;ctx.strokeRect(5,-34,9,10);ctx.beginPath();ctx.moveTo(6,-34);ctx.quadraticCurveTo(9.5,-40,13,-34);ctx.stroke()}
 function wScaleDraw(d,T){const br=rgb(mix([60,46,14],[214,170,70],d)),wd=rgb(mix([30,22,14],[110,74,40],d));ctx.fillStyle=wd;ctx.fillRect(-2,-48,4,48);ctx.fillRect(-2,-48,20,3);ctx.fillRect(-10,-2,20,3);
   const sw=Math.sin(T*1.4)*.06;ctx.save();ctx.translate(14,-45);ctx.rotate(sw);ctx.strokeStyle=br;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(0,5);ctx.stroke();
   ctx.fillStyle=br;ctx.beginPath();ctx.arc(0,12,7,0,7);ctx.fill();ctx.fillStyle=rgb(mix([60,60,56],[244,240,226],d));ctx.beginPath();ctx.arc(0,12,5,0,7);ctx.fill();ctx.strokeStyle='#8a1a1a';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,12);ctx.lineTo(2.6,9.5);ctx.stroke();

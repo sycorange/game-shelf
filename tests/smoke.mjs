@@ -529,7 +529,7 @@ await check('the Lodge: hatch and fly box, the keeper’s weekly jobs, the guest
   const p0=await page(VPS[0][1],save({boat:3,rod:3,lure:3,water:'river',hd:{lake:{done:1}}}));
   ok(await p0.evaluate(()=>{lodgeEnter();lodgeUI();flyTie('mayfly');return !LDG.on&&$('plotModal').hidden&&!HD().flies&&!document.querySelector('[data-hdlodge]')&&!pall().includes('mill')&&castDurFor('mill')===castDurFor('river')}),'nothing before the road');
   const p=await page(VPS[1][1],save({coins:2e6,boat:3,rod:3,lure:3,water:'mill',stamina:30,mats:{feather:20,bark:1},proj:{road:{s:1,b:null}},hd:{canoe:1,waders:1,mill:1},pantry:{corn:7,carrot:2}}));
-  ok(await p.evaluate(()=>{const a=[...Array(60)].map((_,i)=>hatchOf(i+1).id),b=[...Array(60)].map((_,i)=>hatchOf(i+1).id);return a.join()===b.join()&&new Set(a).size===3&&HATCH.length===3}),'one of three insects a day, the same for a given day');
+  ok(await p.evaluate(()=>{const a=[...Array(60)].map((_,i)=>hatchOf(i+1).id),b=[...Array(60)].map((_,i)=>hatchOf(i+1).id);return a.join()===b.join()&&new Set(a).size===3&&hatchPool().length===3&&HATCH.length===6}),'one of three insects a day before the falls bridge, the same for a given day');
   const r=await p.evaluate(()=>{const o={};while(hatchOf().id!=='mayfly')S.day++;const base=castDurFor('mill');o.off=!hatchOn()&&!hatchX('mill');
     const c=S.coins;flyTie('caddis');o.short=!HD().flies||!HD().flies.caddis;flyTie('mayfly');o.tied=HD().flies.mayfly===1&&S.coins===c-5000&&S.mats.feather===16;flyTie('mayfly');o.once=S.coins===c-5000;
     o.fast=hatchX('mill')&&Math.abs(castDurFor('mill')/base-.8)<1e-9&&!hatchX('lake')&&castDurFor('lake')===8*ROD_SPD[3]*BOAT_SPD[3];
@@ -555,7 +555,7 @@ await check('the Lodge: hatch and fly box, the keeper’s weekly jobs, the guest
   ok(await tap('bench')==='Fly bench'&&await p.evaluate(()=>/Mayfly Dun/.test($('plotBody').textContent)&&/In your fly box/.test($('plotBody').textContent)),'tap the bench: the fly box');
   ok(await tap('today')==='On the water today'&&await p.evaluate(()=>/hatch/.test($('plotBody').textContent)&&/water/.test($('plotBody').textContent)),'tap the chalkboard: today’s hatch and the dam');
   ok(await tap('room')==='Guest room'&&await p.evaluate(()=>!!document.querySelector('[data-ldg="rest"]')),'tap the stairs: the guest room');
-  ok(await tap('wall')==='Trophy wall'&&await p.evaluate(()=>document.querySelectorAll('.ldg-pl').length===2),'tap the mounts: the trophy wall');
+  ok(await tap('wall')==='Trophy wall'&&await p.evaluate(()=>document.querySelectorAll('.ldg-pl').length===HDW.length),'tap the mounts: the trophy wall');
   ok(await tap('guest')==='Guest book'&&await p.evaluate(()=>!!$('ldgGuests')),'tap the book: the guest book');
   await p.evaluate(()=>{S.mats.feather=20;S.mats.bark=10});await tap('bench');await p.click('[data-ldg="fly-caddis"]');ok(await p.evaluate(()=>HD().flies.caddis===1&&!$('plotModal').hidden&&!document.querySelector('[data-ldg="fly-caddis"]')),'tie a fly at the bench');
   await p.evaluate(()=>{$('plotModal').hidden=true});await p.click('#lodgeExit');await p.waitForTimeout(300);ok(await p.evaluate(()=>!LDG.on&&$('lodgeBar').hidden&&!hitsS().some(h=>h.kind==='ldg')),'Step outside: back to the water');
@@ -585,7 +585,7 @@ await check('the Mountain Road launch: the whole lake clears it, the crew gets t
   ok(await p.evaluate(()=>{travelTo('mill');return S.water==='mill'&&HD().arrived===1&&!!document.querySelector('.hd-arr canvas')}),'first trip up: the arrival drive plays over the scene');
   await p.waitForTimeout(300);await p.evaluate(()=>document.querySelector('.hd-arr').click());await p.waitForTimeout(900);
   ok(await p.evaluate(()=>{const gone=!document.querySelector('.hd-arr');travelTo('meadow',{instant:true});travelTo('mill');return gone&&!document.querySelector('.hd-arr')}),'tap to skip, and it only plays once');
-  ok(await p.evaluate(async()=>{musicNoteHD();musicPadHD();const v=await (await fetch('version.json',{cache:'no-store'})).json();return UPDATES[0].v===174&&UPDATES[0].hd===1&&v.v===174&&v.n==='The Headwaters'}),'update 174 notes and version');
+  ok(await p.evaluate(async()=>{musicNoteHD();musicPadHD();const v=await (await fetch('version.json',{cache:'no-store'})).json();return UPDATES.some(u=>u.v===174)&&UPDATES[0].v===v.v&&UPDATES[0].hd===1}),'update notes and version agree');
   await p.evaluate(()=>{showTitle()});await p.waitForTimeout(300);ok(await p.evaluate(()=>!$('titleScreen').hidden&&$('tRibbon').textContent.includes('The Headwaters')),'title screen ribbon');
 });
 await check('map pins on phones: no two pins or labels overlap at 390, 360 and 320 wide, the Headwaters pin scrolls to its map and keeps the menu open, and every pin still travels',async()=>{
@@ -615,6 +615,52 @@ await check('bird feeder up close: tap the feeder on the dock, birds you know dr
     await p.evaluate(()=>{openTab('field');renderField()});ok(await p.evaluate(()=>{const b=document.querySelector('[data-fg="feedwatch"]');if(!b)return false;b.click();return FEEDW.on}),'the Guide tab has a Watch the feeder button');
     ok(await p.evaluate(()=>{FLD().feed.left=0;return true})&&(await p.waitForTimeout(300),true)&&await p.evaluate(()=>FEEDW.on),'an empty feeder still shows, just with nobody on it');
     ok(await p.evaluate(()=>{travelTo('lake',{instant:true});feederWatch(false);S.decor.feeder=0;feederWatch(true);return !FEEDW.on}),'no feeder, no close view');ok(p.errs.length===0,'no errors '+p.errs.join(' | '))}
+});
+await check('Silver Falls: road stage 2 costs Headwaters materials, the falls stay shut until it is built, the salmon only run at dawn and dusk, Shed Antler, jobs never ask for falls fish',async()=>{
+  const p=await page(VPS[0][1],save({coins:5e6,boat:3,rod:5,lure:5,water:'mill',mats:{brass:25,stone:40,bark:12},proj:{road:{s:1,b:null}},hd:{canoe:1,waders:1,lake:{done:1},arrived:1}}));
+  ok(await p.evaluate(()=>{travelTo('falls',{instant:true});return S.water==='mill'&&/falls bridge/.test(hdBlock('falls'))&&hdBlock('meadow')===''&&HDW_BY.falls.hd===2}),'Silver Falls is shut before stage 2');
+  await p.click('#mnav [data-mt="map"]');ok(await p.evaluate(()=>{const b=document.querySelector('.lm-pin[data-lm="falls"]');return !!b&&b.disabled&&b.classList.contains('locked')}),'its pin shows locked on the map');
+  ok(await p.evaluate(()=>{const pj=PROJ.find(x=>x.id==='road'),c=S.coins;if(pj.stages.length<2||!projCan(pj))return false;projFund('road');const paid=S.coins===c-1500000&&S.mats.brass===5&&S.mats.stone===10&&S.mats.bark===2;S.day++;projTick();renderAll();return paid&&PJ('road').s===2&&hdBlock('falls')===''}),'stage 2: $1.5M, brass, stone and Birch Bark, built the next day');
+  await p.evaluate(()=>document.querySelector('.hd-panel').scrollIntoView());await p.click('.lm-pin[data-lm="falls"]');await p.waitForTimeout(400);ok(await p.evaluate(()=>S.water==='falls'&&W('falls').n==='Silver Falls'),'the pin travels there');
+  const r=await p.evaluate(()=>{const seen=(min,wx,n)=>{const t=new Set();for(let i=0;i<(n||5000);i++){const c=rollCatch('falls',min,5,5,{wx});if(c)t.add(c.f.id)}return t};const run=['kokanee','pinksalmon','sockeye'],o={};
+    const day=seen(720,'clear',12000),dusk=seen(1110,'clear'),dawn=seen(360,'clear'),night=seen(60,'clear'),rain=seen(720,'rain',12000);
+    o.only=[day,dusk,dawn,night].every(s=>[...s].every(id=>FI(id).at==='falls'));o.noRunDay=run.every(id=>!day.has(id)&&!night.has(id));o.run=run.every(id=>dusk.has(id)&&dawn.has(id));o.night=night.has('bulltrout')&&night.has('slimysculpin');o.leg=day.has('mistbow')&&!rain.has('mistbow');
+    o.cn=FI('sockeye').cn==='Salmon run';o.n=FISH.filter(f=>f.at==='falls').length;o.mat=MATS.some(m=>m.id==='antler'&&m.at==='falls')&&!!MI('antler');o.set=SET_RW.falls===400000;return o});
+  ok(r.only&&r.n===8,'eight fish of its own');ok(r.noRunDay&&r.run&&r.cn,'salmon bite only at dawn and dusk '+JSON.stringify(r));ok(r.night&&r.leg,'night fish, and the legendary needs a clear day');ok(r.mat&&r.set,'Shed Antler and the set reward');
+  ok(await p.evaluate(()=>{let m=0;for(let i=0;i<6000;i++){const x=rollPull({wx:'clear'},'falls',720);if(x&&x.mat&&x.mat.id==='antler')m++}return m>0}),'Shed Antler turns up while fishing the falls');
+  ok(await p.evaluate(()=>{const ok=[];for(let w=0;w<30;w++){delete HD().jobs;const o=weekKey;const J=(()=>{const real=Date;return lodgeJobs()})();ok.push(J.j.filter(j=>j.t==='fish').every(j=>HDW_BY[FI(j.k).at].hd===1))}return ok.every(Boolean)}),'the keeper’s jobs only ask for fish from the first two waters');
+  ok(await p.evaluate(async()=>{const r=await fetch('/api/ping');return r.ok})&&p.errs.length===0,'no errors '+p.errs.join(' | '));
+});
+await check('Steam Hollow: opens with road stage 2, weather never slows the bite there, a daily soak gives Well Rested, River Quartz, the legendary needs a snowy night',async()=>{
+  const p=await page(VPS[1][1],save({coins:5e6,boat:3,rod:5,lure:5,water:'mill',proj:{road:{s:1,b:null}},hd:{canoe:1,waders:1,lake:{done:1},arrived:1}}));
+  ok(await p.evaluate(()=>{travelTo('steam',{instant:true});const shut=S.water==='mill'&&/falls bridge/.test(hdBlock('steam'));PJ('road').s=2;travelTo('steam',{instant:true});return shut&&S.water==='steam'&&FISH.filter(f=>f.at==='steam').length===8&&new Set(FISH.map(f=>f.id)).size===FISH.length}),'shut until stage 2; eight fish of its own and no duplicate ids');
+  const w=await p.evaluate(()=>{const o={};S.buffs={};S.hunger=100;S.stamina=100;S.wx={id:'clear',left:999};const base=castDur();S.wx={id:'storm',left:999};o.storm=Math.abs(castDur()/base-1)<1e-9;S.wx={id:'windy',left:999};o.windy=Math.abs(castDur()/base-1)<1e-9;S.wx={id:'rain',left:999};o.rain=castDur()<base;
+    S.water='falls';S.wx={id:'clear',left:999};const b2=castDur();S.wx={id:'storm',left:999};o.else=castDur()>b2;S.water='steam';return o});
+  ok(w.storm&&w.windy&&w.rain&&w.else,'storms and wind do not slow casts here, rain still speeds them, other waters are unchanged '+JSON.stringify(w));
+  const k=await p.evaluate(()=>{const o={};S.buffs={};S.water='falls';hdSoak();o.far=!S.buffs.rested;S.water='steam';hdSoak();o.soak=S.buffs.rested===1200&&HD().soak===S.day;S.buffs.rested=5;hdSoak();o.daily=S.buffs.rested===5;S.day++;hdSoak();o.again=S.buffs.rested===1200;return o});
+  ok(k.far&&k.soak&&k.daily&&k.again,'one soak a day, only at Steam Hollow '+JSON.stringify(k));
+  const r=await p.evaluate(()=>{const seen=(min,wx,n)=>{const t=new Set();for(let i=0;i<(n||9000);i++){const c=rollCatch('steam',min,5,5,{wx});if(c)t.add(c.f.id)}return t};const o={};o.leg=seen(60,'snow',14000).has('oldsulphur')&&!seen(60,'clear').has('oldsulphur')&&!seen(720,'snow').has('oldsulphur');
+    let q=0;for(let i=0;i<6000;i++){const x=rollPull({wx:'clear'},'steam',720);if(x&&x.mat&&x.mat.id==='quartz')q++}o.q=q>0;o.set=SET_RW.steam===600000;return o});
+  ok(r.leg&&r.q&&r.set,'Old Sulphur on snowy nights only; River Quartz; set reward '+JSON.stringify(r));
+  await p.evaluate(()=>{S.day+=1;renderAll()});await p.click('#mnav [data-mt="map"]');ok(await p.evaluate(()=>{const b=document.querySelector('[data-hdb="soak"]');if(!b||b.disabled)return false;S.buffs={};b.click();return S.buffs.rested===1200&&document.querySelector('[data-hdb="soak"]').disabled}),'the Soak button on the map card');
+  ok(p.errs.length===0,'no errors '+p.errs.join(' | '));
+});
+await check('Headwaters part 2 extras: three more insects once the bridge is built, two more camera trails with their own animals, Hattie’s decor for regulars, notes',async()=>{
+  const p=await page(VPS[0][1],save({coins:5e6,boat:3,rod:5,lure:5,water:'mill',mats:{feather:40,antler:4,quartz:10,moon:2},proj:{road:{s:1,b:null}},hd:{canoe:1,waders:1,lake:{done:1},arrived:1,flies:{mayfly:1,caddis:1,stone:1}},fg:{birds:{},animals:{},feed:{seed:null,left:0},cam:{own:1,at:'yard',lure:null,lureN:0,roll:[]}}}));
+  const a=await p.evaluate(()=>{const o={};const s1=[...Array(80)].map((_,i)=>hatchOf(i+1).id);o.three=new Set(s1).size===3&&[...Array(80)].every((_,i)=>{S.day=i+1;return hatchOn()});flyTie('hopper');o.locked=!HD().flies.hopper;
+    o.trails=!TRAILS.find(t=>t.id==='falls').ok()&&!TRAILS.find(t=>t.id==='steam').ok();PJ('road').s=2;const s2=[...Array(200)].map((_,i)=>hatchOf(i+1).id);o.six=new Set(s2).size===6&&hatchPool().length===6;
+    const c=S.coins;flyTie('hopper');flyTie('midge');flyTie('moth');o.tied=HD().flies.hopper&&HD().flies.midge&&HD().flies.moth&&S.coins===c-270000&&S.mats.antler===0&&S.mats.quartz===0&&S.mats.moon===0;o.all=[...Array(60)].every((_,i)=>{S.day=i+1;return hatchOn()});
+    o.open=TRAILS.find(t=>t.id==='falls').ok()&&TRAILS.find(t=>t.id==='steam').ok();camMove('falls');o.moved=FLD().cam.at==='falls';
+    const seen=(tr,min,wx)=>{FLD().cam.at=tr;const t=new Set();for(const x of camPool(min,wx))t.add((x.a||x).id);return t};o.fa=seen('falls',720,'clear').has('marmot')&&seen('falls',60,'clear').has('greyghost')&&!seen('falls',720,'clear').has('greyghost');
+    o.st=seen('steam',720,'clear').has('pika')&&seen('steam',360,'snow').has('steamelk')&&!seen('steam',360,'clear').has('steamelk');o.own=[...seen('falls',720,'clear'),...seen('steam',720,'clear')].every(id=>AN_BY[id].at.some(x=>x==='falls'||x==='steam'));o.n=ANIMALS.length;
+    o.thumbs=ANIMALS.filter(x=>x.at.includes('falls')||x.at.includes('steam')).every(x=>{try{return fgThumb('animal',x.id).length>50}catch(e){return false}});return o});
+  ok(a.three&&a.locked&&a.trails,'before the bridge: three insects, the first three flies cover every day, no new flies or trails '+JSON.stringify(a));ok(a.six&&a.tied&&a.all,'after: six insects, three new flies cost Shed Antler, River Quartz and Moonstone');ok(a.open&&a.moved&&a.fa&&a.st&&a.own&&a.n===31&&a.thumbs,'Falls Overlook and Hollow Path have their own animals and legends '+JSON.stringify(a));
+  const dd=await p.evaluate(()=>{const o={};const fin=()=>{delete HD().jobs;const J=lodgeJobs();for(let i=0;i<3;i++){const j=J.j[i];if(j.t==='fish')for(let k=0;k<j.n;k++)addCooler(FI(j.k),1,10);else if(j.t==='mat')S.mats[j.k]=(S.mats[j.k]|0)+j.n;else J.c=j.n;lodgeGive(i)}};
+    const got=id=>owned(id)||S.boxes.some(b=>b.id===id);HD().stamps=0;fin();o.one=HD().stamps===1&&!got('lodgerocker');fin();o.two=HD().stamps===2&&got('lodgerocker')&&!got('antlerrack');fin();fin();fin();o.five=HD().stamps===5&&got('antlerrack');const n=S.boxes.length;fin();o.once=S.boxes.length===n;
+    o.decor=['lodgerocker','antlerrack'].every(id=>DECOR.some(x=>x.id===id&&x.cs===1));return o});
+  ok(dd.one&&dd.two&&dd.five&&dd.once&&dd.decor,'a rocking chair after two full weeks and an antler rack after five, once each '+JSON.stringify(dd));
+  ok(await p.evaluate(async()=>{const v=await (await fetch('version.json',{cache:'no-store'})).json();return UPDATES[0].v===175&&v.v===175}),'update 175 notes and version');
+  await p.evaluate(()=>{S.decor.lodgerocker=1;S.decor.antlerrack=1;S.water='pond';goHome&&0;renderAll()});await p.waitForTimeout(500);ok(p.errs.length===0,'no errors '+p.errs.join(' | '));
 });
 await check('Field Guide: feeder birds by seed and time, the trail camera fills a roll, lures, develop, sit and watch gives Witnessed, trails unlock with the Headwaters, away progress',async()=>{
   const p=await page(VPS[1][1],save({coins:1e6,min:600,mats:{scrap:30,brass:20}}));
