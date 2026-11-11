@@ -683,6 +683,17 @@ await check('phone notifications stay out of the way: a phone alert is a slim st
   await p.evaluate(()=>phNotify('friends','Raid help','Marlow needs help'));await p.waitForTimeout(300);await p.click('#phStrip .pst');await p.waitForTimeout(600);ok(await p.evaluate(()=>$('phStrip').hidden&&$('phoneDock').classList.contains('open')),'tapping the alert opens the phone');
   const d=await page(VPS[0][1],save({water:'lake',min:700,nextTour:99999}));await d.evaluate(()=>phNotify('friends','Raid help','Marlow needs help'));await d.waitForTimeout(400);ok(await d.evaluate(()=>getComputedStyle($('phStrip')).display==='none'&&$('phoneDock').classList.contains('ping')),'on desktop the phone still pops up as before');
   for(const q of [p,d])ok(!q.errs.length,'no script errors: '+q.errs.join(' | '))});
+await check('cabin on phones: the cabin buttons sit under the room, not over the floor, so the pet can be tapped; they still work; desktop keeps them in the room',async()=>{
+  const st=save({water:'lake',min:700,nextTour:99999,sleep:{ph:'awake',t:0},pets:{out:'dog',own:{dog:{coat:0,acc:'none',name:'Biscuit'}}}});
+  const p=await page(VPS[1][1],st);await p.waitForTimeout(900);
+  const a=await p.evaluate(()=>{const sc=document.querySelector('.scene').getBoundingClientRect(),lb=$('leaveBar').getBoundingClientRect(),cvs=document.querySelector('.scene canvas').getBoundingClientRect(),h=hitsS().find(h=>h.kind==='pet');
+    const bar=getComputedStyle(document.querySelector('.astrip .bar')).display;let pt=null,top=null;if(h){const k=cvs.width/1000;pt=[cvs.left+(h.x+h.w/2)*k,cvs.top+(h.y+h.h/2)*k];const e=document.elementFromPoint(pt[0],pt[1]);top=e&&e.tagName}
+    return {under:lb.top>=sc.bottom-1,vis:!$('leaveBar').hidden&&lb.height>0&&lb.height<60,bar,pet:!!h,pt,top,btns:[...document.querySelectorAll('#leaveBar button')].filter(b=>!b.hidden).length}});
+  ok(a.under&&a.vis&&a.btns===4,'the four cabin buttons are in one short row under the room: '+JSON.stringify(a));ok(a.bar==='none','they take the place of the idle cast bar');ok(a.pet&&a.top==='CANVAS','nothing sits over the pet: '+JSON.stringify(a));
+  await p.evaluate(()=>$('decoBtn').click());await p.waitForTimeout(300);ok(await p.evaluate(()=>!$('decoModal').hidden),'Decorate still opens');await p.evaluate(()=>{$('decoModal').hidden=true;$('arrBtn').click()});await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>$('leaveBar').hidden&&getComputedStyle(document.querySelector('.astrip .bar')).display!=='none'),'while arranging, the buttons step aside and the cast bar is back');
+  const d=await page(VPS[0][1],st);await d.waitForTimeout(700);ok(await d.evaluate(()=>{const sc=document.querySelector('.scene').getBoundingClientRect(),lb=$('leaveBar').getBoundingClientRect();return lb.top>sc.top&&lb.bottom<=sc.bottom+1&&!!$('leaveBar').closest('.scene')}),'on desktop the bar stays inside the room');
+  for(const q of [p,d])ok(!q.errs.length,'no script errors: '+q.errs.join(' | '))});
 await check('bird feeder up close: tap the feeder on the dock, birds you know drop by without using seed, the real visitor shows as new, the Guide button, and back to the water',async()=>{
   const birds={};for(const k of ['chickadee','cardinal','nuthatch','titmouse'])birds[k]={n:3,d:30};
   for(const vp of [VPS[0][1],VPS[1][1]]){const p=await page(vp,save({water:'pond',min:600,decor:{feeder:1},hd:{lake:{done:1}},fg:{birds,animals:{},feed:{seed:'sun',left:30},cam:{own:0,at:'yard',lure:null,lureN:0,roll:[]}}}));await p.waitForTimeout(400);
