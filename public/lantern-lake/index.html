@@ -1603,6 +1603,10 @@ body.watching #hint{display:none}
 .fg-roll{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
 .fg-ph{display:grid;gap:2px;justify-items:center;text-align:center;background:#f4efe2;border-radius:6px;padding:6px 6px 8px;color:#2a241c;position:relative;border-bottom:3px solid var(--rc)}
 .fg-ph img{width:100%;aspect-ratio:3/2;background:#31474f;border-radius:3px;object-fit:contain}.fg-ph b{font-size:.72rem;line-height:1.15}
+.fg-ms{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}.fg-m{font-size:.74rem;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.16);color:var(--muted)}.fg-m b{color:var(--text,#fff);margin-right:2px}.fg-m.got{border-color:#8fd18a;color:#cfeccb}.fg-m.got b{color:#8fd18a}.ldg-rod{width:48px;height:22px;object-fit:contain;vertical-align:middle;margin-right:6px}
+.fg-ph.tap,.card.fish.fg-e.tap{cursor:pointer}.fg-ph.tap:hover{outline:2px solid var(--rc)}.fg-ph img{object-fit:cover!important}.card.fish.fg-e.tap img{object-fit:cover;background:none}
+.phv{display:grid;gap:8px}.phv-img{width:100%;max-width:420px;aspect-ratio:3/2;justify-self:center;border-radius:6px;border:8px solid #f4efe2;box-shadow:0 4px 14px rgba(0,0,0,.4);image-rendering:auto}.phv-cap{margin:0;text-align:center;font-size:.84rem}
+.phv-fr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.phv-slot{display:grid;gap:3px;justify-items:center;padding:7px 5px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:inherit;font:inherit;cursor:pointer;min-width:0}.phv-slot img,.phv-slot i{width:100%;aspect-ratio:3/2;border-radius:3px;border:4px solid #6a4a2a;box-sizing:border-box;display:block}.phv-slot i{background:rgba(0,0,0,.25);border-style:dashed;border-color:rgba(255,255,255,.3)}.phv-slot b{font-size:.74rem;line-height:1.15;overflow:hidden;text-overflow:ellipsis;max-width:100%}.phv-slot small{font-size:.7rem;color:var(--muted)}.phv-slot:disabled{opacity:.55;cursor:default}.phv-slot.on{opacity:1;border-color:#ffd05a}.phv-slot:not(:disabled):hover{background:rgba(255,255,255,.12)}
 .fg-ph.wit::after{content:'';position:absolute;right:0;top:0;border:9px solid transparent;border-right-color:#e8b020;border-top-color:#e8b020;border-radius:0 6px 0 0}
 .fg-ph em{font-style:normal;font-size:.62rem;font-weight:800;background:#ff8fb8;color:#2a1206;border-radius:999px;padding:0 6px}.fg-ph em.b{background:#ffd05a}
 .fg-st{color:#c89a1a;letter-spacing:1px;font-size:.78rem}.fg-st.wit{color:#e8b020;text-shadow:0 0 6px rgba(232,176,32,.6)}
@@ -2498,6 +2502,10 @@ const DECOR = [
   {id:'figurehead',cat:'dock',cs:1,n:'Marigold Figurehead',c:0,d:'A woman in gold holding up a lantern. It glows a little at night. From The Marigold case.'},
   {id:'lodgesign',cat:'land',cs:1,n:'Master’s Lodge sign',c:0,d:'For anglers with 275 mastery stars.'},
   {id:'transit',cat:'land',cs:1,n:'Surveyor’s Transit',c:0,d:'A brass transit on a wooden tripod, pointed at nothing in particular. From The Guest in Room 6 case.'},
+  {id:'birdbath',cat:'land',cs:1,n:'Birdbath',c:0,d:'A stone birdbath. Birds from your Field Guide stop in for a splash. For 10 birds in the Field Guide.'},
+  {id:'birdhouse',cat:'land',cs:1,n:'Birdhouse',c:0,d:'A blue birdhouse with a red roof, up on a pole. For 20 birds in the Field Guide.'},
+  {id:'carvedbear',cat:'land',cs:1,n:'Carved Bear',c:0,d:'Cut from one pine log with a chainsaw. For 10 animals in the Field Guide.'},
+  {id:'xingsign',cat:'land',cs:1,n:'Wildlife Crossing Sign',c:0,d:'They do cross here. You have the photos. For 30 animals in the Field Guide.'},
   {id:'lodgerocker',cat:'land',cs:1,n:'Lodge Rocking Chair',c:0,d:'A bentwood rocker off the Lodge porch. Hattie gives one to anglers who finish two weeks of her jobs.'},
   {id:'antlerrack',cat:'land',cs:1,n:'Antler Coat Rack',c:0,d:'Shed antlers on a birch post, with a creel hung on it. For five weeks of jobs at the Lodge.'},
   {id:'feasttable',cat:'land',cs:1,n:'The Thanksgiving Table',c:0,d:'A long feast table set for the whole family. From the 2026 Thanksgiving Feast.'},
@@ -3483,7 +3491,7 @@ function tuPane(pane,head){head('Trade up','Turn extra materials into rarer ones
   box.innerHTML=h;pane.append(box);box.querySelectorAll('[data-tu]').forEach(b=>b.onclick=()=>tradeUp(b.dataset.tu,+b.dataset.n))}
 // Decor upgrades: one tier per kind of piece, shown wherever it's placed (cabin, basement, yard), for visitors too.
 const UPG_N=['','Polished','Gilded'];
-function upgList(){const cb=CAB(),out=[];for(const z of COS)if(cb.own[z.id]&&(z.k==='wall'||isFree(z.id)))out.push({id:z.id,n:z.n,c:z.c||10000,where:'Cabin'});
+function upgList(){const cb=CAB(),out=[];for(const z of COS)if(cb.own[z.id]&&!z.ph&&(z.k==='wall'||isFree(z.id)))out.push({id:z.id,n:z.n,c:z.c||10000,where:'Cabin'});
   for(const it of DECOR)if(S.decor[it.id]&&YI[it.id]&&!YI[it.id].unit)out.push({id:it.id,n:it.n,c:it.c||10000,where:'Yard'});return out}
 function upgPrice(c,t){const b=c<5000?0:c<20000?1:2;return t===1?{c:Math.round(c*.2),m:[{scrap:4,paint:2},{scrap:6,brass:4,paint:2},{scrap:8,brass:6,paint:4}][b]}:{c:Math.round(c*.5),m:[{brass:4,glass:2,moon:1},{brass:6,glass:4,moon:2},{brass:8,glass:6,moon:3,amber:1}][b]}}
 function upgOf(id,cb){const src=cb||(VISIT?VISIT.S.cab:CAB()),u=src&&src.upg&&src.upg[id];return u===1||u===2?u:0}
@@ -3822,7 +3830,7 @@ function lodgeUI(sec){if(!hdOpen())return;sec=LDG_T[sec]?sec:LDG.sec||'jobs';LDG
     <p class="ldg-fine">${dn}/3 this week. A new list goes up on Monday. Finish all three for 2 Mill Bait. Fish come out of your cooler.</p><p class="ldg-fine">Full weeks finished: ${HD().stamps|0}. Hattie gives regulars a rocking chair off the porch after 2, and an antler coat rack after 5.</p>`;
   else if(sec==='bench')h=hatchPool().map(f=>{const c=FLY_COST[f.id],got=!!fl[f.id];
       return `<div class="hd-row${got?' done':''}"><div><b>${f.fly}${f.id===x.id?' · hatching today':''}</b>${got?'<span class="hd-cost"><span class="ok">In your fly box</span></span>':`<span class="hd-cost"><span class="${S.coins>=c.c?'ok':''}">$${money(c.c)}</span>${Object.entries(c.m).map(([m,n])=>`<span class="${(S.mats[m]||0)>=n?'ok':''}">${n} ${MI(m).n} (${S.mats[m]||0})</span>`).join('')}</span>`}</div>${got?'':`<button class="sbtn" data-ldg="fly-${f.id}"${flyCan(f.id)?'':' disabled'}>Tie</button>`}</div>`}).join('')+
-    '<p class="ldg-fine">A fly is tied once and kept for good. On its hatch days you fish it automatically: Headwaters fish bite 25% faster and rare fish turn up 1.5 times as often.</p>';
+    '<p class="ldg-fine">A fly is tied once and kept for good. On its hatch days you fish it automatically: Headwaters fish bite 25% faster and rare fish turn up 1.5 times as often.</p>'+flyRodHTML();
   else if(sec==='today')h=`<div class="ldg-sec"><p class="ldg-kp">“${on?`${x.pl} are coming off the water and you’ve got the fly for it. Go fish.`:`${x.pl} are hatching today. The bench is under the window if you want to tie one.`}”</p><p><b>${x.n} hatch.</b> ${on?'Your fly matches: bites come 25% faster and rare fish turn up 1.5 times as often in the Headwaters.':`You haven’t tied the ${x.fly} yet.`} Tomorrow: ${tom.n}.</p><p>Beaver Meadow is at <b>${hdHigh()?'high':'low'} water</b>${hdBroke()?', and the dam broke overnight':''}. Tomorrow: ${hdHigh(S.day+1)?'high':'low'}.</p></div>`;
   else if(sec==='room'){const nap=lodgeNapWhy();h=`<div class="hd-row"><div><b>Take a nap in Room 4</b><span class="hd-cost">Refills your stamina once a day. Your own bed is still the only place to get Well Rested.${nap?` ${nap}`:''}</span></div><button class="sbtn" data-ldg="rest"${nap||S.sleep?' disabled':''}>Rest</button></div>`}
   else if(sec==='wall')h=`<div class="ldg-wall">${HDW.map(w=>{const sp=FISH.filter(f=>f.at===w.id),n=sp.filter(f=>S.log[f.id]).length,got=!!(S.sets&&S.sets[w.id]);
@@ -3833,7 +3841,7 @@ function lodgeUI(sec){if(!hdOpen())return;sec=LDG_T[sec]?sec:LDG.sec||'jobs';LDG
     if(sec==='room'&&q.step===2)h+=`<div class="hd-row"><div><b>Room 6</b><span class="hd-cost">Locked since 1962. Nobody has the key. <span class="${S.coins>=Q10LOCK?'ok':''}">$${money(Q10LOCK)}</span> for the locksmith.</span></div><button class="sbtn" data-ldg="q10room"${S.coins>=Q10LOCK?'':' disabled'}>Open it</button></div>`;
     if(sec==='room'&&q.step===7)h+='<p class="ldg-fine">Hattie gives you Room 6 now, the good room: your nap there also leaves you Well Rested for 10 minutes.</p>'}
   B.innerHTML=`<div class="ldg">${h}</div>`;$('plotModal').hidden=false;if(sec==='guest'){lodgeGuests();try{q10Book()}catch(e){}}}
-$('plotBody').addEventListener('click',e=>{const b=e.target.closest('[data-ldg]');if(!b||b.disabled)return;const k=b.dataset.ldg;if(k==='rest')lodgeRest();else if(k==='q10hattie')q10Hattie();else if(k==='q10room'){q10Unlock();lodgeRe()}else if(k.startsWith('job'))lodgeGive(+k.slice(3));else if(k.startsWith('fly-'))flyTie(k.slice(4))});
+$('plotBody').addEventListener('click',e=>{const b=e.target.closest('[data-ldg]');if(!b||b.disabled)return;const k=b.dataset.ldg;if(k==='rest')lodgeRest();else if(k==='q10hattie')q10Hattie();else if(k==='q10room'){q10Unlock();lodgeRe()}else if(k.startsWith('job'))lodgeGive(+k.slice(3));else if(k.startsWith('fly-'))flyTie(k.slice(4));else if(k.startsWith('rod-'))flyRodWrap(k.slice(4));else if(k.startsWith('roduse-'))flyRodUse(k.slice(7))});
 
 // ==HEADWATERS: MAP PANEL== sits under the lake map on the Map tab. Before the road is built it shows what is needed;
 // after, it is the region's own map with a pin and a card for each water.
@@ -4421,6 +4429,7 @@ const Q_RODS=[{...RSK('starforged','Starforged','M','#1a1440','#ffe8a8','starfor
   {...RSK('legacy','Legacy','L','#5a3a22','#e8b030','legacy','#e8b030'),quest:true,pr:1},{...RSK('legacylit','Lit Legacy','M','#3a2418','#7affe0','legacy','#7affe0'),quest:true,pr:5},{...RSK('legacygold','Golden Legacy','M','#ffd05a','#ffffff','legacy','#fff2a0'),quest:true,pr:10}];
 Q_RODS.push({...RSK('admiral','Admiral’s Spyglass','M','#14224a','#ffd05a','coins','#ffd05a'),quest:true},{...RSK('mbronze','Bronze Master','R','#a8642a','#e0904a','none',''),quest:true},{...RSK('msilver','Silver Master','L','#c8d0dc','#f4f8ff','none','#dfe8f4'),quest:true},{...RSK('mgold','Gold Master','L','#c8961a','#ffe08a','coins','#ffd05a'),quest:true},{...RSK('mprism','Prismatic Master','M','#8a5ae8','#5ae8d8','stars','#c8a8ff'),quest:true});
 Q_RODS.push({...RSK('wishbone','Wishbone','L','#f0e2c0','#c8a070','feathers','#ffe8b0'),quest:true},{...RSK('gobbler','Golden Gobbler','M','#c8861a','#ffe8a0','feathers','#ffd05a'),quest:true,gob:1});
+Q_RODS.push(...[RSK('cane','Split Cane','U','#c8963c','#7a2a1e'),RSK('birchrod','Birch Bark','U','#ece4d2','#3a3430'),RSK('brookie','Brook Trout','R','#4a6a3a','#f08a5a','splash'),RSK('coachman','Royal Coachman','R','#7a1a1a','#f4f0e6','feathers'),RSK('antler','Shed Antler','E','#e0d2ac','#fff2c8','hatch','#fff2c8'),RSK('quartz','River Quartz','E','#f0e6f4','#c89af0','stars','#e8c8ff'),RSK('mirror','Mirror King','L','#1a2a4a','#dfe8f4','hatch','#bcd8ff')].map(x=>({...x,quest:true,fly:1})));
 Q_RODS.push({...RSK('phoenix','Flame Feather','M','phoenix','#ffd23a','phoenix','#ff7a2a'),quest:true,phx:1});
 // Town-only bobbers from Marge's Counter (shown in the locker once owned)
 const T_BOBS=[BSK('neonpink','Neon Pink','U','glow','#ff6ae0','#ffd0f4'),BSK('neoncyan','Neon Cyan','U','glow','#4ae0ff','#d0f8ff'),BSK('harbor','Harbor Buoy','R','buoy','#1e3a5a','#e8b030'),BSK('hlight','Harbor Light','R','lighthouse','#c8281a','#f4f0e8'),BSK('slamp','Streetlamp','E','lantern','#2a2a30','#ffe8a8')].map(b=>({...b,quest:true,town:true}));
@@ -4539,8 +4548,16 @@ function drawBobber(c,x,y,sk,d,T,r){r=r||4.5;const on=lit(d);c.save();
 const RFX=[];
 function sunFlare(x,y,bite,T,d){ctx.save();ctx.globalCompositeOperation='lighter';glow(x,y+6,46,.16+.22*(1-d),'255,190,90');ctx.strokeStyle=`rgba(255,220,140,${.25+.2*(1-d)})`;ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(x,y+6,18+Math.sin(T*2)*2,4,0,0,7);ctx.stroke();
   if(bite){const f=.6+.4*Math.sin(T*22);glow(x,y,90,.45*f,'255,210,120');ctx.strokeStyle=`rgba(255,240,200,${.5*f})`;ctx.lineWidth=1.4;for(let k=0;k<8;k++){const a=k*Math.PI/4+T;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*8,y+Math.sin(a)*8);ctx.lineTo(x+Math.cos(a)*(26+f*14),y+Math.sin(a)*(26+f*14));ctx.stroke()}}ctx.restore()}
+// ----- fly rod finishes (v177): wrapped at Hattie's bench from Headwaters materials. Cosmetic, like every rod finish.
+const FLY_RODS=[['r_cane',15000,{bark:4,feather:4}],['r_birchrod',25000,{bark:10}],['r_brookie',60000,{feather:8,bark:6}],['r_coachman',90000,{feather:14,antler:4}],['r_antler',180000,{antler:10,bark:6}],['r_quartz',250000,{quartz:12,moon:1}],['r_mirror',600000,{quartz:10,antler:10,moon:4}]].map(([id,c,m])=>({id,c,m}));
+const flyRodBy=id=>FLY_RODS.find(r=>r.id===id),flyRodCan=id=>{const r=flyRodBy(id);return !!r&&hdOpen()&&!(PNT().own[id]|0)&&S.coins>=r.c&&Object.entries(r.m).every(([m,n])=>(S.mats[m]||0)>=n)};
+function flyRodWrap(id){if(!flyRodCan(id))return;const r=flyRodBy(id),P=PNT(),it=ITEM_BY[id];S.coins-=r.c;for(const [m,n] of Object.entries(r.m))S.mats[m]-=n;P.own[id]=1;P.eqR=id;storeDirty=true;sfx('craft');
+  celebrate({lbl:'New rod finish',r:it.t,name:it.n,sub:'It’s on your rod. Change it any time at the bench or in Crate Expectations, under Looks.',icon:`<img alt="" src="${itemThumb(id,96,44)}" style="width:100%">`});save();try{renderAll()}catch(e){}lodgeRe()}
+function flyRodUse(id){const P=PNT();if(!(P.own[id]|0)||!flyRodBy(id))return;P.eqR=P.eqR===id?null:id;sfx('click');save();try{renderAll()}catch(e){}lodgeRe()}
+function flyRodHTML(){const P=PNT(),n=FLY_RODS.filter(r=>P.own[r.id]|0).length;return `<div class="sec-h" style="margin-top:12px"><h3>Rod finishes</h3><small>${n}/${FLY_RODS.length}</small></div>`+FLY_RODS.map(r=>{const it=ITEM_BY[r.id],got=!!(P.own[r.id]|0),on=P.eqR===r.id;
+    return `<div class="hd-row${got?' done':''}"><div><b><img class="ldg-rod" alt="" src="${itemThumb(r.id,96,44)}">${esc(it.n)} <span class="eyebrow" style="color:${SK_TIERS[it.t].col}">${SK_TIERS[it.t].n||''}</span></b>${got?`<span class="hd-cost"><span class="ok">${on?'On your rod':'In your looks'}</span></span>`:`<span class="hd-cost"><span class="${S.coins>=r.c?'ok':''}">$${money(r.c)}</span>${Object.entries(r.m).map(([m,k])=>`<span class="${(S.mats[m]||0)>=k?'ok':''}">${k} ${MI(m).n} (${S.mats[m]||0})</span>`).join('')}</span>`}</div><button class="sbtn" data-ldg="${got?'roduse':'rod'}-${r.id}"${got||flyRodCan(r.id)?'':' disabled'}>${got?(on?'Take off':'Use'):'Wrap'}</button></div>`}).join('')+'<p class="ldg-fine">Rod finishes only change how your rod looks. The rarer ones do something when you land a fish.</p>'}
 function rodFx(x,y){const sk=rodEq();if(!sk||!sk.fx||RM)return;const c2=sk.c2,col=sk.col==='prism'?'#ff3a3a':sk.col;
-  if(sk.fx==='splash')burst(x,y-6,[c2,'#ffffff',col],26);else if(sk.fx==='sparks')burst(x,y-6,['#ff7a2a','#ffd02a','#ff3a1a'],30);else if(sk.fx==='snow')burst(x,y-6,['#ffffff','#bfe6ff'],26);
+  if(sk.fx==='hatch')burst(x,y-6,[c2,'#ffffff'],14);else if(sk.fx==='splash')burst(x,y-6,[c2,'#ffffff',col],26);else if(sk.fx==='sparks')burst(x,y-6,['#ff7a2a','#ffd02a','#ff3a1a'],30);else if(sk.fx==='snow')burst(x,y-6,['#ffffff','#bfe6ff'],26);
   else if(sk.fx==='stars')burst(x,y-10,['#ffffff','#c8b0ff','#7ac8ff'],40);else if(sk.fx==='coins')burst(x,y-10,['#ffd05a','#fff2b0','#e8b830'],50);else if(sk.fx==='feathers')burst(x,y-10,sk.id==='r_gobbler'?['#ffd05a','#ff9a3a','#fff2b0','#c8461f']:['#8a4a1a','#c8861a','#e8c890','#f4f0e6'],sk.id==='r_gobbler'?55:30);else if(sk.fx==='starforge')burst(x,y-10,['#ffffff','#ffe8a8','#ffd870','#9ad8ff','#c8a0ff'],90);else if(sk.fx==='phoenix')burst(x,y-10,['#ff3a1a','#ff8a2a','#ffd23a','#fff2b0'],80);else if(sk.fx==='fireflies')burst(x,y-8,['#d8ff6a','#fff6a0'],18);else if(sk.fx==='butterflies')burst(x,y-8,['#ffb04a','#ff7a1a','#fff2d0'],16);else if(sk.fx==='birds')burst(x,y-8,['#ffd05a','#ffffff'],14);else if(sk.fx==='rainbow')burst(x,y-10,['#ff3a3a','#ffa02a','#ffe24a','#3ad06a','#3a8aff','#a05aff'],60);
   RFX.push({k:sk.fx,x,y,t0:performance.now()/1000,c:c2,c1:col});if(RFX.length>6)RFX.shift()}
 function drawRodFx(){const now=performance.now()/1000;try{phxBirdDraw(now)}catch(e){}try{gobStrutDraw(now)}catch(e){}for(let i=RFX.length-1;i>=0;i--){const f=RFX[i];const q=now-f.t0;if(q>1.6){RFX.splice(i,1);continue}ctx.save();
@@ -4550,6 +4567,7 @@ function drawRodFx(){const now=performance.now()/1000;try{phxBirdDraw(now)}catch
   else if(f.k==='bubbles'){for(let j=0;j<8;j++){const p=q-j*.08;if(p<0||p>1)continue;ctx.strokeStyle=f.c;ctx.globalAlpha=1-p;ctx.lineWidth=1;ctx.beginPath();ctx.arc(f.x+Math.sin(j*2.3)*10,f.y-p*40,2+j%3,0,7);ctx.stroke()}}
   else if(f.k==='rainbow'&&q<1.4){const cols=['#ff3a3a','#ffa02a','#ffe24a','#3ad06a','#3a8aff','#a05aff'];ctx.globalAlpha=Math.min(1,(1.4-q)*1.5)*.8;ctx.lineWidth=2.4;cols.forEach((col,j)=>{ctx.strokeStyle=col;ctx.beginPath();ctx.arc(f.x,f.y+4,26+j*3,Math.PI,Math.PI+Math.PI*Math.min(1,q*2));ctx.stroke()})}
   else if(f.k==='phoenix'){const sp=Math.min(1,q*2.2);ctx.globalCompositeOperation='lighter';ctx.lineCap='round';for(const sd of [-1,1])for(let j=0;j<7;j++){const a=-Math.PI/2+sd*(.25+j*.17)*sp,len=(26+j*5)*Math.min(1,q*3),ex=f.x+Math.cos(a)*len,ey=f.y-8+Math.sin(a)*len;ctx.globalAlpha=Math.max(0,1-q/1.6);ctx.strokeStyle=j<3?'#ffd23a':'#ff6a1a';ctx.lineWidth=2.4-j*.2;ctx.beginPath();ctx.moveTo(f.x,f.y-8);ctx.quadraticCurveTo(f.x+Math.cos(a)*len*.5+sd*4,f.y-14+Math.sin(a)*len*.5,ex,ey);ctx.stroke()}}
+  else if(f.k==='hatch'){ctx.lineCap='round';for(let j=0;j<9;j++){const p=q-j*.06;if(p<0)continue;const hx=f.x+Math.sin(j*1.9+p*4)*(6+j*2.4),hy=f.y-4-p*(26+j*3.5),w=Math.sin(q*30+j)*2.2;ctx.globalAlpha=Math.max(0,1-p/1.5);ctx.strokeStyle=f.c;ctx.lineWidth=.9;ctx.beginPath();ctx.moveTo(hx-2.6,hy-w);ctx.lineTo(hx,hy);ctx.lineTo(hx+2.6,hy-w);ctx.stroke();ctx.fillStyle='#3a3020';ctx.fillRect(hx-.5,hy-.4,1,2.8)}}
   else if(f.k==='fireflies'){for(let j=0;j<10;j++){const p=q-j*.05;if(p<0)continue;const fx=f.x+Math.sin(j*2.1+p*3)*(8+j*2.2),fy=f.y-6-p*(28+j*3),bl=.5+.5*Math.sin(q*14+j*1.7);ctx.globalAlpha=Math.max(0,1-p/1.5)*bl;ctx.fillStyle=f.c;ctx.shadowColor=f.c;ctx.shadowBlur=8;ctx.beginPath();ctx.arc(fx,fy,1.6,0,7);ctx.fill()}}
   else if(f.k==='butterflies'){for(let j=0;j<5;j++){const a=-Math.PI/2+(j-2)*.45,p=Math.min(1.6,q),bx=f.x+Math.cos(a)*p*34+Math.sin(q*5+j)*3,by=f.y-6+Math.sin(a)*p*30+Math.cos(q*4+j)*2,w=Math.abs(Math.sin(q*22+j*1.3));ctx.globalAlpha=Math.max(0,1-q/1.6);
       for(const sd of [-1,1]){ctx.fillStyle=j%2?f.c1:'#ffb04a';ctx.beginPath();ctx.ellipse(bx+sd*2.4*w,by-1,2.6*w+.3,2.2,sd*.3,0,7);ctx.fill();ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.ellipse(bx+sd*1.8*w,by+1.6,1.6*w+.2,1.3,0,0,7);ctx.fill()}ctx.fillStyle='#1a1a1a';ctx.fillRect(bx-.4,by-2.2,.8,4.4)}}
@@ -5832,7 +5850,7 @@ function renderAll(){renderWx();renderSnd();renderCooler();renderVitals();render
 // ==FIELD GUIDE (v174)== two hands-off things that run while the game sits open: a bird feeder on your dock and a trail camera.
 // Neither is about money. Birds log themselves as they land; the camera fills a roll you flip through when you check in.
 // You can also sit and watch the trail: a photo taken while you watch is Witnessed (at least 2 stars and a gold corner).
-const FLD=()=>{if(!S.fg||typeof S.fg!=='object')S.fg={};const f=S.fg;f.birds=f.birds||{};f.animals=f.animals||{};f.feed=f.feed||{seed:null,left:0};f.cam=f.cam||{own:0,at:'yard',lure:null,lureN:0,roll:[]};return f};
+const FLD=()=>{if(!S.fg||typeof S.fg!=='object')S.fg={};const f=S.fg;f.birds=f.birds||{};f.animals=f.animals||{};f.feed=f.feed||{seed:null,left:0};f.cam=f.cam||{own:0,at:'yard',lure:null,lureN:0,roll:[]};if(!f.ms||typeof f.ms!=='object')f.ms={};return f};
 const SEEDS={sun:{n:'Sunflower seed',c:300,col:'#3a3026'},thistle:{n:'Thistle',c:500,col:'#6a5a3a'},suet:{n:'Suet cake',c:600,col:'#e8dcc0'},nectar:{n:'Nectar',c:900,col:'#e0483a'},corn:{n:'Cracked corn',c:200,col:'#e8b830'}},SEED_N=45;
 const BD=(id,n,r,seed,col,c2,c3,o)=>Object.assign({id,n,r,seed:seed.split(' '),col,c2,c3,sz:1},o||{});
 const BIRDS=[
@@ -5904,25 +5922,46 @@ function birdPool(){const F=FLD(),sd=F.feed.seed;if(!has('feeder')||!sd||F.feed.
   return BIRDS.filter(b=>b.seed.includes(sd)&&(b.t?b.t.includes(ph):ph!=='night')&&(!b.wx||b.wx.includes(wx)))}
 function birdVisit(quiet){const pool=birdPool();if(!pool.length)return null;const F=FLD(),b=pickW(pool.map(b=>({b,w:FG_W[b.r]}))).b,L=F.birds[b.id]||(F.birds[b.id]={n:0,d:S.day});
   const isNew=L.n===0;L.n++;F.feed.left--;if(isNew&&!quiet){celebrate({lbl:'New bird at your feeder',r:b.r,name:b.n,sub:`${Object.keys(F.birds).length} of ${BIRDS.length} in your Field Guide`,icon:`<img src="${fgThumb('b',b.id)}" alt="" style="width:100%">`});fgDirty=true}
-  if(F.feed.left<=0&&!quiet)showToast('The bird feeder is empty','Field Guide');return {b,isNew}}
-function feedFill(sd){const F=FLD(),s=SEEDS[sd];if(!s||!has('feeder')||S.coins<s.c)return;S.coins-=s.c;F.feed.seed=sd;F.feed.left=SEED_N;FGS.bt=rnd(8,20);sfx('coin');showToast(`${s.n} in the feeder`,`About an hour of visits`);save();renderField()}
+  if(F.feed.left<=0&&!quiet)showToast('The bird feeder is empty','Field Guide');if(isNew&&!quiet)try{fgMsCheck()}catch(e){}return {b,isNew}}
+function feedFill(sd){const F=FLD(),s=SEEDS[sd];if(!s||!has('feeder')||S.coins<s.c)return;S.coins-=s.c;F.feed.seed=sd;F.feed.left=seedN();FGS.bt=rnd(8,20);sfx('coin');showToast(`${s.n} in the feeder`,`About an hour of visits`);save();renderField()}
+// ----- Field Guide milestones (v177): 10, 20 and 30 birds or animals each earn something, once.
+const FG_MS={birds:[{n:10,id:'birdbath',nm:'Birdbath',decor:1,r:'U',d:'A stone birdbath for your yard. Birds you know stop in for a splash.'},{n:20,id:'birdhouse',nm:'Birdhouse',decor:1,r:'R',d:'A painted birdhouse on a pole for your yard.'},{n:30,id:'hopper',nm:'Hopper Feeder',r:'L',d:'Your feeder holds twice the seed: one fill lasts about two hours.'}],
+  animals:[{n:10,id:'carvedbear',nm:'Carved Bear',decor:1,r:'U',d:'A chainsaw-carved bear for your yard.'},{n:20,id:'roll36',nm:'36-photo roll',r:'R',d:'The trail camera holds 36 photos instead of 24.'},{n:30,id:'xingsign',nm:'Wildlife Crossing Sign',decor:1,r:'L',d:'A yellow crossing sign for your yard.'}]};
+const rollN=()=>FLD().ms.roll36?36:ROLL_N,seedN=()=>FLD().ms.hopper?SEED_N*2:SEED_N;
+function fgMsCheck(){const F=FLD(),cnt={birds:Object.keys(F.birds).length,animals:Object.keys(F.animals).length};let any=false;
+  for(const k of ['birds','animals'])for(const m of FG_MS[k]){if(cnt[k]<m.n||F.ms[m.id])continue;F.ms[m.id]=1;any=true;if(m.decor)try{hvGiveDecor(m.id)}catch(e){}
+    celebrate({lbl:`${m.n} ${k} in your Field Guide`,r:m.r,name:m.nm,sub:m.decor?'A delivery is on its way to your yard':m.d,icon:svgI(k==='birds'?'feather':'eye','#8fd18a')})}
+  if(any){storeDirty=true;fgDirty=true;save()}return any}
+function fgMsHTML(k,n){const F=FLD(),nx=FG_MS[k].find(m=>!F.ms[m.id]);return `<div class="fg-ms">${FG_MS[k].map(m=>`<span class="fg-m${F.ms[m.id]?' got':''}"><b>${F.ms[m.id]?'✓':m.n}</b> ${m.nm}</span>`).join('')}</div>${nx?`<p class="fg-note">At ${nx.n} ${k} (${Math.min(n,nx.n)}/${nx.n}): ${nx.d}</p>`:''}`}
+function birdbathDraw(d,T){const st=rgb(mix([70,72,78],[198,200,204],d)),st2=rgb(mix([50,52,58],[158,160,166],d));ctx.fillStyle=st2;ctx.beginPath();ctx.ellipse(0,-1.5,9,2.6,0,0,7);ctx.fill();ctx.fillStyle=st;ctx.fillRect(-2.6,-21,5.2,20);ctx.fillStyle=st2;ctx.fillRect(-3.6,-8,7.2,1.6);
+  ctx.fillStyle=st;ctx.beginPath();ctx.moveTo(-13,-26);ctx.lineTo(13,-26);ctx.quadraticCurveTo(0,-15,-13,-26);ctx.fill();ctx.fillStyle=rgb(mix([40,70,100],[124,192,228],d));ctx.beginPath();ctx.ellipse(0,-26,11.5,2,0,0,7);ctx.fill();
+  try{const ids=Object.keys(FLD().birds);if(ids.length&&d>.45&&Math.sin(T*.11)>.15){const b=BIRD_BY[ids[Math.floor(T/57)%ids.length]];if(b&&b.k!=='owl'&&b.k!=='hum'){fgBird(ctx,b,-2,-27,.8/Math.max(1,b.sz*.85),T,1,{still:1});if(!RM&&Math.sin(T*5)>.5){ctx.fillStyle='rgba(226,242,255,.85)';for(const k of [-1,1])ctx.fillRect(-2+k*6,-31-Math.abs(Math.sin(T*9+k))*3,1.2,1.2)}}}}catch(e){}}
+function birdhouseDraw(d){const post=rgb(mix([30,22,16],[132,96,62],d)),body=rgb(mix([40,52,64],[122,172,206],d)),roof=rgb(mix([52,20,16],[178,62,46],d));ctx.fillStyle=post;ctx.fillRect(-1.5,-44,3,44);
+  ctx.fillStyle=body;ctx.fillRect(-8,-58,16,15);ctx.fillStyle=roof;ctx.beginPath();ctx.moveTo(-11,-57);ctx.lineTo(0,-67);ctx.lineTo(11,-57);ctx.fill();ctx.fillStyle=rgb(mix([8,8,10],[30,24,20],d));ctx.beginPath();ctx.arc(0,-52,2.8,0,7);ctx.fill();ctx.fillStyle=post;ctx.fillRect(-1,-47.5,2,1.2);ctx.fillRect(-.6,-47.5,1.2,-3+3);ctx.fillRect(-9.5,-43.5,19,1.6)}
+function carvedBearDraw(d){const w=rgb(mix([38,24,14],[158,104,58],d)),w2=rgb(mix([26,16,10],[116,74,40],d)),w3=rgb(mix([52,36,22],[196,140,86],d));ctx.fillStyle=w2;ctx.fillRect(-9,-8,18,8);ctx.fillStyle=w3;ctx.beginPath();ctx.ellipse(0,-8,9,2.2,0,0,7);ctx.fill();
+  ctx.fillStyle=w;ctx.beginPath();ctx.ellipse(0,-20,8,12,0,0,7);ctx.fill();for(const k of [-1,1]){ctx.beginPath();ctx.ellipse(k*5,-9.5,3.4,2.2,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(k*7.2,-22,2.4,5.4,k*.35,0,7);ctx.fill();ctx.beginPath();ctx.arc(k*5,-40.5,2.4,0,7);ctx.fill()}
+  ctx.beginPath();ctx.arc(0,-35,6.6,0,7);ctx.fill();ctx.fillStyle=w3;ctx.beginPath();ctx.ellipse(0,-33,3.2,2.6,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(0,-19,4.4,7,0,0,7);ctx.fill();ctx.fillStyle=rgb(mix([8,6,4],[30,22,16],d));ctx.beginPath();ctx.arc(0,-34,1.1,0,7);ctx.fill();for(const k of [-1,1]){ctx.beginPath();ctx.arc(k*2.6,-37,.8,0,7);ctx.fill()}
+  ctx.strokeStyle=w2;ctx.lineWidth=.6;for(const y of [-26,-22,-18,-14]){ctx.beginPath();ctx.moveTo(-6.5,y);ctx.lineTo(-4.8,y+1.6);ctx.moveTo(6.5,y);ctx.lineTo(4.8,y+1.6);ctx.stroke()}}
+function xingSignDraw(d){const post=rgb(mix([60,62,66],[150,154,160],d)),yel=rgb(mix([96,78,14],[246,204,48],d)),blk=rgb(mix([8,8,8],[26,24,22],d));ctx.fillStyle=post;ctx.fillRect(-1.3,-34,2.6,34);ctx.save();ctx.translate(0,-40);ctx.rotate(Math.PI/4);ctx.fillStyle=blk;ctx.fillRect(-9.6,-9.6,19.2,19.2);ctx.fillStyle=yel;ctx.fillRect(-8.6,-8.6,17.2,17.2);ctx.restore();
+  ctx.fillStyle=blk;ctx.strokeStyle=blk;ctx.beginPath();ctx.ellipse(-.6,-39,4.4,2.2,-.12,0,7);ctx.fill();ctx.lineWidth=1;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-3.6,-38);ctx.lineTo(-5.2,-33.6);ctx.moveTo(-2,-37.6);ctx.lineTo(-1.6,-33.6);ctx.moveTo(2,-38);ctx.lineTo(4.6,-34.4);ctx.moveTo(3,-38.6);ctx.lineTo(1.6,-34);ctx.stroke();
+  ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(3,-40);ctx.lineTo(4.8,-43.4);ctx.stroke();ctx.beginPath();ctx.ellipse(5.6,-44,1.9,1.2,-.3,0,7);ctx.fill();ctx.lineWidth=.7;ctx.beginPath();ctx.moveTo(4.8,-44.8);ctx.lineTo(4,-48);ctx.moveTo(4.4,-46.4);ctx.lineTo(6,-47.6);ctx.moveTo(4.2,-47);ctx.lineTo(2.8,-47.8);ctx.stroke()}
 // ----- trail camera -----
 const camTrail=()=>{const F=FLD();let t=TRAILS.find(x=>x.id===F.cam.at);if(!t||!t.ok()){t=TRAILS[0];F.cam.at='yard'}return t};
 function camPool(min,wx){const F=FLD(),tr=camTrail().id,ph=phaseOf(min==null?S.min:min),w=wx||S.wx.id,lu=F.cam.lureN>0?F.cam.lure:null;
   return ANIMALS.filter(a=>a.at.includes(tr)&&a.t.includes(ph)&&(!a.wx||a.wx.includes(w))&&(!a.need||a.need())).map(a=>({a,w:FG_W[a[tr]||a.r]*(lu&&a.lure&&a.lure.split(' ').includes(lu)?3:1)}))}
 const camGap=()=>rnd(150,330)*(FLD().cam.lureN>0?.75:1);
-function camSnap(a,wit,quiet){const F=FLD(),C=F.cam;if(C.roll.length>=ROLL_N||!a)return;let st=pickW([{s:1,w:55},{s:2,w:33},{s:3,w:12}]).s;if(wit)st=Math.max(2,st);
-  C.roll.push({a:a.id,s:st,w:wit?1:0,d:S.day,m:Math.round(S.min)});if(C.lureN>0&&--C.lureN<=0)C.lure=null;fgDirty=true;
-  if(!quiet&&C.roll.length>=ROLL_N)showToast('The trail camera roll is full','Field Guide')}
+function camSnap(a,wit,quiet){const F=FLD(),C=F.cam;if(C.roll.length>=rollN()||!a)return;let st=pickW([{s:1,w:55},{s:2,w:33},{s:3,w:12}]).s;if(wit)st=Math.max(2,st);
+  C.roll.push(phMake(a,st,wit));if(C.lureN>0&&--C.lureN<=0)C.lure=null;fgDirty=true;
+  if(!quiet&&C.roll.length>=rollN())showToast('The trail camera roll is full','Field Guide')}
 function camBuy(){const F=FLD();if(F.cam.own||S.coins<CAM_COST.c||!Object.entries(CAM_COST.m).every(([m,n])=>(S.mats[m]||0)>=n))return;S.coins-=CAM_COST.c;for(const [m,n] of Object.entries(CAM_COST.m))S.mats[m]-=n;
   F.cam.own=1;F.cam.at='yard';FGS.ct=camGap();storeDirty=true;sfx('craft');celebrate({lbl:'Trail camera set',r:'U',name:'Your back yard',sub:'It photographs whatever walks past, day and night',icon:svgI('eye','#8fd18a')});save();renderField()}
 function camMove(id){const F=FLD(),t=TRAILS.find(x=>x.id===id);if(!F.cam.own||!t||!t.ok()||F.cam.at===id)return;F.cam.at=id;{const wn=$('watchName');if(wn)wn.textContent=t.n}FGS.ct=camGap();FGS.next=null;FGS.walk=null;sfx('click');showToast(`Camera moved to ${t.n}`,'Trail camera');save();renderField()}
 function camLure(k){const F=FLD(),l=LURES[k];if(!F.cam.own||!l||S.coins<l.c)return;S.coins-=l.c;F.cam.lure=k;F.cam.lureN=LURE_N;sfx('coin');showToast(`${l.n} set out`,`Good for ${LURE_N} photos`);save();renderField()}
 function camDevelop(){const F=FLD(),C=F.cam;if(!C.roll.length)return;let pay=0;const out=[];
   for(const p of C.roll){const a=AN_BY[p.a];if(!a)continue;const L=F.animals[a.id]||(F.animals[a.id]={n:0,s:0,w:0,d:p.d}),isNew=L.n===0,best=p.s>L.s;L.n++;if(best)L.s=p.s;if(p.w)L.w=1;
-    const v=Math.round(PHOTO_PAY[a.r]*p.s*(p.w?1.25:1));pay+=v;out.push({a:a.id,s:p.s,w:p.w,isNew,best:best&&!isNew,v})}
+    const v=Math.round(PHOTO_PAY[a.r]*p.s*(p.w?1.25:1)),q=phNorm(p);if(isNew||best||!L.p)L.p=q;pay+=v;out.push({a:a.id,s:p.s,w:p.w,isNew,best:best&&!isNew,v,p:q})}
   C.roll=[];S.coins+=pay;FGS.dev={out,pay};sfx('coin');const nw=out.filter(o=>o.isNew).length;if(nw)celebrate({lbl:'New in your Field Guide',r:'R',name:`${nw} new animal${nw>1?'s':''}`,sub:`${Object.keys(F.animals).length} of ${ANIMALS.length} photographed`,icon:svgI('eye','#8fd18a')});
-  if(!FGS.ct||FGS.ct<=0)FGS.ct=camGap();save();renderField()}
+  if(!FGS.ct||FGS.ct<=0)FGS.ct=camGap();try{fgMsCheck()}catch(e){}save();renderField()}
 function fgWatch(on){const F=FLD();if(on&&!F.cam.own)return;if(on&&FEEDW.on)feederWatch(false);WATCH.on=!!on;FGS.walk=null;document.body.classList.toggle('watching',WATCH.on);const bar=$('watchBar');if(bar){bar.hidden=!WATCH.on;if(WATCH.on)$('watchName').textContent=camTrail().n}
   if(WATCH.on){if(sheetMode())sheetSet(false);else $('scene').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})}renderField()}
 // ----- time -----
@@ -5933,14 +5972,14 @@ function fgTick(dt){const F=S.fg;if(!F)return;
   if(FGS.bird){FGS.bird.t+=dt;if(FGS.bird.t>=FGS.bird.dur)FGS.bird=null}
   else if(has('feeder')&&F.feed&&F.feed.left>0&&phaseOf(S.min)!=='night'||(F.feed&&F.feed.left>0&&S.wx.id==='snow'&&has('feeder'))){if((FGS.bt-=dt)<=0){FGS.bt=rnd(50,110);const v=birdVisit();if(v)FGS.bird={id:v.b.id,t:0,dur:rnd(9,15),side:Math.random()<.5?-1:1,nw:v.isNew?1:0}}}
   // camera
-  const C=F.cam;if(C&&C.own&&C.roll.length<ROLL_N){FGS.ct-=dt;
+  const C=F.cam;if(C&&C.own&&C.roll.length<rollN()){FGS.ct-=dt;
     if(FGS.ct<=4.5&&!FGS.next){const pool=camPool();FGS.next=pool.length?pickW(pool).a:null;if(!FGS.next)FGS.ct=rnd(40,90);else if(WATCH.on)FGS.walk={a:FGS.next.id,t:0,dir:Math.random()<.5?1:-1}}
     if(FGS.ct<=0&&FGS.next){const wit=WATCH.on&&!document.hidden;camSnap(FGS.next,wit);if(wit){FGS.flash=1;sfx('snap');showToast(`Witnessed: ${FGS.next.n}`,'Trail camera')}FGS.next=null;FGS.ct=camGap()}}
   if(FGS.walk){FGS.walk.t+=dt;if(FGS.walk.t>9.5)FGS.walk=null}if(FGS.flash>0)FGS.flash=Math.max(0,FGS.flash-dt*3);
   if((fgRT-=dt)<=0){fgRT=2;if(fgDirty&&curTab==='field'){fgDirty=false;renderField()}else fgCount()}}
 function fgOffline(sec){const F=S.fg;if(!F||sec<60)return;let birds=0,nb=0,shots=0;
   if(has('feeder')&&F.feed&&F.feed.left>0){const n=Math.min(F.feed.left,Math.floor(sec/80));for(let i=0;i<n;i++){const v=birdVisit(true);if(!v)break;birds++;if(v.isNew)nb++}}
-  const C=F.cam;if(C&&C.own){const n=Math.min(ROLL_N-C.roll.length,Math.floor(sec/(240*(C.lureN>0?.75:1))));for(let i=0;i<n;i++){const m=((S.min-sec+i*240)%1440+1440)%1440,pool=camPool(m);if(pool.length){camSnap(pickW(pool).a,false,true);shots++}}}
+  const C=F.cam;if(C&&C.own){const n=Math.min(rollN()-C.roll.length,Math.floor(sec/(240*(C.lureN>0?.75:1))));for(let i=0;i<n;i++){const m=((S.min-sec+i*240)%1440+1440)%1440,pool=camPool(m);if(pool.length){camSnap(pickW(pool).a,false,true);shots++}}}
   FGS.away=birds||shots?`${birds?`${birds} bird${birds>1?'s':''} visited your feeder${nb?` (${nb} new)`:''}. `:''}${shots?`Your trail camera took ${shots} photo${shots>1?'s':''}.`:''}`:''}
 // ----- drawing -----
 function fgBird(c,b,x,y,s,T,dir,o){o=o||{};s*=b.sz*(b.plump?1.1:1);c.save();c.translate(x,y);c.scale(dir||1,1);
@@ -5962,7 +6001,8 @@ function fgBird(c,b,x,y,s,T,dir,o){o=o||{};s*=b.sz*(b.plump?1.1:1);c.save();c.tr
   c.fillStyle='#fff';c.beginPath();c.arc(.9*s,-.5*s,.75*s,0,7);c.fill();c.fillStyle='#111';c.beginPath();c.arc(1*s,-.5*s,.45*s,0,7);c.fill();c.restore();
   if(b.k!=='hum'&&b.k!=='peck'){c.strokeStyle='#5a4a3a';c.lineWidth=.6*s;c.beginPath();c.moveTo(-.5*s,-.8*s);c.lineTo(-.5*s,hop);c.moveTo(1.2*s,-.8*s);c.lineTo(1.2*s,hop);c.stroke()}
   c.restore()}
-function fgAnimal(c,a,x,y,s,T,dir,mv,d){d=d==null?1:d;const dm=h=>rgb(mix(hexRgb(h).map(v=>v*.36),hexRgb(h),Math.max(.3,d)));c.save();c.translate(x,y);c.scale((dir||1)*s,s);
+let FGEYE=null;
+function fgAnimal(c,a,x,y,s,T,dir,mv,d,pz){d=d==null?1:d;FGEYE=null;const hdp=pz&&pz.hd||0;const dm=h=>rgb(mix(hexRgb(h).map(v=>v*.36),hexRgb(h),Math.max(.3,d)));c.save();c.translate(x,y);c.scale((dir||1)*s,s);
   const ph=mv?T*(a.hop?7:a.big?4.2:6):0,hopY=a.hop&&mv?-Math.abs(Math.sin(ph))*5:0,by=-a.leg-a.H/2+hopY,L=a.L,H=a.H;
   if(a.glow){c.globalAlpha=.25;c.fillStyle='#fff';c.beginPath();c.ellipse(0,by,L*.8,H*1.3,0,0,7);c.fill();c.globalAlpha=1}
   if(a.k==='turkey'){c.fillStyle=dm(a.c2);for(let i=-3;i<=3;i++){c.save();c.translate(-L*.3,by);c.rotate(-1.2+i*.22);c.fillRect(-2,-H*1.15,4,H*1.1);c.restore()}c.fillStyle=dm(a.col);c.beginPath();c.ellipse(0,by,L*.45,H*.5,0,0,7);c.fill();
@@ -5989,14 +6029,14 @@ function fgAnimal(c,a,x,y,s,T,dir,mv,d){d=d==null?1:d;const dm=h=>rgb(mix(hexRgb
   if(a.ex==='spots'){c.fillStyle=dm('#5a4028');for(let i=0;i<9;i++){c.beginPath();c.arc(-L*.36+((i*7)%10)/10*L*.7,by-H*.2+((i*13)%7)/7*H*.4,1,0,7);c.fill()}}
   if(a.ex==='quill'){c.strokeStyle=dm('#d8d0c0');c.lineWidth=.8;for(let i=0;i<16;i++){const qx=-L*.42+i*L*.055;c.beginPath();c.moveTo(qx,by-H*.25);c.lineTo(qx-4,by-H*.25-7-(i%3)*2);c.stroke()}}
   // neck and head
-  const nk=a.neck?1:0,hx=L/2+(nk?L*.1:H*.2),hy=by-(nk?H*.9:H*.12)+(mv&&!a.hop?Math.sin(ph*2)*.6:0),hr=Math.max(3,H*(a.big?.3:.4));
+  const nk=a.neck?1:0,hx=L/2+(nk?L*.1:H*.2),hy=by-(nk?H*.9:H*.12)+(mv&&!a.hop?Math.sin(ph*2)*.6:0)+hdp*(nk?H*1.2:H*.42),hr=Math.max(3,H*(a.big?.3:.4));
   if(nk){c.strokeStyle=dm(a.col);c.lineWidth=H*.42;c.beginPath();c.moveTo(L*.4,by-H*.2);c.lineTo(hx-1,hy+1);c.stroke()}
   c.fillStyle=dm(a.col);c.beginPath();c.ellipse(hx,hy,hr*1.15,hr,0,0,7);c.fill();
   c.fillStyle=dm(a.snoutc||(a.snout?'#f4f0ec':a.col));c.beginPath();c.ellipse(hx+hr*(a.snout?1.3:1),hy+hr*.25,hr*(a.snout?.75:.6),hr*.48,0,0,7);c.fill();
   if(a.hump&&a.ex==='palm'){c.fillStyle=dm(a.col);c.beginPath();c.ellipse(hx+hr*1.3,hy+hr*.6,hr*.8,hr*.6,0,0,7);c.fill();c.beginPath();c.ellipse(hx-hr*.2,hy+hr*1.5,1.6,3.2,0,0,7);c.fill()}
   c.fillStyle=dm('#1a1410');c.beginPath();c.arc(hx+hr*(a.snout?2:1.55),hy+hr*.2,Math.max(.9,hr*.18),0,7);c.fill();
   if(a.ex==='mask'){c.fillStyle=dm('#1a1a1a');c.beginPath();c.ellipse(hx+hr*.35,hy-hr*.05,hr*.7,hr*.34,0,0,7);c.fill()}
-  c.fillStyle=a.glow?'#ff8aa0':'#fff';c.beginPath();c.arc(hx+hr*.4,hy-hr*.15,Math.max(.9,hr*.2),0,7);c.fill();c.fillStyle='#111';c.beginPath();c.arc(hx+hr*.46,hy-hr*.15,Math.max(.5,hr*.11),0,7);c.fill();
+  FGEYE=[x+(dir||1)*s*(hx+hr*.4),y+s*(hy-hr*.15),Math.max(.9,hr*.2)*s];c.fillStyle=a.glow?'#ff8aa0':'#fff';c.beginPath();c.arc(hx+hr*.4,hy-hr*.15,Math.max(.9,hr*.2),0,7);c.fill();c.fillStyle='#111';c.beginPath();c.arc(hx+hr*.46,hy-hr*.15,Math.max(.5,hr*.11),0,7);c.fill();
   // ears
   c.fillStyle=dm(a.col);const ex0=hx-hr*.45,ey0=hy-hr*.75;
   if(a.ear==='r'){c.beginPath();c.arc(ex0,ey0,hr*.42,0,7);c.fill()}
@@ -6006,6 +6046,81 @@ function fgAnimal(c,a,x,y,s,T,dir,mv,d){d=d==null?1:d;const dm=h=>rgb(mix(hexRgb
   if(a.ex==='antler'){c.strokeStyle=dm(a.glow?'#f8f4e8':'#d8c8a8');c.lineWidth=1.3;c.beginPath();c.moveTo(hx-hr*.1,hy-hr*.8);c.quadraticCurveTo(hx-hr*.9,hy-hr*2.6,hx+hr*.5,hy-hr*3.3);c.moveTo(hx-hr*.45,hy-hr*1.9);c.lineTo(hx+hr*.5,hy-hr*2.2);c.moveTo(hx-hr*.3,hy-hr*2.6);c.lineTo(hx-hr*1.1,hy-hr*3.2);c.stroke()}
   if(a.ex==='palm'){for(const [k,col] of [[1,a.glow?'#d8d4c8':'#a8946e'],[0,a.glow?'#f8f4e8':'#d0bc94']]){c.fillStyle=dm(col);c.save();c.translate(hx-hr*.5-k*hr*.5,hy-hr*.9);c.rotate(-.5);c.fillRect(-.9,-hr*.9,1.8,hr);c.beginPath();c.ellipse(-hr*.3,-hr*1.5,hr*1.5,hr*.62,0,0,7);c.fill();for(let i=0;i<5;i++){c.beginPath();c.moveTo(-hr*1.5+i*hr*.6,-hr*1.8);c.lineTo(-hr*1.4+i*hr*.6,-hr*2.7);c.lineTo(-hr*1.1+i*hr*.6,-hr*1.9);c.fill()}c.restore()}}
   c.restore()}
+// ----- trail photos (v177): every print is its own picture. A photo is {a,s,w,d,m,k,t,x}: animal, stars, witnessed, day, minute,
+// a random seed, the trail and the weather. The seed picks the pose, the facing, the distance, the framing and the backdrop details.
+const phRng=k=>{let t=(k>>>0)||1;return()=>{t=t+0x6D2B79F5|0;let r=Math.imul(t^t>>>15,1|t);r=r+Math.imul(r^r>>>7,61|r)^r;return((r^r>>>14)>>>0)/4294967296}};
+const PH_FR=['frame1','frame2','frame3'],PH_COST=5000,PH_SPOT=[[354,106],[436,106],[518,106]],PHC={},PHV={};
+const phWx=()=>{const w=S.wx&&S.wx.id;return w==='snow'?'s':w==='rain'||w==='storm'||w==='drizzle'?'r':w==='fog'?'f':''};
+const phMinOf=a=>{const t=(a.t||['day'])[0];return t==='dawn'?360:t==='dusk'?1140:t==='night'?1380:720};
+function phNorm(p){if(!p||typeof p!=='object'||!AN_BY[p.a])return null;const a=AN_BY[p.a],m=+p.m;
+  return {a:a.id,s:Math.max(1,Math.min(3,p.s|0||1)),w:p.w?1:0,d:Math.max(1,p.d|0||1),m:isFinite(m)&&m>=0&&m<1440?Math.round(m):phMinOf(a),k:Number.isFinite(+p.k)?(+p.k)>>>0:(Math.random()*4294967296)>>>0,t:TRAILS.some(t=>t.id===p.t)?p.t:a.at[0],x:['s','r','f'].includes(p.x)?p.x:''}}
+const phMake=(a,st,wit)=>({a:a.id,s:st,w:wit?1:0,d:S.day,m:Math.round(S.min),k:(Math.random()*4294967296)>>>0,t:camTrail().id,x:phWx()});
+const phKey=p=>[p.a,p.k,p.s,p.m,p.t,p.x,p.w].join('.');
+// Your best shot of an animal. Logs from before v177 get one made up once, so it is still yours alone.
+function phBest(id){const L=FLD().animals[id],a=AN_BY[id];if(!L||!a)return null;if(!phOkP(L.p))L.p=phNorm({a:id,s:L.s||1,w:L.w,d:L.d,m:phMinOf(a),t:a.at[0]});return L.p}
+const phOkP=p=>!!p&&typeof p==='object'&&!!AN_BY[p.a]&&Number.isFinite(p.k);
+function phDraw(c,p,sc){const a=AN_BY[p.a],R=phRng(p.k^0x9e3779b9),r=(lo,hi)=>lo+R()*(hi-lo),pz=phaseOf(p.m),night=pz==='night',tr=p.t,W=66,H=44;
+  c.save();c.scale(sc,sc);c.beginPath();c.rect(0,0,W,H);c.clip();
+  const hz=r(14,20),sky=pz==='dawn'?['#f2b48c','#f8e0b8']:pz==='dusk'?['#d8805c','#f2c48c']:p.x?['#a8b4bc','#d0d8dc']:['#8cc0e4','#d8ecf2'];
+  let g=c.createLinearGradient(0,0,0,hz+4);g.addColorStop(0,sky[0]);g.addColorStop(1,sky[1]);c.fillStyle=g;c.fillRect(0,0,W,H);
+  // the far side: every trail has its own
+  const pineT=(x,y,h,col)=>{c.fillStyle=col;c.beginPath();c.moveTo(x,y-h);c.lineTo(x+h*.3,y);c.lineTo(x-h*.3,y);c.fill()};
+  if(tr==='tarn'){c.fillStyle='#8a94a4';c.beginPath();c.moveTo(0,hz+2);for(let x=0;x<=W;x+=6)c.lineTo(x,hz-6-R()*9);c.lineTo(W,hz+2);c.fill();c.fillStyle='#eef2f6';for(let i=0;i<5;i++){const x=r(0,W);c.beginPath();c.moveTo(x-4,hz-5);c.lineTo(x,hz-12-R()*3);c.lineTo(x+4,hz-5);c.fill()}}
+  else if(tr==='falls'){c.fillStyle='#6c7078';c.fillRect(0,0,W,hz+2);c.fillStyle='#585c64';for(let i=0;i<9;i++)c.fillRect(r(0,W),r(0,hz),r(4,12),1.2);const fx=r(8,58);c.fillStyle='rgba(236,246,250,.9)';c.fillRect(fx-3,0,6,hz+3);c.fillStyle='rgba(255,255,255,.5)';c.beginPath();c.ellipse(fx,hz+3,9,3,0,0,7);c.fill()}
+  else{const n=tr==='steam'?5:11,col=tr==='meadow'?'#5a8a5c':'#3c6a4c';c.fillStyle=tr==='meadow'?'#7aa468':'#4a7a58';c.beginPath();c.moveTo(0,hz+2);for(let x=0;x<=W;x+=5)c.lineTo(x,hz-3-R()*4);c.lineTo(W,hz+2);c.fill();for(let i=0;i<n;i++)pineT(r(-2,W+2),hz+2,r(8,17),col)}
+  // ground
+  const gc={yard:'#6fa456',mill:'#6a9a54',meadow:'#a8a85c',falls:'#7c8478',steam:'#b4a88c',tarn:'#98a48c'}[tr]||'#6fa456';c.fillStyle=p.x==='s'?'#e4eaf0':gc;c.fillRect(0,hz+1,W,H);
+  c.fillStyle='rgba(120,96,64,.5)';c.beginPath();const ty=hz+r(9,13);c.moveTo(0,ty+r(-2,2));c.quadraticCurveTo(33,ty+r(-4,4),W,ty+r(-2,2));c.lineTo(W,ty+7);c.quadraticCurveTo(33,ty+r(4,9),0,ty+7);c.fill();
+  if(tr==='yard'){c.fillStyle='#f0f0ea';const fy=hz-1;for(let x=r(-3,0);x<W;x+=4.2){c.fillRect(x,fy-5,2.2,8);c.beginPath();c.moveTo(x,fy-5);c.lineTo(x+1.1,fy-6.6);c.lineTo(x+2.2,fy-5);c.fill()}c.fillRect(0,fy-2.5,W,1)}
+  else if(tr==='mill'){c.fillStyle='#8c8880';for(let x=r(-4,0);x<W;x+=5.4){c.beginPath();c.ellipse(x+2.7,hz+2,3.2,2.4+R()*1.4,0,Math.PI,0);c.fill()}if(R()<.6){const mx=R()<.5?r(2,10):r(46,54);c.fillStyle='#9a3a2c';c.fillRect(mx,hz-11,14,12);c.fillStyle='#4a4644';c.beginPath();c.moveTo(mx-1.5,hz-11);c.lineTo(mx+7,hz-16);c.lineTo(mx+15.5,hz-11);c.fill()}}
+  else if(tr==='meadow'){for(let i=0;i<16;i++){c.fillStyle=['#f4e070','#f0f0f0','#e88ab0','#b89ae0'][i%4];c.fillRect(r(0,W),r(hz+3,H),1,1)}}
+  else if(tr==='steam'){for(let i=0;i<3;i++){const x=r(4,62),y=hz+r(0,5);c.fillStyle='rgba(255,255,255,.4)';for(let j=0;j<4;j++){c.beginPath();c.arc(x+Math.sin(j*1.7+i)*2,y-j*4,2.2+j*.9,0,7);c.fill()}}c.fillStyle='#d8c890';c.beginPath();c.ellipse(r(10,56),hz+4,7,1.6,0,0,7);c.fill()}
+  else if(tr==='tarn'){c.fillStyle='#5a8aa8';c.fillRect(0,hz+1,W,r(3,5));c.fillStyle='rgba(240,246,250,.8)';for(let i=0;i<4;i++){c.beginPath();c.ellipse(r(0,W),r(hz+8,H),r(4,9),1.6,0,0,7);c.fill()}}
+  else if(tr==='falls'){c.fillStyle='#5c6068';for(let i=0;i<5;i++){c.beginPath();c.ellipse(r(0,W),r(hz+4,H),r(2,5),1.8,0,Math.PI,0);c.fill()}}
+  if(night){c.fillStyle='rgba(0,0,0,.42)';c.fillRect(0,0,W,H)}
+  // the animal: where it stood, which way it faced and what it was doing
+  const tl=a.tail&&a.tail!=='puff'&&a.tail!=='stub'&&a.tail!=='white'?a.L*.45:2,fr=a.neck?a.L*.3:a.H*.9,top=(a.ex==='palm'||a.ex==='antler'?a.H*1.1:a.ear==='long'?a.H*.9:2),fit=Math.min(1.5,60/(a.L+tl+fr),36/(a.H+a.leg+top+3));
+  const dir=R()<.5?1:-1,kind=p.s>=3?'good':p.s===2?'ok':['far','edge','blur','close'][Math.floor(R()*4)];let z,cx,blur=0;
+  if(kind==='good'){z=r(.86,1);cx=33+r(-3,3)}else if(kind==='ok'){z=r(.55,.72);cx=33+r(-14,14)}
+  else if(kind==='far'){z=r(.3,.4);cx=r(10,56)}else if(kind==='edge'){z=r(.8,1);cx=dir>0?W-r(-2,5)*1:r(-2,5)}
+  else if(kind==='blur'){z=r(.7,.9);cx=33+r(-8,8);blur=1}else{z=r(1.7,2.1);cx=33+r(-10,10)}
+  const s=fit*z,gy=kind==='close'?H+a.leg*s*.4:Math.min(H-2.5,hz+5+z*19),pose=a.hop?(R()<.55?'hop':'sit'):blur?'walk':['walk','walk','stand','graze','graze','alert'][Math.floor(R()*6)],mv=pose==='walk'||pose==='hop',T=r(0,9),hd=pose==='graze'?r(.7,1):pose==='alert'?-.22:pose==='sit'?r(0,.3):0,ax=cx+dir*(tl-fr)*s/2;
+  c.fillStyle='rgba(0,0,0,.2)';c.beginPath();c.ellipse(ax,gy+.4,a.L*s*.5,1.3*z+.4,0,0,7);c.fill();
+  c.save();c.translate(ax,gy);c.rotate(r(-.05,.05));c.translate(-ax,-gy);
+  if(blur){for(let i=3;i>=1;i--){c.globalAlpha=.2;fgAnimal(c,a,ax-dir*i*2.6*z,gy,s,T-i*.05,dir,true,1,{hd})}c.globalAlpha=.85}
+  fgAnimal(c,a,ax,gy,s,T,dir,mv,1,{hd});c.globalAlpha=1;const eye=FGEYE;
+  if(night&&eye&&!a.glow){c.fillStyle='#fff';c.beginPath();c.arc(eye[0],eye[1],eye[2]*1.25+.2,0,7);c.fill();c.fillStyle='rgba(255,255,255,.22)';c.beginPath();c.arc(eye[0],eye[1],eye[2]*2.1+.4,0,7);c.fill()}
+  c.restore();
+  // what was between the camera and the trail
+  const fgn=Math.floor(r(0,4));c.strokeStyle=p.x==='s'?'#c8d2d8':tr==='meadow'?'#c8bc64':'#4c8444';c.lineWidth=.7;for(let i=0;i<fgn*5;i++){const x=r(0,W),h=r(3,8);c.beginPath();c.moveTo(x,H);c.lineTo(x+r(-2,2),H-h);c.stroke()}
+  if(R()<.3&&tr!=='steam'&&tr!=='tarn'){const x=R()<.5?r(0,5):r(58,63);c.fillStyle='#4a3a2c';c.fillRect(x,0,r(3,5),H)}
+  if(p.x==='r'){c.strokeStyle='rgba(220,232,244,.5)';c.lineWidth=.35;for(let i=0;i<34;i++){const x=r(0,W),y=r(0,H);c.beginPath();c.moveTo(x,y);c.lineTo(x-1.2,y+4);c.stroke()}}
+  else if(p.x==='s'){c.fillStyle='rgba(255,255,255,.9)';for(let i=0;i<30;i++){c.beginPath();c.arc(r(0,W),r(0,H),r(.3,.8),0,7);c.fill()}}
+  else if(p.x==='f'){g=c.createLinearGradient(0,hz-8,0,H);g.addColorStop(0,'rgba(226,232,236,.75)');g.addColorStop(1,'rgba(226,232,236,.15)');c.fillStyle=g;c.fillRect(0,0,W,H)}
+  // the light: infrared at night, warm at dawn and dusk
+  if(night){c.globalCompositeOperation='saturation';c.fillStyle='#808080';c.fillRect(0,0,W,H);c.globalCompositeOperation='multiply';g=c.createRadialGradient(cx,gy-8,3,33,26,46);g.addColorStop(0,'#f0fff0');g.addColorStop(.5,'#a4d0a8');g.addColorStop(1,'#2a4a34');c.fillStyle=g;c.fillRect(0,0,W,H);c.globalCompositeOperation='source-over'}
+  else{if(pz!=='day'){c.globalCompositeOperation='multiply';c.fillStyle=pz==='dawn'?'#ffe2c4':'#f8c8a0';c.fillRect(0,0,W,H);c.globalCompositeOperation='source-over'}
+    g=c.createRadialGradient(33,22,20,33,22,42);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.28)');c.fillStyle=g;c.fillRect(0,0,W,H)}
+  const hh=Math.floor(p.m/60),mm=p.m%60;c.font='bold 3px monospace';c.textBaseline='alphabetic';c.fillStyle='rgba(0,0,0,.45)';c.fillRect(0,H-4.4,W,4.4);c.fillStyle=night?'#d8f4d8':'#f4f0e0';c.textAlign='left';c.fillText('DAY '+p.d,1.2,H-1.2);c.textAlign='right';c.fillText((hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm,W-1.2,H-1.2);c.textAlign='left';
+  c.restore()}
+function phCanvas(p,px){const cv=document.createElement('canvas');cv.width=px;cv.height=Math.round(px*2/3);phDraw(cv.getContext('2d'),p,px/66);return cv}
+function phURL(p,px){px=px||132;const k=phKey(p)+'@'+px;if(PHC[k])return PHC[k];if(Object.keys(PHC).length>160)for(const x in PHC)delete PHC[x];try{return PHC[k]=phCanvas(p,px).toDataURL()}catch(e){return fgThumb('a',p.a)}}
+function phWall(p){const k=phKey(p);if(PHV[k])return PHV[k];if(Object.keys(PHV).length>40)for(const x in PHV)delete PHV[x];return PHV[k]=phCanvas(p,198)}
+// ----- framing: three frames for the cabin wall. A new frame costs money once; swapping its photo is free.
+const phFrames=cb=>{cb=cb||CAB();if(!cb.ph||typeof cb.ph!=='object')cb.ph={};return cb.ph};
+const phSame=(p,q)=>!!p&&!!q&&phKey(p)===phKey(q);
+let PHSEL=null;
+function photoView(p){p=phNorm(p);if(!p)return;PHSEL=p;const a=AN_BY[p.a],cb=CAB(),fr=phFrames(cb),tr=TRAILS.find(t=>t.id===p.t),hh=Math.floor(p.m/60),mm=p.m%60,pz=phaseOf(p.m);
+  $('plotEye').textContent='Trail photo';$('plotTitle').textContent=a.n;
+  let h=`<div class="phv"><img class="phv-img" src="${phURL(p,396)}" alt="Your photo of a ${esc(a.n)}"><p class="phv-cap">${starsHTML(p.s,p.w)} · ${tr?tr.n:''} · day ${p.d}, ${hh%12||12}:${mm<10?'0':''}${mm} ${hh<12?'AM':'PM'}${pz==='night'?' · night shot':''}${p.w?' · <b>Witnessed</b>':''}</p>
+    <div class="sec-h"><h3>Frame it for your cabin</h3><small>${PH_FR.filter(id=>cb.own[id]).length}/3 frames</small></div><p class="fr-muted">A new frame costs $${money(PH_COST)}. Swapping the photo in a frame you own is free.${S.shack===0?' Frames hang once you have a cabin.':''}</p><div class="phv-fr">`;
+  PH_FR.forEach((id,i)=>{const cur=cb.own[id]?fr[id]:null,own=!!cb.own[id],same=phSame(cur,p);h+=`<button class="phv-slot${same?' on':''}" data-phf="${id}"${same||(!own&&S.coins<PH_COST)?' disabled':''}>${cur&&AN_BY[cur.a]?`<img src="${phURL(cur)}" alt="">`:'<i></i>'}<b>${same?'Hanging here':cur&&AN_BY[cur.a]?esc(AN_BY[cur.a].n):'Empty frame'}</b><small>${same?'✓':own?'Swap in this photo':'$'+money(PH_COST)}</small></button>`});
+  h+=`</div></div>`;const B=$('plotBody');B.innerHTML=h;B.querySelectorAll('[data-phf]').forEach(b=>b.onclick=()=>photoFrame(b.dataset.phf));$('plotModal').hidden=false}
+function photoFrame(id){const p=PHSEL,cb=CAB();if(!p||!PH_FR.includes(id))return;const fr=phFrames(cb),isNew=!cb.own[id];
+  if(isNew){if(S.coins<PH_COST)return;S.coins-=PH_COST;try{cabSync(cb)}catch(e){}cb.own[id]=1;try{cb.gotP[id]=1;if(!cb.wd.some(w=>w[0]===id)&&!(cb.bs&&Array.isArray(cb.bs.wd)&&cb.bs.wd.some(w=>w[0]===id)))cb.wd.push([id,...PH_SPOT[PH_FR.indexOf(id)]])}catch(e){}}
+  fr[id]=Object.assign({},p);storeDirty=true;sfx(isNew?'craft':'pop');const a=AN_BY[p.a];
+  if(isNew)celebrate({lbl:'Framed for the cabin',r:a.r,name:a.n,sub:S.shack===0?'It hangs once you have a cabin':'On your cabin wall. Move it any time with Arrange.',icon:`<img src="${phURL(p)}" alt="" style="width:100%;border-radius:4px">`});else showToast(`${a.n} is in the frame`,'Trail photo');
+  save();photoView(p);try{renderAll()}catch(e){}}
 const FGTH={};
 function fgThumb(kind,id,unk){const k=kind+id+(unk?'u':'');if(FGTH[k])return FGTH[k];const cv=document.createElement('canvas');cv.width=132;cv.height=88;const c=cv.getContext('2d');c.scale(2,2);
   if(kind==='b'){const b=BIRD_BY[id];c.strokeStyle='#8a6a48';c.lineWidth=2.4;c.beginPath();c.moveTo(6,38);c.lineTo(60,35);c.stroke();fgBird(c,b,b.k==='peck'?30:33,b.k==='owl'?36:b.k==='hum'?30:35,2.1/Math.max(1,b.sz*.85),0,1,{still:1})}
@@ -6014,7 +6129,7 @@ function fgThumb(kind,id,unk){const k=kind+id+(unk?'u':'');if(FGTH[k])return FGT
 // the feeder on the dock (drawn from drawDock)
 function fgDrawFeeder(d,T){const F=FLD(),x=168,y=246,wood=C2([30,22,16],[132,96,62],d);if(!VISIT&&!friendScene()&&!S.sleep)HITS.push({x:x-22,y:y-70,w:44,h:76,kind:'feeder',data:0});ctx.fillStyle=wood;ctx.fillRect(x-1.5,y-40,3,40);
   ctx.fillStyle=C2([24,18,14],[104,74,46],d);ctx.fillRect(x-11,y-41,22,2.5);ctx.fillStyle='rgba(220,235,245,.35)';ctx.fillRect(x-6,y-53,12,12);
-  if(F.feed.seed&&F.feed.left>0){const k=F.feed.left/SEED_N;ctx.fillStyle=rgb(mix(hexRgb(SEEDS[F.feed.seed].col).map(v=>v*.4),hexRgb(SEEDS[F.feed.seed].col),Math.max(.3,d)));ctx.fillRect(x-5.5,y-41-11*k,11,11*k)}
+  if(F.feed.seed&&F.feed.left>0){const k=F.feed.left/seedN();ctx.fillStyle=rgb(mix(hexRgb(SEEDS[F.feed.seed].col).map(v=>v*.4),hexRgb(SEEDS[F.feed.seed].col),Math.max(.3,d)));ctx.fillRect(x-5.5,y-41-11*k,11,11*k)}
   ctx.fillStyle=C2([40,16,12],[168,58,44],d);ctx.beginPath();ctx.moveTo(x-12,y-52);ctx.lineTo(x,y-61);ctx.lineTo(x+12,y-52);ctx.closePath();ctx.fill();
   if(AMB.snowAcc>0){ctx.fillStyle=`rgba(236,242,250,${.8*AMB.snowAcc})`;ctx.beginPath();ctx.moveTo(x-12,y-52);ctx.lineTo(x,y-61);ctx.lineTo(x+12,y-52);ctx.lineTo(x+8,y-52);ctx.lineTo(x,y-58);ctx.lineTo(x-8,y-52);ctx.fill()}
   const B=FGS.bird;if(B){const b=BIRD_BY[B.id],k=Math.min(1,B.t/1.1),out=Math.max(0,(B.t-(B.dur-1.1))/1.1),e=k<1?1-(1-k)*(1-k):1,px=x+B.side*9,py=b.k==='owl'?y-61:b.k==='hum'?y-47:b.k==='peck'?y-30:y-41;
@@ -6042,7 +6157,7 @@ function feederDraw(now,d,T,top,bot,night){HITS=[];baseScene('transit',now);ctx.
   ctx.fillStyle=wood2;ctx.fillRect(312,252,176,12);ctx.fillStyle=wood;ctx.fillRect(312,250,176,5);
   ctx.fillStyle=wood2;ctx.fillRect(318,192,56,4);ctx.fillRect(426,192,56,4);
   ctx.fillStyle=`rgba(214,232,244,${.22+.16*d})`;ctx.fillRect(366,122,68,130);
-  if(F.feed.seed&&F.feed.left>0){const k=Math.max(.06,F.feed.left/SEED_N),sc=hexRgb(SEEDS[F.feed.seed].col),h=124*k;ctx.fillStyle=rgb(mix(sc.map(v=>v*.4),sc,Math.max(.35,d)));ctx.fillRect(369,250-h,62,h);
+  if(F.feed.seed&&F.feed.left>0){const k=Math.max(.06,F.feed.left/seedN()),sc=hexRgb(SEEDS[F.feed.seed].col),h=124*k;ctx.fillStyle=rgb(mix(sc.map(v=>v*.4),sc,Math.max(.35,d)));ctx.fillRect(369,250-h,62,h);
     ctx.fillStyle=`rgba(255,255,255,${.1+.1*d})`;for(let i=0;i<40;i++){const sx=371+((i*37)%58),sy=248-((i*53)%Math.max(4,h-4));ctx.fillRect(sx,sy,3,2)}}
   ctx.strokeStyle=C2([60,70,80],[210,224,234],d);ctx.lineWidth=2;ctx.strokeRect(366,122,68,130);ctx.fillStyle=`rgba(255,255,255,${.1+.12*d})`;ctx.fillRect(372,126,7,120);
   ctx.fillStyle=C2([10,10,12],[40,34,30],d);for(const px of [370,430]){ctx.beginPath();ctx.ellipse(px,184,5,6,0,0,7);ctx.fill()}
@@ -6103,7 +6218,7 @@ function fgDrawTrail(now,d,T,top,bot,night){HITS=[];baseScene('transit',now);ctx
 function fgCount(){const el=$('fieldCount');if(!el)return;const F=S.fg||{},n=Object.keys(F.birds||{}).length+Object.keys(F.animals||{}).length;el.textContent=`${n}/${BIRDS.length+ANIMALS.length}`;
   const r=F.cam?F.cam.roll.length:0,dot=$('mnFieldDot');if(dot)dot.hidden=!r}
 const starsHTML=(n,w)=>`<span class="fg-st${w?' wit':''}">${'★'.repeat(n)}${'☆'.repeat(Math.max(0,3-n))}</span>`;
-function renderField(){const p=$('pane-field');if(!p)return;const F=FLD(),C=F.cam,ph=phaseOf(S.min);fgCount();let h='';
+function renderField(){const p=$('pane-field');if(!p)return;const F=FLD(),C=F.cam,ph=phaseOf(S.min);fgCount();if(!titleOn&&!VISIT)try{fgMsCheck()}catch(e){}let h='';
   // feeder
   h+=`<div class="card fg-card"><span class="eyebrow">On your dock</span><h3>Bird feeder</h3>`;
   if(!has('feeder'))h+=`<p>Hang a feeder on your dock and birds come and go while you fish. Each new one logs itself here.</p><p class="fg-note">${owned('feeder')?'Your feeder is put away. Turn it back on in Decorate.':'Order the Bird Feeder from the Shop app, under Dock.'}</p>${owned('feeder')?'':'<button class="fg-btn" data-fg="shop">Open the Shop</button>'}`;
@@ -6113,17 +6228,17 @@ function renderField(){const p=$('pane-field');if(!p)return;const F=FLD(),C=F.ca
   h+=`<div class="card fg-card"><span class="eyebrow">Day and night</span><h3>Trail camera</h3>`;
   if(!C.own)h+=`<p>Strap a camera to a tree and it photographs whatever walks past. Check the roll when you pick the game up.</p><div class="hd-row"><div><b>Trail camera</b><span class="hd-cost"><span class="${S.coins>=CAM_COST.c?'ok':''}">$${money(CAM_COST.c)}</span>${Object.entries(CAM_COST.m).map(([m,n])=>`<span class="${(S.mats[m]||0)>=n?'ok':''}">${n} ${MI(m).n} (${S.mats[m]||0})</span>`).join('')}</span></div><button class="sbtn" data-fg="cambuy"${S.coins>=CAM_COST.c&&Object.entries(CAM_COST.m).every(([m,n])=>(S.mats[m]||0)>=n)?'':' disabled'}>Build</button></div>`;
   else{const tr=camTrail();
-    if(FGS.dev){const D=FGS.dev;h+=`<p><b>${D.out.length} photos developed</b> · the Lantern Ledger paid $${money(D.pay)} for the prints</p><div class="fg-roll">${D.out.map(o=>{const a=AN_BY[o.a];return `<div class="fg-ph${o.w?' wit':''}" style="--rc:${RCOL[a.r]}"><img src="${fgThumb('a',a.id)}" alt=""><b>${a.n}</b>${starsHTML(o.s,o.w)}${o.isNew?'<em>New</em>':o.best?'<em class="b">Best yet</em>':''}</div>`}).join('')}</div><button class="fg-btn" data-fg="devok">Done</button>`}
-    else{h+=`<p>Set at <b>${tr.n}</b> · roll <b>${C.roll.length}/${ROLL_N}</b>${C.roll.length>=ROLL_N?' · <b>full</b>':''}${C.lureN>0?` · ${LURES[C.lure].n} (${C.lureN} left)`:''}</p>
+    if(FGS.dev){const D=FGS.dev;h+=`<p><b>${D.out.length} photos developed</b> · the Lantern Ledger paid $${money(D.pay)} for the prints</p><div class="fg-roll">${D.out.map(o=>{const a=AN_BY[o.a];return `<div class="fg-ph${o.w?' wit':''}${o.p?' tap':''}" style="--rc:${RCOL[a.r]}"${o.p?` data-fg="print" data-k="${D.out.indexOf(o)}" role="button" tabindex="0"`:''}><img src="${o.p?phURL(o.p):fgThumb('a',a.id)}" alt=""><b>${a.n}</b>${starsHTML(o.s,o.w)}${o.isNew?'<em>New</em>':o.best?'<em class="b">Best yet</em>':''}</div>`}).join('')}</div><p class="fg-note">Tap a print to see it bigger or frame it for your cabin. Your best shot of each animal stays in the Field Guide below.</p><button class="fg-btn" data-fg="devok">Done</button>`}
+    else{h+=`<p>Set at <b>${tr.n}</b> · roll <b>${C.roll.length}/${rollN()}</b>${C.roll.length>=rollN()?' · <b>full</b>':''}${C.lureN>0?` · ${LURES[C.lure].n} (${C.lureN} left)`:''}</p>
       <div class="fg-btns"><button class="fg-btn" data-fg="develop"${C.roll.length?'':' disabled'}>${C.roll.length?`Develop ${C.roll.length} photo${C.roll.length>1?'s':''}`:'No photos yet'}</button><button class="fg-btn alt" data-fg="watch">${WATCH.on?'Stop watching':'Sit and watch the trail'}</button></div>
       <div class="fg-sub"><span>Where</span>${TRAILS.map(t=>`<button class="fg-chip${C.at===t.id?' on':''}" data-fg="move" data-k="${t.id}"${t.ok()?'':` disabled title="${t.lock}"`}>${t.n}${t.ok()?'':' 🔒'}</button>`).join('')}</div>
       <div class="fg-sub"><span>Lure</span>${Object.entries(LURES).map(([k,l])=>`<button class="fg-chip${C.lure===k&&C.lureN>0?' on':''}" data-fg="lure" data-k="${k}"${S.coins<l.c?' disabled':''} title="${l.d}">${l.n} · $${l.c}</button>`).join('')}</div>
-      <p class="fg-note">A photo taken while you sit and watch is <b>Witnessed</b>: at least two stars and a gold corner.</p>`}}
+      <p class="fg-note">A photo taken while you sit and watch is <b>Witnessed</b>: at least two stars and a gold corner. Tap an animal below to see your best photo of it and frame it for your cabin.</p>`}}
   h+=`</div>`;
   // lists
   const nb=Object.keys(F.birds).length,na=Object.keys(F.animals).length;
-  h+=`<div class="sec-h"><h3>Birds</h3><small>${nb}/${BIRDS.length}</small></div><div class="grid">${BIRDS.map(b=>{const L=F.birds[b.id];return `<div class="card fish fg-e${L?'':' unk'}"><img src="${fgThumb('b',b.id,!L)}" alt=""><div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?b.n:'Not yet seen'}</span><span class="eyebrow rar-${b.r}">${RAR[b.r]}</span><span class="rec">${L?`${L.n.toLocaleString()} visit${L.n>1?'s':''} · first on day ${L.d}`:'Likes '+b.seed.map(k=>SEEDS[k].n.toLowerCase()).slice(0,2).join(' or ')+(b.wx?' · snow only':'')}</span></div></div>`}).join('')}</div>`;
-  h+=`<div class="sec-h"><h3>Animals</h3><small>${na}/${ANIMALS.length}</small></div><div class="grid">${ANIMALS.map(a=>{const L=F.animals[a.id];return `<div class="card fish fg-e${L?'':' unk'}"><img src="${fgThumb('a',a.id,!L)}" alt=""><div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?a.n:'Not yet photographed'}</span><span class="eyebrow rar-${a.r}">${RAR[a.r]}</span><span class="rec">${L?`${starsHTML(L.s,L.w)} · ${L.n} photo${L.n>1?'s':''}`:(a.hint||a.at.map(t=>TRAILS.find(x=>x.id===t).n).join(' or '))}</span><div class="chips">${a.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div></div></div>`}).join('')}</div>`;
+  h+=`<div class="sec-h"><h3>Birds</h3><small>${nb}/${BIRDS.length}</small></div>${fgMsHTML('birds',nb)}<div class="grid">${BIRDS.map(b=>{const L=F.birds[b.id];return `<div class="card fish fg-e${L?'':' unk'}"><img src="${fgThumb('b',b.id,!L)}" alt=""><div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?b.n:'Not yet seen'}</span><span class="eyebrow rar-${b.r}">${RAR[b.r]}</span><span class="rec">${L?`${L.n.toLocaleString()} visit${L.n>1?'s':''} · first on day ${L.d}`:'Likes '+b.seed.map(k=>SEEDS[k].n.toLowerCase()).slice(0,2).join(' or ')+(b.wx?' · snow only':'')}</span></div></div>`}).join('')}</div>`;
+  h+=`<div class="sec-h"><h3>Animals</h3><small>${na}/${ANIMALS.length}</small></div>${fgMsHTML('animals',na)}<div class="grid">${ANIMALS.map(a=>{const L=F.animals[a.id],bp=L?phBest(a.id):null;return `<div class="card fish fg-e${L?' tap':' unk'}"${bp?` data-fg="shot" data-k="${a.id}" role="button" tabindex="0" title="Your best photo. Tap to see it or frame it."`:''}><img src="${bp?phURL(bp):fgThumb('a',a.id,!L)}" alt=""><div style="min-width:0;display:grid;gap:3px"><span class="nm">${L?a.n:'Not yet photographed'}</span><span class="eyebrow rar-${a.r}">${RAR[a.r]}</span><span class="rec">${L?`${starsHTML(L.s,L.w)} · ${L.n} photo${L.n>1?'s':''}`:(a.hint||a.at.map(t=>TRAILS.find(x=>x.id===t).n).join(' or '))}</span><div class="chips">${a.t.map(x=>`<span class="chip${x===ph?' now':''}">${PH[x]}</span>`).join('')}</div></div></div>`}).join('')}</div>`;
   p.innerHTML=h}
 
 const TABS=['gear','cooler','waters','log','storage','coll','field'];
@@ -6141,7 +6256,7 @@ document.querySelectorAll('#mnav [data-mt]').forEach(b=>b.onclick=()=>{const m=b
   if(sheetMode()&&document.body.classList.contains('sheet-on')&&document.body.dataset.mt===m){sheetSet(false);return}openTab(m==='catch'?mtCatch:MT_TAB[m])});
 $('shClose').onclick=()=>sheetSet(false);
 $('pane-field').addEventListener('click',e=>{const b=e.target.closest('[data-fg]');if(!b||b.disabled)return;const k=b.dataset.fg,v=b.dataset.k;
-  if(k==='seed')feedFill(v);else if(k==='cambuy')camBuy();else if(k==='move')camMove(v);else if(k==='lure')camLure(v);else if(k==='develop')camDevelop();else if(k==='devok'){FGS.dev=null;sfx('click');renderField()}else if(k==='watch')fgWatch(!WATCH.on);else if(k==='feedwatch')feederWatch(!FEEDW.on);else if(k==='shop'){shopFilter='dock';openPhone();phShow('shop')}});
+  if(k==='seed')feedFill(v);else if(k==='cambuy')camBuy();else if(k==='move')camMove(v);else if(k==='lure')camLure(v);else if(k==='develop')camDevelop();else if(k==='devok'){FGS.dev=null;sfx('click');renderField()}else if(k==='watch')fgWatch(!WATCH.on);else if(k==='feedwatch')feederWatch(!FEEDW.on);else if(k==='shop'){shopFilter='dock';openPhone();phShow('shop')}else if(k==='print'){const o=FGS.dev&&FGS.dev.out[+v];if(o&&o.p){sfx('click');photoView(o.p)}}else if(k==='shot'){const q=phBest(v);if(q){sfx('click');photoView(q)}}});
 $('watchExit').onclick=e=>{e.stopPropagation();if(FEEDW.on)feederWatch(false);else fgWatch(false)};$('lodgeExit').onclick=e=>{e.stopPropagation();lodgeLeave()};
 addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('sheet-on')&&sheetMode()&&document.querySelector('.away:not([hidden])')==null)sheetSet(false)});
 $('pane-waters').addEventListener('click',e=>{if(sheetMode()&&e.target.closest('.go:not(:disabled),.lm-pin:not(:disabled):not([data-lm="hdw"])'))setTimeout(()=>sheetSet(false),0)});
@@ -7980,6 +8095,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:177,hd:1,n:'Photos, Milestones & Fly Rods',items:['Every trail camera photo is now its own picture. The animal might be walking, grazing, looking up or halfway out of the frame, near or far, on the trail where you set the camera, in the weather and light it was taken in. Night shots come out in infrared. No two anglers get the same print.','Three stars is a close, clean shot. One star might be a blur, a tail leaving the frame or a nose against the lens.','Tap any print after you develop a roll to see it bigger. Your best shot of each animal is kept in the Field Guide: tap the animal to see it.','Field Guide milestones. 10, 20 and 30 birds earn a Birdbath, a Birdhouse and a Hopper Feeder that holds twice the seed. 10, 20 and 30 animals earn a Carved Bear, a 36-photo roll for the trail camera and a Wildlife Crossing Sign. If you are already past one, it arrives the next time you open the Field Guide.','Fly rod finishes. Hattie’s bench in the Lodge now wraps seven rod finishes from Headwaters materials, from Split Cane to the Mirror King. They are cosmetic, and the rarer ones do something when you land a fish.','Frame a photo for your cabin wall. Three frames, $5,000 each, and swapping the photo in a frame is free. Move them with Arrange. Friends who visit your cabin see them.']},
  {v:176,hd:1,n:'Mirror Tarn & Room 6',items:['The Headwaters, part 3. Cut the tarn trail (Mountain Road stage 3, under Lake projects: $5,000,000, 8 Titanium Scrap, 20 Shed Antler, 12 River Quartz) and the last water opens.','Mirror Tarn. A still lake above the tree line with the peaks mirrored in it, clear enough to watch fish shadows drift in toward your line. Casts take 15% longer in the thin air, and its 8 fish are the most valuable in the Headwaters. The Mirror King bites only on clear nights, when the shooting stars are out.','Tarn Ridge, a sixth trail camera spot, with five animals of its own.','Master all five Headwaters waters and you are a Headwaters Guide: a trophy, and your canoe turns birch bark.','Case 10, The Guest in Room 6. A surveyor checked into the Lodge in 1962 and never checked out. It opens in your Casefile once your Mountain Road is built, starts with the guest book on the Lodge desk, and takes you to all five waters and in behind Silver Falls. Closing it pays $900,000, a plaque, a surveyor’s transit for your yard, and a better room at the Lodge.']},
  {v:175,hd:1,n:'Silver Falls & Steam Hollow',items:['The Headwaters, part 2. Rebuild the falls bridge (Mountain Road stage 2, under Lake projects: $1,500,000, 20 Brass Fittings, 30 River Stone, 10 Birch Bark) and two more waters open, with 16 new fish.','Silver Falls. The river pours out of a cave in the cliff. Kokanee, Pink Salmon and Sockeye run the falls at dawn and dusk only, and a bear comes down to the ledge to fish while they do. Shed Antler turns up here.','Steam Hollow. A geyser on the bank goes off every so often, and its runoff keeps the water warm. Weather never slows the bite here, the fish are oddballs somebody let go long ago, and one legend only shows on snowy nights. Soak in the warm pool once a day for 20 minutes of Well Rested. River Quartz turns up here.','Three more insects join the hatch once your bridge is built: Grasshoppers, Midges and Moths. Tie the Foam Hopper, Zebra Midge and Night Moth at the Lodge bench. If you have not built the bridge, your hatch stays as it was.','Two more trail camera spots, Falls Overlook and Hollow Path, with 11 new animals between them.','Hattie now rewards regulars: a Lodge Rocking Chair after two full weeks of her jobs and an Antler Coat Rack after five, both for your yard. Her jobs only ever ask for fish from Miller’s Run and Beaver Meadow.']},
  {v:174,hd:1,n:'The Headwaters',items:['The first big expansion. An old logging road climbs past Fork River to a lodge, two new waters and 16 new fish, and the whole lake is clearing it together. Chip in from the Map tab: give 25 points or more and your own road is free the day it opens, with a Mountain Road Crew trophy. After it opens, anyone who has reached Fork River and logged 10 of its species can fund their own stretch under Lake projects.','Miller’s Run and Beaver Meadow. You fish them from a canoe, so any boat can go once you build a canoe and sew waders. Restore the old mill and something pale starts biting on foggy nights. The beaver dam holds or breaks each day, and some fish only bite at high or low water.','Headwaters Lodge. Step inside and tap around the main room: Hattie’s job board (three jobs a week), the fly bench under the window, the guest book on the desk, the stairs to a guest room for a nap, and the trophy wall over the fireplace. Your line stays in while you’re inside. One insect hatches each day. Tie its fly once and, on its days, Headwaters fish bite 25% faster and rare fish turn up 1.5 times as often.','Mill Bait. The restored mill grinds 3 of a Farm crop into bait that makes fish bite 10% sooner for 30 minutes, on any water.','For everyone, road or no road: a Bird Feeder for your dock (Shop, Dock). Fill it with one of five seeds and birds come by on their own. 31 to spot, each with its own taste in seed. Tap the feeder to watch it up close.','Also for everyone: a Trail Camera. Set it in your yard and it photographs whatever walks past while you fish. Develop the roll, sell the prints to the Lantern Ledger, or sit and watch the trail to catch a Witnessed shot. Two more trails open in the Headwaters.','A new Field Guide tab under Catch for your birds and animals, mountain music up the road, and a new title screen.']},
@@ -8750,7 +8866,7 @@ const YI={
   garden:{ox:92,oy:373,w:56,h:24,def:[[92,373]]},
   fence:{ox:64,oy:397,w:130,h:20,def:[[64,397]]},
   birch:{ox:0,oy:242,w:24,h:114,def:[[12,242],[136,242]]},
-  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},feasttable:{ox:0,oy:0,w:90,h:30,def:[[30,300]]},lodgesign:{ox:0,oy:0,w:48,h:44,def:[[150,268]]},lodgerocker:{ox:0,oy:0,w:34,h:42,def:[[132,312]]},transit:{ox:0,oy:0,w:28,h:44,def:[[112,330]]},antlerrack:{ox:0,oy:0,w:30,h:54,def:[[160,300]]},mgbell:{ox:0,oy:0,w:34,h:46,def:[[120,292]]},wscale:{ox:0,oy:0,w:40,h:52,def:[[178,300]]},tractor:{ox:0,oy:0,w:40,h:30,def:[[100,360]]},goldturkey:{ox:0,oy:0,w:34,h:40,def:[[-30,330]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
+  steeple:{ox:186,oy:330,w:34,h:84,def:[[124,324]]},hpsign:{ox:0,oy:0,w:44,h:32,def:[[96,262]]},feasttable:{ox:0,oy:0,w:90,h:30,def:[[30,300]]},lodgesign:{ox:0,oy:0,w:48,h:44,def:[[150,268]]},birdbath:{ox:0,oy:0,w:30,h:34,def:[[150,322]]},birdhouse:{ox:0,oy:0,w:24,h:68,def:[[106,308]]},carvedbear:{ox:0,oy:0,w:24,h:46,def:[[168,314]]},xingsign:{ox:0,oy:0,w:28,h:54,def:[[92,326]]},lodgerocker:{ox:0,oy:0,w:34,h:42,def:[[132,312]]},transit:{ox:0,oy:0,w:28,h:44,def:[[112,330]]},antlerrack:{ox:0,oy:0,w:30,h:54,def:[[160,300]]},mgbell:{ox:0,oy:0,w:34,h:46,def:[[120,292]]},wscale:{ox:0,oy:0,w:40,h:52,def:[[178,300]]},tractor:{ox:0,oy:0,w:40,h:30,def:[[100,360]]},goldturkey:{ox:0,oy:0,w:34,h:40,def:[[-30,330]]},jacks:{ox:141,oy:294,w:48,h:26,def:[[141,294]]},scarecrow:{ox:44,oy:312,w:30,h:44,def:[[44,312]]},tombstones:{ox:28,oy:369,w:46,h:22,def:[[28,369]]},cauldron:{ox:130,oy:380,w:24,h:28,def:[[130,380]]},
   cornstalks:{ox:70,oy:300,w:34,h:36,def:[[70,300]]},harvtable:{ox:170,oy:372,w:50,h:26,def:[[170,372]]},cornucopia:{ox:118,oy:300,w:42,h:22,def:[[118,300]]},
   pumpkinpatch:{ox:61,oy:385,w:56,h:14,def:[[61,385]]},wheelbarrow:{ox:100,oy:347,w:44,h:33,def:[[100,347]]},ciderpress:{ox:44,oy:352,w:60,h:46,def:[[44,352]]},maple:{ox:14,oy:296,w:57,h:83,def:[[14,296]]},hayride:{ox:94,oy:396,w:89,h:62,def:[[94,396]]}};
 // v156 and earlier anchored these five at their top-left corner, so they couldn't come up to the house. Saves shift them once so they stay put.
@@ -8829,6 +8945,10 @@ function yDraw(id,d,T,night,ph){
   else if(id==='mgbell')mgBellDraw(d,T,night);
   else if(id==='wscale')wScaleDraw(d,T);
   else if(id==='transit')transitDraw(d);
+  else if(id==='birdbath')birdbathDraw(d,T);
+  else if(id==='birdhouse')birdhouseDraw(d);
+  else if(id==='carvedbear')carvedBearDraw(d);
+  else if(id==='xingsign')xingSignDraw(d);
   else if(id==='lodgerocker')lodgeRockerDraw(d,T);
   else if(id==='antlerrack')antlerRackDraw(d);
   else if(id==='tractor')tractorDraw(d);
@@ -10027,6 +10147,7 @@ const COS=[
  CZ('stove','Wood Stove','free',25000,{scrap:14,brass:3},'Cast iron, always crackling.'),
  CZ('petbed','Pet Bed','free',1500,{fabric:4},'A plush round bed. Your pet naps here when you’re asleep.'),
  {...CZ('plushbass','Bass Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushduck','Duck Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},{...CZ('plushbeast','Lake Beast Plush','extra',0,{},'From the Lantern Pier Arcade.'),arc:true},
+ ...['frame1','frame2','frame3'].map((id,i)=>({...CZ(id,'Framed Trail Photo '+(i+1),'wall',0,{},'A print from your trail camera. Frame one from the Field Guide.'),arc:true,ph:1})),
  {...CZ('arcneon','“Arcade Champ” Neon','wall',0,{},'From the Lantern Pier Arcade.'),arc:true},
  {...CZ('thanks','“Thanks for Your Patience” Plaque','wall',0,{},'A gift from Lantern Lake. Only a handful of anglers have one.'),arc:true},
  {...CZ('eternal','The Eternal Lantern','wall',0,{},'Mythic. Part of the Lantern Keeper kit, a thank-you to Lantern Lake supporters.'),arc:true},
@@ -10108,6 +10229,7 @@ function cabClean(cb){// for visited cabins
   const p=cb.pat&&typeof cb.pat==='object'?cb.pat:{};cb.pat={w:WPAT.some(x=>x[0]===p.w)?p.w:undefined,f:FPAT.some(x=>x[0]===p.f)?p.f:undefined};
   {const b0=cb.bs&&typeof cb.bs==='object'?cb.bs:{},bp=b0.pat&&typeof b0.pat==='object'?b0.pat:{},bc=b0.col&&typeof b0.col==='object'?b0.col:{},col={};for(const g of BSPAL)if(Number.isInteger(bc[g])&&bc[g]>=0&&bc[g]<8)col[g]=bc[g];
    cb.bs={col,pat:{w:WPAT.some(x=>x[0]===bp.w)?bp.w:undefined,f:FPAT.some(x=>x[0]===bp.f)?bp.f:undefined},wd:Array.isArray(b0.wd)?b0.wd.filter(okW).slice(0,12).map(a=>[a[0],Math.max(20,Math.min(980,+a[1])),Math.max(30,Math.min(370,+a[2]))]):[],fp:Array.isArray(b0.fp)?b0.fp.filter(okF).slice(0,16).map(a=>[a[0],Math.max(10,Math.min(990,+a[1])),Math.max(150,Math.min(494,+a[2])),a[3]?1:0]):[]}}
+  {const q=cb.ph&&typeof cb.ph==='object'?cb.ph:{},o={};for(const id of PH_FR){const n=phNorm(q[id]);if(n)o[id]=n}cb.ph=o}
   {const u=cb.upg&&typeof cb.upg==='object'?cb.upg:{},o={};for(const k in u)if((u[k]===1||u[k]===2)&&(CZI(k)||YI[k]))o[k]=u[k];cb.upg=o}
   return cab_sync_visit(cb)}
 function cab_sync_visit(cb){if(!Array.isArray(cb.wd)){cb.wd=[];(cb.wall||[]).forEach((id,i)=>{if(id&&cb.own[id]&&CAB_SLOTS[i])cb.wd.push([id,CAB_SLOTS[i][0],CAB_SLOTS[i][1]])})}
@@ -10165,7 +10287,7 @@ function cedEnter(){if(!S.sleep||S.sleep.ph!=='awake'||VISIT||!indoor()||S.shack
 function cedExit(){if(!CED.on)return;CED.on=false;CED.sel=null;CED.drag=null;$('yedBar').hidden=true;save()}
 function cedStore(){const cb=CAB(),b=BSD(),onW=id=>cb.wd.some(a=>a[0]===id)||b.wd.some(a=>a[0]===id),onF=id=>cb.fp.some(a=>a[0]===id)||b.fp.some(a=>a[0]===id),w=COS.filter(z=>z.k==='wall'&&cb.own[z.id]&&!onW(z.id)),f=COS.filter(z=>isFree(z.id)&&cb.own[z.id]&&!onF(z.id));return {w,f}}
 function cedPlace(k,id){const cb=RD();if(k==='w'){const [x,y]=cedClamp('w',id,500,ROOM==='basement'?88:150);cb.wd.push([id,x,y]);CED.sel={k:'w',i:cb.wd.length-1}}else{const [x,y]=cedClamp('f',id,500,460);cb.fp.push([id,x,y,0]);CED.sel={k:'f',i:cb.fp.length-1}}sfx('pop');renderCed();save()}
-function renderCed(){const b=$('yedBar');if(!CED.on){b.hidden=true;return}const cb=RD(),st=cedStore(),sel=CED.sel,a=sel?(sel.k==='w'?cb.wd:cb.fp)[sel.i]:null,nm=id=>{const z=CZI(id);return z?z.n:id};
+function renderCed(){const b=$('yedBar');if(!CED.on){b.hidden=true;return}const cb=RD(),st=cedStore(),sel=CED.sel,a=sel?(sel.k==='w'?cb.wd:cb.fp)[sel.i]:null,nm=id=>{const z=CZI(id);if(z&&z.ph){const q=phFrames()[id];return q&&AN_BY[q.a]?'Photo: '+AN_BY[q.a].n:z.n}return z?z.n:id};
   let h=`<div class="yed-top"><div class="yed-tabs"><b style="padding:4px 6px">Arranging your ${ROOM==='basement'?'basement':'cabin'}</b></div><button class="jig" id="cedDone">Done</button></div>`;
   h+=`<div class="yed-sel">${a?`<i>${esc(nm(a[0]))}</i>${sel.k==='f'?'<button class="ghost" id="cedFlip">Flip</button>':''}<button class="ghost" id="cedAway">Put away</button>`:'<span>Drag wall decor and furniture anywhere. Tap one to select it.</span>'}</div>`;
   const items=[...st.w.map(z=>`<button class="yed-it" data-cw="${z.id}">${esc(z.n)} <small>wall</small></button>`),...st.f.map(z=>`<button class="yed-it" data-cf="${z.id}">${esc(z.n)}</button>`)];
@@ -10278,6 +10400,8 @@ function drawWallDeco(id,cx,cy,i,d,T){const dark=d<.4;
   else if(id==='lifering'){for(let k=0;k<8;k++){ctx.strokeStyle=k%2?'#f4f0e8':'#d8402e';ctx.lineWidth=13;ctx.beginPath();ctx.arc(0,0,26,k*Math.PI/4,(k+1)*Math.PI/4);ctx.stroke()}ctx.strokeStyle='#c8b080';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,33,0,7);ctx.stroke()}
   else if(id==='lakemap'){ctx.fillStyle='#e8d8b0';ctx.fillRect(-42,-30,84,60);ctx.fillStyle='#7cb0c8';ctx.beginPath();ctx.moveTo(-26,-6);ctx.quadraticCurveTo(-18,-24,4,-18);ctx.quadraticCurveTo(30,-20,28,4);ctx.quadraticCurveTo(24,22,0,18);ctx.quadraticCurveTo(-30,20,-26,-6);ctx.fill();
    ctx.setLineDash([3,3]);ctx.strokeStyle='#8a3a2a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-34,22);ctx.quadraticCurveTo(-10,8,10,-4);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#8a3a2a';ctx.font='bold 10px sans-serif';ctx.fillText('X',8,0);ctx.strokeStyle='#8a6a40';ctx.lineWidth=2;ctx.strokeRect(-42,-30,84,60)}
+  else if(id.startsWith('frame')){const cbp=VISIT?VISIT.S.cab:CAB(),p=cbp&&cbp.ph&&cbp.ph[id];ctx.fillStyle='rgba(0,0,0,.25)';rrect(-39,-27,80,58,3);ctx.fill();ctx.fillStyle='#6a4a2a';rrect(-40,-29,80,58,3);ctx.fill();ctx.strokeStyle='#3e2a16';ctx.lineWidth=1.2;ctx.stroke();ctx.fillStyle='#8a6438';ctx.fillRect(-38,-27,76,2);ctx.fillStyle='#f4efe2';ctx.fillRect(-36,-25,72,50);
+    if(p&&AN_BY[p.a]){try{ctx.drawImage(phWall(p),-33,-22,66,44)}catch(e){}if(p.w){ctx.fillStyle='#e8b020';ctx.beginPath();ctx.moveTo(36,-25);ctx.lineTo(36,-16);ctx.lineTo(27,-25);ctx.fill()}}else{ctx.fillStyle='#c8c0ac';ctx.fillRect(-33,-22,66,44)}if(dark){ctx.fillStyle='rgba(8,10,20,.35)';ctx.fillRect(-40,-29,80,58)}}
   else if(id==='oars'){for(const r of [.7,-.7]){ctx.save();ctx.rotate(r);ctx.fillStyle='#b88a5a';ctx.fillRect(-3,-40,6,62);ctx.fillStyle='#9a6a3a';ctx.beginPath();ctx.ellipse(0,30,9,16,0,0,7);ctx.fill();ctx.fillStyle='#d8402e';ctx.fillRect(-3,-40,6,10);ctx.restore()}}
   else if(id==='wheel'){ctx.strokeStyle='#8a5a30';ctx.lineWidth=5;for(let k=0;k<8;k++){const a=k*Math.PI/4;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*38,Math.sin(a)*38);ctx.stroke()}ctx.lineWidth=7;ctx.beginPath();ctx.arc(0,0,26,0,7);ctx.stroke();ctx.fillStyle='#a88a3a';ctx.beginPath();ctx.arc(0,0,7,0,7);ctx.fill()}
   else if(id==='mount'){ctx.fillStyle='#6a4428';ctx.beginPath();ctx.ellipse(0,0,46,26,0,0,7);ctx.fill();ctx.fillStyle='#8a5a34';ctx.beginPath();ctx.ellipse(0,0,40,21,0,0,7);ctx.fill();
