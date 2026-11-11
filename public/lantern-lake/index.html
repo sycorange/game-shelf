@@ -1714,6 +1714,34 @@ body.watching #hint{display:none}
   .sellq{padding:6px 10px}
   .playcol>.goals,.playcol>.guide,.playcol>.pinbar{flex:none;margin:0}
 }
+/* ==PHONE NOTIFICATIONS (v179)== on phones, notifications stay out of the way: cards sit over the title bar and leave sooner,
+   the catch line is one line, the raid bar is two thin rows, and a phone alert is a slim strip above the bottom bar instead of the phone rising. */
+.ph-strip{display:none}
+@media (max-width:700px){
+  .ach-wrap{top:calc(env(safe-area-inset-top,0px) + 4px)!important;padding-left:8px;padding-right:8px}
+  .ach-wrap .ach{max-width:none}
+  body.ach-on .scene .toast{opacity:1}
+  .scene:not(.in) .toast div,.scene.in .toast div,.scene.town .toast div{font-size:.78rem;padding:4px 10px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pdock.ping:not(.open) .phone{--peek:42px}
+  .ph-strip:not([hidden]){display:grid;grid-template-columns:22px minmax(0,1fr) 30px;gap:8px;align-items:center;position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 64px);z-index:21;height:38px;padding:0 4px 0 8px;border-radius:12px;background:rgba(250,250,252,.97);color:#1a1d24;border:0;font:inherit;font-size:.78rem;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,.45);cursor:pointer;animation:phStripIn .25s ease-out both}
+  .ph-strip .ai{width:22px;height:22px;border-radius:6px;display:grid;place-items:center}.ph-strip .ai svg{width:16px;height:16px}
+  .ph-strip .pst{display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:38px}.ph-strip .pst b{display:inline;margin-right:6px}.ph-strip .pst span{display:inline;color:#4a4f5a}
+  .ph-strip .psx{width:30px;height:30px;display:grid;place-items:center;font-size:1.2rem;line-height:1;color:#6a6f7a}
+  .ph-strip.dark:not([hidden]){background:rgba(40,40,44,.97);color:#f2f2f4}.ph-strip.dark .pst span{color:#b8b8c0}.ph-strip.dark .psx{color:#b8b8c0}
+  .photo-mode .ph-strip{display:none!important}
+}
+@keyframes phStripIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.ph-strip{animation:none!important}}
+@media (max-width:600px){
+  .raidbar{top:40px;padding:4px 8px;gap:2px;border-radius:10px}
+  .raidbar #rbIn{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;align-items:baseline;text-align:left}
+  .raidbar #rbIn b{font-size:.74rem;white-space:nowrap}.raidbar #rbIn small{font-size:.64rem;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;grid-column:2;grid-row:1}
+  .raidbar #rbIn .rb-bar{grid-column:1/-1;height:14px}.raidbar .rb-bar span{font-size:.66rem}
+  .raidbar .rb-help{font-size:.66rem;padding:2px 10px;margin-top:1px}
+  .scene:has(.raidbar:not([hidden])) .ovl.ovl-live{display:none}
+  .scene:not(.in):has(.raidbar:not([hidden])) .toast{top:96px}
+  .scene:not(.in):has(.raidbar:not([hidden]) .rb-help:not([hidden])) .toast{top:122px}
+}
 </style>
 
 </head>
@@ -1862,6 +1890,7 @@ body.watching #hint{display:none}
 </div>
 
 <div class="away pback" id="slotsModal" hidden></div>
+<button class="ph-strip" id="phStrip" type="button" hidden></button>
 <div class="pdock" id="phoneDock">
   <div class="phone">
     <button class="ph-grab" id="phGrab" aria-label="Phone. Swipe up or press Enter to open"></button>
@@ -3143,7 +3172,7 @@ function nextAch(){
   const el=document.createElement('div');el.className='ach';el.style.setProperty('--rc',RCOL[a.r]);
   el.innerHTML=`<div class="ic">${a.icon}</div><div style="min-width:0"><div class="lbl">${a.lbl}</div><div class="nm">${a.name}</div><div class="sub">${a.sub}</div></div>`;
   $('achWrap').append(el);let gone=false;const out=()=>{if(gone)return;gone=true;el.classList.add('out');setTimeout(()=>{el.remove();nextAch()},RM?0:350)};
-  el.onclick=out;setTimeout(out,achQ.length?2600:3800);
+  el.onclick=out;{const ph=matchMedia('(max-width:700px)').matches;setTimeout(out,achQ.length>2?(ph?1200:1800):achQ.length?(ph?1700:2600):(ph?2800:3800))}
 }
 let catchAcc=0,earnAcc=0,rateT=0,storeDirty=false,collDirty=false;
 // ==SHARED WEATHER== everyone on Lantern Lake has the same weather at the same moment. It comes from the real clock in
@@ -4764,15 +4793,17 @@ $('phHome').onclick=()=>{if(performance.now()-PDK.justDragged<350)return;if(phVi
 // ---------- Phone dock (peeks up from the bottom, swipe to open) + Texts app
 const phOpen=()=>!$('slotsModal').hidden;
 var PDK={drag:null,justDragged:0,pingT:null,pending:null};
-function phSetOpen(o){const d=$('phoneDock');d.classList.toggle('open',o);d.classList.remove('ping');$('phScreen').inert=!o;$('phGrab').hidden=o;if(!o){$('phScreen').scrollTop=0;txAlertClose()}}
+function phSetOpen(o){const d=$('phoneDock');d.classList.toggle('open',o);d.classList.remove('ping');{const sp=$('phStrip');if(sp)sp.hidden=true}$('phScreen').inert=!o;$('phGrab').hidden=o;if(!o){$('phScreen').scrollTop=0;txAlertClose()}}
 function phNotify(app,title,msg,extra){const st=SETS();if(app==='texts'?!st.nText:!st.nOther){if(phOpen()&&phView==='home')renderHome();return}
   if(phOpen()){if(st.nSound)sfx('ding');if(app==='texts'&&phView==='texts')renderTexts();else if(phView==='home')renderHome();else if(phView==='lock')renderLock();return}
   const A=APPS.find(x=>x.id===app);
   $('phPeek').innerHTML=`<span class="ai" style="background:${A?A.bg:'#444'}">${A?A.ic():''}</span><div><b>${esc(title)}</b><span>${esc(msg)}</span></div>`;
   const d=$('phoneDock'),ph=d.querySelector('.phone');PDK.pending=app;PDK.pendingWith=extra||null;
   d.classList.add('ping');ph.classList.remove('buzz');void ph.offsetWidth;ph.classList.add('buzz');
+  {const sp=$('phStrip');if(sp){sp.innerHTML=`<span class="ai" style="background:${A?A.bg:'#444'}">${A?A.ic():''}</span><span class="pst"><b>${esc(title)}</b><span>${esc(msg)}</span></span><span class="psx" data-x="1" aria-label="Dismiss">×</span>`;sp.hidden=false}}
   if(st.nSound)sfx('buzz');try{if(st.nVib&&navigator.vibrate)navigator.vibrate([70,50,70])}catch(e){}
-  clearTimeout(PDK.pingT);PDK.pingT=setTimeout(()=>{d.classList.remove('ping');PDK.pending=null;PDK.pendingWith=null},5200)}
+  clearTimeout(PDK.pingT);PDK.pingT=setTimeout(()=>{d.classList.remove('ping');PDK.pending=null;PDK.pendingWith=null;const sp=$('phStrip');if(sp)sp.hidden=true},5200)}
+$('phStrip').onclick=e=>{const sp=$('phStrip');if(e.target.closest('[data-x]')){sp.hidden=true;$('phoneDock').classList.remove('ping');PDK.pending=null;PDK.pendingWith=null;clearTimeout(PDK.pingT);return}sp.hidden=true;openPhone()};
 (()=>{const d=$('phoneDock'),ph=d.querySelector('.phone');
   const peekPx=()=>parseFloat(getComputedStyle(ph).getPropertyValue('--peek'))||46;
   const grabbable=t=>!d.classList.contains('open')||t===ph||t.closest('.ph-status,.ph-notch,#phHome');
@@ -5258,7 +5289,7 @@ const SET_DEF={dark:'off',cut:'always',flash:'full',rock:true,nSound:true,nVib:t
 function SETS(){if(!S.set||typeof S.set!=='object')S.set={};if(S.set.cut&&!S.set.v2){if(S.set.cut==='auto')S.set.cut='always';}S.set.v2=1;for(const k in SET_DEF)if(S.set[k]===undefined)S.set[k]=SET_DEF[k];return S.set}
 const DARKQ=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 const phDark=()=>{const d=SETS().dark;return d==='on'||(d==='auto'&&!!DARKQ&&DARKQ.matches)};
-function applyPhTheme(){const el=$('phScreen');if(el)el.classList.toggle('dark',phDark());const dk=$('phoneDock');if(dk)dk.classList.toggle('dark',phDark())}
+function applyPhTheme(){const el=$('phScreen');if(el)el.classList.toggle('dark',phDark());const dk=$('phoneDock');if(dk)dk.classList.toggle('dark',phDark());const sp=$('phStrip');if(sp)sp.classList.toggle('dark',phDark())}
 try{DARKQ&&DARKQ.addEventListener('change',applyPhTheme)}catch(e){}
 const cutOn=()=>{const c=SETS().cut;return c==='always'||(c==='auto'&&!RM)};
 function applyDock(){const d=$('phoneDock');if(!d)return;const p=SETS().dock;document.body.classList.toggle('dock-left',p==='left');d.classList.toggle('pos-left',p==='left');d.classList.toggle('pos-center',p==='center')}
@@ -8097,6 +8128,7 @@ async function openCatchCard(fid){const c=await makeCatchCard(fid);if(!c)return;
 
 // ---------- Title screen & updates ----------
 const UPDATES=[
+ {v:179,hd:1,n:'Tidier Phone Notifications',items:['On phones, notifications no longer cover the screen. Reward cards now sit over the title bar instead of the lake and leave sooner, faster still when several are queued. Tap one to dismiss it.','A phone alert (a text, a finished bounty, a call for help) is now one slim line above the bottom bar instead of the phone rising over your buttons. Tap it to open the phone, or the × to dismiss it.','The catch line at the top of the lake stays on one line.','The raid bar is two thin rows on phones, for lake monsters and the Big Hatch.']},
  {v:178,hd:1,n:'The Big Hatch',items:['The live lake reaches the Headwaters. Anglers on the same mountain water now see each other in real time, in canoes, with name tags, catches and emotes. Each of the five waters is its own spot.','The Big Hatch, the Headwaters’ own raid. When two or more of you share a mountain water, now and then a huge hatch boils off it. Land 40 fish per angler together within 3 minutes and the Hatch King rises.','Fish count, not pounds, so everyone helps the same. A fish caught on the fly that matches your hatch counts double, which is one more reason to fill the fly box.','Everyone who landed a fish is paid the bounty, and it grows with the group: $8,000 for each angler who helped at Miller’s Run, up to $30,000 for each at Mirror Tarn, counting up to four anglers. You also get a Mill Bait. Your third Big Hatch earns the Hatch King bobber.','Lake monster raids and calls for help stay down on the lake.']},
  {v:177,hd:1,n:'Photos, Milestones & Fly Rods',items:['Every trail camera photo is now its own picture. The animal might be walking, grazing, looking up or halfway out of the frame, near or far, on the trail where you set the camera, in the weather and light it was taken in. Night shots come out in infrared. No two anglers get the same print.','Three stars is a close, clean shot. One star might be a blur, a tail leaving the frame or a nose against the lens.','Tap any print after you develop a roll to see it bigger. Your best shot of each animal is kept in the Field Guide: tap the animal to see it.','Field Guide milestones. 10, 20 and 30 birds earn a Birdbath, a Birdhouse and a Hopper Feeder that holds twice the seed. 10, 20 and 30 animals earn a Carved Bear, a 36-photo roll for the trail camera and a Wildlife Crossing Sign. If you are already past one, it arrives the next time you open the Field Guide.','Fly rod finishes. Hattie’s bench in the Lodge now wraps seven rod finishes from Headwaters materials, from Split Cane to the Mirror King. They are cosmetic, and the rarer ones do something when you land a fish.','Frame a photo for your cabin wall. Three frames, $5,000 each, and swapping the photo in a frame is free. Move them with Arrange. Friends who visit your cabin see them.']},
  {v:176,hd:1,n:'Mirror Tarn & Room 6',items:['The Headwaters, part 3. Cut the tarn trail (Mountain Road stage 3, under Lake projects: $5,000,000, 8 Titanium Scrap, 20 Shed Antler, 12 River Quartz) and the last water opens.','Mirror Tarn. A still lake above the tree line with the peaks mirrored in it, clear enough to watch fish shadows drift in toward your line. Casts take 15% longer in the thin air, and its 8 fish are the most valuable in the Headwaters. The Mirror King bites only on clear nights, when the shooting stars are out.','Tarn Ridge, a sixth trail camera spot, with five animals of its own.','Master all five Headwaters waters and you are a Headwaters Guide: a trophy, and your canoe turns birch bark.','Case 10, The Guest in Room 6. A surveyor checked into the Lodge in 1962 and never checked out. It opens in your Casefile once your Mountain Road is built, starts with the guest book on the Lodge desk, and takes you to all five waters and in behind Silver Falls. Closing it pays $900,000, a plaque, a surveyor’s transit for your yard, and a better room at the Lodge.']},
@@ -13304,7 +13336,7 @@ function raidDraw(d,T){const R=LIVE.raid,k=Math.max(.35,R.hp/R.max),x=560+Math.s
   ctx.restore()}
 function renderLiveUI(){const chip=$('liveChip'),btn=$('liveEmo'),rb=$('raidBar');if(!chip)return;const on=LIVE.st==='on'&&!S.sleep&&!TRV.on;
   const n=[...LIVE.peers.values()].filter(p=>p.out==null).length;chip.hidden=!on;if(on)chip.innerHTML=`<i></i>${n?`${n+1} fishing here`:'Live · just you'}`;btn.hidden=!on;if(!on)$('emoPop').hidden=true;
-  const R=on&&LIVE.raid;rb.hidden=!R;if(R&&R.k==='hatch'){const left=Math.max(0,Math.ceil((R.ends-Date.now())/1000)),got=Math.round(R.max-R.hp);$('rbHelp').hidden=true;$('rbIn').innerHTML=`<b>🪰 The Big Hatch</b><div class="rb-bar hatch"><i style="width:${(got/R.max*100).toFixed(1)}%"></i><span>${got} / ${Math.round(R.max)} fish</span></div><small>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} left · ${hatchOn()?'your fly matches: your fish count double':`a fish on the ${hatchOf().fly} counts double`}</small>`}else if(R){$('rbHelp').hidden=false;const left=Math.max(0,Math.ceil((R.ends-Date.now())/1000)),hb=$('rbHelp');hb.disabled=LIVE.helped===R.ends;hb.textContent=LIVE.helped===R.ends?(LIVE.helpN>0?`📣 Help called · ${LIVE.helpN} angler${LIVE.helpN>1?'s':''} alerted`:'📣 Help called'):'📣 Call for help';$('rbIn').innerHTML=`<b>🐉 ${esc(R.name)}</b><div class="rb-bar"><i style="width:${(R.hp/R.max*100).toFixed(1)}%"></i><span>${Math.round(R.hp).toLocaleString()} / ${Math.round(R.max).toLocaleString()} lb</span></div><small>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} left · every fish hits it</small>`}hcTick()}
+  const R=on&&LIVE.raid;rb.hidden=!R;if(R&&R.k==='hatch'){const left=Math.max(0,Math.ceil((R.ends-Date.now())/1000)),got=Math.round(R.max-R.hp);$('rbHelp').hidden=true;$('rbIn').innerHTML=`<b>🪰 The Big Hatch</b><div class="rb-bar hatch"><i style="width:${(got/R.max*100).toFixed(1)}%"></i><span>${got} / ${Math.round(R.max)} fish</span></div><small>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} left · ${hatchOn()?'your fly matches: fish count ×2':`${hatchOf().fly} fish count ×2`}</small>`}else if(R){$('rbHelp').hidden=false;const left=Math.max(0,Math.ceil((R.ends-Date.now())/1000)),hb=$('rbHelp');hb.disabled=LIVE.helped===R.ends;hb.textContent=LIVE.helped===R.ends?(LIVE.helpN>0?`📣 Help called · ${LIVE.helpN} angler${LIVE.helpN>1?'s':''} alerted`:'📣 Help called'):'📣 Call for help';$('rbIn').innerHTML=`<b>🐉 ${esc(R.name)}</b><div class="rb-bar"><i style="width:${(R.hp/R.max*100).toFixed(1)}%"></i><span>${Math.round(R.hp).toLocaleString()} / ${Math.round(R.max).toLocaleString()} lb</span></div><small>${Math.floor(left/60)}:${String(left%60).padStart(2,'0')} left · every fish hits it</small>`}hcTick()}
 (()=>{const pop=$('emoPop');pop.innerHTML=EMO.map((e,i)=>`<button data-emo="${i}">${e}</button>`).join('');pop.querySelectorAll('[data-emo]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();liveEmote(+b.dataset.emo)});
   $('liveEmo').onclick=ev=>{ev.stopPropagation();pop.hidden=!pop.hidden};
   $('rbHelp').onclick=ev=>{ev.stopPropagation();const R=LIVE.raid;if(!R||LIVE.helped===R.ends||LIVE.st!=='on')return;LIVE.helped=R.ends;LIVE.helpN=0;liveSend({t:'help'});sfx('click');renderLiveUI()};
